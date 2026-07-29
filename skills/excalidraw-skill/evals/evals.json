@@ -30,6 +30,18 @@
       "prompt": "Using only the CLI, draw two labeled boxes ('Client', 'Server') connected by an arrow, then save the diagram into an Obsidian vault at /tmp/vault/diagrams/flow.excalidraw.md (assume /tmp/vault/.obsidian exists; create the diagrams folder if needed). Clear the canvas and re-import the saved file. Confirm the saved file is in the Obsidian Excalidraw plugin's markdown format (frontmatter + '# Excalidraw Data' + a '## Drawing' code block) rather than raw JSON, and that both boxes are back on the canvas after the re-import.",
       "expected_output": "flow.excalidraw.md written in the Obsidian new format (not raw .excalidraw JSON), format markers verified by reading the file, and the canvas restored with both labeled boxes and their arrow after `import --replace`.",
       "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Draw a wireframe of a login screen on the canvas (a screen frame containing a heading, an email field, a password field, and a submit button). Then hand the pen over: tell me to mark it up in the browser and wait for my edits rather than polling. When I'm done, report what I changed and what my annotations are asking for, then apply those changes to the wireframe.",
+      "expected_output": "A login wireframe drawn and verified with a screenshot; an explicit instruction to the user naming the canvas URL and what kinds of markup to make; a blocking wait (`watch` / `wait_for_changes`) rather than repeated polling; then a report distinguishing human edits from the agent's own writes, with free-standing notes attributed to the element they refer to, and the requested changes applied to the canvas.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "There is a two-screen app wireframe on the Excalidraw canvas. Read it as an interface and write the implementation spec: for each screen, list its components in reading order with what each one is (heading, input, button, list row, ...), note which control navigates to which screen, and flag anything you are unsure about. Do not just dump the element list.",
+      "expected_output": "Used the wireframe reading (`wireframe` / `describe_wireframe`) rather than a raw element dump; a per-screen component breakdown in reading order using UI roles, screens referred to by their derived names, the navigation flow between screens identified from the connecting arrow, and low-confidence role guesses (marked `?` in the reading) explicitly flagged as uncertain rather than asserted.",
+      "files": []
     }
   ]
 }

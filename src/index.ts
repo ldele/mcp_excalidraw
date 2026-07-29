@@ -38,8 +38,14 @@ import {
   saveSnapshot,
   getSnapshot,
   sendMermaid,
+  getChanges,
+  waitForChanges,
+  MAX_WAIT_SECONDS,
+  ChangePayload,
   ApiResponse
 } from './core/canvas-client.js';
+import { formatChangeReport } from './core/changes.js';
+import { readWireframe, formatWireframe } from './core/wireframe.js';
 import { sanitizeFilePath, prepareElement, prepareElementUpdate } from './core/normalize.js';
 import {
   alignElements,
@@ -69,6 +75,26 @@ const sceneState: SceneState = {
   selectedElements: new Set(),
   groups: new Map()
 };
+
+// Cursor into the canvas change feed, so an agent can call get_canvas_changes
+// repeatedly with no arguments and keep getting only what is new since its
+// last look. An explicit `since` always overrides it.
+let lastSeenRev = 0;
+
+async function renderChangeReport(payload: ChangePayload): Promise<string> {
+  const currentElements = await getElements();
+  lastSeenRev = payload.reset ? payload.rev : Math.max(lastSeenRev, payload.rev);
+  return formatChangeReport(
+    {
+      since: payload.since,
+      rev: payload.rev,
+      truncated: payload.truncated,
+      reset: payload.reset,
+      records: payload.records
+    },
+    currentElements
+  );
+}
 
 let canvasEnsurePromise: Promise<unknown> | null = null;
 
@@ -560,7 +586,23 @@ const tools: Tool[] = [
   },
   {
     name: 'describe_scene',
-    description: 'Get an AI-readable description of the current canvas: element types, positions, connections, labels, spatial layout, and bounding box. Use this to understand what is on the canvas before making changes.',
+    description: 'Get an AI-readable description of the current canvas: element types, positions, connections, labels, spatial layout, and bounding box. Use this to understand what is on the canvas before making changes, and to find element IDs. For a UI wireframe, prefer describe_wireframe — it reads the same canvas as an interface rather than as a flat list of shapes.',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+  {
+    name: 'describe_wireframe',
+    description:
+      'Read the canvas as a user interface instead of as shapes: which screens exist, ' +
+      'what is nested inside what, the reading order of each screen, the likely role of ' +
+      'every component (button, input, heading, header, checkbox, divider, ...), which ' +
+      'control navigates to which screen, and any human annotations currently on the ' +
+      'canvas with the component each one refers to. Use this for UI/UX work — reviewing ' +
+      'a wireframe, turning one into code, or understanding a flow a user drew. Roles are ' +
+      'inferred and marked with `?` when uncertain; raw type and size are always included. ' +
+      'For flowcharts and architecture diagrams use describe_scene instead.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -575,6 +617,62 @@ const tools: Tool[] = [
         background: {
           type: 'boolean',
           description: 'Include background in screenshot (default: true)'
+        }
+      }
+    }
+  },
+  {
+    name: 'get_canvas_changes',
+    description:
+      'Read what changed on the canvas since you last looked — including edits a person made ' +
+      'by hand in the browser. Reports additions, edits and deletions in design terms (moved ' +
+      'right 120px, resized, relabelled, restyled) and attributes human markup — sticky notes, ' +
+      'circled shapes, arrows — to the element it refers to. This is how you collect design ' +
+      'feedback: draw a wireframe, ask the user to mark it up, then call this to read their ' +
+      'notes. Call with no arguments to get everything since your previous call.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        since: {
+          type: 'number',
+          minimum: 0,
+          description:
+            'Canvas revision to diff from. Omit to continue from your last call (or from the ' +
+            'start of the session on the first call).'
+        }
+      }
+    }
+  },
+  {
+    name: 'wait_for_changes',
+    description:
+      'Hand the pen to the human: block until someone edits the canvas in the browser, then ' +
+      'return the same report as get_canvas_changes. Use it right after asking the user to ' +
+      'review or mark up a wireframe, instead of polling. Waits for a quiet moment before ' +
+      'returning so a burst of edits arrives as one batch. If nobody touches the canvas it ' +
+      'returns "no changes" when the timeout expires — call again to keep waiting. Requires ' +
+      'the canvas open in a browser tab for human edits to reach the server.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        since: {
+          type: 'number',
+          minimum: 0,
+          description: 'Canvas revision to wait past. Omit to continue from your last call.'
+        },
+        timeoutSeconds: {
+          type: 'number',
+          minimum: 1,
+          maximum: MAX_WAIT_SECONDS,
+          description: `How long to wait before giving up (default 60, max ${MAX_WAIT_SECONDS}).`
+        },
+        settleSeconds: {
+          type: 'number',
+          minimum: 0,
+          maximum: 30,
+          description:
+            'Quiet period after the last edit before returning, so one batch covers a whole ' +
+            'round of markup (default 1.5).'
         }
       }
     }
@@ -1157,6 +1255,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
           content: [{ type: 'text', text: describeScene(allElements) }]
         };
       }
+      case 'describe_wireframe': {
+        logger.info('Reading scene as a wireframe via MCP');
+
+        const wireframeElements = await getElements();
+
+        return {
+          content: [{ type: 'text', text: formatWireframe(readWireframe(wireframeElements)) }]
+        };
+      }
       case 'get_canvas_screenshot': {
         const params = z.object({
           background: z.boolean().optional()
@@ -1178,6 +1285,53 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
               text: 'Canvas screenshot captured. This is what the diagram currently looks like.'
             }
           ]
+        };
+      }
+      case 'get_canvas_changes': {
+        const params = z.object({
+          since: z.number().min(0).optional()
+        }).parse(args || {});
+
+        const since = params.since ?? lastSeenRev;
+        logger.info('Reading canvas changes via MCP', { since });
+
+        const payload = await getChanges(since);
+
+        return {
+          content: [{ type: 'text', text: await renderChangeReport(payload) }]
+        };
+      }
+      case 'wait_for_changes': {
+        const params = z.object({
+          since: z.number().min(0).optional(),
+          timeoutSeconds: z.number().min(1).max(MAX_WAIT_SECONDS).optional(),
+          settleSeconds: z.number().min(0).max(30).optional()
+        }).parse(args || {});
+
+        const since = params.since ?? lastSeenRev;
+        const timeoutSeconds = params.timeoutSeconds ?? 60;
+        const settleSeconds = params.settleSeconds ?? 1.5;
+
+        logger.info('Waiting for canvas changes via MCP', { since, timeoutSeconds });
+
+        const payload = await waitForChanges(since, timeoutSeconds, settleSeconds);
+        const report = await renderChangeReport(payload);
+
+        if (payload.timedOut) {
+          return {
+            content: [{
+              type: 'text',
+              text:
+                `No changes after ${timeoutSeconds}s.\n\n${report}\n\n` +
+                `Nobody has edited the canvas. If the user is meant to be marking it up, check ` +
+                `that they have ${EXPRESS_SERVER_URL} open in a browser — edits only reach the ` +
+                `server from an open tab. Call wait_for_changes again to keep waiting.`
+            }]
+          };
+        }
+
+        return {
+          content: [{ type: 'text', text: report }]
         };
       }
       case 'read_diagram_guide': {

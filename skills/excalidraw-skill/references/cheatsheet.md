@@ -35,6 +35,7 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 | Command | Description |
 |---------|-------------|
 | `describe` | AI-readable scene summary (ids, positions, labels, connections) — plain text |
+| `wireframe [--json]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations — plain text |
 | `screenshot` | PNG/SVG capture; `--out f.png`, `--format png\|svg`, `--no-background`; PNG without `--out` → temp file path in JSON, SVG without `--out` → raw SVG (**browser tab required**) |
 | `export [--out f.excalidraw] [--format json\|obsidian]` | Scene as .excalidraw JSON (stdout without `--out`); a `.md` out path writes Obsidian's .excalidraw.md format |
 | `import [file\|-] [--replace]` | Import .excalidraw JSON or Obsidian .excalidraw.md (merge by default) |
@@ -42,6 +43,16 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 | `share` | Encrypted upload → shareable excalidraw.com URL |
 | `clear --yes` | Wipe the canvas |
 | `snapshot save\|list\|restore [name]` | Named canvas snapshots |
+
+### Review Loop (two-way)
+
+| Command | Description |
+|---------|-------------|
+| `changes [--since <rev>] [--json]` | What changed and who changed it, in design terms — plain text (defaults to everything since the server started) |
+| `watch [--since <rev>] [--timeout 60] [--settle 1.5] [--json]` | Block until someone edits the canvas, then print the same report (defaults to waiting for what happens *next*) |
+
+Every mutation bumps a canvas **revision**; each report ends with `Cursor: rev N`.
+Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240s.
 
 ### Arrange
 
@@ -60,7 +71,7 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 | `install-skill --dir <skills-root>` | Install this skill into an agent-chosen project/global skills root (replaces any existing copy) |
 | `help [command]`, `--version` | Usage and version |
 
-## MCP Tools (26 total)
+## MCP Tools (29 total)
 
 ### Element CRUD
 
@@ -89,9 +100,12 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 
 | Tool | Description | Required params |
 |------|-------------|-----------------|
-| `describe_scene` | AI-readable scene description (types, positions, labels, connections, bounding box) | (none) |
+| `describe_scene` | AI-readable scene description (types, positions, labels, connections, bounding box) — best for diagrams | (none) |
+| `describe_wireframe` | Read the canvas as a UI: screens, containment tree, inferred component roles (`?` = low confidence), reading order, navigation flows, live annotations | (none) |
 | `get_canvas_screenshot` | Returns PNG image of canvas for visual verification | (optional) `background` |
 | `get_resource` | Get scene/library/theme/elements | `resource` |
+| `get_canvas_changes` | What changed since you last looked, incl. human edits; attributes markup to the element it refers to | (optional) `since` |
+| `wait_for_changes` | Block until a human edits the canvas, then return the same report | (optional) `since`, `timeoutSeconds`, `settleSeconds` |
 
 ### File I/O & Export
 
@@ -151,8 +165,18 @@ Notes:
 | `DELETE` | `/api/elements/clear` | Clear all elements |
 | `GET` | `/api/elements/search?type=...` | Search with filters (exact string match + bbox) |
 | `POST` | `/api/elements/batch` | Batch create |
-| `POST` | `/api/elements/sync` | Overwrite import (clear + write) |
+| `POST` | `/api/elements/sync` | Frontend scene sync — reconciles per element and records human edits |
 | `POST` | `/api/elements/from-mermaid` | Mermaid conversion via frontend |
+
+### Changes (review loop)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/changes?since=N` | Change records after revision N: `{rev, truncated, reset, records[]}` |
+| `GET` | `/api/changes/wait?since=N&timeout=60000&settle=1500` | Long-poll: resolves on the next change (or `timedOut: true`); `timeout` caps at 600000ms |
+
+Each record is `{rev, kind: add|update|delete, id, origin: agent|human, at, elementType, label?, before?, after?}`.
+`before`/`after` hold only the fields that differed, in canonical form.
 
 ### Export
 

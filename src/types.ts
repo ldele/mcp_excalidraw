@@ -120,6 +120,10 @@ export const EXCALIDRAW_ELEMENT_TYPES: Record<string, ExcalidrawElementType> = {
   IMAGE: 'image'
 } as const;
 
+// Who last wrote an element. `agent` = MCP/CLI/REST write, `human` = a person
+// editing in the browser canvas (arrives via POST /api/elements/sync).
+export type ChangeOrigin = 'agent' | 'human';
+
 // Server-side element with metadata
 export interface ServerElement extends Omit<ExcalidrawElementBase, 'id'> {
   id: string;
@@ -130,6 +134,10 @@ export interface ServerElement extends Omit<ExcalidrawElementBase, 'id'> {
   syncedAt?: string;
   source?: string;
   syncTimestamp?: string;
+  // Canvas revision at which this element last changed, and who changed it.
+  // These drive the design-review loop (GET /api/changes).
+  rev?: number;
+  origin?: ChangeOrigin;
   text?: string;
   originalText?: string;
   fontSize?: number;
@@ -283,6 +291,45 @@ export interface Snapshot {
   elements: ServerElement[];
   createdAt: string;
 }
+
+// ─── Change tracking (the two-way design-review loop) ──────────
+//
+// Every mutation bumps a monotonic canvas revision and appends a record here.
+// An agent polls `since` = the last revision it saw, so it perceives exactly
+// what a human changed in the browser rather than re-reading the whole scene.
+
+export type ChangeKind = 'add' | 'update' | 'delete';
+
+export interface ChangeRecord {
+  rev: number;
+  kind: ChangeKind;
+  id: string;
+  origin: ChangeOrigin;
+  at: string;
+  elementType: ExcalidrawElementType;
+  // Label/text carried on the record so deletes stay describable after the
+  // element itself is gone from the store.
+  label?: string;
+  // For updates: only the fields that actually differed, before and after.
+  // Keeping the delta (not full snapshots) bounds the log's memory.
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
+}
+
+// Bounded ring: old records are dropped once the log exceeds this length, and
+// a `since` older than the oldest retained record reports `truncated` so the
+// caller knows to fall back to a full `describe_scene`.
+export const CHANGE_LOG_LIMIT = 2000;
+
+export interface ChangeLogState {
+  revision: number;
+  records: ChangeRecord[];
+}
+
+export const changeLog: ChangeLogState = {
+  revision: 0,
+  records: []
+};
 
 // In-memory storage for Excalidraw elements
 export const elements = new Map<string, ServerElement>();

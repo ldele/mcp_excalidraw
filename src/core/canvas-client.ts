@@ -1,5 +1,5 @@
 import logger from '../utils/logger.js';
-import { ServerElement } from '../types.js';
+import { ServerElement, ChangeRecord } from '../types.js';
 import { EXPRESS_SERVER_URL, ENABLE_CANVAS_SYNC } from './config.js';
 
 // API Response types
@@ -215,6 +215,46 @@ export async function getSnapshot(name: string): Promise<{ name: string; element
   return data.snapshot;
 }
 
+// ---- Change feed (the two-way design-review loop) ----
+
+export interface ChangePayload {
+  success: boolean;
+  since: number;
+  rev: number;
+  truncated: boolean;
+  reset: boolean;
+  records: ChangeRecord[];
+  timedOut?: boolean;
+}
+
+// Node's HTTP client aborts a response whose headers take longer than 300s to
+// arrive, so a long-poll must return before that. The canvas server accepts up
+// to 600s for direct REST callers; agents re-poll instead.
+export const MAX_WAIT_SECONDS = 240;
+
+export async function getChanges(since: number): Promise<ChangePayload> {
+  return requestJson<ChangePayload>(`/api/changes?since=${encodeURIComponent(String(since))}`);
+}
+
+export async function waitForChanges(
+  since: number,
+  timeoutSeconds: number,
+  settleSeconds: number
+): Promise<ChangePayload> {
+  const timeoutMs = Math.round(Math.min(timeoutSeconds, MAX_WAIT_SECONDS) * 1000);
+  const settleMs = Math.round(settleSeconds * 1000);
+  const params = new URLSearchParams({
+    since: String(since),
+    timeout: String(timeoutMs),
+    settle: String(settleMs)
+  });
+  // Give the socket a little longer than the server's own deadline so a clean
+  // `timedOut: true` response wins the race against the abort.
+  return requestJson<ChangePayload>(`/api/changes/wait?${params}`, {
+    signal: AbortSignal.timeout(timeoutMs + 15_000)
+  });
+}
+
 export async function sendMermaid(mermaidDiagram: string, config?: Record<string, unknown>): Promise<ApiResponse> {
   return requestJson('/api/elements/from-mermaid', {
     method: 'POST',
@@ -348,6 +388,8 @@ export interface HealthStatus {
   timestamp: string;
   elements_count: number;
   websocket_clients: number;
+  // Current canvas revision — the cursor for the change feed (v1.2+)
+  rev?: number;
   // Identity fields (v1.1+); `stop` requires both before signaling anything
   service?: string;
   pid?: number;

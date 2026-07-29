@@ -13,6 +13,7 @@ import {
 import { buildSceneFile, importScene } from '../../core/scene-io.js';
 import { wrapSceneAsObsidianMd } from '../../core/obsidian-md.js';
 import { describeScene } from '../../core/describe.js';
+import { readWireframe, formatWireframe, WireframeNode } from '../../core/wireframe.js';
 import { exportToExcalidrawUrl } from '../../core/share-url.js';
 import { EXPRESS_SERVER_URL } from '../../core/config.js';
 
@@ -27,6 +28,42 @@ export async function describe(argv: string[]): Promise<void> {
   const elements = await getElements();
   // Plain text by design: this is the human/agent-readable scene summary
   process.stdout.write(describeScene(elements) + '\n');
+}
+
+export async function wireframe(argv: string[]): Promise<void> {
+  const { flags } = parseArgs(argv, { json: { takesValue: false } });
+  await ensureCanvasRunning();
+  const elements = await getElements();
+  const model = readWireframe(elements);
+
+  if (flags.json) {
+    // Elements are dropped from the JSON view: the caller already has them
+    // from `export` / `query`, and echoing each one inside every node would
+    // bury the structure this command exists to expose.
+    printJson({
+      screens: model.screens.map(stripElements),
+      roots: model.roots.map(stripElements),
+      flows: model.flows,
+      markup: model.markup,
+      componentCount: model.componentCount
+    });
+    return;
+  }
+
+  // Plain text by design: this is the agent/human-readable UI reading
+  process.stdout.write(formatWireframe(model) + '\n');
+}
+
+function stripElements(node: WireframeNode): Record<string, unknown> {
+  return {
+    id: node.id,
+    role: node.role,
+    inferred: node.inferred,
+    ...(node.label ? { label: node.label } : {}),
+    type: node.element.type,
+    box: node.box,
+    children: node.children.map(stripElements)
+  };
 }
 
 export async function screenshot(argv: string[]): Promise<void> {

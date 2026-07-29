@@ -38,6 +38,9 @@ interface ServerElement {
   syncedAt?: string;
   source?: string;
   syncTimestamp?: string;
+  // Change-tracking metadata from the server; stripped before rendering
+  rev?: number;
+  origin?: 'agent' | 'human';
   boundElements?: any[] | null;
   containerId?: string | null;
   locked?: boolean;
@@ -97,6 +100,8 @@ const cleanElementForExcalidraw = (element: ServerElement): Partial<ExcalidrawEl
     syncedAt,
     source,
     syncTimestamp,
+    rev,
+    origin,
     ...cleanElement
   } = element;
   return cleanElement;

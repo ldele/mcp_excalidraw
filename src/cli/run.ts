@@ -6,6 +6,7 @@ import * as scene from './commands/scene.js';
 import { snapshot } from './commands/snapshot.js';
 import { arrange } from './commands/arrange.js';
 import { installSkill } from './commands/install-skill.js';
+import { changes, watch } from './commands/changes.js';
 
 interface Command {
   handler: (argv: string[]) => Promise<void>;
@@ -24,6 +25,9 @@ const COMMANDS: Record<string, Command> = {
   get: { handler: elements.get, summary: 'Get one element by id', usage: 'get <id>' },
   query: { handler: elements.query, summary: 'Query elements (server + typed client-side filters)', usage: 'query [--type rectangle] [--bbox x0,y0,x1,y1] [--filter locked=true] [--filter-json \'{...}\']' },
   describe: { handler: scene.describe, summary: 'AI-readable scene description (plain text)', usage: 'describe' },
+  wireframe: { handler: scene.wireframe, summary: 'Read the canvas as a UI: screens, components, flows', usage: 'wireframe [--json]' },
+  changes: { handler: changes, summary: 'What changed on the canvas, and who changed it', usage: 'changes [--since <rev>] [--json]' },
+  watch: { handler: watch, summary: 'Block until a human edits the canvas, then report', usage: 'watch [--since <rev>] [--timeout 60] [--settle 1.5] [--json]' },
   screenshot: { handler: scene.screenshot, summary: 'Capture the canvas (needs an open browser tab)', usage: 'screenshot [--out file.png] [--format png|svg] [--no-background]' },
   export: { handler: scene.exportCmd, summary: 'Export the scene as .excalidraw JSON or Obsidian .excalidraw.md', usage: 'export [--out scene.excalidraw | note.excalidraw.md] [--format json|obsidian] (a .md out path implies obsidian)' },
   import: { handler: scene.importCmd, summary: 'Import a .excalidraw or Obsidian .excalidraw.md file (merge by default)', usage: 'import [scene.excalidraw|note.excalidraw.md|-] [--replace] (or stdin)' },

@@ -10,7 +10,7 @@
 One canvas, three ways to drive it:
 
 - **Agent Skill + CLI** — recommended for coding agents (Claude Code, Codex CLI, Cursor, OpenCode): `npx -y mcp-excalidraw-server <command>`. Zero config, auto-starts the canvas, composable JSON in/out.
-- **MCP Server** — 26 tools over stdio for any Model Context Protocol client (Claude Desktop, Cursor, Codex CLI, Antigravity, ...).
+- **MCP Server** — 29 tools over stdio for any Model Context Protocol client (Claude Desktop, Cursor, Codex CLI, Antigravity, ...).
 - **REST API** — plain HTTP for LangChain and custom frameworks.
 
 Core drawing runs fully local (Node ≥ 18, MIT licensed) — no API keys. Mermaid conversion runs in the local browser canvas; `share` is optional and uploads an encrypted scene to excalidraw.com.
@@ -37,7 +37,7 @@ Core drawing runs fully local (Node ≥ 18, MIT licensed) — no API keys. Merma
   - [Codex CLI](#codex-cli)
   - [OpenCode](#opencode)
   - [Antigravity (Google)](#antigravity-google)
-- [MCP Tools (26 Total)](#mcp-tools-26-total)
+- [MCP Tools (29 Total)](#mcp-tools-29-total)
 - [Quick Start (From Source / Docker)](#quick-start-from-source--docker)
 - [Testing](#testing)
 - [FAQ](#faq)
@@ -63,7 +63,7 @@ Excalidraw has an [official MCP](https://github.com/excalidraw/excalidraw-mcp) �
 
 | | Official Excalidraw MCP | This Project |
 |---|---|---|
-| **Approach** | Prompt in, diagram out (one-shot widget) | Programmatic element-level control (CLI + 26 MCP tools) |
+| **Approach** | Prompt in, diagram out (one-shot widget) | Programmatic element-level control (CLI + 29 MCP tools) |
 | **State** | Checkpoints inside the chat widget | Persistent live canvas with real-time sync |
 | **Element CRUD** | Declarative re-send with delete markers | Full create / read / update / delete per element |
 | **AI sees the canvas** | No | `describe` (structured text) + `screenshot` (image) |
@@ -82,6 +82,27 @@ Excalidraw has an [official MCP](https://github.com/excalidraw/excalidraw-mcp) �
 ## What's New
 
 Current package version: **1.1.0**. The current release line is **v1.1 — CLI-First**.
+
+### Unreleased — Two-Way Wireframing
+
+The canvas stops being a one-way output and becomes a shared design surface: the agent draws a UI, a person marks it up in the browser, and the agent reads both the markup and the resulting interface back.
+
+**Semantic wireframe reading** — `wireframe` / `describe_wireframe` reads the canvas as a user interface rather than as a list of shapes:
+
+- **Screens and nesting** — elements are nested under the smallest element containing them, so a card inside a screen comes out as a tree. Screens are named from their own heading or header bar.
+- **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`, `card`, `checkbox`, `list-item`, `divider`, `avatar`, … inferred from geometry, fill and wording. Inference is marked `?` when uncertain and every entry carries its raw type and size, so the reading can always be overridden.
+- **Reading order** — children numbered top-to-bottom, left-to-right within a row (`3.`, `3.1.`), which is both how a person reads the screen and the order to generate markup in.
+- **Navigation flows** — arrows crossing from one screen to another become `button "Continue" [submit] → screen "Dashboard" [s2]`.
+- **Live annotations** — human markup currently on the canvas, each attached to the component it refers to.
+- Reading a flowchart this way is detected and flagged rather than silently mislabelled.
+
+**The review loop**
+
+- **Change tracking**: every mutation bumps a canvas revision and records who made it (`agent` or `human`). `POST /api/elements/sync` now *reconciles* per element instead of clearing and rewriting the store, so a person's edits are detectable at all — previously any hand edit made the whole scene look brand new.
+- **`changes` / `get_canvas_changes`**: what changed since a given revision, phrased in design terms — *moved down 60px*, *resized 360x52 → 360x64*, *text "Continue" → "Log in"*.
+- **Markup attribution**: sticky notes, circled shapes, scribbles and arrows a person adds are attributed to the element they refer to, so feedback arrives attached to its subject rather than as an orphan text element at some coordinate. Background panels are treated as structure and never absorb a nearby note.
+- **`watch` / `wait_for_changes`**: long-poll that blocks until someone edits the canvas, with a settle window so a whole round of markup returns as one batch.
+- Diffing runs over a canonical projection of each element, so Excalidraw's own renormalization (a shape's label becoming a bound text child, `seed`/`versionNonce` churn) never surfaces as a phantom human edit.
 
 ### v1.1 — CLI-First
 
@@ -195,6 +216,9 @@ Conventions: JSON results on stdout — except `describe` (plain text by design)
 | `update <id> --set '{...}'` | Update an element |
 | `query` | `--type`, `--bbox x0,y0,x1,y1`, `--filter k=v` (typed, nested keys), `--filter-json '{...}'` |
 | `describe` | AI-readable scene summary (plain text) |
+| `wireframe [--json]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations |
+| `changes [--since <rev>]` | What changed on the canvas and who changed it, in design terms (plain text; `--json` for raw records) |
+| `watch [--timeout 60]` | Block until someone edits the canvas, then report (`--since`, `--settle`, `--json`) |
 | `screenshot` | `--out f.png`, `--format png\|svg`, `--no-background` (browser tab required) |
 | `export [--out f.excalidraw] [--format json\|obsidian]` / `import [file\|-] [--replace]` | Scene file I/O — a `.md` out path writes Obsidian's `.excalidraw.md` format; `import` reads it back |
 | `mermaid [file\|-]` | Mermaid → canvas (browser tab required) |
@@ -410,13 +434,14 @@ Config location: `~/.gemini/antigravity/mcp_config.json`
 - **Docker networking**: Use `host.docker.internal` to reach the canvas server running on your host machine. On Linux, you may need `--add-host=host.docker.internal:host-gateway` or use `172.17.0.1`. The Docker MCP image sets `EXCALIDRAW_NO_AUTOSTART=1` (it has no frontend build) — run the canvas as its own container.
 - **In-memory storage**: The canvas server stores elements in memory. Restarting the server clears all elements — use `export` / `snapshot` for persistence.
 
-## MCP Tools (26 Total)
+## MCP Tools (29 Total)
 
 | Category | Tools |
 |---|---|
 | **Element CRUD** | `create_element`, `get_element`, `update_element`, `delete_element`, `query_elements`, `batch_create_elements`, `duplicate_elements` |
 | **Layout** | `align_elements`, `distribute_elements`, `group_elements`, `ungroup_elements`, `lock_elements`, `unlock_elements` |
-| **Scene Awareness** | `describe_scene`, `get_canvas_screenshot` |
+| **Scene Awareness** | `describe_scene`, `describe_wireframe`, `get_canvas_screenshot` |
+| **Review Loop** | `get_canvas_changes`, `wait_for_changes` |
 | **File I/O** | `export_scene`, `import_scene`, `export_to_image`, `export_to_excalidraw_url`, `create_from_mermaid` |
 | **State Management** | `clear_canvas`, `snapshot_scene`, `restore_snapshot` |
 | **Viewport** | `set_viewport` |

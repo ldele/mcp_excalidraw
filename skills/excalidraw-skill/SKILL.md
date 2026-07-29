@@ -1,6 +1,6 @@
 ---
 name: excalidraw-skill
-description: Excalidraw canvas toolkit for creating, editing, and refining diagrams on a live canvas. Use when an agent needs to (1) draw or lay out diagrams, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) export/import .excalidraw files or PNG/SVG images, (4) save/restore canvas snapshots, (5) convert Mermaid to Excalidraw, or (6) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y mcp-excalidraw-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
+description: Excalidraw canvas toolkit for creating, editing, and refining diagrams and wireframes on a live canvas shared with a human. Use when an agent needs to (1) draw or lay out diagrams and UI wireframes, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) collect design feedback by reading what a person changed or annotated on the canvas, (4) export/import .excalidraw files or PNG/SVG images, (5) save/restore canvas snapshots, (6) convert Mermaid to Excalidraw, or (7) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y mcp-excalidraw-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
 ---
 
 # Excalidraw Skill
@@ -31,7 +31,10 @@ Results are JSON on stdout — except `describe` (plain text) and raw-content ou
 | Read one / query many | `get <id>`, `query [--type t] [--bbox x0,y0,x1,y1] [--filter k=v] [--filter-json '{...}']` |
 | Update / delete | `update <id> --set '{...}'`, `delete <id> [...]` |
 | Understand the scene | `describe` (plain-text summary: ids, positions, labels, connections) |
+| Read a UI wireframe | `wireframe` — screens, nesting, component roles, reading order, navigation, annotations |
 | See the scene | `screenshot [--out f.png]` (PNG without `--out` → temp file path in JSON; SVG without `--out` → raw SVG) |
+| Read what the human changed | `changes [--since <rev>]` — additions, edits, deletions in design terms, with markup attributed to its subject |
+| Wait for the human to edit | `watch [--timeout 60]` — blocks until someone touches the canvas, then reports |
 | Layout operations | `arrange align\|distribute\|group\|ungroup\|lock\|unlock\|duplicate --ids a,b,c [--to left\|horizontal\|...]` |
 | Scene files | `export [--out scene.excalidraw]`, `import [scene.excalidraw|-] [--replace]` — a `.excalidraw.md` out path writes Obsidian's format (see File I/O) |
 | Mermaid → canvas | `mermaid [diagram.mmd|-]` (or stdin) |
@@ -212,6 +215,129 @@ add elements
   → proceed
 ```
 
+## Workflow: Reading a UI Wireframe
+
+`describe` gives you a flat list of shapes at coordinates. For a **user interface**
+that is the wrong altitude — you need to know what is a screen, what sits inside
+what, and which box is a button. `wireframe` (`describe_wireframe` in MCP) reads
+the same canvas as a UI:
+
+- **Screens and nesting** — every element is placed under the smallest element that
+  contains it, so a card inside a screen inside nothing comes out as a tree. Screens
+  are named after their own heading, or their header bar's text.
+- **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`,
+  `card`, `checkbox`, `radio`, `avatar`, `list-item`, `divider`, `image`, `text`.
+- **Reading order** — children are numbered top-to-bottom, left-to-right within a
+  row (`3.`, `3.1.`, `3.2.`), which is the order a person reads them and the order
+  you should generate markup in.
+- **Navigation** — arrows that cross from one screen to another are reported as
+  flows: `button "Continue" [submit] → screen "Dashboard" [s2]`.
+- **Annotations** — human markup currently on the canvas, each attached to the
+  component it refers to.
+
+Use it before turning a wireframe into code, before reviewing someone's UI sketch,
+and after a round of markup to re-read the updated design.
+
+### Trust the `?`, and trust the numbers
+
+Roles are **inferred** from geometry, style and wording — a rectangle is never
+definitively a button. A trailing `?` means low confidence. Every entry also
+carries its raw type and size, so you can disagree with the reading:
+
+```
+7. button "Continue"  [submit] rectangle 360x52 · fill #4c6ef5     ← confident
+8. button? "Sign in with Google"  [google] rectangle 360x48 · fill #ffffff  ← guess
+```
+
+Roughly how the guesses are made — useful to know when you *draw* a wireframe you
+want read back accurately:
+
+- **button** — wide, short, and filled with a saturated or dark colour, or labelled
+  with an action word ("Continue", "Save", "Sign in").
+- **input** — wide, short, neutral fill with a border, or labelled with a field name
+  ("Email", "Password", "Search…").
+- **list-item** — same as above but one of several identically sized boxes stacked
+  in a column.
+- **header / footer / sidebar** — a strip pinned to an edge of its container,
+  spanning most of that edge.
+- **heading** — a text element at font size ≥ 20.
+- **checkbox / radio** — a small square / circle ≤ 28px. Text immediately to its
+  right becomes its label rather than a separate component.
+- **divider** — anything ≤ 6px thin and ≥ 40px long.
+
+So: fill your primary buttons with a real colour, leave inputs white with a border,
+give each screen a heading or a header bar, and put every screen's contents fully
+inside its frame. A wireframe drawn that way reads back cleanly.
+
+**If it isn't a wireframe**, the report says so — `0 screens` plus a warning when the
+canvas is really a flowchart. Use `describe` for diagrams.
+
+## Workflow: Two-Way Design Review (wireframes & UX)
+
+The canvas is shared: you draw on it, and so does the person you are working with.
+`changes` / `get_canvas_changes` is how you find out what *they* did. Use this
+whenever you are proposing UI, a layout, or a flow that the user should react to —
+it is far cheaper and more precise than asking them to describe edits in prose.
+
+**The loop:**
+
+1. **Draw** the wireframe (`add` / `batch_create_elements`), then `screenshot` and
+   run the Quality Checklist.
+2. **Hand over the pen.** Tell the user explicitly what to do, in canvas terms:
+   > "The sign-in wireframe is on the canvas at http://127.0.0.1:3000. Mark it up
+   > however you like — drag things, retype labels, circle what's wrong, or drop a
+   > text note next to anything you want changed. Tell me when you're done."
+3. **Wait** with `watch` (`wait_for_changes`) instead of polling. It blocks until
+   the canvas is touched, then waits for a quiet moment so a whole round of markup
+   arrives as one batch. On timeout it says so — call it again to keep waiting.
+4. **Read** the report. Then *act on it*: apply the edits to the code/design, or
+   update the wireframe and go round again. For UI work, follow up with `wireframe`
+   to re-read the marked-up design as an interface — the report tells you what
+   moved, the wireframe reading tells you what the design now *is*.
+
+**The user must have the canvas open in a browser.** Edits only reach the server
+from an open tab — that is the transport. If `watch` keeps timing out, check this
+before assuming the user is idle.
+
+### Reading the report
+
+```
+### Added (2)
+  [note-1] text "Make this full-width and the primary CTA" at (470, 360) — by human
+      ↳ annotates [submit] rectangle "Log in" (40px away)
+  [circle-1] ellipse at (60, 130) size 380x68 — by human
+      ↳ circles / marks [email] rectangle "Email"
+
+### Edited (1)
+  [submit] rectangle "Log in" — by human
+      moved down 60px — (70, 290) → (70, 350)
+      resized 360x52 → 360x64
+      text "Continue" → "Log in"
+```
+
+- **`by human` vs `by agent`** — your own writes are tracked too, so you can tell
+  your changes from theirs. Only `by human` entries are feedback.
+- **The `↳` line is the point.** Free-standing notes, circles, scribbles and arrows
+  a person adds are attributed to the element they refer to — `points at` (a bound
+  arrow), `circles / marks` (drawn around it), `sits on` (drawn over it), or
+  `annotates` (drawn beside it, with the gap). A note attributed to `[submit]` is a
+  change request for the submit button; read it as such.
+- **Background panels are never `annotates` targets.** Anything holding two or more
+  other elements is treated as structure, so a note beside a screen frame is
+  attributed to the nearest real component instead.
+- **Cursor.** Every report ends with `Cursor: rev N`. The MCP tools remember it, so
+  calling them with no arguments always yields "what's new since last time". From
+  the CLI, pass `--since N` yourself.
+
+### Notes
+
+- Moving a shape drags its bound arrows along, and those reroutes are reported as
+  `by agent` — ignore them as feedback.
+- A person retyping a shape's label is reported as a change to **the shape**
+  (`text "Continue" → "Log in"`), not as a separate text element.
+- If a report says the log is truncated or the cursor is ahead of the canvas (the
+  server restarted), fall back to `describe` for the full current state.
+
 ## Workflow: Refine an Existing Diagram
 
 1. `describe` to understand current state — note element IDs and positions.
@@ -273,4 +399,4 @@ Round-trips are safe: text-element block references follow the plugin's own id r
 
 ## References
 
-- `references/cheatsheet.md`: full CLI reference, the 26 MCP tools, REST API endpoints + payload shapes, and the diagram design guide (colors, sizing).
+- `references/cheatsheet.md`: full CLI reference, the 29 MCP tools, REST API endpoints + payload shapes, and the diagram design guide (colors, sizing).

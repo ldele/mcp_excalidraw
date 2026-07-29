@@ -24,12 +24,25 @@ import {
   SyncStatusMessage,
   InitialElementsMessage,
   Snapshot,
-  normalizeFontFamily
+  normalizeFontFamily,
+  changeLog,
+  CHANGE_LOG_LIMIT,
+  ChangeRecord,
+  ChangeKind,
+  ChangeOrigin
 } from './types.js';
 import { z } from 'zod';
 import WebSocket from 'ws';
 import { isMainModule } from './core/entry.js';
 import { writePidFile, removePidFile } from './core/pidfile.js';
+import {
+  canonicalizeElement,
+  diffCanonical,
+  isChangeTracked,
+  effectiveLabel,
+  buildBoundLabelIndex,
+  CanonicalElement
+} from './core/changes.js';
 
 // Load environment variables
 dotenv.config();
@@ -77,6 +90,132 @@ function normalizeLineBreakMarkup(text: string): string {
   return text
     .replace(/<\s*b\s*r\s*\/?\s*>/gi, '\n')
     .replace(/\n{3,}/g, '\n\n');
+}
+
+// ─── Change tracking ───────────────────────────────────────────
+//
+// Every mutation bumps the canvas revision and appends a record, so an agent
+// can ask "what changed since rev N" and perceive a human's edits in the
+// browser instead of re-reading the whole scene and guessing.
+
+// Agents waiting on GET /api/changes/wait, woken by the next change.
+const changeWaiters = new Set<() => void>();
+let lastChangeAt = 0;
+
+function notifyChangeWaiters(): void {
+  lastChangeAt = Date.now();
+  const waiters = [...changeWaiters];
+  changeWaiters.clear();
+  for (const wake of waiters) wake();
+}
+
+function appendChange(record: ChangeRecord): void {
+  changeLog.records.push(record);
+  if (changeLog.records.length > CHANGE_LOG_LIMIT) {
+    changeLog.records.splice(0, changeLog.records.length - CHANGE_LOG_LIMIT);
+  }
+  notifyChangeWaiters();
+}
+
+function track(
+  kind: ChangeKind,
+  element: ServerElement,
+  origin: ChangeOrigin,
+  delta?: { before: Record<string, unknown>; after: Record<string, unknown> }
+): void {
+  // Bound text children are reported through their container's label instead
+  // of as changes in their own right.
+  if (!isChangeTracked(element)) return;
+
+  const rev = ++changeLog.revision;
+  if (kind !== 'delete') {
+    element.rev = rev;
+    element.origin = origin;
+  }
+
+  // Resolved while the element is still in the store, so a delete record can
+  // still name what was removed.
+  const label = effectiveLabel(element, elements);
+
+  appendChange({
+    rev,
+    kind,
+    id: element.id,
+    origin,
+    at: new Date().toISOString(),
+    elementType: element.type,
+    ...(label ? { label } : {}),
+    ...(delta ? { before: delta.before, after: delta.after } : {})
+  });
+}
+
+// Canonical form of an element as the store currently sees it.
+function canonicalOf(element: ServerElement, context: Map<string, ServerElement> = elements): CanonicalElement {
+  return canonicalizeElement(element, context);
+}
+
+export interface ChangePayload {
+  success: true;
+  since: number;
+  rev: number;
+  truncated: boolean;
+  reset: boolean;
+  records: ChangeRecord[];
+}
+
+function buildChangePayload(since: number): ChangePayload {
+  const records = changeLog.records.filter(record => record.rev > since);
+  const oldestRetained = changeLog.records.length > 0 ? changeLog.records[0]!.rev : 1;
+
+  return {
+    success: true,
+    since,
+    rev: changeLog.revision,
+    // History has been trimmed past the caller's cursor — the report will be
+    // incomplete and the caller should fall back to a full scene read.
+    truncated: changeLog.records.length > 0 && since < oldestRetained - 1,
+    // A cursor ahead of the canvas means the server restarted under the agent.
+    reset: since > changeLog.revision,
+    records
+  };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, ms)));
+}
+
+function nextChange(timeoutMs: number): Promise<void> {
+  return new Promise(resolve => {
+    let settled = false;
+    const finish = (): void => {
+      if (settled) return;
+      settled = true;
+      changeWaiters.delete(finish);
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(finish, Math.max(0, timeoutMs));
+    changeWaiters.add(finish);
+  });
+}
+
+// Block until the canvas moves past `since`, then hold for a quiet window so a
+// burst of human edits (drag, type, drag again) is delivered as one batch
+// rather than waking the agent on the first brush stroke.
+async function awaitCanvasChanges(since: number, timeoutMs: number, settleMs: number): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+
+  while (changeLog.revision <= since && Date.now() < deadline) {
+    await nextChange(deadline - Date.now());
+  }
+
+  if (changeLog.revision <= since) return; // timed out with nothing to report
+
+  while (settleMs > 0 && Date.now() < deadline) {
+    const quietFor = Date.now() - lastChangeAt;
+    if (quietFor >= settleMs) break;
+    await sleep(Math.min(settleMs - quietFor, deadline - Date.now()));
+  }
 }
 
 // WebSocket connection handling
@@ -270,6 +409,7 @@ app.post('/api/elements', (req: Request, res: Response) => {
     }
 
     elements.set(id, element);
+    track('add', element, 'agent');
 
     // Broadcast to all connected clients
     const message: ElementCreatedMessage = {
@@ -313,6 +453,8 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
       });
     }
 
+    const beforeCanonical = canonicalOf(existingElement);
+
     const updatedElement: ServerElement = {
       ...existingElement,
       ...updates,
@@ -347,6 +489,9 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
 
     elements.set(id, updatedElement);
 
+    const delta = diffCanonical(beforeCanonical, canonicalOf(updatedElement));
+    if (delta) track('update', updatedElement, 'agent', delta);
+
     // Broadcast to all connected clients
     const message: ElementUpdatedMessage = {
       type: 'element_updated',
@@ -358,7 +503,8 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
     const geometryChanged = ['x', 'y', 'width', 'height']
       .some(key => Object.prototype.hasOwnProperty.call(body, key));
     if (geometryChanged && updatedElement.type !== 'arrow' && updatedElement.type !== 'line') {
-      for (const arrow of rerouteBoundArrows(id)) {
+      for (const { arrow, delta: arrowDelta } of rerouteBoundArrows(id)) {
+        if (arrowDelta) track('update', arrow, 'agent', arrowDelta);
         broadcast({ type: 'element_updated', element: arrow } as ElementUpdatedMessage);
       }
     }
@@ -380,6 +526,10 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
 app.delete('/api/elements/clear', (req: Request, res: Response) => {
   try {
     const count = elements.size;
+    // Recorded before the wipe so the change log can still name what went.
+    for (const element of elements.values()) {
+      track('delete', element, 'agent');
+    }
     elements.clear();
 
     broadcast({
@@ -415,13 +565,15 @@ app.delete('/api/elements/:id', (req: Request, res: Response) => {
       });
     }
 
-    if (!elements.has(id)) {
+    const doomed = elements.get(id);
+    if (!doomed) {
       return res.status(404).json({
         success: false,
         error: `Element with ID ${id} not found`
       });
     }
 
+    track('delete', doomed, 'agent');
     elements.delete(id);
 
     // Broadcast to all connected clients
@@ -647,17 +799,18 @@ function resolveArrowBindings(batchElements: ServerElement[]): void {
 // visual connection follows the shape — bindings are otherwise only resolved
 // at creation time, which left arrows floating at stale coordinates when
 // update/align/distribute moved their endpoints. Returns the re-routed arrows.
-function rerouteBoundArrows(movedId: string): ServerElement[] {
-  const rerouted: ServerElement[] = [];
+function rerouteBoundArrows(movedId: string): { arrow: ServerElement; delta: ReturnType<typeof diffCanonical> }[] {
+  const rerouted: { arrow: ServerElement; delta: ReturnType<typeof diffCanonical> }[] = [];
   elements.forEach(el => {
     if (el.type !== 'arrow' && el.type !== 'line') return;
     const startRef = (el as any).start as { id: string } | undefined;
     const endRef = (el as any).end as { id: string } | undefined;
     if (startRef?.id !== movedId && endRef?.id !== movedId) return;
+    const beforeCanonical = canonicalOf(el);
     resolveArrowBindings([el]);
     el.updatedAt = new Date().toISOString();
     el.version = (el.version || 0) + 1;
-    rerouted.push(el);
+    rerouted.push({ arrow: el, delta: diffCanonical(beforeCanonical, canonicalOf(el)) });
   });
   return rerouted;
 }
@@ -697,6 +850,9 @@ app.post('/api/elements/batch', (req: Request, res: Response) => {
 
     // Store all elements after binding resolution
     createdElements.forEach(el => elements.set(el.id, el));
+    // Tracked only once the whole batch is stored, so a shape's bound label
+    // is already resolvable when its change record is written.
+    createdElements.forEach(el => track('add', el, 'agent'));
 
     // Broadcast to all connected clients
     const message: BatchCreatedMessage = {
@@ -760,15 +916,16 @@ app.post('/api/elements/from-mermaid', (req: Request, res: Response) => {
   }
 });
 
-// Sync elements from frontend (overwrite sync)
+// Sync elements from the frontend — a human editing the canvas in a browser.
+//
+// This reconciles rather than wipes. The old implementation cleared the store
+// and rewrote every element with version 1, which meant an agent could never
+// tell what a person had actually changed: after any edit the entire scene
+// looked new. Diffing each element against its stored canonical form is what
+// makes the two-way review loop possible.
 app.post('/api/elements/sync', (req: Request, res: Response) => {
   try {
     const { elements: frontendElements, timestamp } = req.body;
-
-    logger.info(`Sync request received: ${frontendElements.length} elements`, {
-      timestamp,
-      elementCount: frontendElements.length
-    });
 
     // Validate input data
     if (!Array.isArray(frontendElements)) {
@@ -778,58 +935,127 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
       });
     }
 
-    // Record element count before sync
+    logger.info(`Sync request received: ${frontendElements.length} elements`, {
+      timestamp,
+      elementCount: frontendElements.length
+    });
+
     const beforeCount = elements.size;
+    const syncedAt = new Date().toISOString();
 
-    // 1. Clear existing memory storage
-    elements.clear();
-    logger.info(`Cleared existing elements: ${beforeCount} elements removed`);
+    // Snapshot of the pre-sync store: canonical "before" values (including a
+    // shape's label, which lives on a bound text child) must be resolved
+    // against the old scene, not the half-updated one.
+    const previous = new Map(elements);
 
-    // 2. Batch write new data
-    let successCount = 0;
-    const processedElements: ServerElement[] = [];
+    const incoming = new Map<string, any>();
+    for (const element of frontendElements) {
+      if (!element || typeof element !== 'object') continue;
+      const id = element.id || generateId();
+      incoming.set(id, { ...element, id });
+    }
+    // Context for resolving canonical "after" values across the incoming scene.
+    const incomingContext = incoming as Map<string, ServerElement>;
 
-    frontendElements.forEach((element: any, index: number) => {
-      try {
-        // Ensure element has ID, generate one if missing
-        const elementId = element.id || generateId();
+    // Label indexes built once per scene — resolving a shape's bound-text
+    // label per element would otherwise make each sync quadratic.
+    const previousLabels = buildBoundLabelIndex(previous);
+    const incomingLabels = buildBoundLabelIndex(incomingContext);
 
-        // Add server metadata
-        const processedElement: ServerElement = {
-          ...element,
-          id: elementId,
-          syncedAt: new Date().toISOString(),
+    let added = 0;
+    let updated = 0;
+    let removed = 0;
+
+    // 1. Elements the human deleted in the browser.
+    for (const [id, existing] of previous) {
+      if (incoming.has(id)) continue;
+      track('delete', existing, 'human');
+      elements.delete(id);
+      if (isChangeTracked(existing)) removed++;
+    }
+
+    // 2. Elements added or edited.
+    for (const [id, raw] of incoming) {
+      const existing = previous.get(id);
+
+      if (!existing) {
+        const element: ServerElement = {
+          ...raw,
+          id,
+          createdAt: syncedAt,
+          updatedAt: syncedAt,
+          syncedAt,
           source: 'frontend_sync',
           syncTimestamp: timestamp,
           version: 1
         };
-
-        // Store to memory
-        elements.set(elementId, processedElement);
-        processedElements.push(processedElement);
-        successCount++;
-
-      } catch (elementError) {
-        logger.warn(`Failed to process element ${index}:`, elementError);
+        elements.set(id, element);
+        track('add', element, 'human');
+        if (isChangeTracked(element)) added++;
+        continue;
       }
-    });
 
-    logger.info(`Sync completed: ${successCount}/${frontendElements.length} elements synced`);
+      const delta = diffCanonical(
+        canonicalizeElement(existing, previous, previousLabels),
+        canonicalizeElement(raw as ServerElement, incomingContext, incomingLabels)
+      );
+
+      if (!delta) {
+        // Untouched: keep the stored element (and its rev/origin/createdAt)
+        // so an agent's authorship is not overwritten by a passive echo.
+        existing.syncedAt = syncedAt;
+        continue;
+      }
+
+      // Merge rather than replace: fields the frontend does not echo back
+      // (the agent-format `start`/`end` arrow refs that rerouteBoundArrows
+      // relies on) must survive a human's edit elsewhere in the scene.
+      const element: ServerElement = {
+        ...existing,
+        ...raw,
+        id,
+        createdAt: existing.createdAt ?? syncedAt,
+        updatedAt: syncedAt,
+        syncedAt,
+        source: 'frontend_sync',
+        syncTimestamp: timestamp,
+        version: (existing.version || 0) + 1
+      };
+
+      // The frontend is authoritative for content. Once Excalidraw has
+      // expanded a shape's agent-format `label` into a bound text child,
+      // keeping the original `label` would leave two competing sources of
+      // truth — and every later sync would re-report the same edit.
+      if (!(raw as any).label) delete (element as any).label;
+
+      elements.set(id, element);
+      track('update', element, 'human', delta);
+      if (isChangeTracked(element)) updated++;
+    }
+
+    logger.info(
+      `Sync reconciled: ${added} added, ${updated} updated, ${removed} removed ` +
+      `(${elements.size} elements, rev ${changeLog.revision})`
+    );
 
     // 3. Broadcast sync event to all WebSocket clients
     broadcast({
       type: 'elements_synced',
-      count: successCount,
-      timestamp: new Date().toISOString(),
+      count: elements.size,
+      timestamp: syncedAt,
       source: 'manual_sync'
     });
 
     // 4. Return sync results
     res.json({
       success: true,
-      message: `Successfully synced ${successCount} elements`,
-      count: successCount,
-      syncedAt: new Date().toISOString(),
+      message: `Synced ${elements.size} elements (${added} added, ${updated} updated, ${removed} removed)`,
+      count: elements.size,
+      added,
+      updated,
+      removed,
+      rev: changeLog.revision,
+      syncedAt,
       beforeCount,
       afterCount: elements.size
     });
@@ -841,6 +1067,60 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
       error: (error as Error).message,
       details: 'Internal server error during sync operation'
     });
+  }
+});
+
+// ─── Change feed (the design-review loop) ──────────────────────
+
+// What changed since a given revision.
+app.get('/api/changes', (req: Request, res: Response) => {
+  try {
+    const since = Number(req.query.since ?? 0);
+    if (!Number.isFinite(since) || since < 0) {
+      return res.status(400).json({ success: false, error: 'since must be a non-negative number' });
+    }
+    res.json(buildChangePayload(since));
+  } catch (error) {
+    logger.error('Error building change payload:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+const WAIT_MAX_TIMEOUT_MS = 600_000;
+const WAIT_MAX_SETTLE_MS = 30_000;
+
+// Long-poll: hold the request until a human (or another agent) touches the
+// canvas. This is the "hand the pen over and wait" half of the loop.
+app.get('/api/changes/wait', async (req: Request, res: Response) => {
+  try {
+    const since = Number(req.query.since ?? 0);
+    if (!Number.isFinite(since) || since < 0) {
+      return res.status(400).json({ success: false, error: 'since must be a non-negative number' });
+    }
+
+    const timeoutMs = Math.min(
+      Math.max(Number(req.query.timeout ?? 60_000) || 0, 1_000),
+      WAIT_MAX_TIMEOUT_MS
+    );
+    const settleMs = Math.min(
+      Math.max(Number(req.query.settle ?? 1_500) || 0, 0),
+      WAIT_MAX_SETTLE_MS
+    );
+
+    let clientGone = false;
+    req.on('close', () => { clientGone = true; });
+
+    await awaitCanvasChanges(since, timeoutMs, settleMs);
+
+    if (clientGone) return;
+
+    res.json({
+      ...buildChangePayload(since),
+      timedOut: changeLog.revision <= since
+    });
+  } catch (error) {
+    logger.error('Error waiting for changes:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -1261,6 +1541,8 @@ app.get('/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     elements_count: elements.size,
     websocket_clients: clients.size,
+    // Current canvas revision — the cursor for GET /api/changes
+    rev: changeLog.revision,
     // Identity for `stop`: it must only ever signal a process that both
     // identifies as this service AND self-reports its pid — never a pid
     // from a stale pidfile or an unrelated app squatting on the port.
