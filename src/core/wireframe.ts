@@ -125,11 +125,17 @@ function looksLikeAction(label: string | undefined): boolean {
   return ACTION_WORDS.some(word => text === word || text.startsWith(word + ' '));
 }
 
+// Field labels are noun phrases that end in the thing being asked for:
+// "Password", "New password", "Confirm password", "Billing address". Matching
+// on the tail rather than the whole string is what stops "Confirm password"
+// from reading as the verb "confirm".
 function looksLikeField(label: string | undefined): boolean {
   if (!label) return false;
   const text = label.toLowerCase().trim().replace(/[:*]\s*$/, '');
-  if (text.endsWith('...') || text.startsWith('enter ') || text.startsWith('type ')) return true;
-  return FIELD_WORDS.includes(text);
+  if (text.endsWith('...') || text.endsWith('…')) return true;
+  if (text.startsWith('enter ') || text.startsWith('type ')) return true;
+  if (text.split(/\s+/).length > 4) return false;
+  return FIELD_WORDS.some(word => text === word || text.endsWith(' ' + word));
 }
 
 // ─── Containment ───────────────────────────────────────────────
@@ -229,14 +235,19 @@ interface Classification {
 
 // Repeated siblings of identical size stacked in a column read as a list —
 // the strongest structural signal separating a menu row from a form field.
-function hasStackedTwin(node: WireframeNode, siblings: WireframeNode[]): boolean {
-  return siblings.some(other =>
+function stackedTwins(node: WireframeNode, siblings: WireframeNode[]): WireframeNode[] {
+  return siblings.filter(other =>
     other.id !== node.id &&
     Math.abs(other.box.w - node.box.w) <= 2 &&
     Math.abs(other.box.h - node.box.h) <= 2 &&
     Math.abs(other.box.x - node.box.x) <= 2 &&
     Math.abs(other.box.y - node.box.y) > 2
   );
+}
+
+function hasRowMate(node: WireframeNode, siblings: WireframeNode[]): boolean {
+  const band = { top: node.box.y, bottom: node.box.y + node.box.h };
+  return siblings.some(other => other.id !== node.id && sharesRow(band, other.box));
 }
 
 function classify(
@@ -265,8 +276,12 @@ function classify(
   }
 
   // Bars and rails: full-bleed strips pinned to an edge of their container.
+  // "Full-bleed" means flush with both side edges — a bottom-anchored CTA is
+  // inset by a margin, and would otherwise read as a footer.
   if (parent && box.w >= 100) {
-    const spansWidth = box.w >= parent.box.w * BAR_MIN_WIDTH_RATIO;
+    const flushLeft = Math.abs(box.x - parent.box.x) <= EDGE_TOLERANCE;
+    const flushRight = Math.abs((box.x + box.w) - (parent.box.x + parent.box.w)) <= EDGE_TOLERANCE;
+    const spansWidth = flushLeft && flushRight && box.w >= parent.box.w * BAR_MIN_WIDTH_RATIO;
     const isShort = box.h <= parent.box.h * BAR_MAX_HEIGHT_RATIO;
     if (spansWidth && isShort) {
       if (Math.abs(box.y - parent.box.y) <= EDGE_TOLERANCE) {
@@ -277,7 +292,9 @@ function classify(
       }
     }
 
-    const spansHeight = box.h >= parent.box.h * SIDEBAR_MIN_HEIGHT_RATIO;
+    const flushTop = Math.abs(box.y - parent.box.y) <= EDGE_TOLERANCE;
+    const flushBottom = Math.abs((box.y + box.h) - (parent.box.y + parent.box.h)) <= EDGE_TOLERANCE;
+    const spansHeight = flushTop && flushBottom && box.h >= parent.box.h * SIDEBAR_MIN_HEIGHT_RATIO;
     const isNarrow = box.w <= parent.box.w * SIDEBAR_MAX_WIDTH_RATIO;
     if (spansHeight && isNarrow &&
         (Math.abs(box.x - parent.box.x) <= EDGE_TOLERANCE ||
@@ -299,7 +316,12 @@ function classify(
 
   if (el.type === 'ellipse') {
     if (squarish && box.w <= TICKBOX_MAX_SIZE) return { role: 'radio', inferred: true };
-    if (squarish && box.w <= AVATAR_MAX_SIZE) return { role: 'avatar', inferred: true };
+    if (squarish && box.w <= AVATAR_MAX_SIZE) {
+      // A face sits beside a name; a status glyph stands alone in its row.
+      return hasRowMate(node, siblings)
+        ? { role: 'avatar', inferred: true }
+        : { role: 'icon', inferred: true };
+    }
     return { role: 'shape', inferred: false };
   }
 
@@ -316,9 +338,18 @@ function classify(
   if (isControlSized) {
     const accent = isAccentFill(el.backgroundColor);
     if (accent) return { role: 'button', inferred: !looksLikeAction(label) };
-    if (looksLikeAction(label)) return { role: 'button', inferred: true };
+    // Field before action: "Confirm password" is a field whose first word
+    // happens to be a verb, and only an unpainted box gets here anyway.
     if (looksLikeField(label)) return { role: 'input', inferred: true };
-    if (hasStackedTwin(node, siblings)) return { role: 'list-item', inferred: true };
+    if (looksLikeAction(label)) return { role: 'button', inferred: true };
+
+    const twins = stackedTwins(node, siblings);
+    // A plain box stacked under a painted one of the same size is the
+    // secondary half of a button pair, not the second row of a list.
+    if (twins.some(twin => isAccentFill(twin.element.backgroundColor))) {
+      return { role: 'button', inferred: true };
+    }
+    if (twins.length > 0) return { role: 'list-item', inferred: true };
     if (hasBorder(el)) return { role: 'input', inferred: true };
   }
 
@@ -665,10 +696,15 @@ export function formatWireframe(model: WireframeModel): string {
       lines.push('');
       lines.push(`### Navigation (${navigation.length})`);
       for (const flow of navigation) {
-        const via = flow.label ? ` — "${truncate(flow.label, 32)}"` : '';
+        const label = flow.label ? ` — "${truncate(flow.label, 32)}"` : '';
+        // No point saying "via the screen" when the arrow lands on the screen
+        // itself rather than on something inside it.
+        const via = flow.toId && flow.toId !== flow.toScreenId
+          ? `via ${describeRef(flow.toId)}, `
+          : '';
         lines.push(
           `  ${describeRef(flow.fromId)} → ${describeRef(flow.toScreenId)}` +
-          `${via}   (via ${describeRef(flow.toId)}, arrow [${flow.arrowId}])`
+          `${label}   (${via}arrow [${flow.arrowId}])`
         );
       }
     }

@@ -331,6 +331,7 @@ export function attributeAnnotation(
   let inside: AnnotationLink | null = null;
   let onContainer: AnnotationLink | null = null;
   let nearest: AnnotationLink | null = null;
+  let nearestConnector: AnnotationLink | null = null;
   let enclosedArea = Infinity;
   let insideArea = Infinity;
   let containerArea = Infinity;
@@ -340,6 +341,19 @@ export function attributeAnnotation(
     const candidateBox = boxOf(candidate);
     const candidateArea = candidateBox.w * candidateBox.h;
     if (candidateArea <= 0) continue;
+
+    // An arrow's bounding box is a large diagonal region sweeping mostly empty
+    // space, so it collects proximity matches it has nothing to do with.
+    // Connectors are held back as a last resort behind every real shape.
+    const isConnector = candidate.type === 'arrow' || candidate.type === 'line';
+    if (isConnector) {
+      const connectorGap = edgeDistance(annotationBox, candidateBox);
+      if (connectorGap <= ANNOTATION_RADIUS &&
+          (!nearestConnector || connectorGap < nearestConnector.distance)) {
+        nearestConnector = { targetId: candidate.id, relation: 'near', distance: connectorGap };
+      }
+      continue;
+    }
 
     const isContainer = containerIds.has(candidate.id);
 
@@ -376,8 +390,9 @@ export function attributeAnnotation(
 
   // A concrete component always beats the panel it sits on: a note dropped in
   // the whitespace of a screen is about the control it is next to, and only
-  // falls back to "sits on <screen>" when nothing specific is in reach.
-  return enclosed ?? inside ?? nearest ?? onContainer;
+  // falls back to a connector, then to "sits on <screen>", when nothing
+  // specific is in reach.
+  return enclosed ?? inside ?? nearest ?? nearestConnector ?? onContainer;
 }
 
 // Elements an annotation can be *about*: real scene content, not the markup
