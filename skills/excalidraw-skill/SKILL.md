@@ -49,6 +49,7 @@ The CLI and MCP tools accept the same agent-friendly format and normalize it aut
 
 - **Labels**: put `"text": "My Label"` on any shape — converted to Excalidraw's bound-label format for you.
 - **Label typography**: `fontSize`, `fontFamily`, `textAlign` and `verticalAlign` alongside `text` style the label (a shape has no font of its own, so they follow the text into it). For label colour pass the label explicitly — `"label": {"text": "Save", "strokeColor": "#d03b3b"}` — since a shape's `strokeColor` is its border. Explicit `label` keys win over the shorthand.
+- **Wireframe role**: `"role": "chart"` declares what a shape is, so `wireframe` reports it instead of guessing. Any role from the vocabulary is accepted; an unknown one is rejected by the API.
 - **Arrow binding**: `"startElementId": "a"` / `"endElementId": "b"` — arrows auto-route to element edges.
 - **fontFamily**: pass a string name (`"helvetica"`, `"cascadia"`, `"excalifont"`, ...) or string number `"1"`–`"8"`.
 - **points**: both `[[x,y], ...]` tuples and `[{"x":..,"y":..}]` objects are accepted.
@@ -227,7 +228,14 @@ the same canvas as a UI:
   contains it, so a card inside a screen inside nothing comes out as a tree. Screens
   are named after their own heading, or their header bar's text.
 - **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`,
-  `card`, `checkbox`, `radio`, `avatar`, `list-item`, `divider`, `image`, `text`.
+  `card`, `checkbox`, `radio`, `avatar`, `list-item`, `divider`, `chart`, `table`,
+  `image`, `text`.
+- **Declared roles** — put `"role": "chart"` (or any role above) on a shape and the
+  reader takes your word for it, reported without the `?`. Do this for dashboard
+  content: inference can read a label that says what a thing *is* ("Revenue chart",
+  "12 rows of orders"), but a real dashboard labels a plot with what it *shows*
+  ("PSI per feature · 0.25 line · drift region"), which no general word list can
+  recognise. Declare the role when you draw it and the reading comes back exact.
 - **Reading order** — children are numbered top-to-bottom, left-to-right within a
   row (`3.`, `3.1.`, `3.2.`), which is the order a person reads them and the order
   you should generate markup in.

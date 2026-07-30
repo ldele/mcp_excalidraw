@@ -29,7 +29,8 @@ import {
   CHANGE_LOG_LIMIT,
   ChangeRecord,
   ChangeKind,
-  ChangeOrigin
+  ChangeOrigin,
+  COMPONENT_ROLES
 } from './types.js';
 import { z } from 'zod';
 import WebSocket from 'ws';
@@ -256,6 +257,10 @@ wss.on('connection', (ws: WebSocket) => {
 // A shape's label and the typography Excalidraw applies to the bound text
 // child it creates for it. The style keys have to be declared here or zod
 // strips them, which would leave every label rendering in the default font.
+// Author's declared role for `wireframe`, validated here so a typo is rejected
+// at the boundary rather than silently ignored by the reader.
+const RoleSchema = z.enum(COMPONENT_ROLES);
+
 const LabelSchema = z.object({
   text: z.string(),
   fontSize: z.number().optional(),
@@ -280,6 +285,7 @@ const CreateElementSchema = z.object({
   opacity: z.number().optional(),
   text: z.string().optional(),
   label: LabelSchema.optional(),
+  role: RoleSchema.optional(),
   fontSize: z.number().optional(),
   fontFamily: z.union([z.string(), z.number()]).optional(),
   groupIds: z.array(z.string()).optional(),
@@ -334,6 +340,7 @@ const UpdateElementSchema = z.object({
   text: z.string().optional(),
   originalText: z.string().optional(),
   label: LabelSchema.optional(),
+  role: RoleSchema.optional(),
   fontSize: z.number().optional(),
   fontFamily: z.union([z.string(), z.number()]).optional(),
   groupIds: z.array(z.string()).optional(),

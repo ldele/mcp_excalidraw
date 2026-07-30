@@ -124,6 +124,20 @@ export const EXCALIDRAW_ELEMENT_TYPES: Record<string, ExcalidrawElementType> = {
 // editing in the browser canvas (arrives via POST /api/elements/sync).
 export type ChangeOrigin = 'agent' | 'human';
 
+// The vocabulary `wireframe` reads a canvas with. Also accepted as an explicit
+// `role` on an element, for the cases inference cannot reach: a chart
+// placeholder labelled with what it plots ("PSI per feature · 0.25 line") says
+// nothing about being a chart, and no general word list should have to know
+// one domain's jargon to find out.
+export const COMPONENT_ROLES = [
+  'screen', 'panel', 'card', 'header', 'footer', 'sidebar',
+  'heading', 'text', 'button', 'input', 'checkbox', 'radio',
+  'list-item', 'avatar', 'icon', 'image', 'divider',
+  'chart', 'table', 'shape'
+] as const;
+
+export type ComponentRole = (typeof COMPONENT_ROLES)[number];
+
 // A shape's label — the text plus the typography Excalidraw applies to the
 // bound text child it creates for it. Style keys belong here rather than on
 // the container: a rectangle has no font of its own, so `fontSize` left on the
@@ -162,6 +176,8 @@ export interface ServerElement extends Omit<ExcalidrawElementBase, 'id'> {
   fontSize?: number;
   fontFamily?: string | number;
   label?: ElementLabel;
+  // Author's declared role for `wireframe`. Overrides inference when set.
+  role?: ComponentRole;
   points?: any;
   // Arrow element binding: connect arrows to shapes by element ID
   start?: { id: string };

@@ -1,4 +1,4 @@
-import { ServerElement } from '../types.js';
+import { ServerElement, COMPONENT_ROLES, ComponentRole } from '../types.js';
 import {
   Box,
   boxOf,
@@ -22,10 +22,7 @@ import {
 // caller can discount them, and the raw type and size always travel alongside
 // the role so nothing is hidden behind the interpretation.
 
-export type ComponentRole =
-  | 'screen' | 'panel' | 'card' | 'header' | 'footer' | 'sidebar'
-  | 'heading' | 'text' | 'button' | 'input' | 'checkbox' | 'radio'
-  | 'list-item' | 'avatar' | 'icon' | 'image' | 'divider' | 'shape';
+export type { ComponentRole } from '../types.js';
 
 export interface WireframeNode {
   id: string;
@@ -117,6 +114,55 @@ const FIELD_WORDS = [
   'comment', 'description', 'title', 'date', 'card number', 'cvv', 'confirm password',
   'e-mail', 'full name', 'company', 'notes'
 ];
+
+// Data regions name themselves in one of two ways: by what they are ("Revenue
+// chart", "12 rows"), or by what they show ("PSI per feature · 0.25 line"). Only
+// the first is inferable — these lists stay generic on purpose, because a word
+// list that had to learn one domain's vocabulary to recognise its charts would
+// be wrong for every other domain. For the second, declare `role` on the shape.
+const CHART_WORDS = [
+  'chart', 'charts', 'graph', 'graphs', 'plot', 'plots', 'axis', 'axes',
+  'x-axis', 'y-axis', 'series', 'legend', 'histogram', 'scatter', 'sparkline',
+  'timeline', 'trend', 'trendline', 'curve', 'pie', 'donut', 'heatmap',
+  'gauge', 'barchart', 'linechart'
+];
+
+const TABLE_WORDS = [
+  'table', 'tables', 'row', 'rows', 'column', 'columns', 'cols', 'grid',
+  'spreadsheet', 'record', 'records', 'dataset', 'listing'
+];
+
+// Word-level containment, not whole-string equality: these labels are captions
+// ("23 rows × 11 columns — max PSI"), not the terse names controls carry.
+function mentions(label: string | undefined, words: string[]): boolean {
+  if (!label) return false;
+  const tokens = label.toLowerCase().split(/[^a-z0-9-]+/).filter(Boolean);
+  if (tokens.length === 0) return false;
+  const set = new Set(tokens);
+  return words.some(word => set.has(word));
+}
+
+// An author who declares a role knows something inference cannot recover.
+// Unknown strings fall through to inference rather than erroring — the API
+// schema is where a typo gets rejected.
+function declaredRole(el: ServerElement): ComponentRole | undefined {
+  const raw = (el as { role?: unknown }).role;
+  if (typeof raw !== 'string') return undefined;
+  const role = raw.trim().toLowerCase() as ComponentRole;
+  return (COMPONENT_ROLES as readonly string[]).includes(role) ? role : undefined;
+}
+
+// The word budget a control's own wording gets: past this it is prose, and
+// prose belongs to content rather than to a button or a field.
+const CONTROL_LABEL_MAX_WORDS = 4;
+
+// A label short enough to be a control's prompt. No label counts as terse —
+// an unlabelled box gives the reading nothing to argue with.
+function isTerse(label: string | undefined): boolean {
+  if (!label) return true;
+  const words = label.trim().split(/\s+/).filter(word => /[a-z0-9]/i.test(word));
+  return words.length <= CONTROL_LABEL_MAX_WORDS;
+}
 
 function looksLikeAction(label: string | undefined): boolean {
   if (!label) return false;
@@ -260,6 +306,10 @@ function classify(
   const { box } = node;
   const hasChildren = node.children.length > 0;
 
+  // Declared beats inferred, always.
+  const declared = declaredRole(el);
+  if (declared) return { role: declared, inferred: false };
+
   if (el.type === 'image') return { role: 'image', inferred: false };
 
   if (el.type === 'text') {
@@ -312,6 +362,11 @@ function classify(
       : { role: 'panel', inferred: true };
   }
 
+  // Data regions, before the control check — a wide, short table would
+  // otherwise be indistinguishable from a text field on geometry alone.
+  if (mentions(label, CHART_WORDS)) return { role: 'chart', inferred: true };
+  if (mentions(label, TABLE_WORDS)) return { role: 'table', inferred: true };
+
   const squarish = box.w > 0 && box.h > 0 && Math.abs(box.w - box.h) / Math.max(box.w, box.h) < 0.25;
 
   if (el.type === 'ellipse') {
@@ -350,7 +405,12 @@ function classify(
       return { role: 'button', inferred: true };
     }
     if (twins.length > 0) return { role: 'list-item', inferred: true };
-    if (hasBorder(el)) return { role: 'input', inferred: true };
+    // Last resort: a bordered box that could be a field. A field is prompted
+    // tersely ("Email", "Run date") or not at all, so a long caption — a
+    // sentence, or a row of column headers — vetoes the reading and the box
+    // stays content. Deliberately not a width or aspect ceiling: a full-bleed
+    // search bar is legitimately wide, and would fail either test.
+    if (hasBorder(el) && isTerse(label)) return { role: 'input', inferred: true };
   }
 
   return { role: 'shape', inferred: false };

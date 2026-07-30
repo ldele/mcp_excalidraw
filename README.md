@@ -90,7 +90,8 @@ The canvas stops being a one-way output and becomes a shared design surface: the
 **Semantic wireframe reading** — `wireframe` / `describe_wireframe` reads the canvas as a user interface rather than as a list of shapes:
 
 - **Screens and nesting** — elements are nested under the smallest element containing them, so a card inside a screen comes out as a tree. Screens are named from their own heading or header bar.
-- **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`, `card`, `checkbox`, `list-item`, `divider`, `avatar`, … inferred from geometry, fill and wording. Inference is marked `?` when uncertain and every entry carries its raw type and size, so the reading can always be overridden.
+- **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`, `card`, `checkbox`, `list-item`, `divider`, `avatar`, `chart`, `table`, … inferred from geometry, fill and wording. Inference is marked `?` when uncertain and every entry carries its raw type and size, so the reading can always be overridden.
+- **Declared roles** — set `"role": "chart"` on a shape and the reader takes your word for it, unmarked. Inference reads a label that says what a thing *is* ("Revenue chart", "12 rows"), but a dashboard usually labels a plot with what it *shows* ("PSI per feature · 0.25 line") — no general word list can recover that, so declare it.
 - **Reading order** — children numbered top-to-bottom, left-to-right within a row (`3.`, `3.1.`), which is both how a person reads the screen and the order to generate markup in.
 - **Navigation flows** — arrows crossing from one screen to another become `button "Continue" [submit] → screen "Dashboard" [s2]`.
 - **Live annotations** — human markup currently on the canvas, each attached to the component it refers to.
@@ -103,6 +104,10 @@ The canvas stops being a one-way output and becomes a shared design surface: the
 - **Markup attribution**: sticky notes, circled shapes, scribbles and arrows a person adds are attributed to the element they refer to, so feedback arrives attached to its subject rather than as an orphan text element at some coordinate. Background panels are treated as structure and never absorb a nearby note.
 - **`watch` / `wait_for_changes`**: long-poll that blocks until someone edits the canvas, with a settle window so a whole round of markup returns as one batch.
 - Diffing runs over a canonical projection of each element, so Excalidraw's own renormalization (a shape's label becoming a bound text child, `seed`/`versionNonce` churn) never surfaces as a phantom human edit.
+
+**Added** — **`chart` and `table` roles, and declared roles**: dashboard content used to collapse into the generic `shape` role — 12+ plot and table placeholders across two real dashboards read as bare `shape ... rectangle 912x190`. Labels mentioning a chart or a table ("Revenue chart", "12 rows of orders") are now inferred, and `"role": "chart"` on any shape is taken verbatim for the far more common case where a plot is labelled with what it shows rather than what it is. A declared role survives a human editing the canvas.
+
+**Fixed** — **a wide table read as a text field**: any bordered, control-height box became `input?`, so a 512x56 table of column headers was reported as somewhere to type. A field is prompted tersely or not at all, so a caption longer than four words now vetoes the reading — chosen over a width or aspect-ratio ceiling, either of which would have demoted a legitimate full-bleed search bar.
 
 **Fixed** — **styleable shape labels**: `fontSize` / `fontFamily` / `textAlign` / `verticalAlign` passed alongside a shape's `text` were dropped on the way to Excalidraw, so every label rendered in the default font while the element still reported the size that was asked for. They now follow the text into the label, on create and on update, and relabelling a shape keeps the styling it already had.
 
