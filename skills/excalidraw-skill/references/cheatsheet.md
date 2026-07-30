@@ -144,6 +144,7 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 
 Notes:
 - **CLI + MCP**: Set `text` on shapes to label them (auto-converts to `label.text`). Use `startElementId`/`endElementId` on arrows.
+- **Label typography**: `fontSize` / `fontFamily` / `textAlign` / `verticalAlign` passed next to `text` follow the text into the label. To colour the label text, pass the label object explicitly — `"label": {"text": "Save", "strokeColor": "#d03b3b"}` — because a shape's own `strokeColor` paints its border, not its caption.
 - **CLI `apply.update`**: Update entries can use either direct fields (`{"id":"a","x":120}`) or a `set` object (`{"id":"a","set":{"x":120}}`). Do not mix both forms in one update entry.
 - **Raw REST**: Use `"label": {"text": "..."}` for shape labels. Use `"start": {"id": "..."}` / `"end": {"id": "..."}` for arrow binding. (Different format!)
 - `fontFamily` must be a string (e.g. `"1"`, `"helvetica"`) or omitted — do NOT pass a number.

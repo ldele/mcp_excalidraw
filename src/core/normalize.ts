@@ -1,5 +1,5 @@
 import path from 'path';
-import { generateId, ServerElement, normalizeFontFamily } from '../types.js';
+import { generateId, ServerElement, ElementLabel, LABEL_STYLE_KEYS, normalizeFontFamily } from '../types.js';
 import { ALLOWED_EXPORT_DIR } from './config.js';
 
 // Safe file path validation to prevent path traversal attacks
@@ -23,21 +23,45 @@ export function normalizePoints(points: Array<{ x: number; y: number } | [number
   });
 }
 
-// Helper function to convert text property to label format for Excalidraw
-export function convertTextToLabel(element: ServerElement): ServerElement {
-  const { text, ...rest } = element;
-  if (text) {
-    // For standalone text elements, keep text as direct property
-    if (element.type === 'text') {
-      return element; // Keep text as direct property
+// Lift the label style keys off `source` (mutating it) and return them.
+// Excalidraw reads a label's typography off the bound text child it creates,
+// never off the container, so leaving these on the shape renders the label in
+// the default font while the element still reports the size that was asked for.
+function extractLabelStyle(source: Record<string, unknown>): Partial<ElementLabel> {
+  const style: Record<string, unknown> = {};
+  for (const key of LABEL_STYLE_KEYS) {
+    if (source[key] !== undefined) {
+      style[key] = source[key];
+      delete source[key];
     }
-    // For other elements (rectangle, ellipse, diamond), convert to label format
-    return {
-      ...rest,
-      label: { text }
-    } as ServerElement;
   }
-  return element;
+  return style as Partial<ElementLabel>;
+}
+
+// Normalize a label's fontFamily name ("helvetica") to Excalidraw's numeric id.
+function normalizeLabelFont(label: ElementLabel): ElementLabel {
+  if (label.fontFamily === undefined) return label;
+  return { ...label, fontFamily: normalizeFontFamily(label.fontFamily) };
+}
+
+// Convert the agent-friendly `text` shorthand on a shape into Excalidraw's
+// `label` format, carrying any label typography passed alongside it. An
+// explicit `label` object wins over the shorthand, key by key.
+export function convertTextToLabel(element: ServerElement): ServerElement {
+  // Standalone text elements own their text and typography directly.
+  if (element.type === 'text') return element;
+
+  const { text, label: explicitLabel, ...rest } = element;
+  if (!text && !explicitLabel) return element;
+
+  const style = extractLabelStyle(rest as Record<string, unknown>);
+  const labelText = explicitLabel?.text ?? text;
+  if (labelText === undefined) return element;
+
+  return {
+    ...rest,
+    label: normalizeLabelFont({ ...style, ...explicitLabel, text: labelText })
+  } as ServerElement;
 }
 
 export interface ElementInput {
@@ -86,14 +110,16 @@ export function prepareElement(elementData: ElementInput): ServerElement {
 // Shared update-payload preparation (points, fontFamily, text→label,
 // updatedAt) — used by the MCP update_element tool and the CLI.
 //
-// `knownType` is the element's actual type as fetched from the canvas.
-// Update payloads usually don't carry `type`, and text→label conversion must
-// only happen for non-text elements — converting a standalone text element's
-// `text` into `label` silently fails to change the visible text.
+// `existing` is the element as it currently stands on the canvas. Update
+// payloads usually don't carry `type`, and text→label conversion must only
+// happen for non-text elements — converting a standalone text element's `text`
+// into `label` silently fails to change the visible text. The existing label
+// also matters because the server merges an update shallowly: writing
+// `label: {text}` alone would drop the styling the label already had.
 export function prepareElementUpdate(
   id: string,
   updates: Record<string, unknown>,
-  knownType?: string
+  existing?: Pick<ServerElement, 'type' | 'label'>
 ): Partial<ServerElement> & { id: string } {
   const { points: rawPoints, ...rest } = updates as {
     points?: Array<{ x: number; y: number } | [number, number]>;
@@ -111,14 +137,24 @@ export function prepareElementUpdate(
     updatePayload.fontFamily = normalizeFontFamily(updatePayload.fontFamily);
   }
 
-  // Convert text→label only when the element is known to be a non-text
-  // shape. Unknown type keeps `text` as-is (the safe direction for text
-  // elements; when the canvas is up, callers always know the type).
-  const effectiveType = (updates.type as string | undefined) ?? knownType;
-  if (updatePayload.text !== undefined && effectiveType && effectiveType !== 'text') {
-    const { text, ...withoutText } = updatePayload;
-    return { ...withoutText, label: { text } } as Partial<ServerElement> & { id: string };
-  }
+  // Restyle/relabel a shape's label only when the element is known to be a
+  // non-text shape. Unknown type keeps `text` and the typography as-is (the
+  // safe direction for text elements, which own both directly; when the canvas
+  // is up, callers always know the type).
+  const effectiveType = (updates.type as string | undefined) ?? existing?.type;
+  if (!effectiveType || effectiveType === 'text') return updatePayload;
 
-  return updatePayload;
+  const { text, label: explicitLabel, ...withoutText } = updatePayload;
+  const style = extractLabelStyle(withoutText as Record<string, unknown>);
+  const labelText = explicitLabel?.text ?? text ?? existing?.label?.text;
+
+  // Nothing to attach the styling to — a bare shape with no label. Leave the
+  // payload untouched rather than dropping the caller's keys.
+  const restyling = Object.keys(style).length > 0 || explicitLabel !== undefined;
+  if (labelText === undefined || (text === undefined && !restyling)) return updatePayload;
+
+  return {
+    ...withoutText,
+    label: normalizeLabelFont({ ...existing?.label, ...style, ...explicitLabel, text: labelText })
+  } as Partial<ServerElement> & { id: string };
 }

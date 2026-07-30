@@ -253,6 +253,18 @@ wss.on('connection', (ws: WebSocket) => {
 });
 
 // Schema validation
+// A shape's label and the typography Excalidraw applies to the bound text
+// child it creates for it. The style keys have to be declared here or zod
+// strips them, which would leave every label rendering in the default font.
+const LabelSchema = z.object({
+  text: z.string(),
+  fontSize: z.number().optional(),
+  fontFamily: z.union([z.string(), z.number()]).optional(),
+  textAlign: z.string().optional(),
+  verticalAlign: z.string().optional(),
+  strokeColor: z.string().optional()
+});
+
 const CreateElementSchema = z.object({
   id: z.string().optional(), // Allow passing ID for MCP sync
   type: z.enum(Object.values(EXCALIDRAW_ELEMENT_TYPES) as [ExcalidrawElementType, ...ExcalidrawElementType[]]),
@@ -267,9 +279,7 @@ const CreateElementSchema = z.object({
   roughness: z.number().optional(),
   opacity: z.number().optional(),
   text: z.string().optional(),
-  label: z.object({
-    text: z.string()
-  }).optional(),
+  label: LabelSchema.optional(),
   fontSize: z.number().optional(),
   fontFamily: z.union([z.string(), z.number()]).optional(),
   groupIds: z.array(z.string()).optional(),
@@ -323,9 +333,7 @@ const UpdateElementSchema = z.object({
   opacity: z.number().optional(),
   text: z.string().optional(),
   originalText: z.string().optional(),
-  label: z.object({
-    text: z.string()
-  }).optional(),
+  label: LabelSchema.optional(),
   fontSize: z.number().optional(),
   fontFamily: z.union([z.string(), z.number()]).optional(),
   groupIds: z.array(z.string()).optional(),

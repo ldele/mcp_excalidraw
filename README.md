@@ -104,6 +104,8 @@ The canvas stops being a one-way output and becomes a shared design surface: the
 - **`watch` / `wait_for_changes`**: long-poll that blocks until someone edits the canvas, with a settle window so a whole round of markup returns as one batch.
 - Diffing runs over a canonical projection of each element, so Excalidraw's own renormalization (a shape's label becoming a bound text child, `seed`/`versionNonce` churn) never surfaces as a phantom human edit.
 
+**Fixed** — **styleable shape labels**: `fontSize` / `fontFamily` / `textAlign` / `verticalAlign` passed alongside a shape's `text` were dropped on the way to Excalidraw, so every label rendered in the default font while the element still reported the size that was asked for. They now follow the text into the label, on create and on update, and relabelling a shape keeps the styling it already had.
+
 ### v1.1 — CLI-First
 
 - **First-class CLI**: every capability is now a composable command — `npx -y mcp-excalidraw-server add|query|describe|screenshot|export|import|mermaid|snapshot|arrange|share|...` — JSON on stdout, meaningful exit codes. Also installed as the `excalidraw-canvas` alias.
@@ -228,7 +230,7 @@ Conventions: JSON results on stdout — except `describe` (plain text by design)
 | `clear --yes` | Wipe the canvas |
 | `install-skill [--dir <skills-root>]` | Install the portable agent skill |
 
-Labels and arrow bindings use the agent-friendly format everywhere in the CLI: `"text"` on any shape, `"startElementId"`/`"endElementId"` on arrows — normalization is automatic.
+Labels and arrow bindings use the agent-friendly format everywhere in the CLI: `"text"` on any shape, `"startElementId"`/`"endElementId"` on arrows — normalization is automatic. Label typography (`fontSize`, `fontFamily`, `textAlign`, `verticalAlign`) passed next to `text` follows the text into the label; for label colour pass the label explicitly (`"label": {"text": "Save", "strokeColor": "#d03b3b"}`), since a shape's own `strokeColor` paints its border.
 
 ## Configure MCP Clients
 

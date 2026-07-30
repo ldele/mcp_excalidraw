@@ -796,10 +796,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
 
         if (!id) throw new Error('Element ID is required');
 
-        // Fetch the element's actual type so text→label conversion only
-        // applies to non-text shapes (update payloads rarely carry `type`)
+        // Fetch the element as it stands so text→label conversion only applies
+        // to non-text shapes (update payloads rarely carry `type`) and a
+        // restyle merges into the label it already has
         const existing = await getElementFromCanvas(id);
-        const excalidrawElement = prepareElementUpdate(id, updates, existing?.type);
+        const excalidrawElement = prepareElementUpdate(id, updates, existing ?? undefined);
 
         // Update element directly on HTTP server (no local storage)
         const canvasElement = await updateElementOnCanvas(excalidrawElement);

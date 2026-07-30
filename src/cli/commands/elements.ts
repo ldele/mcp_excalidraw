@@ -53,14 +53,14 @@ export async function apply(argv: string[]): Promise<void> {
 
   const updated: ServerElement[] = [];
   if (patch.update?.length) {
-    const typeById = new Map((await getElements()).map(element => [element.id, element.type]));
+    const byId = new Map((await getElements()).map(element => [element.id, element]));
     for (const update of patch.update) {
       const { id, updates } = normalizePatchUpdate(update);
-      const existingType = typeById.get(id);
-      if (!existingType) throw new Error(`Element ${id} not found`);
+      const existing = byId.get(id);
+      if (!existing) throw new Error(`Element ${id} not found`);
 
-      const element = await updateElementStrict(prepareElementUpdate(id, updates, existingType));
-      typeById.set(id, element.type);
+      const element = await updateElementStrict(prepareElementUpdate(id, updates, existing));
+      byId.set(id, element);
       updated.push(element);
     }
   }
@@ -119,9 +119,10 @@ export async function update(argv: string[]): Promise<void> {
   }
 
   await ensureCanvasRunning();
-  // Fetch the real type so text→label conversion skips text elements
+  // Fetch the real element so text→label conversion skips text elements and
+  // a restyle keeps the label it already has
   const existing = await getElementStrict(id);
-  const element = await updateElementStrict(prepareElementUpdate(id, updates, existing.type));
+  const element = await updateElementStrict(prepareElementUpdate(id, updates, existing));
   printJson({ success: true, element });
 }
 

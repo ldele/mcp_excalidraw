@@ -124,6 +124,25 @@ export const EXCALIDRAW_ELEMENT_TYPES: Record<string, ExcalidrawElementType> = {
 // editing in the browser canvas (arrives via POST /api/elements/sync).
 export type ChangeOrigin = 'agent' | 'human';
 
+// A shape's label — the text plus the typography Excalidraw applies to the
+// bound text child it creates for it. Style keys belong here rather than on
+// the container: a rectangle has no font of its own, so `fontSize` left on the
+// container is silently ignored at render time.
+export interface ElementLabel {
+  text: string;
+  fontSize?: number;
+  fontFamily?: string | number;
+  textAlign?: string;
+  verticalAlign?: string;
+  // Label text colour. Deliberately separate from the container's
+  // `strokeColor`, which paints the shape's border.
+  strokeColor?: string;
+}
+
+// Keys that style a label rather than its container. `text`→`label` conversion
+// moves these off the shape so they reach the bound text child.
+export const LABEL_STYLE_KEYS = ['fontSize', 'fontFamily', 'textAlign', 'verticalAlign'] as const;
+
 // Server-side element with metadata
 export interface ServerElement extends Omit<ExcalidrawElementBase, 'id'> {
   id: string;
@@ -142,9 +161,7 @@ export interface ServerElement extends Omit<ExcalidrawElementBase, 'id'> {
   originalText?: string;
   fontSize?: number;
   fontFamily?: string | number;
-  label?: {
-    text: string;
-  };
+  label?: ElementLabel;
   points?: any;
   // Arrow element binding: connect arrows to shapes by element ID
   start?: { id: string };
