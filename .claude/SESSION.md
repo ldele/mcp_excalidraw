@@ -4,6 +4,13 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-07-31 (close) — Claude Code — Lucas + agent
+- **Correction:** the entry below says the cpc adoption was staged and uncommitted. Lucas reviewed
+  and committed it. Working tree is clean and `main` is level with `origin/main`.
+- **Next is unchanged:** `docs/ROADMAP.md` PR 1, the two-way markup round with a human (also KI-3).
+- **Picks up:** any agent, with a terminal and a browser tab on the canvas URL. `npm link` first —
+  `excalidraw-canvas` is still not on PATH here.
+
 ## 2026-07-31 — Claude Code — Lucas + agent
 - **Done:** adopted the cpc standard (`cpc-init --profile standard`) and filled `AGENTS.md`,
   `.claude/CONTEXT.md`, `docs/ROADMAP.md`, `.claude/KNOWN_ISSUES.md`. Cut the 8 branches inherited
