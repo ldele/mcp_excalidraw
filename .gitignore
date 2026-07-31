@@ -13,13 +13,18 @@ public/dist/
 
 # Editor artifacts
 .cursor/
-.claude/
 .agent/
+
+# The synced copy of skills/excalidraw-skill. Source of truth is skills/;
+# `npm run sync:skills` replaces this wholesale, so it is never committed.
 .agents/
 
-# Development artifacts
+# Scratch drawings. Note: the fixture corpus in docs/ROADMAP.md PR 2 will need
+# committed .excalidraw files, so that PR must carve out an exception here.
 *.excalidraw
 
 .DS_Store
 
-docs/
+# .claude/ and docs/ are COMMITTED: they carry the handoff baton, the canonical
+# context and the roadmap, which exist precisely so another session can read
+# them. Machine-local files are ignored by .claude/.gitignore instead.
