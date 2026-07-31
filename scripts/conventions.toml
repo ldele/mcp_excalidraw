@@ -1,0 +1,106 @@
+# Config for docs_check.py and sprint_check.py. Tune per project; do not silently raise to pass.
+# Laid by cpc-init (standard profile) into the consumer's scripts/conventions.toml.
+
+[cpc]
+# The init profile this project was laid at (read by cpc-init-check, the completeness gate).
+# This file is laid ONLY by the standard profile, so it declares "standard"; a prototype has no
+# conventions.toml and the gate resolves "prototype" by its absence. Single source of truth (§5).
+profile = "standard"
+
+[budgets]
+entry_max_lines        = 600   # docs_check: root entry file (AGENTS.md, else CLAUDE.md) + .claude/CONTEXT.md
+# module_claude_max_lines: raising this is legitimate when the content is real (module contracts,
+# gotchas) — set the number you need HERE with a one-line reason, never wave the gate through
+# (ADR-024; default was 40 until the fleet kept outgrowing it).
+module_claude_max_lines = 80   # docs_check: each <module>/CLAUDE.md
+uses_max_files         = 12    # sprint_check: resolved `uses` read-set files (globs expanded)
+uses_max_lines         = 2500  # sprint_check: summed line count of resolved `uses` files
+session_max_entries    = 10    # docs_check rule 11b (ADR-018): rotate .claude/SESSION.md past 10 entries
+devlog_max_entries     = 20    # docs_check rule 13b (ADR-023): rotate docs/DEVLOG.md past 20 entries
+# Token ceilings alongside the line budgets (cpc.tokens, chars/4 heuristic, ~+/-15% vs a real
+# tokenizer). 0 = disabled (lines-only, unchanged). Calibrate across real sprints before enabling.
+entry_max_tokens       = 0     # docs_check: e.g. 8000 once calibrated
+uses_max_tokens        = 0     # sprint_check: e.g. 30000 once calibrated
+
+[uses]
+# sprint_check: `uses` ⊇ `affects` coherence (you must read what you change).
+# "warn" (default; new files not yet on disk are exempt) or "error" to enforce hard.
+superset_affects = "warn"
+
+[staleness]
+disposable_days = 90           # PLAN_/REVIEW_ still 'active' older than this -> flagged
+# living_bump (docs_check rule 12, ADR-018): "warn" (default on) flags a class:living doc whose last
+# git commit is newer than its `updated:` header — i.e. edited without bumping the date. "off" opts
+# out. Silent outside git / for uncommitted files / on header-exempt paths (docs/specs/**).
+living_bump = "warn"
+# resolved_ki_days (docs_check rule 14, ADR-023): a KNOWN_ISSUES entry marked RESOLVED older than
+# this -> summarize it into the file's `## Resolved index` (one line + archive link) and move the
+# full entry to docs/archive/KNOWN_ISSUES-archive-NNN.md. 0 = off.
+resolved_ki_days = 30
+
+[headers]
+# globs (relative to root) exempt from the status-header requirement
+exempt = ["docs/specs/**", "**/*.json"]
+
+[routes]
+# extensions treated as route targets when found inside `backticks`
+extensions = [".md"]
+# Reference validator (SPEC-reference-validator):
+check_md_links = true     # rule 4b: markdown [text](target) links in CLAUDE.md/.claude must resolve
+# rule 4c: flag a bare `ADR-NNN` prose citation with no docs/decisions/ADR-NNN-*.md (WARN; ERROR
+# under --strict). Opt-in: turn on for a self-contained project; leave off if you cite another
+# repo's ADRs (they would false-positive as "not found").
+check_adr_refs = false
+
+[entry]
+# Stub-stays-stub (ADR-014, docs_check rule 9). cpc-init lays AGENTS.md as the canonical entry file
+# and CLAUDE.md as a one-line `@AGENTS.md` import stub. Turn this ON to lock that split — docs_check
+# then FAILS if CLAUDE.md grows any content beyond the import. OFF by default (silent), matching how
+# every not-universal gate ships: a project that prefers a content-ful CLAUDE.md is unaffected.
+enforce_stub = false
+
+[plan]
+# Prior-art gate (docs_check rule 10, ADR-016). ON = require the iterative-planning PLAN.md to
+# carry a non-empty `## Prior art` block (atlas / internal-reuse / external checks); docs_check
+# then FAILS a PLAN.md that omits or empties it. OFF by default (silent), and always silent when
+# the project has no docs/PLAN.md. Turn on for a project that plans via iterative-planning.
+require_prior_art = false
+
+[sprint]
+# Spec-ledger gate (docs_check rule 15, ADR-027). ON = a STARTED active sprint contract must name
+# its docs/specs/SPEC-*.md executor brief(s), each carrying a fully resolved-or-parked
+# `## Open questions` ledger (the scoped grill — grill-me at keypoint sprint-start — fills it;
+# the CONTEXT.md familiarity map decides ask-vs-research per question). Shipped ON, unlike the
+# other opt-in gates: it is vacuous-safe by construction — it only fires on a contract that was
+# explicitly started (ADR-019 stamp), so a repo that never runs sprints is silently unaffected.
+require_spec_ledger = true
+
+[generate]
+# Derived-artifact regen runner (cpc-generate, ADR-013). Each artifact registers two shell
+# verbs: `check` MUST exit non-zero when the committed artifact is stale; `write` regenerates
+# it in place. Run on-call at session end: `cpc-generate --write` then review the diff. The
+# pre-push net (cpc-sprint-check) calls `cpc-generate --check`. No artifacts below -> no-op.
+#
+# `check` must be CHEAP (fingerprint-compare, not a full rebuild — it runs on every push) and
+# HONEST (non-zero iff stale). Commands run with shell=False: one program + args, no pipes
+# (wrap a pipeline in your own script and register that). Uncomment and point at your generators:
+#
+# [[generate.artifact]]
+# name  = "skill-graph"
+# write = "python skill_graph.py"
+# check = "python skill_graph.py --check README.md"
+#
+# [[generate.artifact]]
+# name  = "ast-context"
+# write = "python -m project_mapper --write"
+# check = "python -m project_mapper --check"
+
+[keypoints]
+# Keypoint runner (cpc-keypoint, ADR-020 / CONVENTIONS S15): deterministic floor + skill-or-inline
+# judgment checklist at session-start / sprint-start / sprint-close / session-close. Built-ins run
+# the existing gates; register per-project extras here (both keys optional; `run` follows the
+# [generate] contract -- shlex, shell=False, one program + args, no pipes):
+#
+# [keypoints.sprint-close]
+# run       = ["python -m pytest -q"]
+# checklist = ["Update the metrics dashboard screenshot"]

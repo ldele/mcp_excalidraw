@@ -1,0 +1,4 @@
+# Commit coordination state (SESSION/CONTEXT/KNOWN_ISSUES); ignore machine-local files only.
+*.local.json
+settings.local.json
+launch.json
