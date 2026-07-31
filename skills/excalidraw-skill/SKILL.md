@@ -217,6 +217,34 @@ add elements
   → proceed
 ```
 
+## Workflow: Drawing a UI Wireframe
+
+A UI wireframe is not a diagram with boxes — it is drawn against a different set of
+rules, because it will be *read back* as an interface (by `wireframe`, below) and
+turned into code. Follow **`references/wireframe-conventions.md`**: the layout grid,
+the neutral-vs-accent palette split, per-component geometry recipes, when to declare
+a `role`, and the pre-flight checklist.
+
+The three rules that matter most, if you read nothing else:
+
+1. **One screen = one rectangle, and everything is fully inside it.** Containment is
+   how nesting is computed. No label on the frame — use a free-standing heading.
+2. **Declare `role` on every chart, table, map and image placeholder.** Inference
+   cannot recognise a plot labelled with what it *shows* ("PSI per feature · 0.25
+   line"), and `shape` is what the next agent will build from.
+3. **Structure is neutral, interactive is coloured.** Role inference keys off fill
+   saturation, so a coloured card becomes a `button` and a white button becomes an
+   `input`.
+
+**Done means the round-trip closes**, not that the screenshot looks right:
+
+```
+draw → screenshot (looks right to a human?) → wireframe (reads right to an agent?) → fix → repeat
+```
+
+Those are different bars and the reading is the one that matters, because the reading
+is what gets generated from. Run both.
+
 ## Workflow: Reading a UI Wireframe
 
 `describe` gives you a flat list of shapes at coordinates. For a **user interface**
@@ -409,3 +437,4 @@ Round-trips are safe: text-element block references follow the plugin's own id r
 ## References
 
 - `references/cheatsheet.md`: full CLI reference, the 29 MCP tools, REST API endpoints + payload shapes, and the diagram design guide (colors, sizing).
+- `references/wireframe-conventions.md`: how to **draw** a UI wireframe — layout grid and column widths, the structure/interactive palette split, typography scale, component geometry recipes, role declaration, flow arrows, annotation gestures, and the pre-flight checklist. Read it before drawing any UI.

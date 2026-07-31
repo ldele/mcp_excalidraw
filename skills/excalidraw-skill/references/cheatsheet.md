@@ -216,3 +216,5 @@ Styling: `"fillStyle": "solid"` for crisp flat fills (default is sketchy hachure
 Sizing: shapes ≥ 120×60 with width ≥ `labelChars * 12`, fonts ≥ 16 (titles ≥ 20), gaps 40–80px (120px+ for labeled arrows), align to a 20px grid.
 Order of work: background zones → primary shapes (with `text`) → arrows (bound via ids) → annotations → refine (align/distribute/screenshot).
 MCP mode has the full guide behind the `read_diagram_guide` tool.
+
+**Drawing a UI wireframe instead of a diagram?** Different rules — see `wireframe-conventions.md`. In short: frame at (120,120) 1160 wide, 32 inset, 1096 content, 16 gutter (so columns are 1096/540/354/262); structure neutral (`#14130f` ink, `#d7d5cc` border, `#ffffff` surface, `#fbfaf8` band) and interactive coloured (`#74c0fc`/`#1971c2` selected, `#dbeafe`/`#4dabf7` unselected); `"fillStyle": "solid"` always; declare `"role"` on every chart/table/image placeholder; verify with `wireframe`, not just `screenshot`.
