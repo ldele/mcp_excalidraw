@@ -1,11 +1,11 @@
 {
-  "name": "mcp-excalidraw-server",
-  "version": "1.1.0",
-  "description": "Excalidraw toolkit for AI coding agents — agent skill, CLI, and MCP server with a live canvas",
+  "name": "@ldele/mcp-excalidraw-server",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Private fork of yctimlin/mcp_excalidraw: adds semantic wireframe reading and a two-way canvas review loop. See FORK.md.",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "mcp-excalidraw-server": "dist/bin.js",
     "excalidraw-canvas": "dist/bin.js"
   },
   "scripts": {
@@ -19,7 +19,6 @@
     "dev": "concurrently \"npm run dev:server\" \"vite\"",
     "dev:server": "npx tsc --watch",
     "production": "npm run build && npm run canvas",
-    "prepublishOnly": "npm run build",
     "sync:skills": "node scripts/sync-skills.mjs",
     "test:bind": "npm run build:server && node scripts/check-local-bind.mjs",
     "type-check": "npx tsc --noEmit"

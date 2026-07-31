@@ -1,6 +1,6 @@
 ---
 name: excalidraw-skill
-description: Excalidraw canvas toolkit for creating, editing, and refining diagrams and wireframes on a live canvas shared with a human. Use when an agent needs to (1) draw or lay out diagrams and UI wireframes, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) collect design feedback by reading what a person changed or annotated on the canvas, (4) export/import .excalidraw files or PNG/SVG images, (5) save/restore canvas snapshots, (6) convert Mermaid to Excalidraw, or (7) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y mcp-excalidraw-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
+description: Excalidraw canvas toolkit for creating, editing, and refining diagrams and wireframes on a live canvas shared with a human. Use when an agent needs to (1) draw or lay out diagrams and UI wireframes, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) collect design feedback by reading what a person changed or annotated on the canvas, (4) export/import .excalidraw files or PNG/SVG images, (5) save/restore canvas snapshots, (6) convert Mermaid to Excalidraw, or (7) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (excalidraw-canvas <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
 ---
 
 # Excalidraw Skill
@@ -12,9 +12,16 @@ Three interfaces drive the same live canvas. Pick the first one that applies:
 1. **MCP tools** — if `excalidraw/*` tools (e.g. `batch_create_elements`) are in your tool list, prefer them: results land directly in your context, and screenshots come back as images without touching disk.
 2. **CLI** (default when no MCP tools are present):
    ```bash
-   npx -y mcp-excalidraw-server <command>
+   excalidraw-canvas <command>
    ```
-   No setup needed — any canvas-touching command **auto-starts the canvas server** on `http://127.0.0.1:3000` (first `npx` run downloads the package). If the CLI is installed globally (`npm i -g mcp-excalidraw-server`), the shorter alias `excalidraw-canvas <command>` works too.
+   Any canvas-touching command **auto-starts the canvas server** on `http://127.0.0.1:3000`.
+
+   > **Do not use `npx mcp-excalidraw-server`.** That name on npm belongs to the
+   > upstream project this is forked from, and upstream has no `wireframe` or
+   > `changes` command — so `npx` silently fetches a build without the features
+   > this skill documents. This fork is private and unpublished. Make
+   > `excalidraw-canvas` available with `npm link` from the repo (or call
+   > `node <repo>/dist/bin.js` directly).
 3. **REST API** (last resort, e.g. from application code): HTTP endpoints on `http://127.0.0.1:3000` — see `references/cheatsheet.md` for payloads. The server must already be running.
 
 The canvas URL comes from `EXPRESS_SERVER_URL` (default `http://127.0.0.1:3000`). Remind the user to open that URL in a browser — screenshots, image export, mermaid conversion, and viewport control need an open tab (CLI exits with code 4 when it's missing).
@@ -147,10 +154,10 @@ If you find any issue: **stop, fix it, re-screenshot, then continue.** Say "I se
 ### Steps (CLI shown; MCP tools are 1:1 — see cheatsheet)
 
 1. Plan your coordinate grid — map out tiers and x-positions before writing JSON. (MCP mode: call `read_diagram_guide` for colors/sizing; the same guidance lives in `references/cheatsheet.md`.)
-2. Optional fresh start: `npx -y mcp-excalidraw-server clear --yes`
+2. Optional fresh start: `excalidraw-canvas clear --yes`
 3. Create shapes and arrows in one call. Custom `id` fields (e.g. `"id": "auth-svc"`) make later updates easy:
    ```bash
-   npx -y mcp-excalidraw-server add - <<'EOF'
+   excalidraw-canvas add - <<'EOF'
    [
      {"id": "lb", "type": "rectangle", "x": 300, "y": 50, "width": 180, "height": 60, "text": "Load Balancer"},
      {"id": "svc-a", "type": "rectangle", "x": 100, "y": 200, "width": 160, "height": 60, "text": "Web Server 1"},
@@ -388,7 +395,7 @@ before assuming the user is idle.
 ```bash
 echo 'graph TD
   A[Client] --> B[API]
-  B --> C[(DB)]' | npx -y mcp-excalidraw-server mermaid
+  B --> C[(DB)]' | excalidraw-canvas mermaid
 ```
 Requires an open browser tab (conversion runs in the frontend; exit code 4 tells you to open the canvas URL). Afterwards `screenshot` to verify layout. If the auto-layout is poor (nodes crowded, edges crossing), find problem elements with `describe` and reposition them with `update`.
 
@@ -406,8 +413,8 @@ This is how diagrams live in a repo: commit the `.excalidraw` file, and re-`impo
 Check the destination before writing: if any ancestor directory contains `.obsidian/`, it is an Obsidian vault. A raw `.excalidraw` file there opens in the Excalidraw plugin only in **compatibility mode** ("Convert to new format" warning), gets no block references or vault-wide search, and default Obsidian Sync skips non-`.md` files. Give the export a `.excalidraw.md` extension and the CLI writes the plugin's native format automatically:
 
 ```bash
-npx -y mcp-excalidraw-server export --out "$VAULT/diagrams/system-map.excalidraw.md"   # .md → Obsidian format (or force with --format obsidian)
-npx -y mcp-excalidraw-server import "$VAULT/diagrams/system-map.excalidraw.md" --replace  # reads both plain and compressed Drawing blocks
+excalidraw-canvas export --out "$VAULT/diagrams/system-map.excalidraw.md"   # .md → Obsidian format (or force with --format obsidian)
+excalidraw-canvas import "$VAULT/diagrams/system-map.excalidraw.md" --replace  # reads both plain and compressed Drawing blocks
 ```
 
 Round-trips are safe: text-element block references follow the plugin's own id rules, so re-importing, editing, and re-exporting the same file keeps links from other notes intact.
