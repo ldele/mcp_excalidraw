@@ -797,3 +797,48 @@ export function formatWireframe(model: WireframeModel): string {
 
   return lines.join('\n');
 }
+
+// ─── Score ─────────────────────────────────────────────────────
+//
+// The pre-flight checklist in references/wireframe-conventions.md, counted.
+// "It looked right" has already proved too weak a bar once, so the reading
+// carries numbers a drawing can be held to: a wireframe that reads cleanly
+// scores zero on everything except `screens` and `components`.
+//
+// The fixture corpus asserts on this rather than counting roles itself, so the
+// tests and the tool can never disagree about what a fallback is.
+
+export interface WireframeScore {
+  screens: number;
+  components: number;
+  // Components that came back as `shape` — the fallback role, meaning the
+  // reading gave up and the next agent is left guessing.
+  fallbacks: number;
+  // Components whose role is a soft guess (the trailing `?` in the report).
+  inferred: number;
+  // Screens no heading could name.
+  unnamedScreens: number;
+  // Top-level components that fell outside every screen frame.
+  orphans: number;
+}
+
+export function scoreWireframe(model: WireframeModel): WireframeScore {
+  let fallbacks = 0;
+  let inferred = 0;
+
+  const visit = (node: WireframeNode): void => {
+    if (node.role === 'shape') fallbacks++;
+    if (node.inferred) inferred++;
+    node.children.forEach(visit);
+  };
+  model.roots.forEach(visit);
+
+  return {
+    screens: model.screens.length,
+    components: model.componentCount,
+    fallbacks,
+    inferred,
+    unnamedScreens: model.screens.filter(screen => !screen.label).length,
+    orphans: model.roots.filter(node => node.role !== 'screen').length
+  };
+}

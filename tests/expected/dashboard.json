@@ -1,0 +1,22 @@
+{
+  "fixture": "dashboard.excalidraw",
+  "what": "The worked skeleton from references/wireframe-conventions.md §10, drawn correct-by-conventions: header and footer bands spanning the frame, a segmented control with one primary tab, two KPI tiles, and two chart cards holding declared chart and table placeholders.",
+  "why": "The clean baseline. Every role here is either structural or declared, so this fixture must score zero on both fallbacks and inferred — if it ever does not, inference has regressed on a drawing that follows the conventions exactly.",
+  "score": {
+    "screens": 1,
+    "components": 21,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s1", "label": "MLflow drift loop" }
+  ],
+  "navigation": [],
+  "markup": [],
+  "notes": [
+    "The screen carries no label of its own; the name is derived from the 26px heading inside the header band.",
+    "The KPI values (\"23\", \"0.31\") read as headings because they are 26px. That is the typography rule working, not a misread — see conventions §3."
+  ]
+}

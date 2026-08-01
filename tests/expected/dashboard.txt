@@ -1,0 +1,26 @@
+## Wireframe reading
+1 screen, 21 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "MLflow drift loop"  [s1] rectangle 1160x1000
+  1. header  [hdr] rectangle 1158x176 · fill #fbfaf8
+    1.1. heading "MLflow drift loop"  [title] text 400x34 · 26px
+    1.2. text "A monitoring loop that catches a model going st…"  [lede] text 640x40 · 13px
+  2. button "Krakow air quality"  [tab-1] rectangle 214x44 · fill #74c0fc
+  3. button "Live schedule"  [tab-2] rectangle 170x44 · fill #dbeafe
+  4. card  [kpi-1] rectangle 262x96 · fill #ffffff
+    4.1. heading "23"  [kpi-1-v] text 100x34 · 26px
+    4.2. text "Monitoring runs"  [kpi-1-k] text 200x18 · 12px
+  5. card  [kpi-2] rectangle 262x96 · fill #ffffff
+    5.1. heading "0.31"  [kpi-2-v] text 100x34 · 26px
+    5.2. text "Worst feature PSI"  [kpi-2-k] text 200x18 · 12px
+  6. card  [card-1] rectangle 540x336 · fill #ffffff
+    6.1. heading "Data drift"  [card-1-h] text 300x26 · 20px
+    6.2. text "Each feature's recent distribution vs. the cham…"  [card-1-d] text 480x34 · 12px
+    6.3. chart "PSI per feature · 0.25 line · drift region"  [plot-1] rectangle 504x200
+  7. card  [card-2] rectangle 540x336 · fill #ffffff
+    7.1. heading "Champion vs challenger"  [card-2-h] text 300x26 · 20px
+    7.2. text "Holdout error for the deployed model against th…"  [card-2-d] text 480x34 · 12px
+    7.3. table "23 rows × 5 cols — as-of, max PSI, worst featur…"  [tbl-1] rectangle 504x200
+  8. footer  [ftr] rectangle 1158x120 · fill #fbfaf8

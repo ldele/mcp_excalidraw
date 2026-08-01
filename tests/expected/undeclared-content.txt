@@ -1,0 +1,10 @@
+## Wireframe reading
+1 screen, 5 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1  [s1] rectangle 1160x700
+  1. shape "PSI per feature · 0.25 line · drift region"  [plot] rectangle 504x200
+  2. shape "Run date Max PSI Worst feature Champion RMSE"  [grid] rectangle 512x56 · fill #ffffff
+  3. shape  [ghost] rectangle 300x180
+  4. input? "Export CSV"  [secondary] rectangle 200x48 · fill #ffffff

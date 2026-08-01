@@ -1,0 +1,23 @@
+{
+  "fixture": "list-detail.excalidraw",
+  "what": "An orders list: a sidebar pinned corner to corner holding an avatar and two nav buttons, a heading, a 2px divider, four identical stacked rows, and a declared table placeholder.",
+  "why": "Guards the structural rules that depend on measurement rather than on style — the sidebar span rule, the divider thinness trigger, and the list-item set rule that needs three or more identical stacked boxes before any of them reads as a row.",
+  "score": {
+    "screens": 1,
+    "components": 13,
+    "fallbacks": 0,
+    "inferred": 5,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s1", "label": "Orders" }
+  ],
+  "navigation": [],
+  "markup": [],
+  "notes": [
+    "The 5 inferred are the avatar (a small filled circle) and the four rows. list-item? is the expected reading: the set is recognised, but membership of a set is a guess rather than a structural certainty.",
+    "If a change ever makes the four rows read as `card` or `shape`, the set rule has broken — that is the regression this fixture exists to catch.",
+    "The sidebar is 798px tall inside an 800px frame. Shortening it materially should make it read as a card; that is the span rule, and it is deliberate."
+  ]
+}

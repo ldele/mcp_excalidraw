@@ -51,6 +51,37 @@ jobs:
             dist/
           retention-days: 7
 
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # The corpus suite only runs on 22.x and up: `node --test` takes a glob
+        # from Node 21, and directory discovery no longer works on current Node.
+        # The package itself still supports Node >= 18 — that is what the
+        # build-and-test matrix above covers.
+        node-version: [22.x, 24.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wireframe fixture corpus
+        run: npm run test:corpus
+
+      - name: Local-bind guard
+        run: npm run test:bind
+
   lint-check:
     name: Lint Check
     runs-on: ubuntu-latest

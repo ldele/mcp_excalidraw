@@ -1,0 +1,18 @@
+## Wireframe reading
+1 screen, 13 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "Orders"  [s1] rectangle 1160x800
+  1. sidebar  [side] rectangle 240x798 · fill #fbfaf8
+    1.1. avatar?  [av] ellipse 40x40 · fill #d7d5cc
+    1.2. text "Lucas D."  [who] text 140x18 · 13px
+    1.3. button "Orders"  [nav-1] rectangle 192x40 · fill #74c0fc
+    1.4. button "Customers"  [nav-2] rectangle 192x40 · fill #dbeafe
+  2. heading "Orders"  [title] text 400x34 · 26px
+  3. divider  [rule] rectangle 856x2 · fill #d7d5cc
+  4. list-item? "#1043 — Nov 12 — shipped"  [row-1] rectangle 856x72 · fill #ffffff
+  5. list-item? "#1044 — Nov 12 — packing"  [row-2] rectangle 856x72 · fill #ffffff
+  6. list-item? "#1045 — Nov 13 — awaiting payment"  [row-3] rectangle 856x72 · fill #ffffff
+  7. list-item? "#1046 — Nov 13 — shipped"  [row-4] rectangle 856x72 · fill #ffffff
+  8. table "4 rows × 4 cols — order, date, status, total"  [summary] rectangle 856x240

@@ -9,9 +9,11 @@ server on `http://127.0.0.1:3000`. Package manager: npm.
 interface*, and share with a human who marks it up. The differentiator over upstream is the
 wireframe layer: a drawing is finished when `wireframe` reads it back as what you meant, not when
 the screenshot looks right.
-**Current phase (2026-07-31):** the fork now stands on its own — renamed, private, `FORK.md`
-published, inherited branches cut. Wireframe reading and the review loop both work; the two-way
-markup leg is built but has never been exercised by a human. Next: `docs/ROADMAP.md`.
+**Current phase (2026-08-01):** the fork stands on its own — renamed, private, `FORK.md` published,
+inherited branches cut. Wireframe reading and the review loop both work; the two-way markup leg is
+built but has never been exercised by a human (KI-3). `docs/ROADMAP.md` PR 2 landed 2026-08-01: the
+repo has a test harness for the first time (`npm test`), five fixtures guarding role inference, and
+a first attribution number. Next: PR 1 (needs a person at the canvas), then PR 3 (a flag).
 
 ## Locked settings
 <!-- change only via an experiment/ADR; list the setting + its locked value + where enforced -->
@@ -40,7 +42,10 @@ markup leg is built but has never been exercised by a human. Next: `docs/ROADMAP
 4. **A wireframe change is not done until the round-trip closes.** Any change to role inference,
    `src/core/wireframe.ts`, or the drawing conventions must be validated by drawing a scene and
    reading it back: zero `shape` fallbacks, zero unintended `?`, every screen named. A screenshot
-   passing is not the bar.
+   passing is not the bar. Since 2026-08-01 this is also enforced mechanically —
+   `npm run test:corpus` reads five stored drawings back and diffs them against known-good
+   readings. Green tests are the floor, not the ceiling: draw the new thing too (ADR-001,
+   `docs/specs/SPEC-001-fixture-corpus.md`).
 
 ## Familiarity map
 - fork / upstream merge policy: **high** — the owner decides when to take upstream changes.

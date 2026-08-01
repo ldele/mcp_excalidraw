@@ -20,7 +20,10 @@
     "dev:server": "npx tsc --watch",
     "production": "npm run build && npm run canvas",
     "sync:skills": "node scripts/sync-skills.mjs",
+    "test": "npm run test:corpus && npm run test:bind",
+    "test:corpus": "npm run build:server && node --test \"tests/**/*.test.mjs\"",
     "test:bind": "npm run build:server && node scripts/check-local-bind.mjs",
+    "corpus:update": "npm run build:server && node scripts/update-corpus.mjs",
     "type-check": "npx tsc --noEmit"
   },
   "dependencies": {

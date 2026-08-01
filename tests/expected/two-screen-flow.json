@@ -1,0 +1,25 @@
+{
+  "fixture": "two-screen-flow.excalidraw",
+  "what": "A sign-in screen and a dashboard, 200px apart, joined by an arrow bound from the Continue button to the second screen.",
+  "why": "Pins two things at once: navigation detection (a bound cross-screen arrow must be reported as a flow naming the control that triggers it), and what undeclared controls infer to. The inputs and the checkbox carry no declared role on purpose — this fixture is the guard on the inference path, so it is expected to score 3 inferred, not 0.",
+  "score": {
+    "screens": 2,
+    "components": 13,
+    "fallbacks": 0,
+    "inferred": 3,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s1", "label": "Sign in" },
+    { "id": "s2", "label": "Dashboard" }
+  ],
+  "navigation": [
+    { "from": "submit", "toScreen": "s2" }
+  ],
+  "markup": [],
+  "notes": [
+    "The 3 inferred are `email` and `password` (white boxes read as input?) and `remember` (a 24px square reads as checkbox?).",
+    "The \"Remember me\" text is folded into the checkbox rather than listed separately — a tickbox and its words are one control to a reader. That is why 15 elements produce 13 components: the arrow and the absorbed label are both accounted for."
+  ]
+}
