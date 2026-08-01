@@ -1,0 +1,105 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "s1",
+      "type": "rectangle",
+      "x": 120,
+      "y": 120,
+      "width": 1160,
+      "height": 700,
+      "backgroundColor": "transparent",
+      "strokeColor": "#14130f",
+      "strokeWidth": 2,
+      "createdAt": "2026-08-01T09:39:04.270Z",
+      "updatedAt": "2026-08-01T09:39:04.270Z",
+      "version": 1,
+      "rev": 147,
+      "origin": "agent"
+    },
+    {
+      "id": "plot",
+      "type": "rectangle",
+      "x": 152,
+      "y": 168,
+      "width": 504,
+      "height": 200,
+      "backgroundColor": "transparent",
+      "strokeColor": "#d7d5cc",
+      "strokeStyle": "dashed",
+      "label": {
+        "text": "PSI per feature · 0.25 line · drift region",
+        "fontSize": 11,
+        "fontFamily": 2
+      },
+      "createdAt": "2026-08-01T09:39:04.270Z",
+      "updatedAt": "2026-08-01T09:39:04.270Z",
+      "version": 1,
+      "rev": 148,
+      "origin": "agent"
+    },
+    {
+      "id": "grid",
+      "type": "rectangle",
+      "x": 688,
+      "y": 168,
+      "width": 512,
+      "height": 56,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#d7d5cc",
+      "label": {
+        "text": "Run date  Max PSI  Worst feature  Champion RMSE",
+        "fontSize": 11,
+        "fontFamily": 2
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:39:04.270Z",
+      "updatedAt": "2026-08-01T09:39:04.270Z",
+      "version": 1,
+      "rev": 149,
+      "origin": "agent"
+    },
+    {
+      "id": "ghost",
+      "type": "rectangle",
+      "x": 152,
+      "y": 416,
+      "width": 300,
+      "height": 180,
+      "backgroundColor": "transparent",
+      "strokeColor": "#d7d5cc",
+      "createdAt": "2026-08-01T09:39:04.270Z",
+      "updatedAt": "2026-08-01T09:39:04.270Z",
+      "version": 1,
+      "rev": 150,
+      "origin": "agent"
+    },
+    {
+      "id": "secondary",
+      "type": "rectangle",
+      "x": 512,
+      "y": 416,
+      "width": 200,
+      "height": 48,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#d7d5cc",
+      "label": {
+        "text": "Export CSV",
+        "fontSize": 13,
+        "fontFamily": 2
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:39:04.270Z",
+      "updatedAt": "2026-08-01T09:39:04.270Z",
+      "version": 1,
+      "rev": 151,
+      "origin": "agent"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

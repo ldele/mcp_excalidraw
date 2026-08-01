@@ -19,9 +19,13 @@ public/dist/
 # `npm run sync:skills` replaces this wholesale, so it is never committed.
 .agents/
 
-# Scratch drawings. Note: the fixture corpus in docs/ROADMAP.md PR 2 will need
-# committed .excalidraw files, so that PR must carve out an exception here.
+# Scratch drawings stay out of the repo...
 *.excalidraw
+# ...except the fixture corpus, which is the whole point of committing drawings:
+# these five files are the known-good input `npm run test:corpus` reads back
+# (ADR-001, docs/specs/SPEC-001-fixture-corpus.md). Carved out by PR 2, as the
+# note that used to live here asked for.
+!tests/fixtures/*.excalidraw
 
 .DS_Store
 

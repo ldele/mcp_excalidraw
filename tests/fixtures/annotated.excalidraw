@@ -1,0 +1,287 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "s1",
+      "type": "rectangle",
+      "x": 400,
+      "y": 200,
+      "width": 600,
+      "height": 640,
+      "backgroundColor": "transparent",
+      "strokeColor": "#14130f",
+      "strokeWidth": 2,
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 181,
+      "origin": "agent"
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "x": 432,
+      "y": 248,
+      "width": 320,
+      "height": 34,
+      "strokeColor": "#14130f",
+      "text": "Checkout",
+      "fontSize": 26,
+      "fontFamily": 2,
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 182,
+      "origin": "agent"
+    },
+    {
+      "id": "card-num",
+      "type": "rectangle",
+      "x": 432,
+      "y": 336,
+      "width": 536,
+      "height": 48,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#d7d5cc",
+      "label": {
+        "text": "Card number",
+        "fontSize": 13,
+        "fontFamily": 2
+      },
+      "role": "input",
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 183,
+      "origin": "agent"
+    },
+    {
+      "id": "expiry",
+      "type": "rectangle",
+      "x": 432,
+      "y": 400,
+      "width": 260,
+      "height": 48,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#d7d5cc",
+      "label": {
+        "text": "Expiry",
+        "fontSize": 13,
+        "fontFamily": 2
+      },
+      "role": "input",
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 184,
+      "origin": "agent"
+    },
+    {
+      "id": "cvc",
+      "type": "rectangle",
+      "x": 708,
+      "y": 400,
+      "width": 260,
+      "height": 48,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#d7d5cc",
+      "label": {
+        "text": "CVC",
+        "fontSize": 13,
+        "fontFamily": 2
+      },
+      "role": "input",
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 185,
+      "origin": "agent"
+    },
+    {
+      "id": "total",
+      "type": "rectangle",
+      "x": 432,
+      "y": 496,
+      "width": 536,
+      "height": 120,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#d7d5cc",
+      "role": "card",
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 186,
+      "origin": "agent"
+    },
+    {
+      "id": "total-v",
+      "type": "text",
+      "x": 456,
+      "y": 520,
+      "width": 200,
+      "height": 34,
+      "strokeColor": "#14130f",
+      "text": "£48.00",
+      "fontSize": 26,
+      "fontFamily": 2,
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 187,
+      "origin": "agent"
+    },
+    {
+      "id": "pay",
+      "type": "rectangle",
+      "x": 432,
+      "y": 664,
+      "width": 536,
+      "height": 52,
+      "backgroundColor": "#74c0fc",
+      "strokeColor": "#1971c2",
+      "label": {
+        "text": "Pay now",
+        "fontSize": 13,
+        "fontFamily": 2
+      },
+      "role": "button",
+      "fillStyle": "solid",
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 188,
+      "origin": "agent"
+    },
+    {
+      "id": "note-1",
+      "type": "text",
+      "x": 1064,
+      "y": 336,
+      "width": 260,
+      "height": 40,
+      "strokeColor": "#d03b3b",
+      "text": "needs a card-type icon here",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 189,
+      "origin": "human"
+    },
+    {
+      "id": "note-1-arrow",
+      "type": "arrow",
+      "x": 1048.0020191822634,
+      "y": 352.1797299060166,
+      "strokeColor": "#d03b3b",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -72.00403836452676,
+          1.6180682778544906
+        ]
+      ],
+      "end": {
+        "id": "card-num"
+      },
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 190,
+      "origin": "human"
+    },
+    {
+      "id": "note-2",
+      "type": "text",
+      "x": 1064,
+      "y": 520,
+      "width": 240,
+      "height": 40,
+      "strokeColor": "#d03b3b",
+      "text": "show VAT breakdown",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 191,
+      "origin": "human"
+    },
+    {
+      "id": "ring",
+      "type": "ellipse",
+      "x": 412,
+      "y": 648,
+      "width": 576,
+      "height": 84,
+      "backgroundColor": "transparent",
+      "strokeColor": "#d03b3b",
+      "strokeWidth": 2,
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 192,
+      "origin": "human"
+    },
+    {
+      "id": "scribble",
+      "type": "freedraw",
+      "x": 470,
+      "y": 410,
+      "width": 160,
+      "height": 28,
+      "strokeColor": "#d03b3b",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          24,
+          18
+        ],
+        [
+          52,
+          2
+        ],
+        [
+          78,
+          22
+        ],
+        [
+          104,
+          4
+        ],
+        [
+          132,
+          20
+        ],
+        [
+          160,
+          6
+        ]
+      ],
+      "createdAt": "2026-08-01T09:42:40.063Z",
+      "updatedAt": "2026-08-01T09:42:40.063Z",
+      "version": 1,
+      "rev": 193,
+      "origin": "human"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

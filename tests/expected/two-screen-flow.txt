@@ -1,0 +1,22 @@
+## Wireframe reading
+2 screens, 13 components, 1 connection, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "Sign in"  [s1] rectangle 600x760
+  1. heading "Sign in"  [s1-title] text 320x34 · 26px
+  2. input? "Email address"  [email] rectangle 536x48 · fill #ffffff
+  3. input? "Password"  [password] rectangle 536x48 · fill #ffffff
+  4. checkbox? "Remember me"  [remember] rectangle 24x24 · fill #ffffff
+  5. button "Continue"  [submit] rectangle 536x48 · fill #74c0fc
+  6. text "Forgot your password?"  [forgot] text 240x18 · 12px
+
+### Screen 2 "Dashboard"  [s2] rectangle 600x760
+  1. heading "Dashboard"  [s2-title] text 320x34 · 26px
+  2. card  [s2-card] rectangle 536x300 · fill #ffffff
+    2.1. heading "This week"  [s2-card-h] text 300x26 · 20px
+    2.2. chart "Sessions per day · 7-day window"  [s2-plot] rectangle 500x220
+  3. button "Sign out"  [s2-signout] rectangle 200x44 · fill #ffffff
+
+### Navigation (1)
+  button "Continue" [submit] → screen "Dashboard" [s2]   (arrow [flow-1])

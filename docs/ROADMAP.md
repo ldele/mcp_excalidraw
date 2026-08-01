@@ -13,12 +13,14 @@ Three measures, because "it looked right" has already proved too weak a bar once
    fallbacks and unintended `?` marks. Both should be zero. The three wireframes drawn on
    2026-07-31 scored 91, 30 and 18 components at zero and zero; wireframes drawn before the
    conventions existed shipped 12+ undeclared placeholders.
-2. **A fixture corpus** — not built yet, PR 2. `.excalidraw` files plus their expected reading, run
-   as tests. This is what stops a role-inference tweak from silently regressing another shape.
-   `skills/excalidraw-skill/evals/evals.json` is the seed.
+2. **A fixture corpus** — built 2026-08-01 (PR 2). Five `.excalidraw` files plus their expected
+   reading, run as tests: `npm run test:corpus`. This is what stops a role-inference tweak from
+   silently regressing another shape. Spec: `docs/specs/SPEC-001-fixture-corpus.md`.
 3. **Markup attribution accuracy** — of N human annotations, how many bind to the component a
-   person would say they refer to. Currently unmeasured, because the markup round has never been
-   run with a human in it.
+   person would say they refer to. **First measurement 2026-08-01: 4 of 5**, against markup an
+   agent drew imitating a human (`tests/expected/attribution-baseline.json`). The one miss is a
+   note that binds to the field above the card it sits level with. That is a regression guard, not
+   evidence the loop works — the real number needs a person, which is PR 1.
 
 ## Phases
 
@@ -31,9 +33,9 @@ Three measures, because "it looked right" has already proved too weak a bar once
 
 | PR | Scope | Status | Spec |
 |----|-------|--------|------|
-| 1  | Run the two-way markup round with a human end to end; fix what it exposes | todo | — |
-| 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | todo | `docs/specs/` |
-| 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | todo | — |
+| 1  | Run the two-way markup round with a human end to end; fix what it exposes | todo — needs a person at the canvas | — |
+| 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
+| 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | todo — engine landed with PR 2 (`scoreWireframe()`), only the flag is left | — |
 
 ## Phase 2 — what the canvas already knows and we ignore
 

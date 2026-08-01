@@ -1,0 +1,26 @@
+## Wireframe reading
+1 screen, 8 components, 0 connections, 5 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "Checkout"  [s1] rectangle 600x640
+  1. heading "Checkout"  [title] text 320x34 · 26px
+  2. input "Card number"  [card-num] rectangle 536x48 · fill #ffffff
+  3. input "Expiry"  [expiry] rectangle 260x48 · fill #ffffff
+  4. input "CVC"  [cvc] rectangle 260x48 · fill #ffffff
+  5. card  [total] rectangle 536x120 · fill #ffffff
+    5.1. heading "£48.00"  [total-v] text 200x34 · 26px
+  6. button "Pay now"  [pay] rectangle 536x52 · fill #74c0fc
+
+### Annotations on this wireframe (5)
+  Human markup currently on the canvas — treat as change requests.
+  "needs a card-type icon here"
+      ↳ annotates input "Card number" [card-num] (96px away)
+  (arrow markup)
+      ↳ points at input "Card number" [card-num]
+  "show VAT breakdown"
+      ↳ annotates input "CVC" [cvc] (120px away)
+  (ellipse markup)
+      ↳ circles / marks button "Pay now" [pay]
+  (freedraw markup)
+      ↳ sits on input "Expiry" [expiry]

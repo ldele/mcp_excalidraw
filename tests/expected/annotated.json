@@ -1,0 +1,56 @@
+{
+  "fixture": "annotated.excalidraw",
+  "what": "A checkout screen with five pieces of human markup on it — a note beside a field, a bound arrow from that note to the field, a second note beside the totals card, an ellipse round the primary button, and a scribble across an input.",
+  "why": "The only fixture that exercises markup attribution, which is the agent-side half of the review loop (KI-3). It covers all four relations the conventions promise a human: near / points-at / encloses / inside. The `intendedTargetId` on each note is the component a person would say the markup is about — where that differs from `targetId`, the reader is wrong, and the gap is ROADMAP measure 3.",
+  "score": {
+    "screens": 1,
+    "components": 8,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s1", "label": "Checkout" }
+  ],
+  "navigation": [],
+  "markup": [
+    {
+      "id": "note-1",
+      "text": "needs a card-type icon here",
+      "targetId": "card-num",
+      "relation": "near",
+      "intendedTargetId": "card-num"
+    },
+    {
+      "id": "note-1-arrow",
+      "targetId": "card-num",
+      "relation": "points-at",
+      "intendedTargetId": "card-num"
+    },
+    {
+      "id": "note-2",
+      "text": "show VAT breakdown",
+      "targetId": "cvc",
+      "relation": "near",
+      "intendedTargetId": "total",
+      "miss": "A person reading this canvas would say the VAT note is about the £48.00 totals card it sits level with, not about the CVC field two rows above. The note's centre is nearer the CVC box because `total` is wider and the distance is measured edge to edge from a point outside both. This is a real attribution miss, recorded rather than fixed — see docs/specs/SPEC-001."
+    },
+    {
+      "id": "ring",
+      "targetId": "pay",
+      "relation": "encloses",
+      "intendedTargetId": "pay"
+    },
+    {
+      "id": "scribble",
+      "targetId": "expiry",
+      "relation": "inside",
+      "intendedTargetId": "expiry"
+    }
+  ],
+  "notes": [
+    "The markup elements carry `origin: \"human\"`, which the canvas server will not set on its own — it stamps `agent` on everything it creates. The fixture was exported and then patched, and the harness reads it off disk for exactly this reason. Re-importing it through `excalidraw-canvas import` resets the origins and the annotations disappear from the reading.",
+    "With the markup excluded from the component tree, the ellipse does not become a container: `pay` reads as a direct child of the screen, not as a child of a `card?`. That is the markup-exclusion path working, and it is worth keeping an eye on."
+  ]
+}

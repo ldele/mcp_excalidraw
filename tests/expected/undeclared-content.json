@@ -1,0 +1,23 @@
+{
+  "fixture": "undeclared-content.excalidraw",
+  "what": "The same content as the clean fixtures, drawn wrong on purpose: a chart placeholder and a table placeholder with no declared role, an empty outlined box, a white secondary button, and no heading to name the screen.",
+  "why": "A corpus where every fixture reads perfectly cannot detect a change that makes everything read as `card` with no `?`. This one asserts the failures are still failures. It reproduces both worked examples from references/wireframe-conventions.md — the plot that reads as `shape`, and the white button that reads as `input?`.",
+  "score": {
+    "screens": 1,
+    "components": 5,
+    "fallbacks": 3,
+    "inferred": 1,
+    "unnamedScreens": 1,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s1" }
+  ],
+  "navigation": [],
+  "markup": [],
+  "notes": [
+    "Non-zero fallbacks are the point. Do not 'fix' this fixture by declaring roles on it — declare them on a copy if a clean variant is ever wanted.",
+    "`unnamedScreens: 1` is the other half: the screen has no heading of any size, so nothing can name it.",
+    "The conventions doc predicted the table placeholder would read as `input?`; it reads as `shape`. The doc is describing the shape of the failure, not this exact drawing — both are the same category of miss."
+  ]
+}
