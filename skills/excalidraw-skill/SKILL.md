@@ -278,9 +278,32 @@ the same canvas as a UI:
   flows: `button "Continue" [submit] → screen "Dashboard" [s2]`.
 - **Annotations** — human markup currently on the canvas, each attached to the
   component it refers to.
+- **Reading quality** — a block that appears *only when something is wrong*: how
+  many components fell back to `shape`, how many screens could not be named, how
+  many fell outside every frame. If you don't see it, the reading is clean.
 
 Use it before turning a wireframe into code, before reviewing someone's UI sketch,
 and after a round of markup to re-read the updated design.
+
+### Checking a drawing without reading it
+
+`wireframe --score` emits the same counts as JSON and nothing else — use it when you
+want to *gate* on the reading rather than read it:
+
+```bash
+excalidraw-canvas wireframe --score
+```
+
+```json
+{ "screens": 1, "components": 21, "fallbacks": 0, "inferred": 0, "unnamedScreens": 0, "orphans": 0 }
+```
+
+`fallbacks`, `unnamedScreens` and `orphans` should all be **0** before you call a
+wireframe finished — that is the pre-flight checklist in
+`references/wireframe-conventions.md` §9, counted. `inferred` is the number of `?`
+marks: fine on anything you would not mind being guessed wrong, worth declaring a
+role on anything load-bearing. `wireframe --json` carries the same object under
+`score`, alongside the full tree.
 
 ### Trust the `?`, and trust the numbers
 

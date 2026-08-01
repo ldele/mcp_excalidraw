@@ -729,6 +729,44 @@ export function formatWireframe(model: WireframeModel): string {
     );
   }
 
+  // The pre-flight checklist (references/wireframe-conventions.md §9), reported
+  // rather than left to be counted by eye. Only the failures show: a reading
+  // with nothing wrong should not carry a block saying so, and inference marks
+  // are not failures — they ride along here only when something else is.
+  //
+  // This is in the report and not behind the CLI's --score flag on purpose: the
+  // MCP tool takes no arguments, and an agent reading its own drawing back is
+  // exactly who needs to be told the reading gave up.
+  const score = scoreWireframe(model);
+  if (score.fallbacks > 0 || score.unnamedScreens > 0 || score.orphans > 0) {
+    lines.push('');
+    lines.push('### Reading quality');
+    if (score.fallbacks > 0) {
+      lines.push(
+        `  ⚠️  ${score.fallbacks} component${score.fallbacks === 1 ? '' : 's'} read as ` +
+        '`shape` — the fallback role, meaning the reading gave up. Declare a `role` on each.'
+      );
+    }
+    if (score.unnamedScreens > 0) {
+      lines.push(
+        `  ⚠️  ${score.unnamedScreens} screen${score.unnamedScreens === 1 ? '' : 's'} could not ` +
+        'be named. A heading of 20px or more near the top of a screen is what names it.'
+      );
+    }
+    if (score.orphans > 0) {
+      lines.push(
+        `  ⚠️  ${score.orphans} component${score.orphans === 1 ? '' : 's'} fell outside every ` +
+        'screen frame. Containment is what builds the tree — move them fully inside.'
+      );
+    }
+    if (score.inferred > 0) {
+      lines.push(
+        `  ${score.inferred} role${score.inferred === 1 ? ' is a guess' : 's are guesses'} ` +
+        '(marked `?`). Fine on anything you would not mind being guessed wrong.'
+      );
+    }
+  }
+
   const renderRoot = (node: WireframeNode, heading: string): void => {
     lines.push('');
     const label = node.label ? ` "${truncate(node.label, 48)}"` : '';
