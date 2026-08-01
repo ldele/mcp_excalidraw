@@ -8,6 +8,25 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-08-01 — `wireframe --score`, and the reading now reports its own failures (ROADMAP PR 3)
+- **What:** `wireframe --score` emits the pre-flight counts as JSON and nothing else; `wireframe
+  --json` carries the same object under `score`; and `formatWireframe` grew a `### Reading quality`
+  block that appears **only** when `fallbacks`, `unnamedScreens` or `orphans` is non-zero. Skill,
+  cheatsheet and conventions §9 updated, then `npm run sync:skills`.
+- **Why:** the roadmap asked for the flag. The report block is the same counts aimed at the other
+  consumer: the MCP tool `describe_wireframe` takes no arguments, so a CLI-only flag would leave an
+  agent reading its own drawing back with no way to be told the reading gave up — which is exactly
+  who needs telling.
+- **Rejected:** always printing the quality block (a clean reading should not carry a paragraph
+  saying nothing is wrong, and it would have churned every golden); making `inferred` a warning
+  (`?` marks are normal — `list-detail` has 5 and reads correctly, so warning on them would train
+  the reader to ignore the block); a `--check` flag that exits non-zero on a bad score (a gate is a
+  bigger decision than "emit the number", and nothing asked for it yet).
+- **Verified:** live CLI round-trip on both a clean and a deliberately-bad drawing — 21 components
+  all zero, versus 3 fallbacks and 1 unnamed screen. The corpus caught the report change and scoped
+  it exactly: 1 of 5 goldens moved, +5 lines, the other four byte-identical.
+- **Opens:** nothing new. Phase 1 now hangs entirely on PR 1, the human markup round.
+
 ## 2026-08-01 — Fixture corpus + the repo's first test harness (ROADMAP PR 2)
 - **What:** five `.excalidraw` fixtures drawn through the real CLI, each with a hand-authored
   expectation and a golden reading; a `node:test` harness (28 assertions) reading them off disk;

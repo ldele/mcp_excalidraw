@@ -296,6 +296,17 @@ real component instead.
 
 ## 9. Pre-flight checklist
 
+Four of the eight below are counted for you. `wireframe --score` returns:
+
+```json
+{ "screens": 1, "components": 21, "fallbacks": 0, "inferred": 0, "unnamedScreens": 0, "orphans": 0 }
+```
+
+`fallbacks` is item 4, `unnamedScreens` item 2, `orphans` item 3, `inferred` item 8. All three of
+the first should be **0**. The plain reading also prints a `### Reading quality` block whenever any
+of them is non-zero, so a failed drawing says so without being asked — if you don't see that block,
+those checks passed.
+
 Screenshot checks (see SKILL.md's Quality Checklist), plus these, from `wireframe`:
 
 1. **Screen count** matches the number of frames you drew. Not `0 screens` — that

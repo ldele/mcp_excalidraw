@@ -35,7 +35,7 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 | Command | Description |
 |---------|-------------|
 | `describe` | AI-readable scene summary (ids, positions, labels, connections) — plain text |
-| `wireframe [--json]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations — plain text |
+| `wireframe [--json] [--score]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations — plain text. `--score` emits only the pre-flight counts as JSON (`fallbacks`, `inferred`, `unnamedScreens`, `orphans`); `--json` carries them under `score` |
 | `screenshot` | PNG/SVG capture; `--out f.png`, `--format png\|svg`, `--no-background`; PNG without `--out` → temp file path in JSON, SVG without `--out` → raw SVG (**browser tab required**) |
 | `export [--out f.excalidraw] [--format json\|obsidian]` | Scene as .excalidraw JSON (stdout without `--out`); a `.md` out path writes Obsidian's .excalidraw.md format |
 | `import [file\|-] [--replace]` | Import .excalidraw JSON or Obsidian .excalidraw.md (merge by default) |

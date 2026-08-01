@@ -13,7 +13,7 @@ import {
 import { buildSceneFile, importScene } from '../../core/scene-io.js';
 import { wrapSceneAsObsidianMd } from '../../core/obsidian-md.js';
 import { describeScene } from '../../core/describe.js';
-import { readWireframe, formatWireframe, WireframeNode } from '../../core/wireframe.js';
+import { readWireframe, formatWireframe, scoreWireframe, WireframeNode } from '../../core/wireframe.js';
 import { exportToExcalidrawUrl } from '../../core/share-url.js';
 import { EXPRESS_SERVER_URL } from '../../core/config.js';
 
@@ -31,10 +31,21 @@ export async function describe(argv: string[]): Promise<void> {
 }
 
 export async function wireframe(argv: string[]): Promise<void> {
-  const { flags } = parseArgs(argv, { json: { takesValue: false } });
+  const { flags } = parseArgs(argv, {
+    json: { takesValue: false },
+    score: { takesValue: false }
+  });
   await ensureCanvasRunning();
   const elements = await getElements();
   const model = readWireframe(elements);
+
+  // The pre-flight checklist as numbers, for a caller that wants to gate on it
+  // rather than read it. The reading itself already warns about the failures
+  // (see formatWireframe) — this is the same counts without the prose.
+  if (flags.score) {
+    printJson(scoreWireframe(model));
+    return;
+  }
 
   if (flags.json) {
     // Elements are dropped from the JSON view: the caller already has them
@@ -45,7 +56,8 @@ export async function wireframe(argv: string[]): Promise<void> {
       roots: model.roots.map(stripElements),
       flows: model.flows,
       markup: model.markup,
-      componentCount: model.componentCount
+      componentCount: model.componentCount,
+      score: scoreWireframe(model)
     });
     return;
   }

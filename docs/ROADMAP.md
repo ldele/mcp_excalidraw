@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-07-31 · class: living -->
+<!-- status: active · updated: 2026-08-01 · class: living -->
 
 # ROADMAP
 
@@ -24,7 +24,9 @@ Three measures, because "it looked right" has already proved too weak a bar once
 
 ## Phases
 
-- **Phase 1 — Close the loop we already built.** The review leg exists and is untested. Status: in progress.
+- **Phase 1 — Close the loop we already built.** The review leg exists and is untested. Status: in
+  progress — PR 2 and PR 3 landed 2026-08-01; PR 1 (the human round) is all that is left, and it is
+  the one that needs a person rather than an agent.
 - **Phase 2 — Make the reader see more of the canvas.** Excalidraw carries structure we discard. Status: not started.
 - **Phase 3 — Stop inferring, start declaring.** A component library makes a role a fact, not a guess. Status: not started.
 - **Phase 4 — Wireframe to code.** Deliberately unplanned; see below. Status: not started.
@@ -35,7 +37,7 @@ Three measures, because "it looked right" has already proved too weak a bar once
 |----|-------|--------|------|
 | 1  | Run the two-way markup round with a human end to end; fix what it exposes | todo — needs a person at the canvas | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
-| 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | todo — engine landed with PR 2 (`scoreWireframe()`), only the flag is left | — |
+| 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
 
 ## Phase 2 — what the canvas already knows and we ignore
 

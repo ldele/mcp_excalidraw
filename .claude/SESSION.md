@@ -16,10 +16,15 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Found:** markup attribution is 4/5 — a note level with a card binds to the input above it
   (now **KI-4**). Recorded rather than tuned: fitting attribution to one agent-drawn sample of 5
   would be fitting to noise.
+- **Also done: PR 3** — `wireframe --score` (pre-flight counts as JSON), `score` added to
+  `--json`, and a `### Reading quality` block in the plain reading that fires only when something
+  is actually wrong. Put in the report as well as behind the flag because `describe_wireframe` (MCP)
+  takes no arguments, and an agent is the main consumer. Skill + cheatsheet + conventions §9
+  updated and `npm run sync:skills` run.
 - **Uncommitted:** everything above is staged for review, not committed — rule 1.
-- **Next:** **PR 1** — the human markup round, still the one leg never exercised (KI-3, skipped a
-  fourth time today for lack of 20 free minutes). Then PR 3, which is now only a CLI flag over
-  `scoreWireframe()`.
+- **Next:** **PR 1** — the human markup round, the only Phase 1 item left and still the one leg
+  never exercised (KI-3, skipped a fourth time today for lack of 20 free minutes). After that,
+  Phase 2 (`link`, frames, `groupIds`, z-order, `customData`) is the next real body of work.
 - **Picks up:** any agent, with a terminal. PR 1 also needs **Lucas at a browser tab** on the canvas
   URL. `excalidraw-canvas` is still not on PATH — use `node dist/bin.js <cmd>` (what this session
   did) or `npm link` first.
