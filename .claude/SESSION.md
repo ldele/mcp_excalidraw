@@ -4,6 +4,18 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-08-07 (close) — Claude Code — Lucas + agent
+- **Correction to the entry below:** it says the fix was staged and uncommitted. Lucas reviewed and
+  committed it as `3c60710` (9 files). `main` is **ahead of `origin/main` by 1 and unpushed**.
+- **Also done since:** `docs/decisions/ADR-002-geometry-lint.md` written and **accepted** — PR 4's
+  shape is settled (a `--lint` flag on `wireframe`, findings also in `--json`, two severities,
+  reporting only). ADRs are immutable once accepted: supersede with a new one, never edit.
+- **Next is unchanged in priority:** **PR 1's attribution number is still untaken** — the loop works,
+  nobody has drawn an annotation through it. Then build PR 4 to ADR-002, and **calibrate the
+  tolerances against the corpus first** (both ⚠ items in the ADR's Confidence block) rather than
+  shipping guessed numbers.
+- **Picks up:** any agent with a terminal; PR 1 additionally needs Lucas at a browser tab.
+
 ## 2026-08-07 — Claude Code — Lucas + agent
 - **Done:** ran **PR 1**, the human markup round, for the first time (KI-3 — skipped four times
   before this). It broke before a single annotation was drawn, and the defect was the important

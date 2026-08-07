@@ -8,6 +8,27 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-08-07 — ADR-002 accepted: the geometry lint's shape (ROADMAP PR 4)
+- **What:** `docs/decisions/ADR-002-geometry-lint.md`, accepted. A `--lint` flag on `wireframe` with
+  the findings also under `lint` in `wireframe --json`; two severities, only reading-affecting rules
+  as errors; reporting only, no exit-code gate. No code yet.
+- **Why:** the lint's central check *is* the reader's nesting computation, so it must consume
+  `readWireframe`'s model rather than re-derive geometry — a lint that disagreed with the reader
+  about containment would be worse than none. Carrying `lint` inside `wireframe --json` also hands
+  the planned browser panel tree, score and findings in one request, against one consistent snapshot
+  of a canvas someone may still be editing.
+- **Rejected:** folding findings into `--score` (conflates "the reading succeeded" with "the drawing
+  is well-formed", and changes a contract four consumers already assert on); a separate `lint`
+  command (splits the canvas into two reads that can race); relying on Excalidraw's own grid and
+  object snapping (helps only a human, only at draw time, only for position — and the 4.29px failure
+  that motivated this was produced by a human dragging *with* those aids on); gating now
+  (the tolerances are uncalibrated, and gating on unvalidated numbers teaches people to bypass it).
+- **Opens:** two ⚠ in the ADR's Confidence block. Every numeric tolerance is currently a guess — the
+  conventions state targets, not tolerances — and the error/advisory split is a judgement call in
+  which only containment has been *demonstrated* to change a reading. Both need calibrating against
+  the corpus before the advisory rules ship, with the chosen values and their evidence recorded in a
+  SPEC alongside the code.
+
 ## 2026-08-07 — The first human markup round, and the origin bug it exposed (ROADMAP PR 1)
 - **What:** ran the two-way review loop with a person at the canvas for the first time (KI-3). It
   broke before a single annotation was drawn. Fixed the load-bearing defect:
