@@ -21,15 +21,23 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Workaround:** none needed; it is a clone-size cost, not a correctness one.
 - **Real fix:** descoped. Evicting it means rewriting history, which is not worth it at this size.
 
-## KI-3 — the two-way markup loop has never run with a human
-- **Symptom:** unknown. `changes` / `watch` / markup attribution are implemented and unit-exercised
-  but no person has marked a canvas up and had it read back.
-- **Cause:** the markup round was offered and skipped three times on 2026-07-31, and once on
-  2026-08-01 (no time to sit for it).
-- **Workaround:** none; the agent-side half works. As of 2026-08-01 it is also pinned by a test —
-  `tests/fixtures/annotated.excalidraw` exercises all four attribution relations. That narrows what
-  a human round could surprise us with; it does not close this.
-- **Real fix:** `docs/ROADMAP.md` PR 1.
+## KI-3 — markup attribution has never been measured with a human
+- **Symptom:** the attribution accuracy figure in `docs/ROADMAP.md` (measure 3) still rests on
+  markup an *agent* drew imitating a human — 4 of 5. No person has drawn annotations and had them
+  read back.
+- **Cause:** the round was skipped three times on 2026-07-31 and once on 2026-08-01. It ran on
+  2026-08-07 and got further than ever — but the loop was broken in a way that made annotations
+  undetectable (below), and once that was fixed the session moved to feature design before any
+  annotation was drawn.
+- **Was:** "the loop has never run with a human." It has now, and it paid for itself before a single
+  mark was made: the round exposed that opening a browser tab restamps every agent element `human`,
+  collapsing `trustOrigin` and silently disabling markup detection for everything but freedraw.
+  Fixed 2026-08-07 (`EDITOR_DEFAULTS` / `fieldsEqual` in `src/core/changes.ts`; DEVLOG same date) and
+  verified live — elements now stay `agent` after a tab syncs. Detection works; nobody has yet drawn
+  markup through it.
+- **Workaround:** none needed. `tests/fixtures/annotated.excalidraw` pins all four attribution
+  relations and `tests/frontend-echo.test.mjs` now pins the browser echo.
+- **Real fix:** `docs/ROADMAP.md` PR 1 — one sitting with a person, now unblocked.
 
 ## KI-4 — a note beside a card can bind to the wrong component
 - **Symptom:** in `tests/fixtures/annotated.excalidraw`, the note "show VAT breakdown" sits level
@@ -44,6 +52,38 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Real fix:** not attempted. Worth doing only on evidence from a real human round
   (`docs/ROADMAP.md` PR 1) — tuning attribution against one agent-drawn sample of 5 would be
   fitting to noise. Baseline and method: `tests/expected/attribution-baseline.json`.
+
+## KI-5 — copy-pasting a component in the browser destroys its declared `role`
+- **Symptom:** on 2026-08-07 a screen was duplicated in the canvas. The original tabs read
+  `button "General"`; the copies read `button? "General"`. Copied header and footer bands lost their
+  declared roles too and survived only because inference happened to re-guess them.
+- **Cause:** `role` is our own property. Excalidraw does not carry it, so a copy made in the editor
+  is a brand-new element built from the editor's representation and arrives via
+  `POST /api/elements/sync` with no `role` at all. The original keeps its role because sync *merges*
+  over the stored element; a copy has no stored element to merge with.
+- **Workaround:** re-declare the role via `update <id> --set '{"role": "..."}'` after copying, or
+  draw duplicates with `arrange duplicate` (server-side, preserves the role) instead of the editor.
+- **Real fix:** `customData` (`docs/ROADMAP.md` Phase 2) is Excalidraw's sanctioned slot for
+  app-specific metadata and would survive the editor's own copy path. Upstream's `.passthrough()`
+  (commit `ecf3cac`, unmerged as of 2026-08-07) is the mechanism that makes it possible. This is the
+  concrete evidence for both that and the Phase 3 component library, which exists precisely to stop
+  a role being a guess.
+
+## KI-6 — `changes` will attribute a whole screen frame as an annotation
+- **Symptom:** on 2026-08-07 a duplicated 1160x1180 screen frame was reported as
+  `annotates [in-slug] rectangle "Slug" (192px away)` — a screen described as a comment on a 540x48
+  input. `wireframe` did not make the same claim.
+- **Cause:** `looksLikeAnnotation` (`src/core/changes.ts`) accepts any rectangle, ellipse or diamond
+  whose background is unset or transparent, with **no size ceiling**. A screen frame is transparent
+  by convention, so it qualifies. `findContainers` guards the *target* side ("a note beside a big
+  panel is about something inside it") but nothing guards the *source* side — the thing doing the
+  annotating.
+- **Workaround:** none needed; the report names the target, so a wrong bind is visible rather than
+  silent. `wireframe` was unaffected here only because `trustOrigin` was false at the time, which is
+  now fixed — so this may become visible in `wireframe` too.
+- **Real fix:** not attempted. The obvious rule is that anything large enough to *hold* components
+  is structure, not markup — the same reasoning `findContainers` already applies to targets, applied
+  to sources. Worth folding into the geometry lint rather than patching alone.
 
 ## Resolved index
 

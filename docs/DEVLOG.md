@@ -8,6 +8,58 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-08-07 — The first human markup round, and the origin bug it exposed (ROADMAP PR 1)
+- **What:** ran the two-way review loop with a person at the canvas for the first time (KI-3). It
+  broke before a single annotation was drawn. Fixed the load-bearing defect:
+  `canonicalizeElement` now drops width/height for text elements, and `diffCanonical` compares
+  through a new `fieldsEqual` that treats "unset" and the editor's own default-fill as equal
+  (`EDITOR_DEFAULTS`). Eight assertions in `tests/frontend-echo.test.mjs`. Also documented `watch`'s
+  240s ceiling in the skill and cheatsheet, then `npm run sync:skills`.
+- **Why:** opening the canvas in a browser — which the loop *requires*; the tab is the transport —
+  makes Excalidraw echo the whole scene back with every unset style property filled in
+  (`fillStyle: null → "solid"`, `strokeWidth: null → 2`, …) and every text box re-measured
+  (`width 400 → 177.75`). The server stamps anything arriving from the browser `human`, so all 25
+  agent-drawn elements were restamped in one write. Two failures followed. `changes` offered 25
+  normalization records as the human's design feedback, against a skill that says "only `by human`
+  entries are feedback". And `trustOrigin` — `allElements.some(el => el.origin === 'agent')`,
+  `src/core/wireframe.ts:531` — went false, so `collectMarkup` silently stopped detecting everything
+  except freedraw. The headline feature of the review loop could not work in its own documented
+  workflow, and no fixture could show it: the corpus reads `.excalidraw` off disk and never passes
+  through a browser.
+- **Rejected:** normalizing at creation time in `normalize.ts` so the echo matches (the true root
+  cause, but that file is collision-zone under rule 2 with an undecided upstream merge open, and it
+  would not repair elements already stored); absorbing the frontend's concrete values on a no-delta
+  echo so storage becomes concrete and *later* style-only edits stay detectable (correct, and the
+  better long-term shape — but it lives in `server.ts`, also collision-zone); treating unset as equal
+  to *any* value (would permanently suppress "the human filled this shape red" on any property the
+  agent never set — hence a per-field default map, so a non-default value still reports); a
+  live-server test driving `POST /api/elements/sync` (the honest level for this, but ADR-001 keeps
+  the server out of the suite deliberately, and the defect is in a pure comparison function that a
+  unit test pins exactly).
+- **Verified:** the tests were proved to fail before being trusted — stash the fix and 3 of 8 fail,
+  and it is the right 3: the echo guards fail, the five "real edits still report" assertions pass
+  either way. Then end-to-end on the live canvas: *before*, opening the tab produced 25 phantom
+  `human` records and `trustOrigin: false`; *after*, the identical action produced `No changes — the
+  canvas is exactly as you left it`, `origins: {"agent":25}`, `trustOrigin: true`. Full suite 36/36,
+  `type-check` clean, and no golden moved — the fix does not change how any fixture reads.
+- **Opens:** **PR 1's number is still unmeasured.** Markup attribution accuracy needs a person to
+  draw annotations and the session pivoted to feature design before that; the blocker is gone but the
+  measurement is not taken. New: KI-5 (copy-paste in the browser destroys a declared `role` —
+  screen 1 read `button "General"`, its copy read `button? "General"`) and KI-6 (`changes` attributed
+  a 1160x1180 duplicated screen frame as `annotates` a 540x48 input, because `looksLikeAnnotation`
+  accepts any transparent rectangle at any size). Agreed next: a geometry lint — `--score` reported
+  "1 screen could not be named" where the cause was a footer sitting 4.29px outside its frame; the
+  lint should report the cause. Core lint first with a JSON contract, browser panel as a thin view
+  over it. Needs an ADR.
+- **Upstream (rule 2):** `git fetch upstream` at session start — upstream has moved for the first
+  time since the fork. `2930519` (export fidelity: preserves `containerId`, `index`, `seed`,
+  `versionNonce`, `updated` through import; new `src/core/expand-elements.ts`) and `ecf3cac`
+  (`.passthrough()` on the create/update element schemas). Both touch `src/server.ts`;
+  `git merge-tree` reports **no conflicts**. **Decision deferred** — nothing this session touched the
+  collision zone, so the merge was not needed to proceed. It is directly relevant to Phase 2's
+  `customData` plan (`.passthrough()` is the mechanism that would let it survive), and to KI-5.
+  Decide next session.
+
 ## 2026-08-01 — `wireframe --score`, and the reading now reports its own failures (ROADMAP PR 3)
 - **What:** `wireframe --score` emits the pre-flight counts as JSON and nothing else; `wireframe
   --json` carries the same object under `score`; and `formatWireframe` grew a `### Reading quality`

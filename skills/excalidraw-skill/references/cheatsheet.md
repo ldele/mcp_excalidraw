@@ -49,7 +49,7 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 | Command | Description |
 |---------|-------------|
 | `changes [--since <rev>] [--json]` | What changed and who changed it, in design terms — plain text (defaults to everything since the server started) |
-| `watch [--since <rev>] [--timeout 60] [--settle 1.5] [--json]` | Block until someone edits the canvas, then print the same report (defaults to waiting for what happens *next*) |
+| `watch [--since <rev>] [--timeout 60] [--settle 1.5] [--json]` | Block until someone edits the canvas, then print the same report (defaults to waiting for what happens *next*). `--timeout` max **240s** — re-poll in a loop for a human round; `--json` carries `timedOut` |
 
 Every mutation bumps a canvas **revision**; each report ends with `Cursor: rev N`.
 Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240s.

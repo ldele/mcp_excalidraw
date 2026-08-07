@@ -86,12 +86,17 @@ export function canonicalizeElement(
   boundLabels?: Map<string, string>
 ): CanonicalElement {
   const anyEl = el as any;
+  // Excalidraw measures a text element's box from its content and font on
+  // first render, overwriting whatever width/height the author supplied. That
+  // is a hint being corrected, not a resize anyone performed, so text metrics
+  // are outside what a designer can be said to have changed.
+  const isText = el.type === 'text';
   return {
     type: el.type,
     x: el.x,
     y: el.y,
-    width: el.width ?? 0,
-    height: el.height ?? 0,
+    width: isText ? null : (el.width ?? 0),
+    height: isText ? null : (el.height ?? 0),
     angle: el.angle ?? 0,
     points: normalizePoints(anyEl.points),
     strokeColor: el.strokeColor ?? null,
@@ -120,6 +125,41 @@ export function canonicalizeElement(
 
 // Sub-pixel deltas are float noise from Excalidraw's own maths, not an edit.
 const NUMERIC_TOLERANCE = 0.5;
+
+// Style properties the editor fills in when the author left them unset, and
+// the value it fills them with. An unset property *renders as* this value, so
+// a designer cannot perceive the difference — and the first sync after someone
+// opens the canvas in a browser echoes the whole scene back with every one of
+// them populated.
+//
+// Without this, that echo reads as an edit to every element, each gets
+// restamped `origin: "human"`, and two things break at once: the change report
+// offers normalization as the human's design feedback, and `readWireframe`
+// sees no `agent` element left, concludes the origin signal is meaningless,
+// and switches markup detection off entirely. Found by the first human markup
+// round (ROADMAP PR 1) — no fixture could catch it, because fixtures never
+// pass through a browser.
+const EDITOR_DEFAULTS: Record<string, unknown> = {
+  fillStyle: 'solid',
+  strokeStyle: 'solid',
+  strokeWidth: 2,
+  roughness: 1,
+  opacity: 100,
+  textAlign: 'left',
+  backgroundColor: 'transparent'
+};
+
+// Equality for one canonical field. Unset on one side and the editor's own
+// default on the other is not a change; unset against any *other* value still
+// is, so a human filling a shape red is still reported.
+function fieldsEqual(field: string, a: unknown, b: unknown): boolean {
+  if (valuesEqual(a, b)) return true;
+  if (!(field in EDITOR_DEFAULTS)) return false;
+  const filled = EDITOR_DEFAULTS[field];
+  if (a == null) return valuesEqual(b, filled);
+  if (b == null) return valuesEqual(a, filled);
+  return false;
+}
 
 function valuesEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
@@ -160,7 +200,7 @@ export function diffCanonical(
   const fields = new Set([...Object.keys(before), ...Object.keys(after)]);
   for (const field of fields) {
     if (field === 'type') continue;
-    if (valuesEqual(before[field], after[field])) continue;
+    if (fieldsEqual(field, before[field], after[field])) continue;
     beforeDelta[field] = before[field];
     afterDelta[field] = after[field];
     changed = true;
