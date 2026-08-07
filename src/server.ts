@@ -42,6 +42,7 @@ import {
   isChangeTracked,
   effectiveLabel,
   buildBoundLabelIndex,
+  boundChildSupersedesLabel,
   CanonicalElement
 } from './core/changes.js';
 
@@ -1019,6 +1020,14 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
         // Untouched: keep the stored element (and its rev/origin/createdAt)
         // so an agent's authorship is not overwritten by a passive echo.
         existing.syncedAt = syncedAt;
+        // The merge path below drops a superseded `label`, but a passive echo
+        // never reaches it — and since the echo stopped producing a delta
+        // (changes.ts EDITOR_DEFAULTS), that is now the common case. Left here,
+        // the stale label is re-expanded into a fresh bound text child on every
+        // client load, duplicating the label without bound.
+        if (boundChildSupersedesLabel(!!(raw as any).label, id, incomingLabels)) {
+          delete (existing as any).label;
+        }
         continue;
       }
 

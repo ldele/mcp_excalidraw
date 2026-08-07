@@ -4,6 +4,33 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-08-07 (close 2) — Claude Code — Lucas + agent
+- **Correction:** the entry below says PR 1 needs "one sitting". Two further attempts were made the
+  same day and **both failed**, for new reasons each time. PR 1's number is *still* untaken.
+- **Attempt 2** died on **KI-7**: two browser tabs open at once, each POSTing its whole scene, deleted
+  each other's elements — 386 adds against 385 deletes — and silently destroyed a complete round of
+  human markup (a note, an ellipse, four scribbles). Unrecoverable; change records carry no geometry.
+  Caused by my own instructions ("open the canvas", then later "open or reload"). Guarded now:
+  `changes`/`watch` warn on stderr and in-band when `websocket_clients > 1`, in `watch` *before* the
+  wait. The protocol fix is still open (KI-7).
+- **Attempt 3** never got drawn — the tab was closed and the canvas went quiet.
+- **Also fixed: a regression I introduced this morning.** Suppressing the browser echo meant the
+  first sync produced no delta, which skips the branch that drops a shape's `label` once Excalidraw
+  has expanded it into a bound text child. Every client load then re-expanded it: 10 shapes × 4 tab
+  loads = 40 stray text elements. `boundChildSupersedesLabel` now applies on the no-delta path.
+  Verified across two reloads: 0 duplicates, 0 stale labels, rev unchanged at 25.
+- **Uncommitted:** the guard, the label fix, KI-7, this baton and the DEVLOG entry are **staged for
+  review, not committed** — rule 1. (Commit `3c60710`, the morning's echo fix, is already in and is
+  what the label regression came from.)
+- **Rule 2 — read this before touching the collision zone.** This work **edited `src/server.ts`**.
+  Upstream's two commits were re-checked (still no conflicts) and the merge was **deliberately
+  deferred**, so a bug fix and a five-file upstream merge would not be reviewed together. That
+  deferral is the decision rule 2 requires. The merge is still owed and Lucas asked for it explicitly.
+- **Next, in order:** (1) the upstream merge, as its own reviewed step; (2) **PR 1** — one sitting
+  with a person, everything blocking it is now fixed; (3) PR 4 to ADR-002, calibrating tolerances
+  against the corpus first.
+- **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
+
 ## 2026-08-07 (close) — Claude Code — Lucas + agent
 - **Correction to the entry below:** it says the fix was staged and uncommitted. Lucas reviewed and
   committed it as `3c60710` (9 files). `main` is **ahead of `origin/main` by 1 and unpushed**.

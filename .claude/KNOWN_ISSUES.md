@@ -85,6 +85,24 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
   is structure, not markup — the same reasoning `findContainers` already applies to targets, applied
   to sources. Worth folding into the geometry lint rather than patching alone.
 
+## KI-7 — two browser tabs on one canvas silently destroy each other's work
+- **Symptom:** with two tabs open, elements are added and deleted in a loop and the canvas becomes
+  unusable to draw on. On 2026-08-07 a full round of human markup — a text note, an ellipse and four
+  freedraw strokes — was wiped this way; the change log showed **386 adds against 385 deletes**, the
+  rev climbed past 700, and `changes` reported "1 change" because the adds and deletes cancelled.
+  Nothing in any report said why. The markup is unrecoverable: change records store
+  `id`/`kind`/`origin`/`at`/`elementType`, no geometry.
+- **Cause:** every tab POSTs its *whole scene* to `/api/elements/sync`, and the handler treats an
+  element absent from that payload as a human deletion (`src/server.ts`, "1. Elements the human
+  deleted in the browser"). With one client that is correct. With two, each sync asserts its own
+  view as complete truth, so tab A's sync deletes what tab B just added, and back again.
+- **Workaround:** keep exactly one tab open. Since 2026-08-07 `changes` and `watch` warn loudly —
+  on stderr and in-band in the report — when `/health` shows `websocket_clients > 1`, so the
+  condition is visible before someone spends a round drawing into it. That is a guard, not a fix.
+- **Real fix:** not attempted. The server has to stop inferring deletion from absence in a single
+  client's snapshot — a per-client baseline, or a scene sequence number carried on the sync. That is
+  a protocol change in `src/server.ts` (collision zone, rule 2) and wants an ADR of its own.
+
 ## Resolved index
 
 One line per resolved issue (ADR-023): mark the entry's heading `(RESOLVED 2026-07-31)` on the day

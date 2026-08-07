@@ -21,7 +21,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const { canonicalizeElement, diffCanonical } =
+const { canonicalizeElement, diffCanonical, boundChildSupersedesLabel } =
   await import(pathToFileURL(join(__dirname, '..', 'dist', 'core', 'changes.js')).href);
 
 const EMPTY = new Map();
@@ -68,6 +68,33 @@ describe('the frontend echo is not an edit', () => {
       backgroundColor: 'transparent', textAlign: 'left'
     };
     assert.equal(diff(authored, echoed), null);
+  });
+});
+
+// Suppressing the echo removed the only path that dropped a superseded `label`,
+// so every client load re-expanded it into another bound text child: 10 shapes
+// x 4 tab loads = 40 stray text elements before this was caught. Guarding the
+// fix's own side effect, not the original bug.
+describe('a label superseded by a bound child is dropped', () => {
+  const bound = new Map([['tab-general', 'General']]);
+
+  test('drops the stored label once the editor owns the text', () => {
+    assert.equal(boundChildSupersedesLabel(false, 'tab-general', bound), true);
+  });
+
+  test('keeps it while no bound child exists yet', () => {
+    // First sync of a freshly drawn shape: the editor has not expanded it, so
+    // dropping the label here would lose the text outright.
+    assert.equal(boundChildSupersedesLabel(false, 'tab-general', new Map()), false);
+  });
+
+  test('keeps it when the payload still carries a label of its own', () => {
+    assert.equal(boundChildSupersedesLabel(true, 'tab-general', bound), false);
+  });
+
+  test('is scoped to the element, not the scene', () => {
+    // A bound child belonging to some other shape says nothing about this one.
+    assert.equal(boundChildSupersedesLabel(false, 'btn-save', bound), false);
   });
 });
 

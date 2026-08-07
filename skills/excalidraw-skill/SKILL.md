@@ -374,6 +374,17 @@ it is far cheaper and more precise than asking them to describe edits in prose.
 from an open tab — that is the transport. If `watch` keeps timing out, check this
 before assuming the user is idle.
 
+**Exactly one tab, and say so when you hand over the pen.** Every tab POSTs its
+whole scene, and the server reads "absent from this payload" as "the human
+deleted it" — so two tabs delete each other's elements in a loop and destroy
+markup as it is drawn, unrecoverably (KI-7). `changes` and `watch` warn when more
+than one is connected, on stderr and in the report; `watch` warns *before* it
+waits. **Never ignore that warning and let someone start drawing.** Tell them to
+close the extras, then confirm with `/health` that `websocket_clients` is 1.
+Be careful not to cause it yourself: asking the user to "open the canvas" a second
+time after a server restart is how it usually happens — say *reload the tab you
+already have*.
+
 ### Reading the report
 
 ```
