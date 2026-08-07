@@ -64,10 +64,11 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Workaround:** re-declare the role via `update <id> --set '{"role": "..."}'` after copying, or
   draw duplicates with `arrange duplicate` (server-side, preserves the role) instead of the editor.
 - **Real fix:** `customData` (`docs/ROADMAP.md` Phase 2) is Excalidraw's sanctioned slot for
-  app-specific metadata and would survive the editor's own copy path. Upstream's `.passthrough()`
-  (commit `ecf3cac`, unmerged as of 2026-08-07) is the mechanism that makes it possible. This is the
-  concrete evidence for both that and the Phase 3 component library, which exists precisely to stop
-  a role being a guess.
+  app-specific metadata and would survive the editor's own copy path. **Unblocked 2026-08-07** —
+  upstream's `.passthrough()` (`ecf3cac`) merged, so unknown props now survive the schema and the
+  mechanism exists. Still needs building, and needs an ADR: moving `role` into `customData` changes
+  the element contract. This KI is the concrete evidence for both that and the Phase 3 component
+  library, which exists precisely to stop a role being a guess.
 
 ## KI-6 — `changes` will attribute a whole screen frame as an annotation
 - **Symptom:** on 2026-08-07 a duplicated 1160x1180 screen frame was reported as

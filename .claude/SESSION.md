@@ -4,6 +4,27 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-08-07 (close 3) — Claude Code — Lucas + agent
+- **Done: the upstream merge** (`1c5925b`), the first since the fork, at 14 commits of divergence —
+  clean, no conflicts. **Rule 2's open deferral is now closed.**
+- **It was not hygiene — it fixed a live bug.** Reproduced *before* merging: our schema lacked
+  `containerId`, and zod strips unknown keys, so `import` turned 10 bound text children into **0**.
+  Every label detached, and the reading changed silently — `input? "Project name"` became `card?`,
+  23 components/5 inferred became 33/7, with `--score` reporting `fallbacks: 0` throughout.
+  `snapshot restore` had the same defect. Both documented recovery paths were corrupting drawings.
+  After the merge the same file round-trips **35/10 in → 35/10 out** and the reading is identical to
+  the original.
+- **Unlocked:** `.passthrough()` means `customData` is finally possible — what **KI-5** and Phase 3
+  were waiting on. Needs an ADR (moving `role` into `customData` changes the element contract).
+- **Not tested: `share`.** It publishes the scene to excalidraw.com, and `share-url.ts` is the file
+  upstream rewrote most heavily — so it is both the most-changed path and the one needing a
+  deliberate choice to upload. Smoke-test before relying on it.
+- **Uncommitted:** the doc updates for this merge are **staged, not committed** — rule 1. The merge
+  commit itself is in (`1c5925b`); `main` is **ahead of `origin/main` by 3, unpushed**.
+- **Next:** **PR 1 is still the open item** — three attempts on 2026-08-07, never measured. Then
+  PR 4 to ADR-002 (calibrate tolerances against the corpus first), and a `customData` ADR.
+- **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
+
 ## 2026-08-07 (close 2) — Claude Code — Lucas + agent
 - **Correction:** the entry below says PR 1 needs "one sitting". Two further attempts were made the
   same day and **both failed**, for new reasons each time. PR 1's number is *still* untaken.
