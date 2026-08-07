@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-08-01 · class: living -->
+<!-- status: active · updated: 2026-08-07 · class: living -->
 
 # ROADMAP
 
@@ -49,7 +49,7 @@ Three measures, because "it looked right" has already proved too weak a bar once
 | 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; attribution number still untaken | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
-| 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — needs an ADR first | — |
+| 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — ADR-002 accepted 2026-08-07, not started | `docs/decisions/ADR-002-geometry-lint.md` |
 
 ## PR 4 — the geometry lint
 
@@ -68,11 +68,17 @@ none of it is enforced:
 | Overlapping siblings; body text < 12px | §3 + SKILL.md Quality Checklist | — |
 | An oversized "annotation" that is really structure | — | KI-6 |
 
-**Shape:** core first, in `src/core`, emitting a JSON contract and reusing the existing reader;
-the browser panel lands afterwards as a thin view over that output rather than duplicate logic.
-Testable against the existing fixture corpus, which already contains a deliberately bad drawing.
-Needs an ADR before building — where it lives (a `lint` command vs a flag on `wireframe`), and
-whether it ever *gates* rather than reports, are both decisions rather than details.
+**Shape decided in `docs/decisions/ADR-002-geometry-lint.md`** (accepted 2026-08-07): a `--lint`
+flag on `wireframe` with the findings also under `lint` in `wireframe --json`, computed from
+`readWireframe`'s own model so the lint can never disagree with the reader about containment;
+two severities, with only reading-affecting rules as errors; reporting only, no exit-code gate
+until the tolerances are calibrated. The browser panel lands afterwards as a thin view over that
+contract rather than a second implementation of the rules.
+
+**Before building:** the numeric tolerances are unvalidated (ADR-002 Confidence, ⚠). Calibrate them
+against the five corpus fixtures — `undeclared-content.excalidraw` is already a deliberately bad
+drawing and is the natural positive case — and record the chosen values with their evidence in a
+SPEC alongside the code.
 
 ## Phase 2 — what the canvas already knows and we ignore
 
