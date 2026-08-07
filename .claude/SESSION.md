@@ -21,9 +21,34 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   deliberate choice to upload. Smoke-test before relying on it.
 - **Uncommitted:** the doc updates for this merge are **staged, not committed** — rule 1. The merge
   commit itself is in (`1c5925b`); `main` is **ahead of `origin/main` by 3, unpushed**.
+- **Also fixed at close:** `AGENTS.md`'s State line still read 2026-07-31 and claimed the markup leg
+  "has never been exercised by a human" — wrong for a week, in the first file every agent reads.
+  Nothing enforces that line; it is judgment, so it goes stale silently.
 - **Next:** **PR 1 is still the open item** — three attempts on 2026-08-07, never measured. Then
   PR 4 to ADR-002 (calibrate tolerances against the corpus first), and a `customData` ADR.
 - **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
+
+### Requested for next session: a documentation review (Lucas, 2026-08-07)
+
+Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG entries, 3 KIs, an ADR,
+3 baton entries) and none of it has been read back critically.
+
+1. **Rotation is switched off and nothing will ever say so.** `devlog_max_entries` and
+   `session_max_entries` are both `0` (= disabled) in the cpc defaults, so `docs_check` stays silent
+   while the files grow: `docs/DEVLOG.md` is at **8 entries / 223 lines**, `.claude/SESSION.md` at
+   **7 / 163**, and `AGENTS.md` tells agents to read only the **newest 3** of each. Either set the
+   caps and rotate to `docs/archive/` as ADR-023 describes, or decide unbounded growth is fine and
+   say so — right now it is neither, just unexamined.
+2. **`.claude/KNOWN_ISSUES.md` (7 entries).** KI-1 is "done for our own docs" and KI-2 is
+   explicitly "descoped", yet both still sit as full entries while the Resolved index at the bottom
+   holds nothing but its commented-out template line. The file documents its own process for this
+   and it has never been used.
+3. **Entry length.** Today's DEVLOG entries are long. They are append-only so this is not about
+   editing them — it is about agreeing the right level for the next ones.
+4. **`docs/ROADMAP.md`** gained a PR 4 section and rewritten measures 3 and 4; worth one read for
+   coherence rather than accretion.
+5. **ADR-002's two ⚠ Confidence items** are the gate on PR 4 starting — every numeric tolerance is
+   currently a guess, and the error/advisory split is asserted rather than demonstrated.
 
 ## 2026-08-07 (close 2) — Claude Code — Lucas + agent
 - **Correction:** the entry below says PR 1 needs "one sitting". Two further attempts were made the
