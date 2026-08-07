@@ -17,16 +17,27 @@ Three measures, because "it looked right" has already proved too weak a bar once
    reading, run as tests: `npm run test:corpus`. This is what stops a role-inference tweak from
    silently regressing another shape. Spec: `docs/specs/SPEC-001-fixture-corpus.md`.
 3. **Markup attribution accuracy** — of N human annotations, how many bind to the component a
-   person would say they refer to. **First measurement 2026-08-01: 4 of 5**, against markup an
-   agent drew imitating a human (`tests/expected/attribution-baseline.json`). The one miss is a
-   note that binds to the field above the card it sits level with. That is a regression guard, not
-   evidence the loop works — the real number needs a person, which is PR 1.
+   person would say they refer to. **Still 4 of 5, and still agent-drawn**
+   (`tests/expected/attribution-baseline.json`). The one miss is a note that binds to the field
+   above the card it sits level with. That is a regression guard, not evidence the loop works.
+
+   The human round finally ran on 2026-08-07 and **the number is still untaken** — the loop turned
+   out to be broken before any annotation could be drawn (opening a browser tab restamped every
+   agent element `human`, which switched markup detection off entirely; fixed and verified live the
+   same day). Worth stating plainly, because it is the measure this whole layer is judged on: four
+   sessions in, every attribution figure we have was produced by an agent imitating a person.
+
+4. **Drawing conformance** — not yet measured. `wireframe --score` says whether the *reading*
+   succeeded; nothing says whether the *drawing* follows the conventions it was drawn against. On
+   2026-08-07 a footer 4.29px outside its frame produced "1 screen could not be named" — the symptom,
+   two inferential steps from the cause. See PR 4.
 
 ## Phases
 
-- **Phase 1 — Close the loop we already built.** The review leg exists and is untested. Status: in
-  progress — PR 2 and PR 3 landed 2026-08-01; PR 1 (the human round) is all that is left, and it is
-  the one that needs a person rather than an agent.
+- **Phase 1 — Close the loop we already built.** Status: in progress — PR 2 and PR 3 landed
+  2026-08-01. PR 1 ran on 2026-08-07 and found the loop broken at the browser boundary; the defect
+  is fixed and verified, but the attribution measurement PR 1 exists to take is still untaken, so
+  the item stays open. It needs a person, and roughly one sitting.
 - **Phase 2 — Make the reader see more of the canvas.** Excalidraw carries structure we discard. Status: not started.
 - **Phase 3 — Stop inferring, start declaring.** A component library makes a role a fact, not a guess. Status: not started.
 - **Phase 4 — Wireframe to code.** Deliberately unplanned; see below. Status: not started.
@@ -35,9 +46,33 @@ Three measures, because "it looked right" has already proved too weak a bar once
 
 | PR | Scope | Status | Spec |
 |----|-------|--------|------|
-| 1  | Run the two-way markup round with a human end to end; fix what it exposes | todo — needs a person at the canvas | — |
+| 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; attribution number still untaken | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
+| 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — needs an ADR first | — |
+
+## PR 4 — the geometry lint
+
+Agreed 2026-08-07. `--score` answers *"did the reading succeed?"*; the lint answers *"will this
+drawing hold up?"* — and catches the failure one step earlier, at the cause rather than the symptom.
+
+Every rule is already written in `skills/excalidraw-skill/references/wireframe-conventions.md` and
+none of it is enforced:
+
+| Check | Convention | Evidence |
+|---|---|---|
+| Element outside its frame by < 20px | §1 "a card poking 3px outside is not a child" | a footer 4.29px out became a phantom screen, 2026-08-07 |
+| Row members not sharing a `y` | §1 "ragged values make the reading order shuffle" | — |
+| Header / footer / sidebar spanning < 90% of its edge | §4 "a sidebar that stops short reads as a `card`" | — |
+| Off-grid coordinates, wrong inset / gutter / column width | §1 measurements | — |
+| Overlapping siblings; body text < 12px | §3 + SKILL.md Quality Checklist | — |
+| An oversized "annotation" that is really structure | — | KI-6 |
+
+**Shape:** core first, in `src/core`, emitting a JSON contract and reusing the existing reader;
+the browser panel lands afterwards as a thin view over that output rather than duplicate logic.
+Testable against the existing fixture corpus, which already contains a deliberately bad drawing.
+Needs an ADR before building — where it lives (a `lint` command vs a flag on `wireframe`), and
+whether it ever *gates* rather than reports, are both decisions rather than details.
 
 ## Phase 2 — what the canvas already knows and we ignore
 

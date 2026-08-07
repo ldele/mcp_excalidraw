@@ -9,11 +9,14 @@ server on `http://127.0.0.1:3000`. Package manager: npm.
 interface*, and share with a human who marks it up. The differentiator over upstream is the
 wireframe layer: a drawing is finished when `wireframe` reads it back as what you meant, not when
 the screenshot looks right.
-**Current phase (2026-08-01):** the fork stands on its own — renamed, private, `FORK.md` published,
-inherited branches cut. Wireframe reading and the review loop both work; the two-way markup leg is
-built but has never been exercised by a human (KI-3). `docs/ROADMAP.md` PR 2 landed 2026-08-01: the
-repo has a test harness for the first time (`npm test`), five fixtures guarding role inference, and
-a first attribution number. Next: PR 1 (needs a person at the canvas), then PR 3 (a flag).
+**Current phase (2026-08-07):** the fork stands on its own — renamed, private, `FORK.md` published,
+inherited branches cut. PR 2 and PR 3 landed 2026-08-01 (test harness, five fixtures, `--score`).
+PR 1 — the human markup round — finally ran on 2026-08-07 and found the review loop broken at the
+browser boundary: opening a tab restamped every agent element `human`, which collapsed `trustOrigin`
+and silently switched markup detection off. Fixed and verified live the same day; markup detection
+now works for the first time. **The attribution measurement PR 1 exists to take is still untaken**,
+so PR 1 stays open (KI-3). Agreed next: PR 4, a geometry lint (core first, browser panel over it) —
+needs an ADR. Upstream moved for the first time since the fork; merge decision deferred, see rule 2.
 
 ## Locked settings
 <!-- change only via an experiment/ADR; list the setting + its locked value + where enforced -->
@@ -57,8 +60,12 @@ a first attribution number. Next: PR 1 (needs a person at the canvas), then PR 3
   lookup-able.
 
 ## Open questions
-- Whether the two-way markup loop holds up with a human in it. Built, never exercised — the markup
-  round has been skipped three times running.
+- Whether markup attribution holds up with a human in it. The loop itself has now been exercised
+  (2026-08-07) and the browser-boundary defect it exposed is fixed — but no person has yet drawn an
+  annotation through the working loop, so every attribution number we have is still agent-drawn.
+- Whether to take upstream's `.passthrough()` + export-fidelity commits. Both touch `src/server.ts`;
+  `merge-tree` says no conflicts. Relevant because `.passthrough()` is what would let `customData`
+  survive the editor, which is what KI-5 and Phase 3 both need.
 - Whether Excalidraw's own **frames** should replace the "screen = plain rectangle" convention.
 - Whether the wireframe layer should ever emit code, or stop at the reading and leave generation to
   the calling agent. Currently the latter, deliberately — see `docs/ROADMAP.md`.
