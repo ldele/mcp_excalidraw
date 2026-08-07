@@ -346,6 +346,24 @@ export function findContainers(candidates: ServerElement[]): Set<string> {
   return containers;
 }
 
+// Once Excalidraw has expanded a shape's agent-format `label` into a bound text
+// child, the stored `label` is a second source of truth for the same string.
+// Leaving it means every later client load expands it again into another
+// duplicate child — 10 shapes across 4 tab loads produced 40 stray text elements
+// on 2026-08-07.
+//
+// The frontend never echoes `label` back, so "the incoming element carries no
+// label, but the incoming scene has a bound child pointing at it" is exactly the
+// moment the stored label became redundant. Pure so the sync handler's decision
+// is testable without a live server.
+export function boundChildSupersedesLabel(
+  incomingHasLabel: boolean,
+  elementId: string,
+  incomingBoundLabels: Map<string, string>
+): boolean {
+  return !incomingHasLabel && incomingBoundLabels.has(elementId);
+}
+
 // Find what a human's annotation is talking about.
 export function attributeAnnotation(
   annotation: ServerElement,

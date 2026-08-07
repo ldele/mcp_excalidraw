@@ -8,6 +8,48 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-08-07 — A multi-tab guard, and fixing the regression the echo fix introduced
+- **What:** two changes from two failed attempts at the PR 1 markup round. (1) `multiClientWarning`
+  in `src/cli/util.ts`, wired into `changes` and `watch` — warns on stderr *and* in-band in the
+  report when `/health` shows more than one browser tab connected; in `watch` it fires **before** the
+  wait. (2) `boundChildSupersedesLabel` in `src/core/changes.ts`, applied on the sync handler's
+  no-delta path in `src/server.ts`. Seven new assertions across
+  `tests/multi-client-guard.test.mjs` and `tests/frontend-echo.test.mjs`.
+- **Why (1):** with two tabs open, each POSTs its whole scene and the handler reads "absent from this
+  payload" as "the human deleted it", so the tabs delete each other's elements indefinitely. It wiped
+  a complete round of human markup — 386 adds against 385 deletes, six annotations gone,
+  unrecoverable because change records carry no geometry. `changes` reported "1 change" because the
+  adds and deletes cancelled out. Logged as **KI-7**; the protocol fix is a separate ADR.
+- **Why (2):** **this was a regression introduced by the same day's echo fix.** Suppressing the
+  browser echo meant the first sync no longer produced a delta — which was the point — but the early
+  `continue` on the no-delta path skips the merge branch that drops a shape's agent-format `label`
+  once Excalidraw has expanded it into a bound text child. So every shape kept a `label` that each
+  new client load re-expanded into another duplicate child: 10 shapes across 4 tab loads produced 40
+  stray text elements. The comment at that branch already warned that keeping the label "would leave
+  two competing sources of truth"; the fix moved the code path around it without noticing it was
+  load-bearing.
+- **Rejected:** reverting the echo fix (removes the regression but restores the original bug —
+  phantom human writes and markup detection silently off; trades a visible problem for an invisible
+  one); making the *merge* path's label-drop conditional on a bound child existing too (a real
+  behaviour change to a path that is working — the new predicate is applied only where the gap was);
+  hard-refusing to run with two tabs (there is no legitimate multi-tab case, but a refusal blocks
+  reads that are perfectly safe, and a loud warning in both channels already makes the condition
+  impossible to miss).
+- **Verified:** 43/43 tests, `type-check` clean. Live, after **two** page reloads on a fresh server:
+  35 elements (25 agent + exactly 10 bound labels), **0 duplicated containers**, **0 shapes carrying
+  a stale label**, `origins: {"agent":25}`, `trustOrigin: true`, and `rev` still **25** — the browser
+  echo is now completely inert, which is a stronger result than the morning's fix alone produced. The
+  guard was confirmed silent at one client; its warning text is unit-tested, and the field it reads
+  is the same `websocket_clients` that read `2` while diagnosing KI-7.
+- **Opens:** **PR 1's attribution number is still untaken** — three attempts today, defeated by
+  `trustOrigin`, then by KI-7, and the third round was never drawn. Everything blocking it is now
+  fixed; it needs one sitting.
+- **Upstream (rule 2):** this change edits `src/server.ts`, the collision zone. Upstream's two
+  commits (`2930519`, `ecf3cac`) were re-checked — still no conflicts — and the merge was
+  **deliberately deferred** so a bug fix and a five-file upstream merge are not reviewed together.
+  The deferral is the decision rule 2 asks for, not an omission. Take the merge as its own step;
+  `ecf3cac`'s `.passthrough()` remains what `customData` and KI-5 need.
+
 ## 2026-08-07 — ADR-002 accepted: the geometry lint's shape (ROADMAP PR 4)
 - **What:** `docs/decisions/ADR-002-geometry-lint.md`, accepted. A `--lint` flag on `wireframe` with
   the findings also under `lint` in `wireframe --json`; two severities, only reading-affecting rules

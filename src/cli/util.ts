@@ -24,6 +24,24 @@ export async function requireBrowserClient(what: string): Promise<void> {
   }
 }
 
+// Two browser tabs on one canvas destroy each other's work. Every tab POSTs its
+// whole scene to /api/elements/sync, and the handler reads "absent from this
+// payload" as "the human deleted it" — so each tab's sync deletes whatever the
+// other just added, and the two thrash indefinitely. On 2026-08-07 that silently
+// wiped a whole round of human markup: 386 adds against 385 deletes, six
+// annotations gone, and nothing in the report said why (KI-7).
+//
+// Pure so it can be tested without a live server; callers pass
+// `(await getHealth()).websocket_clients`.
+export function multiClientWarning(clients: number): string | null {
+  if (clients <= 1) return null;
+  return (
+    `${clients} browser tabs are connected to ${EXPRESS_SERVER_URL}. They will delete ` +
+    `each other's elements, and anything drawn now can be lost silently. ` +
+    `Close all but one tab before drawing or reading markup.`
+  );
+}
+
 // Read JSON input from a positional file argument or stdin ("-" = stdin).
 export async function readJsonInput(file: string | undefined, what: string): Promise<any> {
   const raw = file !== undefined && file !== '-' ? fs.readFileSync(file, 'utf-8') : await readStdin();

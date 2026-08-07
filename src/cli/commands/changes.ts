@@ -1,5 +1,5 @@
 import { parseArgs, CliUsageError } from '../args.js';
-import { printJson, note } from '../util.js';
+import { printJson, note, multiClientWarning } from '../util.js';
 import { ensureCanvasRunning } from '../../core/spawn.js';
 import {
   getElements,
@@ -21,14 +21,30 @@ function parseNumberFlag(value: unknown, name: string): number | undefined {
   return parsed;
 }
 
-async function report(payload: ChangePayload, asJson: boolean): Promise<void> {
+async function report(
+  payload: ChangePayload,
+  asJson: boolean,
+  warning?: string | null
+): Promise<void> {
   if (asJson) {
-    printJson(payload);
+    printJson(warning ? { ...payload, warnings: [warning] } : payload);
     return;
   }
   const elements = await getElements();
+  // In-band as well as on stderr: the MCP tools take no arguments and an agent
+  // reading a report has no other way to be told the canvas is eating markup.
+  const banner = warning ? `⚠️  ${warning}\n\n` : '';
   // Plain text by design: this is the agent/human-readable review report
-  process.stdout.write(formatChangeReport(payload, elements) + '\n');
+  process.stdout.write(banner + formatChangeReport(payload, elements) + '\n');
+}
+
+// Never fail a report because the health probe did; the warning is a courtesy.
+async function clientWarning(): Promise<string | null> {
+  try {
+    return multiClientWarning((await getHealth()).websocket_clients);
+  } catch {
+    return null;
+  }
 }
 
 export async function changes(argv: string[]): Promise<void> {
@@ -39,7 +55,9 @@ export async function changes(argv: string[]): Promise<void> {
 
   await ensureCanvasRunning();
   const since = parseNumberFlag(flags.since, 'since') ?? 0;
-  await report(await getChanges(since), !!flags.json);
+  const warning = await clientWarning();
+  if (warning) note(`WARNING: ${warning}`);
+  await report(await getChanges(since), !!flags.json, warning);
 }
 
 export async function watch(argv: string[]): Promise<void> {
@@ -65,11 +83,16 @@ export async function watch(argv: string[]): Promise<void> {
   }
   const settle = parseNumberFlag(flags.settle, 'settle') ?? 1.5;
 
+  // Before the wait, not after: the whole cost of this bug is a person spending
+  // ten minutes drawing into a canvas that is deleting their work.
+  const warning = await clientWarning();
+  if (warning) note(`WARNING: ${warning}`);
+
   note(`Waiting up to ${timeout}s for canvas edits (open ${EXPRESS_SERVER_URL} to draw)...`);
   const payload = await waitForChanges(since, timeout, settle);
 
   if (payload.timedOut && !flags.json) {
     note(`No edits within ${timeout}s.`);
   }
-  await report(payload, !!flags.json);
+  await report(payload, !!flags.json, warning);
 }
