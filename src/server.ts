@@ -289,6 +289,16 @@ const CreateElementSchema = z.object({
   role: RoleSchema.optional(),
   fontSize: z.number().optional(),
   fontFamily: z.union([z.string(), z.number()]).optional(),
+  // Bound-text back-pointer — without it, zod strips containerId on import
+  // and re-imported bound labels detach from their containers
+  containerId: z.string().nullable().optional(),
+  // Excalidraw identity fields — preserve through import so re-exported
+  // scenes keep their stacking order, roughness seeds, and timestamps, and
+  // no-op import→export cycles stay byte-stable
+  index: z.string().nullable().optional(),
+  seed: z.number().optional(),
+  versionNonce: z.number().optional(),
+  updated: z.number().optional(),
   groupIds: z.array(z.string()).optional(),
   locked: z.boolean().optional(),
   roundness: z.object({ type: z.number(), value: z.number().optional() }).nullable().optional(),
@@ -323,7 +333,7 @@ const CreateElementSchema = z.object({
   fileId: z.string().optional(),
   status: z.string().optional(),
   scale: z.tuple([z.number(), z.number()]).optional(),
-});
+}).passthrough();
 
 const UpdateElementSchema = z.object({
   id: z.string(),
@@ -344,6 +354,16 @@ const UpdateElementSchema = z.object({
   role: RoleSchema.optional(),
   fontSize: z.number().optional(),
   fontFamily: z.union([z.string(), z.number()]).optional(),
+  // Bound-text back-pointer — without it, zod strips containerId on import
+  // and re-imported bound labels detach from their containers
+  containerId: z.string().nullable().optional(),
+  // Excalidraw identity fields — preserve through import so re-exported
+  // scenes keep their stacking order, roughness seeds, and timestamps, and
+  // no-op import→export cycles stay byte-stable
+  index: z.string().nullable().optional(),
+  seed: z.number().optional(),
+  versionNonce: z.number().optional(),
+  updated: z.number().optional(),
   groupIds: z.array(z.string()).optional(),
   locked: z.boolean().optional(),
   roundness: z.object({ type: z.number(), value: z.number().optional() }).nullable().optional(),
@@ -380,7 +400,7 @@ const UpdateElementSchema = z.object({
   fileId: z.string().optional(),
   status: z.string().optional(),
   scale: z.tuple([z.number(), z.number()]).optional(),
-});
+}).passthrough();
 
 // API Routes
 
