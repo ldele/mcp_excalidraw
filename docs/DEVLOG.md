@@ -8,6 +8,40 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-08-07 — Merged upstream for the first time since the fork (rule 2)
+- **What:** `git merge upstream/main` — `2930519` (export fidelity) and `ecf3cac` (`.passthrough()`).
+  Clean, no conflicts. Brings `src/core/expand-elements.ts` (new, 276 lines), rewrites
+  `src/core/share-url.ts`, and touches `scene-io.ts`, `obsidian-md.ts`, `server.ts`. Merge commit
+  `1c5925b`.
+- **Why:** it fixes a live data-corruption bug in our own import path, reproduced before merging.
+  Our `CreateElementSchema` had no `containerId`, `index`, `seed` or `versionNonce`, and zod strips
+  unknown keys — so a scene exported with 10 bound text children came back from `import` with
+  **0**. Every label detached from its shape, and the reading changed with it: `button "General"`
+  became `button` plus a separate child `text "General"`, and **`input? "Project name"` became
+  `card?`** — 23 components/5 inferred turned into 33/7. `wireframe --score` did **not** flag any of
+  it (`fallbacks` stayed 0), so it was silent. `snapshot restore` shares the defect: restoring a
+  snapshot taken while the labels were intact also returned 0 `containerId`. Both of the skill's
+  documented recovery paths were corrupting drawings.
+- **Rejected:** cherry-picking only the schema additions (leaves us permanently diverged on
+  `share-url.ts`/`scene-io.ts`, converting a free merge into a conflicted one next time);
+  reimplementing the schema fix ourselves (same outcome, all of the divergence cost, none of the
+  benefit); continuing to defer (the cost only grows — every commit we add to `server.ts` widens the
+  collision surface, and this was the cheapest the merge will ever be).
+- **Verified:** `type-check` clean, full build, 43/43 tests, bind check. Merged schema carries
+  `containerId`/`index`/`seed`/`versionNonce` on both Create and Update, `.passthrough()` on both,
+  and `role: RoleSchema.optional()` still validates — so unknown props now survive without invalid
+  roles slipping through. Then the decisive test, same input file as before the merge:
+  **35 elements / 10 `containerId` in → 35 / 10 out**, and the reading returned to 23 components,
+  5 inferred, 0 fallbacks — identical to the original drawing. `export` to both `.excalidraw` and
+  Obsidian `.excalidraw.md` still work (the `expand-elements.ts` path).
+- **Not tested:** `share`. It uploads the scene to excalidraw.com, and `share-url.ts` is the file
+  upstream rewrote most heavily — so that is exactly the path most worth exercising and the one that
+  needs a deliberate decision to publish a scene externally. Smoke-test it before relying on it.
+- **Opens:** `.passthrough()` now makes `customData` viable, which is what **KI-5** (copy-paste
+  destroys a declared `role`) and Phase 3 have been waiting on — the roadmap item is no longer
+  blocked on upstream. Nothing else changed for our layer: upstream has never touched
+  `wireframe.ts` or `changes.ts`, which is why this merged clean at 14 commits of divergence.
+
 ## 2026-08-07 — A multi-tab guard, and fixing the regression the echo fix introduced
 - **What:** two changes from two failed attempts at the PR 1 markup round. (1) `multiClientWarning`
   in `src/cli/util.ts`, wired into `changes` and `watch` — warns on stderr *and* in-band in the

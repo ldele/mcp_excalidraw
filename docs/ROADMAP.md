@@ -135,6 +135,16 @@ code" and "the reader stops at the reading" are different products.
 
 ## Upstream
 
-The fork tracks `yctimlin/mcp_excalidraw`, which has not moved since the fork point. Checking is
-rule 2 in `.claude/CONTEXT.md`. If upstream ever lands wireframe work of its own, that is an ADR
-rather than a merge.
+The fork tracks `yctimlin/mcp_excalidraw`. Checking is rule 2 in `.claude/CONTEXT.md`. If upstream
+ever lands wireframe work of its own, that is an ADR rather than a merge.
+
+**Merged 2026-08-07** — the first time since the fork, at 14 commits of divergence, cleanly. Worth
+recording *why* it was cheap, because it sets the policy: upstream has never touched
+`wireframe.ts` or `changes.ts`, where nearly all of our work lives, and our diff in the one shared
+file (`server.ts`) is additive rather than a rewrite. Divergence in our own layer is not an argument
+against taking base fixes — and this merge fixed a live bug we had reproduced but not yet diagnosed
+(`import` and `snapshot restore` were detaching every bound label, silently changing what a
+wireframe read as; DEVLOG 2026-08-07).
+
+The lesson for next time: merge cost grows with every commit we add to `server.ts`, so check at
+session start as rule 2 says and take base fixes promptly rather than accumulating a deferral.

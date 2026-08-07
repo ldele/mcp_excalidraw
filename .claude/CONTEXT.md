@@ -63,9 +63,9 @@ needs an ADR. Upstream moved for the first time since the fork; merge decision d
 - Whether markup attribution holds up with a human in it. The loop itself has now been exercised
   (2026-08-07) and the browser-boundary defect it exposed is fixed — but no person has yet drawn an
   annotation through the working loop, so every attribution number we have is still agent-drawn.
-- Whether to take upstream's `.passthrough()` + export-fidelity commits. Both touch `src/server.ts`;
-  `merge-tree` says no conflicts. Relevant because `.passthrough()` is what would let `customData`
-  survive the editor, which is what KI-5 and Phase 3 both need.
+- Whether `customData` should now carry the declared `role`. Upstream's `.passthrough()` landed in
+  the 2026-08-07 merge, so unknown props survive the schema and the mechanism finally exists — this
+  is what KI-5 and Phase 3 were blocked on. Still a decision (an ADR), not a given.
 - Whether Excalidraw's own **frames** should replace the "screen = plain rectangle" convention.
 - Whether the wireframe layer should ever emit code, or stop at the reading and leave generation to
   the calling agent. Currently the latter, deliberately — see `docs/ROADMAP.md`.
