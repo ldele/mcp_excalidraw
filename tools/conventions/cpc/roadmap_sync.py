@@ -4,7 +4,7 @@
 Parses the markdown PR table in docs/ROADMAP.md (columns: PR | Scope | Status | Spec) and,
 for each not-done row, ensures docs/sprints/SPRINT-NNN-slug.md exists — seeded with the row's
 scope (DoD) and spec (uses). Idempotent: never overwrites a filled contract.
-  python roadmap_sync.py --root . [--base main] [--archive-done]
+  python roadmap_sync.py --root . [--base BRANCH] [--archive-done]   # base: detected, not `main`
 
 --archive-done flips an existing contract's header to `superseded` when its row reads done,
 so the next docs_check/audit sweep moves it to docs/archive/.
@@ -12,6 +12,14 @@ so the next docs_check/audit sweep moves it to docs/archive/.
 from __future__ import annotations
 import argparse, datetime as dt, re
 from pathlib import Path
+
+# KI-4: a hardcoded `--base main` silently disables two sprint_check gates in any repo whose
+# default branch is named otherwise. `sprint_start` was fixed at the time; this is the OTHER
+# contract-creation path — the one CONVENTIONS §11's documented flow starts from (edit ROADMAP ->
+# roadmap_sync -> sprint_start), though `cpc-keypoint plan-start` runs no gates itself — so it
+# reintroduced the defect into every contract it materialized. `workflow -> gates` is an allowed
+# concept-map edge, and one implementation beats two copies.
+from cpc.sprint_check import default_branch
 
 DONE = re.compile(r"\b(done|complete|completed|merged|shipped)\b|✅|✔|✓", re.I)
 NUM = re.compile(r"(\d+)")
@@ -70,10 +78,13 @@ def parse_table(md: str) -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", type=Path)
-    ap.add_argument("--base", default="main")
+    ap.add_argument("--base", default=None,
+                    help="branch these sprints merge into; defaults to the repo's DETECTED "
+                         "default branch (a hardcoded `main` is what caused KI-4)")
     ap.add_argument("--archive-done", action="store_true")
     args = ap.parse_args()
     root = args.root.resolve()
+    base = args.base or default_branch(root)
     roadmap = root / "docs" / "ROADMAP.md"
     if not roadmap.exists():
         raise SystemExit("no docs/ROADMAP.md")
@@ -106,7 +117,7 @@ def main() -> int:
         spec = r["spec"].strip("` ")
         uses = f"- {spec}" if spec and "<" not in spec else "- <file the agent should load>"
         dod = r["scope"] or "<behavioral acceptance criteria>"
-        f.write_text(CONTRACT_TMPL.format(date=date, num=num, slug=slug, base=args.base,
+        f.write_text(CONTRACT_TMPL.format(date=date, num=num, slug=slug, base=base,
                                           dod=dod, uses=uses), encoding="utf-8", newline="")
         created += 1
         print(f"+ created: {f.name}")

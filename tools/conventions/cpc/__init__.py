@@ -11,4 +11,4 @@ The historical `python scripts/<name>.py` paths still work via thin shims in scr
 Single source of truth for each gate's logic lives here.
 """
 
-__version__ = "1.3.0"
+__version__ = "1.5.0"

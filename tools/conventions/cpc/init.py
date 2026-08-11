@@ -41,6 +41,11 @@ _PROTOTYPE: list[tuple[str, str, bool]] = [
     (".claude/CONTEXT.md",        ".claude/CONTEXT.md",        True),
     (".claude/SESSION.md",        ".claude/SESSION.md",        True),
     (".claude/KNOWN_ISSUES.md",   ".claude/KNOWN_ISSUES.md",   True),
+    # ADR-035: the standing half of the writing contract — audience, register, standing answers.
+    # Laid in BOTH profiles because a prototype's README is read by strangers too, and it is the
+    # cheapest artifact here to fill (~20 lines). `cpc-init-check` treats it as RECOMMENDED, not
+    # required: making it required would fail every consumer repo that has not re-vendored.
+    (".claude/NORTH_STAR.md",     ".claude/NORTH_STAR.md",     True),
     (".claude/.gitignore",        ".claude/.gitignore",        False),
     (".gitattributes",            ".gitattributes",            False),
     (".gitignore",                ".gitignore",                False),
@@ -50,6 +55,10 @@ _STANDARD_EXTRA: list[tuple[str, str, bool]] = [
     ("docs/ROADMAP.md",                   "docs/ROADMAP.md",                   True),
     ("docs/architecture.md",              "docs/architecture.md",              True),
     ("docs/decisions/ADR-000-template.md","docs/decisions/ADR-000-template.md",False),
+    # ADR-037: the pivot variant. Laid alongside the plain template because a direction change is
+    # commonest in the first weeks — exactly when a project has just graduated to `standard` and is
+    # least likely to go looking for a template it has never heard of.
+    ("docs/decisions/ADR-000-pivot-template.md","docs/decisions/ADR-000-pivot-template.md",False),
     ("docs/sprints/SPRINT-000-template.md","docs/sprints/SPRINT-000-template.md",False),
     ("docs/features/FEATURE-000-template.md","docs/features/FEATURE-000-template.md",False),
     ("docs/specs/SPEC-000-template.md",    "docs/specs/SPEC-000-template.md",    False),  # ADR-019: executor brief
@@ -85,25 +94,65 @@ def _cpc_version() -> str:
     except Exception:
         return "unknown"
 
+def _manifest_of(stamp: Path) -> list[str]:
+    """The modules the PREVIOUS drop recorded writing. Read before `_VERSION` is overwritten."""
+    if not stamp.is_file():
+        return []
+    for ln in stamp.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if ln.startswith("modules:"):
+            return ln.split(":", 1)[1].split()
+    return []
+
+def _retired_modules(previous: list[str], shipping: set[str]) -> list[str]:
+    """What the last drop wrote that this one no longer ships — a rename or removal in cpc.
+
+    Copying never removes, so before this a retired module stayed in every consumer tree forever,
+    and `init_check`'s manifest check could not see it either: that check reads named-but-absent,
+    and a ghost is the mirror — present but unnamed. It is not inert. `settings_doc` walks modules
+    dynamically, so a ghost carrying a stale DEFAULTS puts phantom settings in a consumer's
+    generated SETTINGS.md.
+
+    The removal set comes from the manifest and never from a directory listing: cpc deletes only
+    what cpc recorded putting there, so a file the consumer added survives (init_check flags it
+    instead). `_VERSION` is read out of the consumer's tree, which makes it untrusted input to a
+    delete — names are filtered to bare `*.py` filenames so a manifest reading `../../AGENTS.md` is
+    skipped rather than resolved.
+    """
+    return sorted(m for m in previous
+                  if m not in shipping and m.endswith(".py") and m == Path(m).name)
+
 def vendor_gates(root: Path, dry_run: bool) -> None:
     """Copy the cpc package into tools/conventions/cpc/ (+ _VERSION). Overwrites on re-run."""
     src = _cpc_pkg_dir()
     dst = root / _VENDOR_DST
     rel = _VENDOR_DST
     py_files = sorted(p.name for p in src.glob("*.py"))
+    retired = _retired_modules(_manifest_of(dst / "_VERSION"), set(py_files))
     if dry_run:
         print(f"+ would vendor: {rel}/  ({len(py_files)} modules, cpc {_cpc_version()})")
+        for name in retired:
+            print(f"- would remove: {rel}/{name}  (retired — not shipped by cpc {_cpc_version()})")
         return
     dst.mkdir(parents=True, exist_ok=True)
     for name in py_files:
         shutil.copy2(src / name, dst / name)
+    for name in retired:
+        (dst / name).unlink(missing_ok=True)
+        print(f"- removed: {rel}/{name}  (retired — not shipped by cpc {_cpc_version()})")
     # The license notice travels with the vendor drop, so substantial copies stay marked (an
     # all-rights-reserved notice — see LICENSE). Resolved next to the templates dir (repo root on
     # an editable/source install); absent (bare wheel) -> skipped.
     lic = _templates_dir().parent / "LICENSE"
     if lic.is_file():
         shutil.copy2(lic, dst / "LICENSE")
-    (dst / "_VERSION").write_text(_cpc_version() + "\n", encoding="utf-8", newline="")
+    # Line 1 stays the bare version (any reader that took the first line still works). The manifest
+    # below it is what makes a PARTIAL drop detectable: the gates import each other, so a copy that
+    # is missing one module fails with a raw `ModuleNotFoundError` traceback at import — the gate
+    # dies instead of reporting, and the message names a cpc internal rather than the real problem.
+    # `cpc-init-check` reads this list and says "re-run cpc-init" instead.
+    (dst / "_VERSION").write_text(
+        _cpc_version() + "\nmodules: " + " ".join(py_files) + "\n",
+        encoding="utf-8", newline="")
     (root / "tools" / "conventions" / ".gitignore").write_text("__pycache__/\n", encoding="utf-8", newline="")
     print(f"+ vendored gates: {rel}/  ({len(py_files)} modules, cpc {_cpc_version()})")
 
@@ -124,7 +173,12 @@ def _fill(text: str, project: str, today: str) -> str:
 # Entry-file routes whose targets only the standard profile lays. On a prototype they dangle, and
 # the vendored docs_check [route] gate rightly ERRORs on a dangling route — so an untrimmed entry
 # file made a fresh prototype fail its own gate out of the box (ADR-021).
-_PROTO_ENTRY_DROPS = ("`docs/DEVLOG.md`", "`docs/ROADMAP.md`", "`docs/architecture.md`")
+# `docs/DIGEST.md` joins the list for a different reason than the others: it is never laid by ANY
+# profile — it appears once a project registers cpc-digest under [generate]. The standard profile
+# tolerates the dangling route through its laid `[routes] allow_missing`; a prototype lays no
+# conventions.toml at all, so the line has to go instead.
+_PROTO_ENTRY_DROPS = ("`docs/DEVLOG.md`", "`docs/ROADMAP.md`", "`docs/architecture.md`",
+                      "`docs/DIGEST.md`")
 
 def _trim_entry_for_prototype(body: str) -> str:
     """Drop entry-file lines routing to docs/ files the prototype does not lay (ADR-021).

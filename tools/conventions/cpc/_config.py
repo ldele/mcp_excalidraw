@@ -5,7 +5,13 @@
 (each section deep-copied, so the template is never mutated), then overlays the user's
 `scripts/conventions.toml` — or an explicit `--config` path — section by section. Extracted from
 docs_check and sprint_check, which carried byte-identical copies (DOD-D001 cleared); each now passes
-its own `DEFAULTS` in. The `tomllib`/`tomli` import fallback lives here so it isn't duplicated too.
+its own `DEFAULTS` in.
+
+The `tomllib`/`tomli` fallback guard is repeated in the three gates that read toml without going
+through `load_config` (`coupling_check`, `init_check`, `test_api_check`); `dod_lint` reads its own
+`dodlint.toml` too, with a tomllib-only guard and no `tomli` arm. The *loader* is what is
+single-sourced here, not the import. Earlier wording claimed the fallback "isn't duplicated too",
+which was never true.
 """
 from __future__ import annotations
 from pathlib import Path

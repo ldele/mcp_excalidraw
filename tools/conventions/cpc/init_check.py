@@ -38,7 +38,11 @@ _PROTO_REQUIRED_FILES = [
     "AGENTS.md", "CLAUDE.md", ".claude/CONTEXT.md", ".claude/SESSION.md",
     ".claude/KNOWN_ISSUES.md", ".gitattributes",
 ]
-_RECOMMENDED_FILES = [".gitignore", ".claude/.gitignore"]
+# RECOMMENDED, not required: a missing one WARNs (and so fails only under --strict). `NORTH_STAR.md`
+# (ADR-035) is here rather than in the required list on compatibility grounds — promoting it would
+# fail every consumer repo that has not re-vendored since, turning a documentation addition into a
+# broken build. Promote once the fleet has re-vendored.
+_RECOMMENDED_FILES = [".gitignore", ".claude/.gitignore", ".claude/NORTH_STAR.md"]
 _STANDARD_REQUIRED_FILES = ["docs/DEVLOG.md", "docs/ROADMAP.md",
                             "docs/architecture.md", "scripts/conventions.toml"]
 _STANDARD_REQUIRED_DIRS = ["docs/decisions"]
@@ -100,6 +104,44 @@ def main() -> int:
     if entry.is_file() and "CONVENTIONS" not in entry.read_text(encoding="utf-8", errors="ignore"):
         errors.append(f"[init] {entry.name} does not reference CONVENTIONS (the §12/§13 preference "
                       f"home) — engineering-preference presence not carried (ADR-007)")
+
+    # The vendored drop must be COMPLETE. The gates import each other as a package, so a copy that
+    # is missing one module dies at import with a raw `ModuleNotFoundError` naming a cpc internal —
+    # the gate stops reporting rather than reporting a problem, which is the failure mode this repo
+    # treats as worse than a wrong answer. It happens on a hand-copied file, an interrupted
+    # re-vendor, or a merge that took one module and not its sibling. `_VERSION`'s `modules:` line
+    # is the manifest written at vendor time; anything named there and absent is drift.
+    vdir = root / "tools" / "conventions" / "cpc"
+    stamp = vdir / "_VERSION"
+    if stamp.is_file():
+        manifest: list[str] = []
+        for ln in stamp.read_text(encoding="utf-8", errors="ignore").splitlines():
+            if ln.startswith("modules:"):
+                manifest = ln.split(":", 1)[1].split()
+        missing = [m for m in manifest if not (vdir / m).is_file()]
+        if missing:
+            errors.append(f"[vendor] tools/conventions/cpc/ is incomplete — {len(missing)} module(s) "
+                          f"named in _VERSION are absent ({', '.join(missing[:4])}"
+                          f"{', …' if len(missing) > 4 else ''}); the gates import each other, so "
+                          f"they will die at import rather than report. Re-run `cpc-init` to "
+                          f"re-vendor")
+        elif not manifest:
+            warns.append("[vendor] tools/conventions/cpc/_VERSION carries no `modules:` manifest — "
+                         "it predates the completeness check; re-run `cpc-init` to refresh it")
+        # The mirror case: present but UNNAMED. The check above reads named-but-absent, so a module
+        # left over from an older cpc (a rename, or a hand-copy that skipped the tool) satisfied it
+        # by doing nothing. `cpc-init` now removes the ones it can prove it wrote — the previous
+        # manifest names them — and this reports whatever is left. WARN, not error: the file is
+        # inert on its own, and a consumer who deliberately put something there deserves a nag
+        # rather than a broken build. Skipped entirely for a pre-manifest drop, where every module
+        # is unnamed by definition and this would bury the one actionable line under thirty.
+        if manifest:
+            ghosts = sorted(p.name for p in vdir.glob("*.py") if p.name not in set(manifest))
+            if ghosts:
+                warns.append(f"[vendor] tools/conventions/cpc/ carries {len(ghosts)} module(s) not "
+                             f"named in _VERSION ({', '.join(ghosts[:4])}"
+                             f"{', …' if len(ghosts) > 4 else ''}) — left over from an older cpc, or "
+                             f"copied in by hand; re-run `cpc-init` to re-vendor")
 
     for w in warns:
         print(f"WARN  {w}")

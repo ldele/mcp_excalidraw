@@ -11,7 +11,8 @@ Reads the active docs/sprints/SPRINT-*.md, computes the change set over the bran
                             1. existence  : every `uses` path/glob resolves to >=1 file -> ERROR
                             2. budget     : resolved `uses` files/lines <= conventions.toml caps -> ERROR
                             3. uses⊇affects: a base-existing `affects` file absent from `uses`
-                                            -> WARN (ERROR if [uses] superset_affects = "error")
+                                            -> WARN (ERROR if [uses] superset_affects = "error");
+                                            [uses] superset_affects_exempt globs skip a file
 
 stdlib only (py3.11+). Exit 1 on errors; warnings also fail under --strict.
 """
@@ -38,7 +39,7 @@ RULES: RuleRegistry = {
 # Defaults for the uses read-set gate; overridden by root/scripts/conventions.toml (or --config).
 DEFAULTS = {
     "budgets": {"uses_max_files": 15, "uses_max_lines": 4000, "uses_max_tokens": 0},
-    "uses": {"superset_affects": "warn"},
+    "uses": {"superset_affects": "warn", "superset_affects_exempt": []},
 }
 GLOB_CHARS = set("*?[]")
 
@@ -346,8 +347,16 @@ def main() -> int:
     #   tier 3 — uses ⊇ affects: you must read what you change. Files created this sprint
     #   (absent from `base`) are exempt — you can't read what doesn't exist yet (and tier 1
     #   forbids listing a nonexistent path in `uses`).
+    #   `superset_affects_exempt` globs skip a file outright (PR-23a). Tier 3 asks "did you read what
+    #   you edited" (ADR-003), and that question does not apply to a bookkeeping APPEND: no session
+    #   loads a 700-line DEVLOG archive to add an entry on top of it, and one that did would blow the
+    #   tier-2 budget. Empty in code — the exemption is a per-project claim, so a code default would
+    #   un-gate files in trees cpc has never seen. `templates/conventions.toml` ships the append-only
+    #   registers pre-filled, which is where a consumer can see and edit it.
     mode = str(cfg["uses"].get("superset_affects", "warn")).lower()
+    exempt = [str(g) for g in cfg["uses"].get("superset_affects_exempt", []) if str(g).strip()]
     uses_patterns = [strip_note(u) for u in sec["uses"] if strip_note(u)]
+    n_exempt = 0
     for raw in sec["affects"]:
         a = strip_note(raw)
         if not a:
@@ -360,8 +369,17 @@ def main() -> int:
                 continue
             if matches_any(rel, uses_patterns):
                 continue
+            if matches_any(rel, exempt):
+                n_exempt += 1
+                continue
             msg = f"[uses] affects file modified but not in read-set `uses`: {rel}"
             (errors if mode == "error" else warns).append(msg)
+    #   Say how much was suppressed. A silent exemption is how `superset_affects_exempt = ["**"]`
+    #   turns tier 3 off while the gate still prints 0 warnings — the "a check reports clean because
+    #   its input never reached it" shape KI-4 and KI-5 both were.
+    if n_exempt:
+        info(f"INFO  tier 3: {n_exempt} affects file(s) exempt via "
+             f"[uses] superset_affects_exempt")
 
     # §13 net (ADR-013): derived artifacts must be regenerated before push. Cheap because
     # this gate is pre-push only, and each generator's `check` is a fingerprint-compare. The

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Assisted sprint start: scaffold the contract + open the doc stubs the gate will enforce.
 
-  python sprint_start.py --root . --sprint 13 --slug rule-binding [--title "..."] [--base main]
+  python sprint_start.py --root . --sprint 13 --slug rule-binding [--title "..."] [--base BRANCH]
+  # --base defaults to the repo's DETECTED default branch, not a literal `main` (KI-4)
 
 Idempotent: re-running won't duplicate the contract or the DEVLOG stub.
 You fill in DoD / uses / affects / contracts and the DEVLOG body; sprint_check.py enforces them.
