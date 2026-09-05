@@ -32,6 +32,7 @@ import argparse, shlex, subprocess, sys
 from pathlib import Path
 
 from cpc._config import load_config
+from cpc._console import make_console_safe
 
 # Absent section -> empty artifact list -> no-op. Mirrors the optional-section pattern
 # load_config already uses for every other gate.
@@ -48,6 +49,7 @@ def _run(cmd: str, root: Path) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(
         description="Regenerate or drift-check derived artifacts (CONVENTIONS.md §13).")
     ap.add_argument("--root", default=".", type=Path)

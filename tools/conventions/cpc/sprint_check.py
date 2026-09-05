@@ -23,6 +23,7 @@ from pathlib import Path
 from cpc._config import load_config
 from cpc.findings import Finding, RuleRegistry, from_tagged, to_json
 from cpc.tokens import estimate_tokens
+from cpc._console import make_console_safe
 
 # Every finding this gate can emit, by its `[tag]` id (ADR-029) — see docs_check.RULES for why the
 # registry is explicit rather than scraped. `tests/test_rule_inventory.py` keeps it honest.
@@ -223,6 +224,7 @@ def matches_any(path: str, patterns: list[str]) -> bool:
     return False
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--contract", default=None, type=Path)

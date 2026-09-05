@@ -47,6 +47,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from cpc._console import make_console_safe
 
 ENTRY = re.compile(r"^##\s+((?:D|C)-\S+)\s*[—-]\s*(.*)$")
 FIELD = re.compile(r"^\*\*(Canonical|Forbidden):\*\*\s*(.*)$", re.IGNORECASE)
@@ -297,6 +298,7 @@ def scan(fmap: dict[str, tuple[str, str]], files) -> list[tuple]:
 
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(prog="cpc-glossary", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=".", type=Path, help="project root (default: .)")

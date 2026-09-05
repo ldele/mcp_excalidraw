@@ -37,6 +37,7 @@ from pathlib import Path
 
 from cpc._config import load_config
 from cpc.docs_scan import CLASS_RE, UPDATED_RE, head_block, header_of
+from cpc._console import make_console_safe
 
 DEFAULTS = {"keypoints": {},
             # mirrors docs_check's [sprint] default: the stamp machinery rides the same toggle as
@@ -386,6 +387,7 @@ def stale_living_edits(root: Path, today: dt.date, cfg: dict | None = None) -> l
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(
         description="Run a workflow keypoint: deterministic floor + judgment checklist "
                     "(CONVENTIONS.md S15).")

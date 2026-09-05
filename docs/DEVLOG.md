@@ -8,6 +8,33 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-09-05 — The inbound-issue ledger, and the first five tickets (cpc ADR-047)
+- **What:** `docs/TICKETS.md` laid from cpc's `templates/docs/TICKETS.md` (its fleet follow-up
+  item 7 names this repo). Opened **T-001–T-005** from
+  `docs/feedback/2026-08-21-provenote-wireframe-session.md` §1–§5: a text element created without
+  `width`/`height` is stored with a null bbox and dropped from the reading, taking every screen
+  heading with it (§1); a declared `role: shape` is counted as a fallback (§2); no `progress` /
+  `meter` role (§3); `textAlign` on a bound label round-trips but renders centred (§4); screen
+  naming picks the topmost ≥20px heading over the largest (§5). `AGENTS.md`'s Reference line routes
+  at the ledger; the feedback note carries a one-line pointer to the tickets. §6 of the note is
+  praise and got no ticket.
+- **Why:** the note had sat 15 days as `class: disposable` with nothing tracking whether its
+  findings were answered — the DEVLOG's newest entry predates it. A ticket is what somebody
+  *reported*; a known issue is what this project found in itself. Two of the five (§1, §2) are
+  defects in the reading, the product's own claim.
+- **Rejected:** folding them into `KNOWN_ISSUES.md` (its admission test is "twice", and a report has
+  bitten once, elsewhere); running the verbs from the vendored drop — `tools/conventions/cpc/` is
+  1.8.0 and predates `cpc.ticket`, so the ledger's intro says to use the global `cpc-ticket --root .`
+  until the next re-vendor.
+- **Verified:** `cpc-ticket --root . check` → 5 tickets, 5 open, OK. `just check` (vendored
+  `docs_check --strict`) reports one warning that predates this session — `.claude/NORTH_STAR.md`'s
+  `updated:` (2026-08-09) lags its last commit (2026-08-11) — and nothing about the ledger.
+- **Opens:** answer them. §1 is the costly one (the documented happy path silently does nothing);
+  the note's own fix order is measure text server-side, else reject at the API, at minimum name the
+  cause in the "could not be named" line. `claude-skills` now ships `wireframe-first` (its
+  v0.56.0), which routes every wrong reading a consumer meets to this ledger — expect tickets from
+  outside.
+
 ## 2026-08-07 — Merged upstream for the first time since the fork (rule 2)
 - **What:** `git merge upstream/main` — `2930519` (export fidelity) and `ecf3cac` (`.passthrough()`).
   Clean, no conflicts. Brings `src/core/expand-elements.ts` (new, 276 lines), rewrites

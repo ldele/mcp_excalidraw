@@ -20,6 +20,7 @@ stdlib only (Python 3.11+). Exit 1 on any corruption; --strict also fails adviso
 from __future__ import annotations
 import argparse, subprocess, sys
 from pathlib import Path
+from cpc._console import make_console_safe
 
 # Extensions we always treat as text: NUL in any of these = corruption, no exceptions.
 TEXT_EXTS = {
@@ -94,6 +95,7 @@ def check_file(p: Path, check_eol: bool) -> tuple[list[str], list[str]]:
 
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--strict", action="store_true",

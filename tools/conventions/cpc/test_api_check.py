@@ -14,6 +14,7 @@ stdlib only (Python 3.11+). Exit 1 on a finding (warnings also fail under --stri
 from __future__ import annotations
 import argparse, re
 from pathlib import Path
+from cpc._console import make_console_safe
 try:
     import tomllib
 except ModuleNotFoundError:  # Python < 3.11
@@ -57,6 +58,7 @@ def iter_test_files(root: Path):
             yield p, rel
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Forbid live-API/network calls in test files.")
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--config", default=None, type=Path)

@@ -12,11 +12,13 @@ stdlib only (Python 3.11+). Exit 1 to block the push.
 """
 from __future__ import annotations
 import argparse, os
+from cpc._console import make_console_safe
 
 FLAG = "CPC_PUSH_OK"
 
 def main() -> int:
     # Accept and ignore any args — pre-push hooks are handed the remote name/url.
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Block a push unless CPC_PUSH_OK is set.")
     ap.add_argument("--root", default=".")
     ap.add_argument("rest", nargs="*")

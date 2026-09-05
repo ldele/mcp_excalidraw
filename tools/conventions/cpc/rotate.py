@@ -36,11 +36,12 @@ leave the index unwritten.
 stdlib only (Python 3.11+). Exit 1 on a failed verification or an unreadable target; 0 otherwise.
 """
 from __future__ import annotations
-import argparse, datetime as dt
+import argparse, datetime as dt, re
 from pathlib import Path
 
 from cpc._config import load_config
-from cpc.docs_rules_history import SESSION_ENTRY_RE
+from cpc.docs_rules_history import SESSION_ENTRY_RE, ends_entry
+from cpc._console import make_console_safe
 
 # name -> (live path, archive path, cap key, ADR/rule citation, archive title, archive blurb)
 LOGS: dict[str, tuple[str, str, str, str, str, str]] = {
@@ -63,19 +64,46 @@ def split_entries(text: str) -> tuple[str, list[str], str]:
     """(preamble, entries, tail) — every byte accounted for, so ''.join round-trips exactly.
 
     `tail` is the trailing run of non-entry lines after the last entry: a pointer line, a trailing
-    blank. It belongs to the live file and must not travel with the entry it happens to follow.
+    blank, a whole trailing `## Older entries` section. It belongs to the live file and must not
+    travel with the entry it happens to follow — if it does, rotating the oldest entry silently
+    carries the file's own pointer into the archive.
     """
     lines = text.splitlines(keepends=True)
     starts = [i for i, ln in enumerate(lines) if SESSION_ENTRY_RE.match(ln)]
     if not starts:
         return text, [], ""
-    end = len(lines)
+    # An entry ends at the next `## ` heading, dated or not (`ends_entry`). Scanning for that
+    # heading first is what catches a trailing SECTION; the backward walk below then reclaims the
+    # blank lines and `>` pointer lines that sit between the last entry and whatever follows.
+    end = next((i for i in range(starts[-1] + 1, len(lines)) if ends_entry(lines[i])), len(lines))
     while end > starts[-1] + 1 and (not lines[end - 1].strip()
                                     or lines[end - 1].lstrip().startswith(">")):
         end -= 1
     bounds = starts + [end]
     entries = ["".join(lines[bounds[i]:bounds[i + 1]]) for i in range(len(starts))]
     return "".join(lines[:starts[0]]), entries, "".join(lines[end:])
+
+
+ARCHIVE_NUM_RE = re.compile(r"-(\d+)\.md$")
+
+
+def newest_archive(root: Path, rel_arch: str) -> Path:
+    """The archive to rotate INTO: the highest-numbered `…-archive-NNN.md` that exists.
+
+    `LOGS` names `…-archive-001.md`, and this used to be taken literally — so a project that had
+    already grown `-002`, `-003`, `-004` got its newest entries filed into `-001`, on top of its
+    OLDEST history. `_verify` would then report the ordering inversions it caused, after writing
+    them. Measured in one consumer at four archives deep: every rotation since had to be done by
+    hand, and the runbook told people not to use `--write` at all.
+
+    cpc has no rollover — it never *creates* `-002` — so the numbering is the project's convention
+    and the highest number is its newest archive. Numeric sort, not lexicographic: `-010` must beat
+    `-009`. Nothing on disk yet means the configured `-001` is correct and will be created.
+    """
+    arch = root / rel_arch
+    candidates = [(int(m.group(1)), p) for p in arch.parent.glob(f"{ARCHIVE_NUM_RE.sub('-*.md', arch.name)}")
+                  if (m := ARCHIVE_NUM_RE.search(p.name))]
+    return max(candidates)[1] if candidates else arch
 
 
 def new_archive(title: str, blurb: str, cap: int, today: str) -> str:
@@ -88,7 +116,7 @@ def new_archive(title: str, blurb: str, cap: int, today: str) -> str:
 def plan(root: Path, name: str, cfg: dict) -> tuple[Path, Path, list[str], int, int]:
     """(live, archive, entries_to_move, kept, cap). Empty list = nothing to do."""
     rel_live, rel_arch, cap_key, _, _, _ = LOGS[name]
-    live, arch = root / rel_live, root / rel_arch
+    live, arch = root / rel_live, newest_archive(root, rel_arch)
     cap = int(cfg["budgets"].get(cap_key, 0) or 0)
     if cap <= 0 or not live.is_file():          # 0 = the cap is off, the token-cap precedent
         return live, arch, [], 0, cap
@@ -192,7 +220,33 @@ def rotate(root: Path, name: str, cfg: dict, write: bool, today: str) -> tuple[i
     return len(moving), _verify(live, arch, moving, keeping, inversions_before, heads_before)
 
 
+def index_note(root: Path, arch: Path, moving: list[str]) -> None:
+    """Say out loud that a `<STEM>-INDEX.md` now owes a line per moved entry — if one exists.
+
+    An index is a consumer convention, not a cpc one, so this tool does not write it: the prose
+    shape is the project's, and guessing it would put a wrong line in an append-only-adjacent file.
+    What it can do is refuse to move entries silently past a file that claims to list them all.
+
+    This is the moment-of-action half. `docs_check` rule 17 is the other half and the load-bearing
+    one — it catches the entries a hand rotation moved before this tool existed, and it keeps
+    catching them long after this message has scrolled off. A printed reminder that nobody reads is
+    the same failure the index bug already is.
+    """
+    index = arch.parent / f"{arch.name.split('-archive-', 1)[0]}-INDEX.md"
+    if not index.is_file():
+        return
+    rel = index.relative_to(root).as_posix() if index.is_relative_to(root) else str(index)
+    print(f"\n  NOTE  {rel} exists and now owes {len(moving)} line(s) — it is not written for you.")
+    for e in moving:
+        head = e.splitlines()[0].lstrip("# ").strip()
+        date, _, title = head.partition(" ")
+        print(f"          - **{date}** {title}".rstrip())
+    print(f"        Place them under the {arch.name} section, newest first. "
+          f"`docs_check` rule 17 fails until they are there.\n")
+
+
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(
         description="Rotate an append-only log's oldest entries to its archive, verbatim.")
     ap.add_argument("--root", default=".", type=Path)
@@ -210,7 +264,10 @@ def main(argv: list[str] | None = None) -> int:
     problems: list[str] = []
     for name in names:
         rel_live, rel_arch, _, cite, _, _ = LOGS[name]
-        live, _, moving, cap, _ = plan(root, name, cfg)
+        live, arch, moving, cap, _ = plan(root, name, cfg)
+        # The RESOLVED archive, not the `-001` in LOGS: printing the configured name while writing
+        # somewhere else is how the hardcoding stayed invisible for four releases.
+        rel_arch = arch.relative_to(root).as_posix() if arch.is_relative_to(root) else str(arch)
         if not live.is_file():
             print(f"  skip  {rel_live} — not present")
             continue
@@ -224,6 +281,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {verb} {moved} entry(ies) from {rel_live} -> {rel_arch}  [{cite}]")
         for e in moving:
             print(f"          {e.splitlines()[0][:88]}")
+        index_note(root, arch, moving)
 
     for p in problems:
         print(f"ERROR verification: {p}")

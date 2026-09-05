@@ -20,6 +20,7 @@ from pathlib import Path
 # reintroduced the defect into every contract it materialized. `workflow -> gates` is an allowed
 # concept-map edge, and one implementation beats two copies.
 from cpc.sprint_check import default_branch
+from cpc._console import make_console_safe
 
 DONE = re.compile(r"\b(done|complete|completed|merged|shipped)\b|✅|✔|✓", re.I)
 NUM = re.compile(r"(\d+)")
@@ -76,6 +77,7 @@ def parse_table(md: str) -> list[dict]:
     return out
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--base", default=None,

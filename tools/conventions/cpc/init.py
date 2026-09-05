@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse, datetime as dt, re, shutil
 from importlib import resources
 from pathlib import Path
+from cpc._console import make_console_safe
 
 # --- what each profile lays -------------------------------------------------------------------
 # (src relative to templates/, dest relative to --root, fill placeholders?)
@@ -60,7 +61,10 @@ _STANDARD_EXTRA: list[tuple[str, str, bool]] = [
     # least likely to go looking for a template it has never heard of.
     ("docs/decisions/ADR-000-pivot-template.md","docs/decisions/ADR-000-pivot-template.md",False),
     ("docs/sprints/SPRINT-000-template.md","docs/sprints/SPRINT-000-template.md",False),
-    ("docs/features/FEATURE-000-template.md","docs/features/FEATURE-000-template.md",False),
+    # FEATURE-000 is deliberately NOT laid (ADR-039). It is an adaptable example, not a core
+    # archetype, and it still ships in `templates/` for a project that wants it. Laying it by
+    # default put an empty template in 3 of 6 consumer repos — the "directory nobody fills, so
+    # every session learns to skip directories" failure §1's growth rule warns about.
     ("docs/specs/SPEC-000-template.md",    "docs/specs/SPEC-000-template.md",    False),  # ADR-019: executor brief
     ("conventions.toml",                  "scripts/conventions.toml",          False),
     ("GLOSSARY.md",                       "GLOSSARY.md",                       True),
@@ -180,6 +184,14 @@ def _fill(text: str, project: str, today: str) -> str:
 _PROTO_ENTRY_DROPS = ("`docs/DEVLOG.md`", "`docs/ROADMAP.md`", "`docs/architecture.md`",
                       "`docs/DIGEST.md`")
 
+# The on-call invocation, in both shells. `PYTHONPATH=x cmd` is POSIX-only: PowerShell parses
+# `PYTHONPATH=tools/conventions` as a command name and fails with CommandNotFoundException before
+# python ever starts. cpc is developed on Windows and half the fleet runs there, so printing only
+# the POSIX form hands most consumers a command that cannot work in their default shell.
+GATE_CMD_POSIX = "PYTHONPATH=tools/conventions python -m cpc.docs_check --root . --strict"
+GATE_CMD_PWSH = ('$env:PYTHONPATH="tools/conventions"; '
+                 "python -m cpc.docs_check --root . --strict")
+
 def _trim_entry_for_prototype(body: str) -> str:
     """Drop entry-file lines routing to docs/ files the prototype does not lay (ADR-021).
 
@@ -227,6 +239,7 @@ def lay(root: Path, profile: str, project: str, today: str, dry_run: bool) -> tu
     return created, skipped
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Lay the canonical claude-project-conventions layout.")
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--profile", choices=["prototype", "standard"], default="prototype")
@@ -257,7 +270,9 @@ def main() -> int:
               "stub); graduate with `cpc-init --root . --profile standard` when the project grows.")
     else:
         print("Next: fill the laid placeholders (CONTEXT, ROADMAP, architecture), then run the "
-              "vendored gate: `PYTHONPATH=tools/conventions python -m cpc.docs_check --root . --strict`.")
+              "vendored gate:")
+        print(f"  {GATE_CMD_POSIX}")
+        print(f"  {GATE_CMD_PWSH}   (PowerShell)")
         if graduating:
             print("Graduating a prototype? Restore the trimmed docs routes in AGENTS.md (the "
                   "DEVLOG read-order line + the Reference line -- see templates/AGENTS.root.md); "

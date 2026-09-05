@@ -20,6 +20,7 @@ stdlib only (Python 3.11+). Exit 1 on errors; warnings also fail under --strict.
 from __future__ import annotations
 import argparse, sys
 from pathlib import Path
+from cpc._console import make_console_safe
 try:
     import tomllib
 except ModuleNotFoundError:  # Python < 3.11
@@ -72,6 +73,7 @@ def resolve_profile(root: Path, explicit: str | None) -> str:
     return "prototype"
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Profile-aware project-init completeness gate.")
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--profile", choices=["prototype", "standard"], default=None,

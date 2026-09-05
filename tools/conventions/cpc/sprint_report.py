@@ -13,6 +13,7 @@ from pathlib import Path
 
 from cpc.sprint_check import (find_active_contract, parse_contract, parse_contracts,
                                changed_files, sh, matches_any, BULLET_RE)
+from cpc._console import make_console_safe
 
 TITLE_RE = re.compile(r"^#\s+(.+)$", re.M)
 DOD_RE = re.compile(r"\*\*DoD:\*\*\s*(.*)")
@@ -213,6 +214,7 @@ Out-of-scope files changed (not in `affects`/`docs`):
 
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--contract", default=None, type=Path)

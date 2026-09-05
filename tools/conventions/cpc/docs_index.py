@@ -26,6 +26,8 @@ from pathlib import Path
 
 from cpc.docs_refs import ADR_CITE_RE, LINK_RE, PATHISH_RE, code_spans, link_token
 from cpc.docs_scan import header_of, in_embedded_tree, root_docs, tags_of
+from cpc.rotate import LOGS
+from cpc._console import make_console_safe
 
 INDEX_REL = "docs/INDEX.md"
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)")
@@ -33,6 +35,21 @@ TITLE_RE = re.compile(r"^#\s+(.+?)\s*$", re.M)
 # Citers listed inline per doc. A vault index is for reading; the full edge list
 # for one doc is what `--of` is for.
 MAX_CITERS = 6
+
+# The live logs whose oldest entries `cpc-rotate` moves to docs/archive/ once they pass their cap.
+# Read from `rotate.LOGS` rather than listed here: that registry is what the rotation tool acts on,
+# and a second spelling of "which files rotate" is the KI-5/KI-7 shape — two definitions that agree
+# until one moves.
+ROTATING_SOURCES = frozenset(live for live, *_rest in LOGS.values())
+
+
+def cites_from_rotating_text(relpath: str) -> bool:
+    """Is a citation written here scheduled to move out of the live vault?
+
+    True for a rotating log and for anything already archived. Not for `CHANGELOG.md`, which is
+    `class: living` and never rotates — a release note is a permanent home for a citation.
+    """
+    return relpath in ROTATING_SOURCES or relpath.startswith("docs/archive/")
 
 
 def vault_docs(root: Path) -> list[Path]:
@@ -171,6 +188,11 @@ def render(root: Path, inbound: dict[Path, set[Path]], docs: list[Path]) -> str:
 
     orphans = [p for p in docs
                if not inbound[p.resolve()] and not rel(p).startswith("docs/archive/")]
+    # Cited, but only from text that rotates away. Disjoint from `orphans` by construction: these
+    # have at least one citation, which is exactly why the Unreferenced list can never name them.
+    log_only = [p for p in docs
+                if inbound[p.resolve()] and not rel(p).startswith("docs/archive/")
+                and all(cites_from_rotating_text(rel(c)) for c in inbound[p.resolve()])]
     total_edges = sum(len(v) for v in inbound.values())
     by_tag: dict[str, list[Path]] = defaultdict(list)
     for p in docs:
@@ -178,7 +200,7 @@ def render(root: Path, inbound: dict[Path, set[Path]], docs: list[Path]) -> str:
             by_tag[t].append(p)
     tagged = sum(1 for p in docs if tags_of(p))
     out += [f"**{len(docs)} docs · {total_edges} references · {len(orphans)} unreferenced "
-            f"· {tagged} tagged.**", ""]
+            f"· {len(log_only)} cited only from rotating logs · {tagged} tagged.**", ""]
 
     if by_tag:
         out += ["## By tag", "",
@@ -193,6 +215,18 @@ def render(root: Path, inbound: dict[Path, set[Path]], docs: list[Path]) -> str:
                 "Nothing in the vault points at these. That is correct for an entry point and a",
                 "symptom for anything else — a doc no one links is a doc no one reads.", ""]
         out += [f"- `{rel(p)}`" for p in orphans]
+        out.append("")
+
+    if log_only:
+        out += ["## Cited only from rotating logs", "",
+                "Every citation of these sits in a log whose oldest entries `cpc-rotate` moves to",
+                "`docs/archive/` once it passes its cap. **`Unreferenced` above can never name them**:",
+                "an archived citer still counts, so the reference total never reaches zero while the",
+                "last live pointer quietly ages out. Cite one from a living doc, or accept that it is",
+                "reachable only by search.", ""]
+        out += [f"- `{rel(p)}` — {len(inbound[p.resolve()])} citation(s), "
+                + ", ".join(f"`{c}`" for c in sorted(rel(c) for c in inbound[p.resolve()])[:MAX_CITERS])
+                for p in log_only]
         out.append("")
 
     for gname in sorted(groups):
@@ -280,6 +314,7 @@ def vault_updated(docs: list[Path]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Reverse index over the docs vault (ADR-031).")
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--of", metavar="DOC",

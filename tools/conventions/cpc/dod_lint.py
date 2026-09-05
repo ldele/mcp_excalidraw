@@ -41,6 +41,7 @@ from cpc.dod_scan import DEFAULT_SEVERITY, load_config, norm_rule
 from cpc.dod_rules_ast import FileChecker
 from cpc.dod_rules_dup import check_duplication
 from cpc.dod_rules_graph import check_concept_orphans, check_graph, parse_concept_map
+from cpc._console import make_console_safe
 
 __all__ = ["main", "DEFAULT_SEVERITY", "FileChecker", "check_duplication", "check_graph",
            "check_concept_orphans", "parse_concept_map", "load_config", "norm_rule"]
@@ -56,6 +57,7 @@ def collect_files(root: Path, excludes: list[str]) -> list[Path]:
     return out
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(prog="dod_lint", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("root", type=Path, help="project root to lint")

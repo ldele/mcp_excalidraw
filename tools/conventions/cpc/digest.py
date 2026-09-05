@@ -28,6 +28,7 @@ import argparse, datetime as dt, re, sys
 from pathlib import Path
 
 from cpc.tokens import estimate_tokens
+from cpc._console import make_console_safe
 
 DEFAULTS = {"digest": {"path": "docs/DIGEST.md", "devlog_entries": 20}}
 
@@ -142,8 +143,13 @@ def known_issues(root: Path) -> tuple[list[str], int, int]:
         n_closed += closed
         n_open += not closed
         date = pick_date(meta, status)
+        # Hoisted out of the f-string on purpose: a backslash inside an f-string *expression* is a
+        # SyntaxError until 3.12 (PEP 701), and cpc's floor is 3.11 — so this line made the whole
+        # module unimportable on the version the package declares it supports. Nothing local caught
+        # it because development runs 3.12; CI's 3.11 leg did, on every commit since it was written.
+        squashed = re.sub(r"\s{2,}", " ", title)
         lines.append(f"- **KI-{m.group(1)}** · {status}{' ' + date if date else ''} — "
-                     f"{clip(re.sub(r'\s{2,}', ' ', title))}")
+                     f"{clip(squashed)}")
     return lines, n_open, n_closed
 
 
@@ -178,6 +184,7 @@ def render(root: Path, cfg: dict, today: dt.date) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Generate docs/DIGEST.md from the logs' headings.")
     ap.add_argument("--root", default=".", type=Path)
     mode = ap.add_mutually_exclusive_group()

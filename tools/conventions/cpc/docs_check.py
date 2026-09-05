@@ -67,6 +67,7 @@ from cpc.docs_scan import (CLASS_RE, DATE_IN_NAME_RE, HEADER_RE, UPDATED_RE, cla
                            md_files, tags_of, text_of)
 from cpc.findings import Finding, RuleRegistry, from_tagged, to_json
 from cpc.tokens import estimate_tokens
+from cpc._console import make_console_safe
 
 
 DEFAULTS = {
@@ -180,6 +181,7 @@ RULES: RuleRegistry = {
     "known-issue": "rule 14 — a RESOLVED known issue is past its grace window",
     "enforced":    "rule 16 — an accepted ADR does not name what would fail if it were violated",
     "living":      "rule 12 — a class:living doc was committed without bumping `updated:`",
+    "archive-index": "rule 17 — an archive index does not account for every archived entry",
 }
 
 
@@ -198,6 +200,7 @@ def git_last_commit_date(root: Path, rel: str) -> str | None:
     return r.stdout.strip() or None
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--config", default=None, type=Path)

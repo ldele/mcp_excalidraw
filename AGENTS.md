@@ -28,7 +28,7 @@ Full stack + constraints: `.claude/CONTEXT.md`.
 3. `docs/DEVLOG.md` — running log, newest first: **newest 3 entries**.
 4. `.claude/KNOWN_ISSUES.md` — open weaknesses / recurring failures.
 
-Reference: `docs/ROADMAP.md` · `docs/architecture.md` · `docs/decisions/` (ADRs) · `docs/specs/`.
+Reference: `docs/ROADMAP.md` · `docs/architecture.md` · `docs/decisions/` (ADRs) · `docs/specs/` · `docs/TICKETS.md` (issues reported against the fork — `cpc-ticket` opens and closes them; the vendored cpc 1.8.0 predates the verb, so run the global `cpc-ticket --root .` until the next re-vendor).
 
 ## Non-negotiables (digest — full text `.claude/CONTEXT.md`)
 1. **Stage, never commit.** Default for every agent: stage the diff and hand it off for the

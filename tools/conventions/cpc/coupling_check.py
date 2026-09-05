@@ -14,6 +14,7 @@ gate falls back to <root>/.git/COMMIT_EDITMSG. stdlib only (Python 3.11+). Exit 
 from __future__ import annotations
 import argparse, re, subprocess
 from pathlib import Path
+from cpc._console import make_console_safe
 try:
     import tomllib
 except ModuleNotFoundError:  # Python < 3.11
@@ -60,6 +61,7 @@ def message_text(root: Path, msg_file: str | None) -> str:
     return "\n".join(ln for ln in raw.splitlines() if not ln.lstrip().startswith("#"))
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Require a coupling: note for >1-module commits.")
     ap.add_argument("message_file", nargs="?", default=None)
     ap.add_argument("--root", default=".", type=Path)

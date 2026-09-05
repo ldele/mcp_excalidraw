@@ -26,6 +26,7 @@ stdlib only (Python 3.11+). Travels in the vendored drop like every other gate.
 from __future__ import annotations
 import argparse, json, re, statistics, sys
 from pathlib import Path
+from cpc._console import make_console_safe
 
 # One pattern per tell, named as §17 names it. Case-insensitive, multiline.
 # Kept deliberately small and NOT configurable (ADR-036): a project that can edit the list can
@@ -131,6 +132,7 @@ def report(rows: list[dict], threshold: float, show_all: bool) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(
         description="Count prose tells (CONVENTIONS §17). Advisory: always exits 0.")
     ap.add_argument("paths", nargs="*", default=["."], type=Path,

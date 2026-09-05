@@ -15,6 +15,7 @@ from pathlib import Path
 # anything else that silently disabled two sprint_check gates, so the default is now detected.
 # `workflow -> gates` is an allowed concept-map edge, and one implementation beats two copies.
 from cpc.sprint_check import default_branch
+from cpc._console import make_console_safe
 
 STARTED_RE = re.compile(r"^- \*\*started:\*\*", re.M)
 BASE_LINE_RE = re.compile(r"^- \*\*base:\*\*", re.M)
@@ -92,6 +93,7 @@ def ensure_devlog(root: Path, num: str, slug: str, date: str) -> None:
     print("+ opened DEVLOG stub entry (fill on landing)")
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--sprint", required=True)

@@ -25,6 +25,7 @@ from pathlib import Path
 
 import cpc
 from cpc.docs_scan import UPDATED_RE
+from cpc._console import make_console_safe
 
 HEADER = "<!-- status: active · updated: {date} · class: living -->"
 
@@ -68,12 +69,27 @@ GUIDANCE: dict[str, str] = {
 
 
 def collect_settings() -> list[tuple[str, str, object, str]]:
-    """(section, key, code default, owning module) for every `DEFAULTS` dict in the package."""
+    """(section, key, code default, owning module) for every `DEFAULTS` dict in the package.
+
+    **An unimportable module is an error, not an empty one.** This used to `except Exception:
+    continue` under the comment *"a module that will not import owns no settings"* — but it owns
+    *unknown* settings, not zero, and every module here is cpc's own, so there is no optional case
+    to tolerate. The cost was measured rather than argued: `digest.py` carried a backslash inside an
+    f-string expression, which is a SyntaxError on the declared 3.11 floor, so on 3.11 this loop
+    skipped it and rendered a SETTINGS.md **two rows short** — and `--check` then reported the
+    committed file "STALE" rather than the import broken. CI said `docs/SETTINGS.md is STALE` for
+    four days while the actual defect was a syntax error in a different file.
+
+    Failing loudly here means a broken module can never be silently absent from a generated
+    document — the same rule the rest of cpc applies to counts: unmeasured is not zero.
+    """
     rows: dict[tuple[str, str], tuple[object, str]] = {}
+    broken: list[str] = []
     for m in sorted(pkgutil.iter_modules(cpc.__path__), key=lambda x: x.name):
         try:
             mod = importlib.import_module(f"cpc.{m.name}")
-        except Exception:                     # a module that will not import owns no settings
+        except Exception as exc:
+            broken.append(f"cpc.{m.name}: {type(exc).__name__}: {exc}")
             continue
         d = getattr(mod, "DEFAULTS", None)
         if not isinstance(d, dict):
@@ -83,6 +99,12 @@ def collect_settings() -> list[tuple[str, str, object, str]]:
                 continue
             for key, val in vals.items():
                 rows.setdefault((section, key), (val, m.name))
+    if broken:
+        raise RuntimeError(
+            "cannot enumerate settings — these cpc modules do not import, so the document would be "
+            "silently short:\n  " + "\n  ".join(broken)
+            + "\nFix the module; do not regenerate around it."
+        )
     return [(s, k, v, owner) for (s, k), (v, owner) in sorted(rows.items())]
 
 
@@ -232,6 +254,7 @@ def _stamp(body: str, existing: str | None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Generate docs/SETTINGS.md from the code (ADR-037).")
     ap.add_argument("--root", default=".", type=Path)
     ap.add_argument("--out", default="docs/SETTINGS.md")

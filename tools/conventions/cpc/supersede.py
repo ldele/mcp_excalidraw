@@ -40,6 +40,7 @@ from pathlib import Path
 
 from cpc._config import load_config
 from cpc.docs_scan import CLASS_RE, HEADER_RE, UPDATED_RE, header_line, is_exempt
+from cpc._console import make_console_safe
 
 # A `## Supersedes` bullet names its path in backticks: `docs/specs/SPEC-x.md` — anything after is
 # prose for the reader. Bare paths are rejected on purpose; the backtick form is what rule 4's route
@@ -104,6 +105,7 @@ def retire(text: str, adr_num: str, adr_title: str, adr_rel: str, today: str) ->
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(
         description="Retire every doc a direction-change ADR supersedes (ADR-037).")
     ap.add_argument("--adr", required=True, help="the pivot ADR number, e.g. 37 or 037")

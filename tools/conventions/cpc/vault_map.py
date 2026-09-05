@@ -21,6 +21,7 @@ import argparse, sys
 from pathlib import Path
 
 from cpc.tokens import estimate_tokens
+from cpc._console import make_console_safe
 
 DEFAULTS = {"vault_map": {"path": "README.md"}}
 
@@ -44,7 +45,10 @@ def render(root: Path) -> str:
     logs = _tok(root, "docs/DEVLOG.md") + _tok(root, ".claude/KNOWN_ISSUES.md")
     n_adr = _count(root, "docs/decisions", "ADR-*.md")
     n_spec = _count(root, "docs/specs", "SPEC-*.md")
-    n_feat = _count(root, "docs/features", "FEATURE-*.md")
+    # The schema draws the CORE archetypes only (ADR-039). `docs/features/` and any project-shaped
+    # doc are adaptable examples, deliberately absent: a diagram that gives an optional template the
+    # same weight as ADR/SPEC/SPRINT is what made FEATURE read as a fourth thing to choose between.
+    n_sprint = _count(root, "docs/sprints", "SPRINT-*.md")
     n_res = _count(root, "docs/research", "RESEARCH-*.md")
     # Mermaid labels are quoted throughout: a bare label containing `(`, `,` or `—` is a parse
     # error on GitHub's renderer, and the numbers below routinely produce all three.
@@ -65,8 +69,8 @@ def render(root: Path) -> str:
         "  subgraph W[\"Authored on demand — one question each\"]",
         "    direction LR",
         f"    ADR[\"decisions/ADR-NNN · {n_adr}<br/>why we chose this\"]",
-        f"    SPEC[\"specs/SPEC-slug · {n_spec}<br/>what to build\"]",
-        f"    FEAT[\"features/FEATURE-NNN · {n_feat}<br/>what exists, and how much is verified\"]",
+        f"    SPEC[\"specs/SPEC-slug · {n_spec}<br/>how it gets built\"]",
+        f"    SPR[\"sprints/SPRINT-NNN · {n_sprint}<br/>what one increment may touch\"]",
         f"    RES[\"research/RESEARCH-slug · {n_res}<br/>no answer to look up\"]",
         "  end",
         "  subgraph G[\"Generated — never hand-edited\"]",
@@ -77,9 +81,9 @@ def render(root: Path) -> str:
         # Node-to-node only. An edge into a subgraph renders inconsistently across mermaid
         # versions, and one from a node to its OWN containing subgraph is meaningless.
         "  D -.->|\"open one entry\"| L",
-        "  D -.->|\"--tag a,b\"| FEAT",
-        "  FEAT -->|\"Decided by\"| ADR",
-        "  FEAT -->|\"Built to\"| SPEC",
+        "  D -.->|\"--tag a,b\"| ADR",
+        "  SPEC -->|\"prepares execution of\"| ADR",
+        "  SPR -->|\"bounds the increment for\"| SPEC",
         "  ADR -.->|\"--of ADR-NNN\"| IDX",
         "  RES -.->|\"before proposing an approach\"| ADR",
         "```",
@@ -95,6 +99,7 @@ def _split(text: str) -> tuple[str, str] | None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(description="Generate the README's mermaid vault schema.")
     ap.add_argument("--root", default=".", type=Path)
     mode = ap.add_mutually_exclusive_group()

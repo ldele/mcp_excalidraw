@@ -27,6 +27,7 @@ import argparse, os, re, shutil, subprocess, sys, tempfile
 from collections import Counter
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
+from cpc._console import make_console_safe
 
 # `ERROR [route] ...`, `WARN  [living] ...`, `advisory [x] ...`. Deliberately permissive about the
 # severity word and the rule name: this parses output from revisions this code has never seen, and a
@@ -153,6 +154,7 @@ def repo_root(start: Path) -> Path:
 
 
 def main() -> int:
+    make_console_safe()   # KI-9: never crash echoing text cpc did not write
     ap = argparse.ArgumentParser(
         description="Report how a gate's verdict changes between two revisions of cpc. "
                     "A report, never a gate (ADR-022) — always exits 0.")
