@@ -8,6 +8,21 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-09-05 (b) — The cpc 1.5.0 → 1.8.0 re-vendor landed inside the ticket-ledger commit
+- **What:** `bed553e` carries 34 files: this session's five (the ledger, `AGENTS.md`, the feedback
+  note, DEVLOG, SESSION) **and the 29-file re-vendor of `tools/conventions/cpc/`** from 1.5.0 to
+  1.8.0 that had sat staged and unwritten-up since before this session (`_VERSION` 1.5.0 → 1.8.0;
+  new modules `_console.py`, `ci_budget.py`, `date_stamp.py`, `docs_rules_history.py` and more).
+  Its subject also carries a stray closing quote and a pathspec.
+- **Why it happened:** the suggested command was `git commit -m "…" -- <paths>`; under PowerShell
+  the quote and the en dash inside the subject broke the parse, the pathspec became part of the
+  message, and `git commit -m` took the whole index.
+- **Why not rewrite:** the commit is on `origin/main`. An amend means a force-push; on a private
+  solo fork that is allowed but is the owner's call, and this entry makes the commit legible
+  without it.
+- **Consequence:** the vendored cpc is 1.8.0 — still without `cpc.ticket`, so the ledger's intro
+  (run the global `cpc-ticket --root .`) stands until the next re-vendor.
+
 ## 2026-09-05 — The inbound-issue ledger, and the first five tickets (cpc ADR-047)
 - **What:** `docs/TICKETS.md` laid from cpc's `templates/docs/TICKETS.md` (its fleet follow-up
   item 7 names this repo). Opened **T-001–T-005** from

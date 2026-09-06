@@ -4,6 +4,22 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-09-05 (b) — Claude Code — `npm link` done; the CLI answers from PATH
+- **Corrects the entry below's "Not on this machine":** `npm link` ran from this repo;
+  `excalidraw-canvas status` resolves via the npm global prefix and reports the canvas not running,
+  which is the expected idle answer. Nothing in the tree changed — the link lives in npm's global
+  prefix, not in git. The MCP server is still not configured in Claude Code; the CLI is the
+  skill's documented default when no MCP tools are present.
+- **Committed and pushed by Lucas:** `bed553e`. Its subject reads *Lay the ticket ledger; file the
+  2026-08-21 feedback as T-001–T-005" -- docs/TICKETS.md …* — the suggested command's closing quote
+  and pathspec were swallowed under PowerShell, so nothing limited the commit and the **older staged
+  cpc 1.5.0 → 1.8.0 re-vendor (29 files) rode in** beside this session's five (34 files, +975/−23).
+  Already on `origin/main`. DEVLOG 2026-09-05 (b) explains the commit so history need not be
+  rewritten. **Decided by Lucas the same day: `bed553e` stays as is.** No amend, no force-push.
+- **Uncommitted:** this entry and that DEVLOG entry, staged.
+- **Next:** as below, minus items (1) and (3).
+- **Picks up:** any session.
+
 ## 2026-09-05 — Claude Code — the ledger is laid; five tickets open; the tree still carries an older staged re-vendor
 - **Done:** `docs/TICKETS.md` with T-001–T-005 from the 2026-08-21 feedback note; `AGENTS.md`
   Reference line; a pointer atop the note. Detail: DEVLOG 2026-09-05. Staged, not committed (rule 1).
