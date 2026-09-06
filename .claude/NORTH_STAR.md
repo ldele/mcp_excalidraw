@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-08-09 · class: living -->
+<!-- status: active · updated: 2026-09-06 · class: living -->
 
 # NORTH STAR — mcp_excalidraw
 

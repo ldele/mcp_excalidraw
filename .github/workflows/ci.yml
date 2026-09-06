@@ -1,103 +1,92 @@
 name: CI
 
+# Minimal, in the cpc §13 shape (tier by trigger; cancel superseded runs; heavy work at a keypoint).
+# On every push and PR: ONE Node job that builds and validates the product — and the product here is
+# a wireframe reading, not code, so the gate that matters is the fixture corpus (ADR-001: known
+# drawings in, expected readings out) — plus ONE ten-second docs job running the vendored cpc gates.
+# The Node-range matrix (engines >= 18) runs only on a `v*` tag or a manual dispatch: it verifies the
+# floor, it does not find wireframe regressions, and it used to be six jobs per push.
+#
+# Cost note (CONVENTIONS §13, ADR-041): this repo is public, so minutes are unmetered; the shape is
+# for signal and reading time, not money. Keep it that way if the repo ever goes private.
+
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
+    tags: ["v*"]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A superseded run is a run nobody will read. Tags are exempt: a release run has to finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
-  build-and-test:
-    name: Build and Type Check
+  check:
+    name: Build + wireframe corpus
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
+    timeout-minutes: 10
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run TypeScript type check
+          # One version per push: the corpus needs `node --test` with a glob (Node >= 21), and 22 is
+          # the lowest LTS that has it. The engines floor (18) is checked by `compat` at a keypoint.
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Type check
         run: npm run type-check
-
-      - name: Build project
+      - name: Build (frontend + server)
         run: npm run build
-
-      - name: Check build artifacts
-        run: |
-          echo "Checking if build artifacts exist..."
-          test -f dist/index.js || (echo "dist/index.js not found" && exit 1)
-          test -f dist/server.js || (echo "dist/server.js not found" && exit 1)
-          test -d dist/frontend || (echo "dist/frontend not found" && exit 1)
-          echo "All build artifacts present!"
-
-      - name: Upload build artifacts
-        if: matrix.node-version == '20.x'
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist/
-          retention-days: 7
-
-  test:
-    name: Tests
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        # The corpus suite only runs on 22.x and up: `node --test` takes a glob
-        # from Node 21, and directory discovery no longer works on current Node.
-        # The package itself still supports Node >= 18 — that is what the
-        # build-and-test matrix above covers.
-        node-version: [22.x, 24.x]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Wireframe fixture corpus
+      - name: Build artifacts present
+        run: test -f dist/index.js && test -f dist/server.js && test -f dist/bin.js && test -d dist/frontend
+      - name: Wireframe fixture corpus (the product's own gate — ADR-001 / SPEC-001)
         run: npm run test:corpus
-
-      - name: Local-bind guard
+      - name: Local-bind guard (the canvas binds IPv4 loopback only)
         run: npm run test:bind
 
-  lint-check:
-    name: Lint Check
+  docs:
+    name: cpc docs + integrity gates
     runs-on: ubuntu-latest
-
+    timeout-minutes: 5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # fetch-depth: 0 is required: rule 12 compares a living doc's `updated:` header against the
+      # date of the last commit that touched it, and a shallow clone has no such date.
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      # The gates are VENDORED at tools/conventions/cpc/ (cpc ADR-015); stdlib only, nothing fetched.
+      # Same two commands as `just lint` — CI calls them directly, never `just` (cpc ADR-011).
+      - run: PYTHONPATH=tools/conventions python -m cpc.docs_check --root . --strict
+      - run: PYTHONPATH=tools/conventions python -m cpc.integrity_check --root . --strict
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+  compat:
+    name: Node ${{ matrix.node }} (keypoint only)
+    # Only on a `v*` tag or a manual dispatch — dispatch it BEFORE tagging, so a red can still stop
+    # the tag (cpc §13 default 1; ci-pipelines cost guide, lever 1).
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22", "24"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: '20.x'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check for TypeScript errors
-        run: npm run type-check
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run build
+      - name: Wireframe fixture corpus (Node >= 22 only — `node --test` glob)
+        if: matrix.node != '18' && matrix.node != '20'
+        run: npm run test:corpus

@@ -8,6 +8,31 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-09-06 — CI cut to what validates the product: two jobs per push, the Node range at a keypoint
+- **What:** `.github/workflows/ci.yml` rewritten. Per push and PR: `check` (Node 22 — type-check,
+  build, artifact presence, `npm run test:corpus`, `npm run test:bind`) and `docs` (the vendored
+  `cpc.docs_check --strict` + `cpc.integrity_check --strict`, `fetch-depth: 0`). `compat` runs the
+  Node 18/20/22/24 matrix only on a `v*` tag or `workflow_dispatch`, the corpus on 22+ where
+  `node --test` takes a glob. Actions on their v7 majors; `permissions: contents: read`;
+  `concurrency` with tags exempt; `timeout-minutes` on every job. `.claude/NORTH_STAR.md`'s
+  `updated:` bumped (2026-08-09 → today) so the strict docs gate is green on arrival, not red on
+  day one.
+- **Why:** the old file ran six jobs per push — a 3-way Node matrix for build, a 2-way for tests,
+  and a third job repeating the type-check — while the product is a wireframe reading, not code:
+  the gate that finds a regression is the fixture corpus (ADR-001, SPEC-001), and it ran in two of
+  the six. Lucas asked for the standard shape (cpc §13: tier by trigger, cancel superseded runs,
+  heavy work at a keypoint) and nothing more. The repo is public, so this is about signal and
+  reading time, not minutes.
+- **Rejected:** a diff-classifying first job (nothing heavy is left to gate); dropping the
+  Node-range check (the `engines` floor is 18 and the build is what a consumer installs — worth one
+  run per release); keeping the artifact upload (nothing downloads it).
+- **Verified locally, the exact commands CI runs:** type-check clean; build produces `dist/index.js`,
+  `dist/server.js`, `dist/bin.js`, `dist/frontend/`; corpus **43 tests, 10 suites, 43 pass, 0
+  fail**; bind guard passes; `just lint` (docs + integrity, strict) 0 errors, 0 warnings — the
+  NORTH_STAR warning is gone; the workflow parses. **Not verified:** an Actions run — the v7 majors
+  and the `compat` gating are proven only by the first push and the first dispatch.
+- **Opens:** read the first run; dispatch `compat` once by hand before the next tag.
+
 ## 2026-09-05 (b) — The cpc 1.5.0 → 1.8.0 re-vendor landed inside the ticket-ledger commit
 - **What:** `bed553e` carries 34 files: this session's five (the ledger, `AGENTS.md`, the feedback
   note, DEVLOG, SESSION) **and the 29-file re-vendor of `tools/conventions/cpc/`** from 1.5.0 to
