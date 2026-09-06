@@ -4,6 +4,17 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-09-06 — Claude Code — CI is two jobs per push; the Node range waits for a tag
+- **Done:** `ci.yml` rewritten (6 jobs per push → 2, plus a keypoint matrix), NORTH_STAR date
+  bumped, strict docs gate green, the exact CI commands run green locally (corpus 43/43). Detail:
+  DEVLOG 2026-09-06.
+- **Uncommitted, staged:** `ci.yml`, `.claude/NORTH_STAR.md`, DEVLOG, this entry — on top of the
+  still-uncommitted (b) entries.
+- **Next:** (1) Lucas commits and pushes; **read the run**. (2) `workflow_dispatch` the `compat` job
+  once before the next `v*` tag. (3) T-001 first — the silent text-size drop. (4) KI-3, PR 4,
+  `share` untested since the upstream merge.
+- **Picks up:** any session.
+
 ## 2026-09-05 (b) — Claude Code — `npm link` done; the CLI answers from PATH
 - **Corrects the entry below's "Not on this machine":** `npm link` ran from this repo;
   `excalidraw-canvas status` resolves via the npm global prefix and reports the canvas not running,
