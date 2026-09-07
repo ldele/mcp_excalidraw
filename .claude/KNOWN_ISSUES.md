@@ -106,8 +106,9 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 
 ## KI-8 — a push to this fork creates no workflow run; a dispatch does
 - **Symptom:** `git push` to `main` lands (`pushed_at` moves, `git ls-remote` agrees) and
-  `gh run list` shows nothing new. Twice on 2026-09-07: `49afba0` at 07:42Z and `899c365` at
-  08:46Z. `gh workflow run ci.yml --ref main` at 07:47Z created a run and all six jobs passed.
+  `gh run list` shows nothing new. Four pushes on 2026-09-07 — `49afba0` at 07:42Z, `899c365` at
+  08:46Z, then `65b6452` and `2948946` — and not one run. `gh workflow run ci.yml --ref main`
+  at 07:47Z created a run and all six jobs passed; every dispatch since has too.
 - **Cause:** open. `actions/permissions` says enabled, the workflow's API record says `active`
   (with an `updated_at` of 2026-07-24 — the upstream's, not this file's), the commit messages
   carry no skip token, and the `on: push` block is the one the dispatch used. The first guess —
