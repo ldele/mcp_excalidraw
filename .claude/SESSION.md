@@ -4,6 +4,15 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-09-07 (b) — Claude Code — the push trigger is dead on this fork; dispatch after each push
+- **Done:** the second push (`899c365`, 08:46Z) made no run either; the morning's enable-after-push
+  cause is retracted; logged as a known issue. Detail: DEVLOG 2026-09-07 (b).
+- **Uncommitted, staged:** DEVLOG, KNOWN_ISSUES, this entry.
+- **Next:** (1) Lucas, logged in, opens the fork's Actions tab: an enable banner, or none. (2) Until
+  the trigger fires, `gh workflow run ci.yml --ref main` after each push. (3) T-001 first — the
+  silent text-size drop. (4) KI-3, PR 4, `share` untested since the upstream merge.
+- **Picks up:** any session; step (1) needs the owner's browser.
+
 ## 2026-09-07 — Claude Code — CI proven by a dispatch; the push trigger waits for the next push
 - **Done:** run 34097250095 (`workflow_dispatch` on `main`) — all six jobs green, the compat
   matrix included. The push of `49afba0` made no run. Detail: DEVLOG 2026-09-07.
@@ -210,11 +219,4 @@ Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG e
   (`npm run corpus:update`). `undeclared-content` scores 3 fallbacks *on purpose*. And do not use
   PowerShell `Set-Content` on `src/core/*.ts` — it re-encodes the UTF-8 box-drawing comment rules
   into mojibake; this session did that and had to `git checkout` the file.
-
-## 2026-07-31 (close) — Claude Code — Lucas + agent
-- **Correction:** the entry below says the cpc adoption was staged and uncommitted. Lucas reviewed
-  and committed it. Working tree is clean and `main` is level with `origin/main`.
-- **Next is unchanged:** `docs/ROADMAP.md` PR 1, the two-way markup round with a human (also KI-3).
-- **Picks up:** any agent, with a terminal and a browser tab on the canvas URL. `npm link` first —
-  `excalidraw-canvas` is still not on PATH here.
 
