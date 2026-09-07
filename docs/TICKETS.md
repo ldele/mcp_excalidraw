@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-09-05 · class: living -->
+<!-- status: active · updated: 2026-09-07 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -55,8 +55,9 @@ run from the global install: `cpc-ticket --root . …`.
 - **Resolution:** —
 
 ## T-001 — A text element without width/height silently disappears from the reading, including the screen heading
-- **Status:** open · 2026-09-05
+- **Status:** triaged · 2026-09-07
 - **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §1
 - **Symptom:** The server stores width: null, height: null for a text element created without them; with no bbox it is dropped from the reading, so 26 headings vanished and 3 screens could not be named — the documented happy path (a free-standing heading names the screen) does nothing, and the diagnostic points at the symptom.
 - **Reproduce:** excalidraw-canvas add a text element with no width/height, then wireframe --score: unnamedScreens counts it, get <id> shows width None. Fix order proposed: measure text server-side; else reject at the API; at minimum say so in the could-not-be-named line.
+- **Triage:** 2026-09-07 — traced, not fixed. The API takes a text element with no size (`src/server.ts:279` schema, width/height optional; the create handler at `src/server.ts:426` stores it as sent; `src/core/normalize.ts:52` returns standalone text untouched — nothing measures it). The reading drops any element whose box is empty at `src/core/wireframe.ts:545` (`boxOf`, `src/core/changes.ts:287`, turns a missing size into 0×0) with no count and no diagnostic. With a tab open, Excalidraw's `convertToExcalidrawElements` (`frontend/src/App.tsx:307`) measures the text and the sync (`frontend/src/App.tsx:837`) writes the size back — width/height are not in `EDITOR_DEFAULTS` (`src/core/changes.ts:142`), so the echo counts as a change and lands as a **human** 'resized' record: a second defect, a measurement reported as feedback. So the drop bites when the reading runs with no tab, or before the tab's first sync — confirm both halves by repro first. Fix order stands as proposed: measure server-side for the known font families (which also removes the false human delta); else 400 at the API; in every case count skipped sizeless text in the could-not-be-named line at `src/core/wireframe.ts:752`. Next session: the repro pair, then the diagnostic and the 400 (cheap and honest), measurement as the real fix.
 - **Resolution:** —
