@@ -8,6 +8,42 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-09-07 (c) — Upstream is four commits ahead (2.0.0); merge deferred until T-001 lands (rule 2)
+- **What:** `git fetch upstream` shows `0db05c4`, `6ddbe98`, `f17c886`, `ff42de9` on `upstream/main`
+  past our merge base `ecf3cac`: MCP protocol revision 2026-07-28 on the SDK v2 split packages, with
+  `src/index.ts` cut into `core/mcp-server.ts`, `mcp-tools.ts`, `mcp-dispatch.ts` and
+  `canvas-state.ts` plus a new `npm run test:mcp` wire test (#98); the 2.0.0 release with byte-stable
+  `.excalidraw.md` exports and CRLF-tolerant vault import (#99); a dependency refresh (#104); a
+  hardened `npm-publish.yml` (#105). The Node floor moves to 20 — the SDK's own `engines`.
+  **Decision (Lucas, 2026-09-07): defer the merge until T-001 is answered, then take it as its own
+  reviewed step.**
+- **Why defer:** nothing in the four touches the reading path or the other two collision-zone files —
+  `src/server.ts`, `src/core/normalize.ts`, `wireframe.ts`, `changes.ts` and `tests/` are untouched —
+  so, unlike 2026-08-07, there is no live bug fix in it for this fork; and T-001's fix lands in files
+  upstream did not change, so the order does not alter the conflict cost. T-001 is a reported defect
+  in the product's own claim; it goes first.
+- **Cost, from a `git merge-tree --write-tree` dry run:** eight conflicting files. Three are
+  modify/delete on files we removed on purpose (both Dockerfiles, `npm-publish.yml` — `FORK.md`):
+  keep deleted. `ci.yml` (two hunks over our rewrite): keep ours, drop 18 from `compat`, add
+  `test:mcp` to `check`. `package.json` two hunks, then regenerate the lock. `README.md` one hunk.
+  `src/index.ts` is the whole file: take upstream's and port by hand `describe_wireframe`,
+  `get_canvas_changes` and `wait_for_changes` into the tool table and dispatcher, and the
+  `lastSeenRev` cursor into `canvas-state.ts` — upstream builds one server instance per connection,
+  so instance-held state resets.
+- **Trap for the port:** upstream's `mcp-dispatch.ts` still calls
+  `prepareElementUpdate(id, updates, existing?.type)`; ours takes the whole element so a restyle
+  merges into the existing label (2026-08-07). Type-check will fail on it — pass
+  `existing ?? undefined`, do not revert the signature. Also bump the Node ≥ 18 line in six places
+  (README ×3, `AGENTS.md`, `CONTEXT.md`, `package.json` `engines`) plus the `ci.yml` comment.
+- **Rejected:** merging now (a half-day port that fixes nothing live, ahead of a reported defect);
+  never merging (rule 2 exists because the diff only grows, and upstream's next work builds on the
+  split files).
+- **Verified today, at HEAD:** type-check clean; `docs_check --strict` and `integrity_check --strict`
+  0/0; `origin/main` level with HEAD. `@modelcontextprotocol/sdk: "latest"` is lock-held at 1.29.0
+  (npm latest 1.30.0), so `npm ci` stays deterministic meanwhile.
+- **Opens:** the merge, after T-001 — budget half a day plus a live MCP round-trip, which needs the
+  MCP server configured in a client (it is not, on this machine; the CLI path is untouched).
+
 ## 2026-09-07 (b) — Second push, still no run: the push trigger does not fire on this fork; dispatch does
 - **What:** `899c365` reached `origin/main` at 08:46:52Z, an hour after the manual dispatch had
   run six jobs green, and created no workflow run — `gh run list` still shows the dispatch alone.
