@@ -8,6 +8,22 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-09-07 — First run of the rewritten CI: the push made none, a dispatch ran six jobs green
+- **What:** the push of `49afba0` (07:42Z) created no workflow run — the fork had never had one,
+  for the old `ci.yml` either. Actions enabled and the workflow `active`, so
+  `gh workflow run ci.yml --ref main` was the test: run 34097250095, six jobs green in about a
+  minute — `check` 55 s (corpus + bind), `docs` 7 s, and the Node 18/20/22/24 `compat` matrix at
+  about 50 s each, which is the keypoint dispatch the 2026-09-06 baton asked for before the next
+  `v*` tag.
+- **Why:** a workflow is proven by a run. The v7 action majors and the vendored cpc gates on
+  `ubuntu-latest` had only run locally.
+- **Likely cause, unverified:** GitHub holds a fork's workflows until the owner enables them in
+  the Actions tab, and the enable happened after the push. The next push settles it: a run
+  should appear on its own.
+- **Rejected:** an empty commit to test the push trigger — the next real push tests it for free.
+- **Opens:** if the next push makes no run, that is a known issue here (self-found — DEVLOG,
+  not a ticket).
+
 ## 2026-09-06 — CI cut to what validates the product: two jobs per push, the Node range at a keypoint
 - **What:** `.github/workflows/ci.yml` rewritten. Per push and PR: `check` (Node 22 — type-check,
   build, artifact presence, `npm run test:corpus`, `npm run test:bind`) and `docs` (the vendored
