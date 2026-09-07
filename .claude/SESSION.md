@@ -4,6 +4,31 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-09-07 (c) — Claude Code — upstream is four commits ahead (2.0.0); merge deferred past T-001
+- **Done:** state read (clean at `70a3329`, level with `origin/main`); upstream fetched — four
+  commits, `0db05c4`..`ff42de9`, the 2.0.0 release: MCP SDK v2, `src/index.ts` split into four
+  core files, Node floor 20. Dry-run merge: eight conflicting files, `src/index.ts` whole-file.
+  **Decision (Lucas): defer the merge until T-001 is answered, then take it as its own reviewed
+  step.** Recorded with the port plan and its trap: DEVLOG 2026-09-07 (c).
+- **Verified at HEAD:** type-check clean; `docs_check --strict` and `integrity_check --strict` 0/0;
+  corpus and bind covered by the 2026-09-07 dispatch (the two commits since were docs-only).
+- **Not done:** no code change. `.claude/CONTEXT.md:13` still says the upstream merge is deferred —
+  that was August's, which landed the same day. KI-1/KI-2 still sit as full entries over an empty
+  Resolved index (the 2026-08-07 review request, item 2).
+- **Committed and pushed by Lucas:** `65b6452`, the DEVLOG entry. Its push made no run either —
+  the third: three pushes, zero runs; a dispatch on `899c365` at 09:34Z ran green (KI-8 holds).
+- **Uncommitted, staged:** this entry, and the rotation the session-close gate asked for (rule 11b,
+  11 entries > 10): the 2026-08-01 entry moved verbatim to `docs/archive/SESSION-archive-001.md`.
+- **Next:** (1) Lucas commits. (2) KI-8: Lucas, logged in, opens the fork's Actions tab — an
+  enable banner, or none; until the trigger fires, `gh workflow run ci.yml --ref main` after each
+  push. (3) T-001: a standalone text element passes `src/core/normalize.ts:52` unmeasured and
+  `src/server.ts:426` stores it with a null bbox; the ticket's fix order is measure server-side,
+  else reject at the API, at minimum name the cause at `src/core/wireframe.ts:752`. (4) Then the
+  upstream merge, as its own reviewed step — plan and trap in DEVLOG 2026-09-07 (c). (5)
+  Pre-existing: KI-3, PR 4 (ADR-002), `share` untested since the August merge.
+- **Picks up:** any session; (2) needs the owner's browser; (4) needs a terminal and, for the MCP
+  round-trip, a client with the MCP server configured.
+
 ## 2026-09-07 (b) — Claude Code — the push trigger is dead on this fork; dispatch after each push
 - **Done:** the second push (`899c365`, 08:46Z) made no run either; the morning's enable-after-push
   cause is retracted; logged as a known issue. Detail: DEVLOG 2026-09-07 (b).
@@ -190,33 +215,4 @@ Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG e
   restarting the server loses the drawing, so `export` before any restart. And `npm run sync:skills`
   warns that `.claude/skills/` is not a symlink; it simply does not exist (no stale copy), pre-dating
   this session.
-
-## 2026-08-01 — Claude Code — Lucas + agent
-- **Done:** `docs/ROADMAP.md` **PR 2** — the repo's first test harness. Five `.excalidraw` fixtures
-  drawn through the real CLI (`dashboard`, `two-screen-flow`, `list-detail`, `annotated`,
-  `undeclared-content`), each with a hand-authored expectation and a golden reading; 28 assertions
-  on `node:test`; `scoreWireframe()` exported from `src/core/wireframe.ts`; `npm test` wired and a
-  CI `test` job added (CI previously ran no tests at all). ADR-001 + SPEC-001 written. Backfilled
-  the two missing DEVLOG entries — the file was still the unedited template.
-- **Proved it works:** moving `HEADING_MIN_FONT_SIZE` 20 → 24 fails all five golden readings.
-  Reverted. A suite that has never failed is not evidence of anything.
-- **Found:** markup attribution is 4/5 — a note level with a card binds to the input above it
-  (now **KI-4**). Recorded rather than tuned: fitting attribution to one agent-drawn sample of 5
-  would be fitting to noise.
-- **Also done: PR 3** — `wireframe --score` (pre-flight counts as JSON), `score` added to
-  `--json`, and a `### Reading quality` block in the plain reading that fires only when something
-  is actually wrong. Put in the report as well as behind the flag because `describe_wireframe` (MCP)
-  takes no arguments, and an agent is the main consumer. Skill + cheatsheet + conventions §9
-  updated and `npm run sync:skills` run.
-- **Uncommitted:** everything above is staged for review, not committed — rule 1.
-- **Next:** **PR 1** — the human markup round, the only Phase 1 item left and still the one leg
-  never exercised (KI-3, skipped a fourth time today for lack of 20 free minutes). After that,
-  Phase 2 (`link`, frames, `groupIds`, z-order, `customData`) is the next real body of work.
-- **Picks up:** any agent, with a terminal. PR 1 also needs **Lucas at a browser tab** on the canvas
-  URL. `excalidraw-canvas` is still not on PATH — use `node dist/bin.js <cmd>` (what this session
-  did) or `npm link` first.
-- **Watch out:** don't regenerate `tests/expected/*.json` — only the `.txt` goldens are generated
-  (`npm run corpus:update`). `undeclared-content` scores 3 fallbacks *on purpose*. And do not use
-  PowerShell `Set-Content` on `src/core/*.ts` — it re-encodes the UTF-8 box-drawing comment rules
-  into mojibake; this session did that and had to `git checkout` the file.
 
