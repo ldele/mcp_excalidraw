@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-08-07 · class: living -->
+<!-- status: active · updated: 2026-09-07 · class: living -->
 
 # KNOWN ISSUES
 
@@ -103,6 +103,22 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Real fix:** not attempted. The server has to stop inferring deletion from absence in a single
   client's snapshot — a per-client baseline, or a scene sequence number carried on the sync. That is
   a protocol change in `src/server.ts` (collision zone, rule 2) and wants an ADR of its own.
+
+## KI-8 — a push to this fork creates no workflow run; a dispatch does
+- **Symptom:** `git push` to `main` lands (`pushed_at` moves, `git ls-remote` agrees) and
+  `gh run list` shows nothing new. Twice on 2026-09-07: `49afba0` at 07:42Z and `899c365` at
+  08:46Z. `gh workflow run ci.yml --ref main` at 07:47Z created a run and all six jobs passed.
+- **Cause:** open. `actions/permissions` says enabled, the workflow's API record says `active`
+  (with an `updated_at` of 2026-07-24 — the upstream's, not this file's), the commit messages
+  carry no skip token, and the `on: push` block is the one the dispatch used. The first guess —
+  workflows enabled on the fork after the push — is out: the second push came an hour after a
+  successful dispatch.
+- **Workaround:** dispatch after each push: `gh workflow run ci.yml --repo ldele/mcp_excalidraw --ref main`.
+  A dispatch also runs the Node 18–24 `compat` matrix, so it is the heavier run.
+- **Real fix:** unknown until the owner looks at the fork's Actions tab logged in (the enable
+  banner is owner-only; a logged-out view cannot exclude it). If no banner: a no-op edit to
+  `ci.yml` and a push, then read the workflow record's `updated_at` — a re-registered workflow
+  carries the push's date.
 
 ## Resolved index
 

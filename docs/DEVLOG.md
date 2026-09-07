@@ -8,6 +8,23 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-09-07 (b) — Second push, still no run: the push trigger does not fire on this fork; dispatch does
+- **What:** `899c365` reached `origin/main` at 08:46:52Z, an hour after the manual dispatch had
+  run six jobs green, and created no workflow run — `gh run list` still shows the dispatch alone.
+  The morning entry's likely cause (workflows enabled on the fork after the push) is **retracted**:
+  the fork was enabled by 07:47Z and the 08:46Z push still made nothing. Logged as a known issue
+  (second bite, self-found — not a ticket).
+- **Facts that hold:** `actions/permissions` → `enabled: true`; the workflow's API record says
+  `state: active` but carries `updated_at` 2026-07-24 — the upstream's date, not this file's;
+  the commit message carries no skip token; `on: push: branches: [main, develop]` is the block
+  the dispatch used, and the dispatch ran.
+- **Why it matters:** a push that validates nothing is the pre-2026-09-06 state with extra steps;
+  until the trigger fires, every push needs `gh workflow run ci.yml --ref main` after it.
+- **Next:** the owner opens the fork's Actions tab logged in — the enable banner is shown to the
+  owner only, and a logged-out view cannot exclude it — and, if the banner is absent, compares
+  the workflow record's `updated_at` after a no-op edit to `ci.yml` (a re-registered workflow
+  gets today's date). Until then: dispatch after each push.
+
 ## 2026-09-07 — First run of the rewritten CI: the push made none, a dispatch ran six jobs green
 - **What:** the push of `49afba0` (07:42Z) created no workflow run — the fork had never had one,
   for the old `ci.yml` either. Actions enabled and the workflow `active`, so
