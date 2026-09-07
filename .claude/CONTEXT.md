@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-08-07 · class: living -->
+<!-- status: active · updated: 2026-09-07 · class: living -->
 
 # CONTEXT — mcp_excalidraw
 
@@ -9,14 +9,17 @@ server on `http://127.0.0.1:3000`. Package manager: npm.
 interface*, and share with a human who marks it up. The differentiator over upstream is the
 wireframe layer: a drawing is finished when `wireframe` reads it back as what you meant, not when
 the screenshot looks right.
-**Current phase (2026-08-07):** the fork stands on its own — renamed, private, `FORK.md` published,
-inherited branches cut. PR 2 and PR 3 landed 2026-08-01 (test harness, five fixtures, `--score`).
-PR 1 — the human markup round — finally ran on 2026-08-07 and found the review loop broken at the
-browser boundary: opening a tab restamped every agent element `human`, which collapsed `trustOrigin`
-and silently switched markup detection off. Fixed and verified live the same day; markup detection
-now works for the first time. **The attribution measurement PR 1 exists to take is still untaken**,
-so PR 1 stays open (KI-3). Agreed next: PR 4, a geometry lint (core first, browser panel over it) —
-needs an ADR. Upstream moved for the first time since the fork; merge decision deferred, see rule 2.
+**Current phase (2026-09-07):** the fork stands on its own — renamed, private, `FORK.md` published,
+inherited branches cut — and has taken one upstream merge (2026-08-07, clean; it fixed a live import
+bug). PR 2 and PR 3 landed 2026-08-01 (test harness, five fixtures, `--score`). PR 1 — the human
+markup round — ran on 2026-08-07, exposed and fixed a browser-boundary defect, and **still has not
+taken the attribution measurement it exists for** (KI-3). The first outside consumer reported five
+findings on 2026-08-21, filed as T-001–T-005 in `docs/TICKETS.md`; T-001 — a text element created
+without a size silently drops out of the reading, screen headings included — is a defect in the
+product's own claim. **Upstream is four commits ahead** (2.0.0: MCP SDK v2, `src/index.ts` split
+into four core files, Node floor 20). **Order agreed 2026-09-07: T-001 first, then the upstream
+merge as its own reviewed step** — conflict map, port plan and trap in DEVLOG 2026-09-07 (c) — then
+PR 4 (ADR-002). CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings
 <!-- change only via an experiment/ADR; list the setting + its locked value + where enforced -->

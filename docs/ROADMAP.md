@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-08-07 · class: living -->
+<!-- status: active · updated: 2026-09-07 · class: living -->
 
 # ROADMAP
 
@@ -50,6 +50,11 @@ Three measures, because "it looked right" has already proved too weak a bar once
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
 | 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — ADR-002 accepted 2026-08-07, not started | `docs/decisions/ADR-002-geometry-lint.md` |
+
+**Before PR 4 (agreed 2026-09-07):** T-001 in `docs/TICKETS.md` — a text element created without a
+size silently drops out of the reading — then the pending upstream merge (§ Upstream) as its own
+reviewed step. Both sit ahead of the lint: one is a reported defect in the reading, the other only
+grows with every commit we add.
 
 ## PR 4 — the geometry lint
 
@@ -148,3 +153,10 @@ wireframe read as; DEVLOG 2026-08-07).
 
 The lesson for next time: merge cost grows with every commit we add to `server.ts`, so check at
 session start as rule 2 says and take base fixes promptly rather than accumulating a deferral.
+
+**Pending since 2026-09-07** — upstream is four commits ahead (2.0.0: the MCP SDK v2 split packages,
+`src/index.ts` cut into `core/mcp-server.ts`, `mcp-tools.ts`, `mcp-dispatch.ts` and
+`canvas-state.ts`; Node floor 20). Nothing in it touches the reading path or `server.ts`, so it
+fixes nothing live for us; the whole cost is porting our three MCP tools into the split files.
+Decision: after T-001, as its own reviewed step. Conflict map, port plan and the one trap: DEVLOG
+2026-09-07 (c).

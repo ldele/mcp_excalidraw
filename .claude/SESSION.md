@@ -4,6 +4,25 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-09-07 (d) — Claude Code — the next two steps made explicit: T-001 triaged, the order in the canon
+- **Corrects (c):** its "Uncommitted, staged" line is history — Lucas committed (c) as `ac0cede`.
+  The stale CONTEXT.md phase paragraph it listed under "Not done" is now rewritten.
+- **Done:** `.claude/CONTEXT.md` "Current phase" and `AGENTS.md` "State" rewritten to today's facts
+  with the agreed order (T-001, then the upstream merge as its own step, then PR 4);
+  `docs/ROADMAP.md` carries the same order under the PR table and a "Pending since 2026-09-07"
+  paragraph under § Upstream; **T-001 triaged** in `docs/TICKETS.md` with the trace — the API takes
+  a sizeless text element (`src/server.ts:426`), the reading drops an empty box silently
+  (`src/core/wireframe.ts:545`), and an open tab's measurement comes back through sync as a
+  **human** "resized" record, a second defect. No code changed.
+- **Verified:** `docs_check --strict`, `integrity_check --strict`, `cpc-ticket check` green.
+- **Uncommitted, staged:** the four docs, this entry, and the rotation (rule 11b).
+- **Next:** (1) Lucas commits and pushes; dispatch CI after the push (KI-8). (2) T-001: first the
+  repro pair — a sizeless text heading read with no tab, then with a tab after one sync — to
+  confirm the trace; then the diagnostic at `src/core/wireframe.ts:752` and a 400 at
+  `src/server.ts:426`, with server-side measurement as the real fix (the ticket's Triage line).
+  (3) The upstream merge, plan in DEVLOG 2026-09-07 (c). (4) KI-8's owner step; KI-3; PR 4.
+- **Picks up:** any session; (2) needs a terminal and, for the repro's second half, a browser tab.
+
 ## 2026-09-07 (c) — Claude Code — upstream is four commits ahead (2.0.0); merge deferred past T-001
 - **Done:** state read (clean at `70a3329`, level with `origin/main`); upstream fetched — four
   commits, `0db05c4`..`ff42de9`, the 2.0.0 release: MCP SDK v2, `src/index.ts` split into four
@@ -173,46 +192,4 @@ Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG e
   tolerances against the corpus first** (both ⚠ items in the ADR's Confidence block) rather than
   shipping guessed numbers.
 - **Picks up:** any agent with a terminal; PR 1 additionally needs Lucas at a browser tab.
-
-## 2026-08-07 — Claude Code — Lucas + agent
-- **Done:** ran **PR 1**, the human markup round, for the first time (KI-3 — skipped four times
-  before this). It broke before a single annotation was drawn, and the defect was the important
-  kind: **opening the canvas in a browser restamped all 25 agent-drawn elements as `human`**, because
-  Excalidraw echoes the whole scene back with unset style properties default-filled and text boxes
-  re-measured, and the server stamps browser writes `human`. That collapsed
-  `trustOrigin` (`src/core/wireframe.ts:531`) and **silently switched markup detection off for
-  everything except freedraw** — the review loop's headline feature could not work in its own
-  documented workflow. Fixed in `src/core/changes.ts` (`EDITOR_DEFAULTS` + `fieldsEqual`; text
-  width/height dropped from the canonical projection), 8 new assertions in
-  `tests/frontend-echo.test.mjs`. Also documented `watch`'s undocumented 240s ceiling in SKILL.md +
-  cheatsheet and re-ran `npm run sync:skills`.
-- **Proved it works:** stash the fix and 3 of the 8 new tests fail — and it is the right 3 (the echo
-  guards; the five "real edits still report" assertions pass either way). Live end-to-end: *before*,
-  opening the tab produced 25 phantom `human` records and `trustOrigin: false`; *after*, the same
-  action produced `No changes`, `origins: {"agent":25}`, `trustOrigin: true`. 36/36 tests,
-  `type-check` clean, no golden moved.
-- **Found, not fixed:** **KI-5** — copy-pasting a component in the editor destroys its declared
-  `role` (`button "General"` → `button? "General"`); real evidence for `customData` and the Phase 3
-  library. **KI-6** — `changes` attributed a 1160x1180 screen frame as `annotates` a 540x48 input;
-  `looksLikeAnnotation` has no size ceiling. Also: a copied footer landing **4.29px** outside its
-  frame silently became a phantom third screen — the cause behind an "unnamed screen" warning, and
-  the motivating case for PR 4.
-- **Also:** a wireframe reading caught a mis-drawn flow arrow the screenshot hid — it looked like it
-  landed on Billing, `endBinding` said Members, and Lucas confirmed Billing was intended. The
-  round-trip thesis doing exactly what it claims.
-- **Uncommitted:** everything above is staged for review, not committed — rule 1.
-- **Next:** **PR 1 is still open** — the attribution accuracy number is *still* untaken, because the
-  session pivoted to feature design once the loop was fixed. It is now genuinely unblocked and needs
-  about one sitting. Then **PR 4**, the geometry lint (agreed this session: core first with a JSON
-  contract, browser panel as a thin view over it) — **write the ADR before building**.
-- **Picks up:** any agent, with a terminal. PR 1 needs **Lucas at a browser tab** on the canvas URL.
-  `excalidraw-canvas` is still not on PATH — use `node dist/bin.js <cmd>`.
-- **Watch out:** **rule 2 is live** — upstream moved for the first time since the fork (`2930519`
-  export fidelity, `ecf3cac` `.passthrough()`), both touching `src/server.ts`, `merge-tree` says no
-  conflicts, **decision deferred**. Decide before editing `src/server.ts` / `src/index.ts` /
-  `src/core/normalize.ts`. It matters beyond hygiene: `.passthrough()` is the mechanism `customData`
-  needs, which is what KI-5 and Phase 3 both want. Also: the canvas holds its scene **in memory** —
-  restarting the server loses the drawing, so `export` before any restart. And `npm run sync:skills`
-  warns that `.claude/skills/` is not a symlink; it simply does not exist (no stale copy), pre-dating
-  this session.
 

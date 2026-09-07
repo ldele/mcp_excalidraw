@@ -15,10 +15,11 @@ component roles, reading order, navigation flows — plus a review loop where a 
 up and the agent reads the markup attributed to the component it refers to. What the fork adds and
 why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 
-**State (2026-08-07):** fork stands on its own (renamed, private, inherited branches cut) and has
-taken its first upstream merge. The two-way markup leg **has** now been run with a human — it was
-broken at the browser boundary and is fixed — but the attribution accuracy it exists to measure is
-**still untaken** (ROADMAP PR 1, KI-3). Detail: `.claude/CONTEXT.md`.
+**State (2026-09-07):** fork stands on its own (renamed, private, inherited branches cut), one
+upstream merge taken (2026-08-07). The two-way markup leg has run with a human and works, but the
+attribution accuracy it exists to measure is **still untaken** (ROADMAP PR 1, KI-3). First outside
+feedback is filed as T-001–T-005 in `docs/TICKETS.md`. **Next, in order: T-001, then the pending
+upstream merge (four commits, 2.0.0) as its own step, then PR 4.** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 18 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
