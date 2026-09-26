@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-09-07 · class: living -->
+<!-- status: active · updated: 2026-09-22 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -25,6 +25,13 @@ run from the global install: `cpc-ticket --root . …`.
      - **Symptom:** one line: what was seen, and where
      - **Reproduce:** the command, or the file and line
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
+
+## T-006 — A corner-to-corner sidebar merges every sibling into one row, so the reading order goes column-major
+- **Status:** open · 2026-09-22
+- **From:** UI-Wizard agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7828a2d) · 2026-09-22
+- **Symptom:** wireframe-conventions §4 requires the sidebar pinned corner to corner; with it, a sidebar-layout screen's main column reads column-major (every x=400 item top to bottom, then the x=896 column, then x=1144) — [tour] button 'Take the tour' is numbered 15, after [invoices-table], and the bento's right-hand tiles follow the table. Shortening [sidebar] to 400px restores row order, so the full-height band is what merges the rows. Score stays clean (fallbacks 0, orphans 0), so the gate does not catch it.
+- **Reproduce:** excalidraw-canvas import C:/Projects/UI-Wizard/wireframes/dashboard/dashboard.excalidraw --replace; excalidraw-canvas wireframe (main column numbered 3–16 column-major); excalidraw-canvas update sidebar --set '{"height":400}'; excalidraw-canvas wireframe (row order). Ask: leave edge-pinned sidebar/header bands out of row grouping for their siblings.
+- **Resolution:** —
 
 ## T-005 — Screen naming picks the topmost heading, not the most screen-like one
 - **Status:** open · 2026-09-05
