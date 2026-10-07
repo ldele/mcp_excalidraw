@@ -4,6 +4,34 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-07 — Claude Code — upstream 2.1.2 merged on a branch (SPEC-002); staged in a worktree, not committed
+- **Where:** `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`, a `git worktree` of this
+  repo — the merge is **in progress and staged** there (`git diff --cached`). The main checkout is
+  untouched at `cf3617d` (SPEC-002, committed on Lucas's instruction, not pushed) with his
+  uncommitted `docs/TICKETS.md` (T-006, T-007). The canvas on `:3000` was running someone's drawing
+  from the main checkout's `dist/` throughout and was never touched.
+- **Done:** 25 upstream commits (`96d9c21`) merged, 15 conflicts resolved; our three MCP tools ported
+  into the split files; one silent-merge defect fixed (a `replace` now records its deletes);
+  `repairOrderKeys` so scenes exported before 2.1.1 import and render; 13 new tests. Version 1.3.0,
+  Node ≥ 20. Detail, per file: DEVLOG 2026-10-07.
+- **Verified:** `type-check` ×2, `npm run build`, `npm test` (56 / 56 `node:test`, MCP wire 6 / 6,
+  bind, render, state), `tests/expected/` untouched, upstream's Playwright suite 19 / 19 with the
+  system Chrome, the legacy dashboard loading in the merged page with the server left at 98.
+  `integrity_check --strict` green. **`docs_check --strict` fails on one warning that is not this
+  branch's:** `docs/TICKETS.md` was committed 2026-09-26 with `updated: 2026-09-22` (rule 12) — the
+  uncommitted edit in the main checkout carries the fix, so CI's docs job is red until that lands.
+- **Not verified:** one human drag = one human record (SPEC-002 case 6, second half) — needs a
+  person. Two early runs of the new server test did not reach the server right after a build;
+  not reproduced in six later runs.
+- **Next:** (1) Lucas commits `docs/TICKETS.md` on `main`, then reviews the staged merge in the
+  worktree and commits it (`git commit` there completes the merge). (2) `main` ← the branch
+  (fast-forward), then `npm ci && npm run build && npm link` in the main checkout **with no canvas
+  running**, push, dispatch CI by hand (KI-8), `git worktree remove ../mcp_excalidraw-merge`.
+  (3) File with `cpc-ticket`: bound-label typography on export; the sync deleting what a payload
+  omits (KI-7); `EDITOR_DEFAULTS` lacking `strokeColor` / `fontFamily`. Add T-001's re-test line
+  (unchanged by the merge). (4) Those three, then T-001, then PR 4.
+- **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
+
 ## 2026-09-07 (e) — Claude Code — (d) committed and pushed; CI green on `2948946` by dispatch
 - **Corrects (d):** its staged set is committed as `2948946` and pushed. Run 34124916242
   (`workflow_dispatch`): six jobs green, the Node 18–24 matrix included. The push itself made no
@@ -164,31 +192,4 @@ Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG e
    coherence rather than accretion.
 5. **ADR-002's two ⚠ Confidence items** are the gate on PR 4 starting — every numeric tolerance is
    currently a guess, and the error/advisory split is asserted rather than demonstrated.
-
-## 2026-08-07 (close 2) — Claude Code — Lucas + agent
-- **Correction:** the entry below says PR 1 needs "one sitting". Two further attempts were made the
-  same day and **both failed**, for new reasons each time. PR 1's number is *still* untaken.
-- **Attempt 2** died on **KI-7**: two browser tabs open at once, each POSTing its whole scene, deleted
-  each other's elements — 386 adds against 385 deletes — and silently destroyed a complete round of
-  human markup (a note, an ellipse, four scribbles). Unrecoverable; change records carry no geometry.
-  Caused by my own instructions ("open the canvas", then later "open or reload"). Guarded now:
-  `changes`/`watch` warn on stderr and in-band when `websocket_clients > 1`, in `watch` *before* the
-  wait. The protocol fix is still open (KI-7).
-- **Attempt 3** never got drawn — the tab was closed and the canvas went quiet.
-- **Also fixed: a regression I introduced this morning.** Suppressing the browser echo meant the
-  first sync produced no delta, which skips the branch that drops a shape's `label` once Excalidraw
-  has expanded it into a bound text child. Every client load then re-expanded it: 10 shapes × 4 tab
-  loads = 40 stray text elements. `boundChildSupersedesLabel` now applies on the no-delta path.
-  Verified across two reloads: 0 duplicates, 0 stale labels, rev unchanged at 25.
-- **Uncommitted:** the guard, the label fix, KI-7, this baton and the DEVLOG entry are **staged for
-  review, not committed** — rule 1. (Commit `3c60710`, the morning's echo fix, is already in and is
-  what the label regression came from.)
-- **Rule 2 — read this before touching the collision zone.** This work **edited `src/server.ts`**.
-  Upstream's two commits were re-checked (still no conflicts) and the merge was **deliberately
-  deferred**, so a bug fix and a five-file upstream merge would not be reviewed together. That
-  deferral is the decision rule 2 requires. The merge is still owed and Lucas asked for it explicitly.
-- **Next, in order:** (1) the upstream merge, as its own reviewed step; (2) **PR 1** — one sitting
-  with a person, everything blocking it is now fixed; (3) PR 4 to ADR-002, calibrating tolerances
-  against the corpus first.
-- **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
 

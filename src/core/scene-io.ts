@@ -4,12 +4,12 @@ import {
   getElements,
   getFiles,
   postFiles,
-  clearCanvas,
-  batchCreateElementsOnCanvas
+  batchCreateElementsOnCanvas,
+  replaceElementsOnCanvas
 } from './canvas-client.js';
 import { sanitizeFilePath } from './normalize.js';
 import { isObsidianExcalidrawMd, extractSceneJsonFromObsidianMd } from './obsidian-md.js';
-import { expandElementsForExport } from './expand-elements.js';
+import { expandElementsForExport, repairOrderKeys } from './expand-elements.js';
 
 export interface ExportedScene {
   scene: Record<string, any>;
@@ -82,13 +82,9 @@ export async function importScene(options: {
     throw new Error('No elements found in the import data');
   }
 
-  // If replace mode, clear first
-  if (options.mode === 'replace') {
-    await clearCanvas();
-  }
-
-  // Batch create the imported elements
-  const elementsToCreate = importElements.map(el => ({
+  // Batch create the imported elements. Order keys from a pre-2.1.1 export
+  // are dropped here so the server never stores a scene the canvas page cannot load.
+  const elementsToCreate = repairOrderKeys(importElements).map(el => ({
     ...el,
     id: el.id || generateId(),
     createdAt: new Date().toISOString(),
@@ -96,11 +92,11 @@ export async function importScene(options: {
     version: 1
   }));
 
-  const created = await batchCreateElementsOnCanvas(elementsToCreate);
+  const created = options.mode === 'replace'
+    ? await replaceElementsOnCanvas(elementsToCreate)
+    : await batchCreateElementsOnCanvas(elementsToCreate);
   if (!created) {
-    // Especially important in replace mode: the canvas was already cleared,
-    // so a silently swallowed failure here would report success on data loss
-    throw new Error('Import failed: canvas rejected the batch create (elements were not restored)');
+    throw new Error('Import failed: canvas rejected the batch create');
   }
 
   // Import files if present (for image elements)
