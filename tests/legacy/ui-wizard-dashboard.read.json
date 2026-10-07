@@ -1,0 +1,2033 @@
+{
+  "screens": [
+    {
+      "id": "screen",
+      "role": "screen",
+      "inferred": false,
+      "label": "Overview",
+      "type": "rectangle",
+      "box": {
+        "x": 120,
+        "y": 120,
+        "w": 1280,
+        "h": 1880
+      },
+      "children": [
+        {
+          "id": "sidebar",
+          "role": "sidebar",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 120,
+            "y": 120,
+            "w": 256,
+            "h": 1880
+          },
+          "children": [
+            {
+              "id": "sb-brand",
+              "role": "text",
+              "inferred": false,
+              "label": "UI Wizard",
+              "type": "text",
+              "box": {
+                "x": 152,
+                "y": 140,
+                "w": 160,
+                "h": 22
+              },
+              "children": []
+            },
+            {
+              "id": "sb-brand-sub",
+              "role": "text",
+              "inferred": false,
+              "label": "dashboard shell",
+              "type": "text",
+              "box": {
+                "x": 152,
+                "y": 162,
+                "w": 160,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "sb-group-platform",
+              "role": "text",
+              "inferred": false,
+              "label": "Platform",
+              "type": "text",
+              "box": {
+                "x": 136,
+                "y": 198,
+                "w": 120,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "nav-overview",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Overview",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 220,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-new",
+              "role": "list-item",
+              "inferred": false,
+              "label": "New entry",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 256,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-analytics",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Analytics  ›",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 292,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-settings",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Settings",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 328,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "sb-group-collection",
+              "role": "text",
+              "inferred": false,
+              "label": "Collection",
+              "type": "text",
+              "box": {
+                "x": 136,
+                "y": 382,
+                "w": 120,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "nav-templates",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Templates",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 404,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-themes",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Themes",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 440,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-motion",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Motion",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 476,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "sb-avatar",
+              "role": "avatar",
+              "inferred": false,
+              "type": "ellipse",
+              "box": {
+                "x": 136,
+                "y": 868,
+                "w": 40,
+                "h": 40
+              },
+              "children": []
+            },
+            {
+              "id": "sb-user-name",
+              "role": "text",
+              "inferred": false,
+              "label": "Ada Lovelace",
+              "type": "text",
+              "box": {
+                "x": 188,
+                "y": 870,
+                "w": 150,
+                "h": 18
+              },
+              "children": []
+            },
+            {
+              "id": "sb-user-mail",
+              "role": "text",
+              "inferred": false,
+              "label": "ada@example.com",
+              "type": "text",
+              "box": {
+                "x": 188,
+                "y": 890,
+                "w": 150,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "topbar",
+          "role": "header",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 376,
+            "y": 120,
+            "w": 1024,
+            "h": 56
+          },
+          "children": [
+            {
+              "id": "topbar-toggle",
+              "role": "button",
+              "inferred": false,
+              "label": "≡",
+              "type": "rectangle",
+              "box": {
+                "x": 392,
+                "y": 132,
+                "w": 32,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "topbar-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Overview",
+              "type": "text",
+              "box": {
+                "x": 436,
+                "y": 134,
+                "w": 140,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "cmdk",
+              "role": "button",
+              "inferred": false,
+              "label": "Search…   ⌘K",
+              "type": "rectangle",
+              "box": {
+                "x": 840,
+                "y": 132,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "inbox",
+              "role": "button",
+              "inferred": false,
+              "label": "Inbox 2",
+              "type": "rectangle",
+              "box": {
+                "x": 1072,
+                "y": 132,
+                "w": 64,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "theme-system",
+              "role": "button",
+              "inferred": false,
+              "label": "System",
+              "type": "rectangle",
+              "box": {
+                "x": 1144,
+                "y": 132,
+                "w": 80,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "theme-light",
+              "role": "button",
+              "inferred": false,
+              "label": "Light",
+              "type": "rectangle",
+              "box": {
+                "x": 1232,
+                "y": 132,
+                "w": 72,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "theme-dark",
+              "role": "button",
+              "inferred": false,
+              "label": "Dark",
+              "type": "rectangle",
+              "box": {
+                "x": 1312,
+                "y": 132,
+                "w": 72,
+                "h": 32
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "welcome-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "Welcome back",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 200,
+            "w": 300,
+            "h": 26
+          },
+          "children": []
+        },
+        {
+          "id": "onboarding",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 240,
+            "w": 976,
+            "h": 284
+          },
+          "children": [
+            {
+              "id": "onboarding-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Get started",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 256,
+                "w": 200,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "onboarding-dismiss",
+              "role": "button",
+              "inferred": false,
+              "label": "Dismiss",
+              "type": "rectangle",
+              "box": {
+                "x": 1296,
+                "y": 256,
+                "w": 64,
+                "h": 28
+              },
+              "children": []
+            },
+            {
+              "id": "onboarding-count",
+              "role": "text",
+              "inferred": false,
+              "label": "1 of 3 complete",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 284,
+                "w": 220,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "onboarding-progress",
+              "role": "divider",
+              "inferred": false,
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 310,
+                "w": 944,
+                "h": 4
+              },
+              "children": []
+            },
+            {
+              "id": "step-1",
+              "role": "list-item",
+              "inferred": false,
+              "label": "✓  Complete your profile — done",
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 326,
+                "w": 944,
+                "h": 48
+              },
+              "children": []
+            },
+            {
+              "id": "step-2",
+              "role": "list-item",
+              "inferred": false,
+              "label": "2  Review this month's metrics · check your key numbers",
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 382,
+                "w": 944,
+                "h": 48
+              },
+              "children": [
+                {
+                  "id": "step-2-view",
+                  "role": "button",
+                  "inferred": false,
+                  "label": "View",
+                  "type": "rectangle",
+                  "box": {
+                    "x": 1288,
+                    "y": 392,
+                    "w": 56,
+                    "h": 28
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "step-3",
+              "role": "list-item",
+              "inferred": false,
+              "label": "3  Create your first entry",
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 438,
+                "w": 944,
+                "h": 48
+              },
+              "children": [
+                {
+                  "id": "step-3-new",
+                  "role": "button",
+                  "inferred": false,
+                  "label": "New entry",
+                  "type": "rectangle",
+                  "box": {
+                    "x": 1264,
+                    "y": 448,
+                    "w": 80,
+                    "h": 28
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "month-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "This month",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 552,
+            "w": 200,
+            "h": 26
+          },
+          "children": []
+        },
+        {
+          "id": "kpi-mrr",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 588,
+            "w": 480,
+            "h": 148
+          },
+          "children": [
+            {
+              "id": "kpi-mrr-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Monthly recurring revenue",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 604,
+                "w": 300,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-mrr-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "€48,290",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 626,
+                "w": 200,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-mrr-d",
+              "role": "text",
+              "inferred": false,
+              "label": "+12.4% vs last month",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 700,
+                "w": 220,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-mrr-spark",
+              "role": "chart",
+              "inferred": false,
+              "label": "sparkline · 8 months",
+              "type": "rectangle",
+              "box": {
+                "x": 716,
+                "y": 660,
+                "w": 148,
+                "h": 56
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-signups",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 752,
+            "w": 480,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-signups-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Q3 signups target",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 768,
+                "w": 300,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "7'420 / 10'000",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 790,
+                "w": 260,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-progress",
+              "role": "divider",
+              "inferred": false,
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 846,
+                "w": 448,
+                "h": 4
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-d",
+              "role": "text",
+              "inferred": false,
+              "label": "74% of goal · 2'580 to go",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 862,
+                "w": 260,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "revenue",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 920,
+            "w": 976,
+            "h": 629
+          },
+          "children": [
+            {
+              "id": "revenue-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Revenue vs expenses",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 936,
+                "w": 300,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-desc",
+              "role": "text",
+              "inferred": false,
+              "label": "Last 8 months",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 966,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-plot",
+              "role": "chart",
+              "inferred": false,
+              "label": "Area chart · revenue vs expenses · 8 months · x = month, y = € · series 1 and 2 on --chart-1 / --chart-2 · grid on --chart-grid",
+              "type": "rectangle",
+              "box": {
+                "x": 418,
+                "y": 996,
+                "w": 940,
+                "h": 535
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "invoices-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "Invoices",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 1586,
+            "w": 200,
+            "h": 26
+          },
+          "children": []
+        },
+        {
+          "id": "invoices-table",
+          "role": "table",
+          "inferred": false,
+          "label": "24 rows × 5 cols — invoice, customer, email, status (paid / pending / overdue pill), amount (tabular, right-aligned) · sortable headers · filter row · row selection · 5 per page with pagination",
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 1654,
+            "w": 976,
+            "h": 316
+          },
+          "children": []
+        },
+        {
+          "id": "kpi-churn",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 896,
+            "y": 588,
+            "w": 232,
+            "h": 148
+          },
+          "children": [
+            {
+              "id": "kpi-churn-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Churn",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 604,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-churn-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "1.9%",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 626,
+                "w": 120,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-churn-d",
+              "role": "text",
+              "inferred": false,
+              "label": "+0.3 pt",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 700,
+                "w": 80,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-churn-spark",
+              "role": "chart",
+              "inferred": false,
+              "label": "sparkline",
+              "type": "rectangle",
+              "box": {
+                "x": 1000,
+                "y": 680,
+                "w": 112,
+                "h": 40
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-tickets",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 896,
+            "y": 752,
+            "w": 232,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-tickets-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Support tickets",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 768,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "96",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 790,
+                "w": 80,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-d",
+              "role": "text",
+              "inferred": false,
+              "label": "−26.7% · prev. 131",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 862,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-workspaces",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 1144,
+            "y": 588,
+            "w": 232,
+            "h": 148
+          },
+          "children": [
+            {
+              "id": "kpi-workspaces-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Active workspaces",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 604,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-workspaces-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "1'284",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 626,
+                "w": 120,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-workspaces-d",
+              "role": "text",
+              "inferred": false,
+              "label": "+14.5% · prev. 1'121",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 700,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-latency",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 1144,
+            "y": 752,
+            "w": 232,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-latency-k",
+              "role": "text",
+              "inferred": false,
+              "label": "API p95 latency",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 768,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-latency-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "184 ms",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 790,
+                "w": 120,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-latency-d",
+              "role": "text",
+              "inferred": false,
+              "label": "−9.1%",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 862,
+                "w": 60,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-latency-spark",
+              "role": "chart",
+              "inferred": false,
+              "label": "sparkline",
+              "type": "rectangle",
+              "box": {
+                "x": 1232,
+                "y": 840,
+                "w": 128,
+                "h": 40
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "tour",
+          "role": "button",
+          "inferred": false,
+          "label": "Take the tour",
+          "type": "rectangle",
+          "box": {
+            "x": 1276,
+            "y": 198,
+            "w": 100,
+            "h": 30
+          },
+          "children": []
+        },
+        {
+          "id": "invoices-columns",
+          "role": "button",
+          "inferred": false,
+          "label": "Columns",
+          "type": "rectangle",
+          "box": {
+            "x": 1300,
+            "y": 1614,
+            "w": 76,
+            "h": 28
+          },
+          "children": []
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "screen",
+      "role": "screen",
+      "inferred": false,
+      "label": "Overview",
+      "type": "rectangle",
+      "box": {
+        "x": 120,
+        "y": 120,
+        "w": 1280,
+        "h": 1880
+      },
+      "children": [
+        {
+          "id": "sidebar",
+          "role": "sidebar",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 120,
+            "y": 120,
+            "w": 256,
+            "h": 1880
+          },
+          "children": [
+            {
+              "id": "sb-brand",
+              "role": "text",
+              "inferred": false,
+              "label": "UI Wizard",
+              "type": "text",
+              "box": {
+                "x": 152,
+                "y": 140,
+                "w": 160,
+                "h": 22
+              },
+              "children": []
+            },
+            {
+              "id": "sb-brand-sub",
+              "role": "text",
+              "inferred": false,
+              "label": "dashboard shell",
+              "type": "text",
+              "box": {
+                "x": 152,
+                "y": 162,
+                "w": 160,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "sb-group-platform",
+              "role": "text",
+              "inferred": false,
+              "label": "Platform",
+              "type": "text",
+              "box": {
+                "x": 136,
+                "y": 198,
+                "w": 120,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "nav-overview",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Overview",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 220,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-new",
+              "role": "list-item",
+              "inferred": false,
+              "label": "New entry",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 256,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-analytics",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Analytics  ›",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 292,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-settings",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Settings",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 328,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "sb-group-collection",
+              "role": "text",
+              "inferred": false,
+              "label": "Collection",
+              "type": "text",
+              "box": {
+                "x": 136,
+                "y": 382,
+                "w": 120,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "nav-templates",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Templates",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 404,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-themes",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Themes",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 440,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "nav-motion",
+              "role": "list-item",
+              "inferred": false,
+              "label": "Motion",
+              "type": "rectangle",
+              "box": {
+                "x": 136,
+                "y": 476,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "sb-avatar",
+              "role": "avatar",
+              "inferred": false,
+              "type": "ellipse",
+              "box": {
+                "x": 136,
+                "y": 868,
+                "w": 40,
+                "h": 40
+              },
+              "children": []
+            },
+            {
+              "id": "sb-user-name",
+              "role": "text",
+              "inferred": false,
+              "label": "Ada Lovelace",
+              "type": "text",
+              "box": {
+                "x": 188,
+                "y": 870,
+                "w": 150,
+                "h": 18
+              },
+              "children": []
+            },
+            {
+              "id": "sb-user-mail",
+              "role": "text",
+              "inferred": false,
+              "label": "ada@example.com",
+              "type": "text",
+              "box": {
+                "x": 188,
+                "y": 890,
+                "w": 150,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "topbar",
+          "role": "header",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 376,
+            "y": 120,
+            "w": 1024,
+            "h": 56
+          },
+          "children": [
+            {
+              "id": "topbar-toggle",
+              "role": "button",
+              "inferred": false,
+              "label": "≡",
+              "type": "rectangle",
+              "box": {
+                "x": 392,
+                "y": 132,
+                "w": 32,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "topbar-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Overview",
+              "type": "text",
+              "box": {
+                "x": 436,
+                "y": 134,
+                "w": 140,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "cmdk",
+              "role": "button",
+              "inferred": false,
+              "label": "Search…   ⌘K",
+              "type": "rectangle",
+              "box": {
+                "x": 840,
+                "y": 132,
+                "w": 224,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "inbox",
+              "role": "button",
+              "inferred": false,
+              "label": "Inbox 2",
+              "type": "rectangle",
+              "box": {
+                "x": 1072,
+                "y": 132,
+                "w": 64,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "theme-system",
+              "role": "button",
+              "inferred": false,
+              "label": "System",
+              "type": "rectangle",
+              "box": {
+                "x": 1144,
+                "y": 132,
+                "w": 80,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "theme-light",
+              "role": "button",
+              "inferred": false,
+              "label": "Light",
+              "type": "rectangle",
+              "box": {
+                "x": 1232,
+                "y": 132,
+                "w": 72,
+                "h": 32
+              },
+              "children": []
+            },
+            {
+              "id": "theme-dark",
+              "role": "button",
+              "inferred": false,
+              "label": "Dark",
+              "type": "rectangle",
+              "box": {
+                "x": 1312,
+                "y": 132,
+                "w": 72,
+                "h": 32
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "welcome-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "Welcome back",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 200,
+            "w": 300,
+            "h": 26
+          },
+          "children": []
+        },
+        {
+          "id": "onboarding",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 240,
+            "w": 976,
+            "h": 284
+          },
+          "children": [
+            {
+              "id": "onboarding-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Get started",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 256,
+                "w": 200,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "onboarding-dismiss",
+              "role": "button",
+              "inferred": false,
+              "label": "Dismiss",
+              "type": "rectangle",
+              "box": {
+                "x": 1296,
+                "y": 256,
+                "w": 64,
+                "h": 28
+              },
+              "children": []
+            },
+            {
+              "id": "onboarding-count",
+              "role": "text",
+              "inferred": false,
+              "label": "1 of 3 complete",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 284,
+                "w": 220,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "onboarding-progress",
+              "role": "divider",
+              "inferred": false,
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 310,
+                "w": 944,
+                "h": 4
+              },
+              "children": []
+            },
+            {
+              "id": "step-1",
+              "role": "list-item",
+              "inferred": false,
+              "label": "✓  Complete your profile — done",
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 326,
+                "w": 944,
+                "h": 48
+              },
+              "children": []
+            },
+            {
+              "id": "step-2",
+              "role": "list-item",
+              "inferred": false,
+              "label": "2  Review this month's metrics · check your key numbers",
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 382,
+                "w": 944,
+                "h": 48
+              },
+              "children": [
+                {
+                  "id": "step-2-view",
+                  "role": "button",
+                  "inferred": false,
+                  "label": "View",
+                  "type": "rectangle",
+                  "box": {
+                    "x": 1288,
+                    "y": 392,
+                    "w": 56,
+                    "h": 28
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "step-3",
+              "role": "list-item",
+              "inferred": false,
+              "label": "3  Create your first entry",
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 438,
+                "w": 944,
+                "h": 48
+              },
+              "children": [
+                {
+                  "id": "step-3-new",
+                  "role": "button",
+                  "inferred": false,
+                  "label": "New entry",
+                  "type": "rectangle",
+                  "box": {
+                    "x": 1264,
+                    "y": 448,
+                    "w": 80,
+                    "h": 28
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "month-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "This month",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 552,
+            "w": 200,
+            "h": 26
+          },
+          "children": []
+        },
+        {
+          "id": "kpi-mrr",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 588,
+            "w": 480,
+            "h": 148
+          },
+          "children": [
+            {
+              "id": "kpi-mrr-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Monthly recurring revenue",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 604,
+                "w": 300,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-mrr-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "€48,290",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 626,
+                "w": 200,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-mrr-d",
+              "role": "text",
+              "inferred": false,
+              "label": "+12.4% vs last month",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 700,
+                "w": 220,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-mrr-spark",
+              "role": "chart",
+              "inferred": false,
+              "label": "sparkline · 8 months",
+              "type": "rectangle",
+              "box": {
+                "x": 716,
+                "y": 660,
+                "w": 148,
+                "h": 56
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-signups",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 752,
+            "w": 480,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-signups-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Q3 signups target",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 768,
+                "w": 300,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "7'420 / 10'000",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 790,
+                "w": 260,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-progress",
+              "role": "divider",
+              "inferred": false,
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 846,
+                "w": 448,
+                "h": 4
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-d",
+              "role": "text",
+              "inferred": false,
+              "label": "74% of goal · 2'580 to go",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 862,
+                "w": 260,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "revenue",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 920,
+            "w": 976,
+            "h": 629
+          },
+          "children": [
+            {
+              "id": "revenue-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Revenue vs expenses",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 936,
+                "w": 300,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-desc",
+              "role": "text",
+              "inferred": false,
+              "label": "Last 8 months",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 966,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-plot",
+              "role": "chart",
+              "inferred": false,
+              "label": "Area chart · revenue vs expenses · 8 months · x = month, y = € · series 1 and 2 on --chart-1 / --chart-2 · grid on --chart-grid",
+              "type": "rectangle",
+              "box": {
+                "x": 418,
+                "y": 996,
+                "w": 940,
+                "h": 535
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "invoices-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "Invoices",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 1586,
+            "w": 200,
+            "h": 26
+          },
+          "children": []
+        },
+        {
+          "id": "invoices-table",
+          "role": "table",
+          "inferred": false,
+          "label": "24 rows × 5 cols — invoice, customer, email, status (paid / pending / overdue pill), amount (tabular, right-aligned) · sortable headers · filter row · row selection · 5 per page with pagination",
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 1654,
+            "w": 976,
+            "h": 316
+          },
+          "children": []
+        },
+        {
+          "id": "kpi-churn",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 896,
+            "y": 588,
+            "w": 232,
+            "h": 148
+          },
+          "children": [
+            {
+              "id": "kpi-churn-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Churn",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 604,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-churn-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "1.9%",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 626,
+                "w": 120,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-churn-d",
+              "role": "text",
+              "inferred": false,
+              "label": "+0.3 pt",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 700,
+                "w": 80,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-churn-spark",
+              "role": "chart",
+              "inferred": false,
+              "label": "sparkline",
+              "type": "rectangle",
+              "box": {
+                "x": 1000,
+                "y": 680,
+                "w": 112,
+                "h": 40
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-tickets",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 896,
+            "y": 752,
+            "w": 232,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-tickets-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Support tickets",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 768,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "96",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 790,
+                "w": 80,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-d",
+              "role": "text",
+              "inferred": false,
+              "label": "−26.7% · prev. 131",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 862,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-workspaces",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 1144,
+            "y": 588,
+            "w": 232,
+            "h": 148
+          },
+          "children": [
+            {
+              "id": "kpi-workspaces-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Active workspaces",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 604,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-workspaces-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "1'284",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 626,
+                "w": 120,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-workspaces-d",
+              "role": "text",
+              "inferred": false,
+              "label": "+14.5% · prev. 1'121",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 700,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-latency",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 1144,
+            "y": 752,
+            "w": 232,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-latency-k",
+              "role": "text",
+              "inferred": false,
+              "label": "API p95 latency",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 768,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-latency-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "184 ms",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 790,
+                "w": 120,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-latency-d",
+              "role": "text",
+              "inferred": false,
+              "label": "−9.1%",
+              "type": "text",
+              "box": {
+                "x": 1160,
+                "y": 862,
+                "w": 60,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-latency-spark",
+              "role": "chart",
+              "inferred": false,
+              "label": "sparkline",
+              "type": "rectangle",
+              "box": {
+                "x": 1232,
+                "y": 840,
+                "w": 128,
+                "h": 40
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "tour",
+          "role": "button",
+          "inferred": false,
+          "label": "Take the tour",
+          "type": "rectangle",
+          "box": {
+            "x": 1276,
+            "y": 198,
+            "w": 100,
+            "h": 30
+          },
+          "children": []
+        },
+        {
+          "id": "invoices-columns",
+          "role": "button",
+          "inferred": false,
+          "label": "Columns",
+          "type": "rectangle",
+          "box": {
+            "x": 1300,
+            "y": 1614,
+            "w": 76,
+            "h": 28
+          },
+          "children": []
+        }
+      ]
+    }
+  ],
+  "flows": [],
+  "markup": [],
+  "componentCount": 72,
+  "score": {
+    "screens": 1,
+    "components": 72,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  }
+}

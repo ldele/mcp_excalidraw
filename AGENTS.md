@@ -15,12 +15,13 @@ component roles, reading order, navigation flows — plus a review loop where a 
 up and the agent reads the markup attributed to the component it refers to. What the fork adds and
 why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 
-**State (2026-09-07):** fork stands on its own (renamed, private, inherited branches cut), one
-upstream merge taken (2026-08-07). The two-way markup leg has run with a human and works, but the
-attribution accuracy it exists to measure is **still untaken** (ROADMAP PR 1, KI-3). First outside
-feedback is filed as T-001–T-005 in `docs/TICKETS.md`. **Next, in order: T-001, then the pending
-upstream merge (four commits, 2.0.0) as its own step, then PR 4.** Detail: `.claude/CONTEXT.md`.
-**Stack:** Node ≥ 18 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
+**State (2026-10-07):** fork stands on its own (renamed, private, inherited branches cut), two
+upstream merges taken (2026-08-07; 2026-10-07 — upstream 2.1.2, SPEC-002). The two-way markup leg
+has run with a human and works, but the attribution accuracy it exists to measure is **still
+untaken** (ROADMAP PR 1, KI-3). Outside feedback is filed as T-001 onward in `docs/TICKETS.md`.
+**Next, in order: what the merge left that is ours (label typography on export, the
+absent-means-deleted sync, the first-sync echo), T-001, then PR 4.** Detail: `.claude/CONTEXT.md`.
+**Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
 ## Coordination files (read in this order)
@@ -46,8 +47,10 @@ Any agent session may plan, review, document, or execute. Pick the surface by th
 next action needs** (a terminal, a connector, a browser), never by work type; note a capability
 need in the baton's "Picks up" line when it exists.
 
-Specific to this project: screenshots, image export, Mermaid conversion and viewport control need an
-**open browser tab** on the canvas URL — the CLI exits with code 4 when there isn't one.
+Specific to this project: Mermaid conversion, viewport control and anything a *person* does — the
+markup round, `watch` — need an **open browser tab** on the canvas URL; the CLI exits with code 4
+when a command needs one and there is none. Screenshots and image export render headless since the
+2.1.2 merge, and `render <file>` needs no canvas server at all.
 
 ## Engineering standards
 - Engineering preferences (design + working protocol + file-level maintainability) live in

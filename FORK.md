@@ -6,8 +6,9 @@ kept for our own use. Not published, not intended for distribution.
 | | |
 |---|---|
 | Fork point | `505f4c6` |
-| Our commits since | 6 |
-| Upstream commits we lack | 0 (we are strictly ahead) |
+| Last upstream merge | 2026-10-07 — upstream **2.1.2** at `96d9c21` (the first was 2026-08-07) |
+| Upstream commits we lack | 0 as of that merge — check with the command under "Keeping current" |
+| Our version | **1.3.0**, our own line: the package is private and renamed, so it does not borrow upstream's number |
 | Package name | `@ldele/mcp-excalidraw-server`, `"private": true` |
 | Binary | `excalidraw-canvas` |
 | `@excalidraw/excalidraw` | `^0.18.0`, resolving to **0.18.1**, which is current |
@@ -100,19 +101,22 @@ worth it for a repo this size.
 git fetch upstream && git log --oneline HEAD..upstream/main
 ```
 
-Upstream has not moved since the fork point. If it does, our changes concentrate
-in `src/core/` (two new files), `src/server.ts` and `src/index.ts`, so conflicts
+Upstream moves in bursts: nothing for weeks, then three releases in three days (2.1.0–2.1.2,
+2026-10-03..05). Two merges so far; what each cost and taught is in `docs/ROADMAP.md` § Upstream.
+Our changes concentrate in `src/core/` (`wireframe.ts`, `changes.ts`, and our tools inside
+`mcp-tools.ts` / `mcp-dispatch.ts`), `src/server.ts` and `frontend/src/utils/scene.ts`, so conflicts
 would land mostly in the latter two.
 
 ## Specs
 
-- **Node** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`
+- **Node ≥ 20** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`
 - **Frontend** is React 18 + Vite, wrapping `@excalidraw/excalidraw`, served from
   `http://127.0.0.1:3000`
 - **Three interfaces over one canvas**: the `excalidraw-canvas` CLI, an MCP
-  server (29 tools), and a REST API. The CLI auto-starts the canvas server;
-  screenshots, image export and Mermaid conversion additionally need an open
-  browser tab, and exit code 4 says so
+  server (29 tools, MCP `2026-07-28` with the 2025 handshake still accepted), and a REST API.
+  The CLI auto-starts the canvas server. Screenshots and image export render headless
+  (`src/core/render/`); `render <file>` needs no server at all. Mermaid conversion,
+  viewport control and human markup need an open browser tab, and exit code 4 says so
 - **State is in memory** in the Express server, with named snapshots. Nothing
   persists across a restart except what you `export`
 - **The skill** (`skills/excalidraw-skill/`) is the source of truth and is copied

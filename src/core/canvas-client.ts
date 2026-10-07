@@ -1,5 +1,5 @@
 import logger from '../utils/logger.js';
-import { ServerElement, ChangeRecord } from '../types.js';
+import { ServerElement, ChangeRecord, ExportImageOptions } from '../types.js';
 import { EXPRESS_SERVER_URL, ENABLE_CANVAS_SYNC } from './config.js';
 
 // API Response types
@@ -61,6 +61,15 @@ export async function syncToCanvas(operation: string, data: any): Promise<SyncRe
         };
         break;
 
+      case 'replace_elements':
+        url = `${EXPRESS_SERVER_URL}/api/elements/batch`;
+        options = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ elements: data, replace: true })
+        };
+        break;
+
       default:
         logger.warn(`Unknown sync operation: ${operation}`);
         return null;
@@ -116,6 +125,15 @@ export async function deleteElementOnCanvas(elementId: string): Promise<any> {
 export async function batchCreateElementsOnCanvas(elementsData: ServerElement[]): Promise<ServerElement[] | null> {
   if (!ENABLE_CANVAS_SYNC) return elementsData;
   const result = await syncToCanvas('batch_create', elementsData);
+  return result?.elements ?? null;
+}
+
+// Atomically replace the canvas only after the server validates and prepares
+// the complete incoming batch. This prevents a rejected import from erasing
+// the scene that was already on the canvas.
+export async function replaceElementsOnCanvas(elementsData: ServerElement[]): Promise<ServerElement[] | null> {
+  if (!ENABLE_CANVAS_SYNC) return elementsData;
+  const result = await syncToCanvas('replace_elements', elementsData);
   return result?.elements ?? null;
 }
 
@@ -180,11 +198,24 @@ export async function postFiles(files: any[]): Promise<void> {
   });
 }
 
-export async function exportImage(format: 'png' | 'svg', background = true): Promise<{ success: boolean; format: string; data: string }> {
+export interface ExportImageResult {
+  success: boolean;
+  format: string;
+  data: string;
+  renderer?: 'node' | 'browser';
+  width?: number;
+  height?: number;
+  warnings?: string[];
+}
+
+export async function exportImage(options: ExportImageOptions): Promise<ExportImageResult>;
+export async function exportImage(format: 'png' | 'svg', background?: boolean): Promise<ExportImageResult>;
+export async function exportImage(arg: ExportImageOptions | 'png' | 'svg', background = true): Promise<ExportImageResult> {
+  const body: ExportImageOptions = typeof arg === 'string' ? { format: arg, background } : arg;
   return requestJson('/api/export/image', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ format, background })
+    body: JSON.stringify(body)
   });
 }
 
@@ -306,6 +337,17 @@ export async function batchCreateElementsStrict(elements: ServerElement[]): Prom
   return data.elements || [];
 }
 
+// Strict counterpart of replaceElementsOnCanvas: the server validates the whole
+// batch before clearing, so a rejected restore leaves the canvas untouched.
+export async function replaceElementsStrict(elements: ServerElement[]): Promise<ServerElement[]> {
+  const data = await requestJson<ApiResponse>('/api/elements/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ elements, replace: true })
+  });
+  return data.elements || [];
+}
+
 // Identity marker the canvas server puts in /health (v1.1+)
 export const CANVAS_SERVICE_NAME = 'mcp-excalidraw-canvas';
 
@@ -393,6 +435,8 @@ export interface HealthStatus {
   // Identity fields (v1.1+); `stop` requires both before signaling anything
   service?: string;
   pid?: number;
+  // v2.1+: which image renderers this server can use right now
+  renderers?: { node: boolean; browser: number };
 }
 
 export async function getHealth(timeoutMs = 2000): Promise<HealthStatus> {
