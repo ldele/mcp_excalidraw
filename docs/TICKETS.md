@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-09-22 · class: living -->
+<!-- status: active · updated: 2026-10-07 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -26,10 +26,45 @@ run from the global install: `cpc-ticket --root . …`.
      - **Reproduce:** the command, or the file and line
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
 
+## T-011 — A tab that is panned or clicked rewrites an imported scene: every free-standing text moves by half its size and the reading loses half its components
+- **Status:** open · 2026-10-07
+- **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
+- **Symptom:** After import of a scene this tool exported, the first pan or click in an open tab makes the tab write the scene back with every free-standing text element moved up and left by half its re-measured size (a heading: x 152 to 48.06, y 130 to 117.5, width 520 to 207.87, height 26 to 25). wireframe --score goes from 97 components to 47 and all three screens lose their names. If the tab was panned or clicked before the import, it happens within 5 s with no further interaction, with or without --replace. The same scene drawn with add is not affected: after the same pan and click it still reads 97. The file is untouched, but an export after this overwrites it with the shifted scene. SKILL.md says re-import, edit and export is how a diagram lives in a repo, and that round trips are safe. A likely cause: every free-standing text in an exported scene carries textAlign center, verticalAlign middle and autoResize true, though it was created with none of them, and the moved box is exactly the re-measured text centred on the old top-left corner. Worked around in Scribe by redrawing a saved scene with add instead of importing it (scripts/open_wireframe.py there): redrawn, both scenes read line for line as saved.
+- **Reproduce:** With no tab: excalidraw-canvas import docs/wireframes/findings-beside-text.excalidraw --replace (pylvir-labs/Writing-App at 34eb574; library.excalidraw does the same); excalidraw-canvas wireframe --score gives 97 components. Open one tab, wait 6 s: still 97. Scroll the canvas once and click empty canvas, wait 5 s: wireframe --score gives 47, unnamedScreens 3; excalidraw-canvas get w-title shows the moved box.
+- **Resolution:** —
+
+## T-010 — changes reports the tab's own label-fitting resize as an edit by human, and the write-back has a trigger: the first pan or click
+- **Status:** open · 2026-10-07
+- **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
+- **Symptom:** A rectangle added at 36x20 with "label": {"text": "3", "fontSize": 11} comes back from changes as Edited, by human: resized 36x20 to 36x23, with the bound arrow in the same scene reported beside it as in T-007. No element was touched. Ten such shapes made 10 of 11 by-human changes on a wireframe a person had only looked at. Nothing is written back until the tab is panned or clicked once: a tab left alone for 6 s, hovered, or screenshotted wrote nothing. That may be the trigger T-007 could not name. Found the same day, and worse than the wrong attribution: the reading treats a written-back arrow as a person's markup (collectMarkup in src/core/wireframe.ts: origin human and looksLikeAnnotation, which is true of every arrow), so after one pan or click a flow arrow leaves Navigation and is listed under Annotations. A wireframe that read 1 connection, 0 annotations reads 0 connections, 1 annotation. The drawing is unchanged.
+- **Reproduce:** excalidraw-canvas add the rectangle above and a bound arrow; open one tab; note the rev from excalidraw-canvas changes; scroll the canvas once and click empty canvas; excalidraw-canvas changes --since <rev> lists both as by human. Same family as T-007; filed apart because the symptom differs and the trigger is new.
+- **Resolution:** —
+
+## T-009 — A bound arrow's waypoints are dropped when it is created; update keeps them
+- **Status:** open · 2026-10-07
+- **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
+- **Symptom:** add of an arrow with startElementId, endElementId and "points": [[0,0],[120,0],[120,300],[340,300]] stores two points, a straight line between the two shapes: [[0,0],[412.9,247.8]]. No tab is attached, so the server does it. update of the same arrow with the same four points keeps all four.
+- **Reproduce:** With no tab: excalidraw-canvas add two rectangles and an arrow bound to both with the four points above; excalidraw-canvas get <arrow id> shows two points. Then excalidraw-canvas update <arrow id> with the same points; get shows four. Wireframe-conventions section 7 says to route around intervening screens with waypoints, which a created arrow cannot do.
+- **Resolution:** —
+
+## T-008 — A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border
+- **Status:** open · 2026-10-07
+- **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
+- **Symptom:** A rectangle with backgroundColor #ffffff, strokeColor #e2e2e2 and "text": "Short form" draws its label in #e2e2e2 (the bound text element's strokeColor is #e2e2e2). The same shape with "label": {"text": ..., "strokeColor": "#1a1a1a"} draws it in #1a1a1a. wireframe-conventions section 4 recommends white secondary buttons with a #d7d5cc border, which gives exactly this; nothing in the skill mentions the label object or its colour.
+- **Reproduce:** excalidraw-canvas add the two rectangles above; open one tab and pan once so the labels become elements; excalidraw-canvas query --type text and compare each label's strokeColor, or excalidraw-canvas screenshot. Met while drawing Scribe docs/wireframes/library.excalidraw (2026-10-05) and worked around with the label object.
+- **Resolution:** —
+
+## T-007 — changes reports the first routing of a bound arrow as an edit by human
+- **Status:** open · 2026-10-03
+- **From:** BlackBox (unknown) · 2026-10-03
+- **Symptom:** Three arrows the agent added with startElementId/endElementId at x 0, y 0 came back from changes --since 452 as Edited, by human: resized 0x0 to 224x36, path reshaped, arrowheads changed. No person had touched the canvas; the one open tab had written back the routed geometry. The skill says such reroutes are reported as by agent. **The consequence is in `wireframe`, not only in `changes`:** read straight after `add`, the scene gives `3 connections, 0 annotations` with a Navigation block; read again after the write-back (rev 764 → 770, nothing else changed) it gives `0 connections, 3 annotations` and the three flows are listed as human markup pointing at their target screens. The score stays clean (fallbacks 0, unnamedScreens 0, orphans 0), so the gate does not catch it, and the exported `.excalidraw` carries the second state.
+- **Reproduce:** excalidraw-canvas add a scene with a bound arrow given no size, open one tab, then: excalidraw-canvas changes --since <rev after add>. Seen on arrows f-open, f-col and f-grants of BlackBox docs/wireframes/WF-04-source-page-and-table-screen.elements.json.
+- **Resolution:** —
+
 ## T-006 — A corner-to-corner sidebar merges every sibling into one row, so the reading order goes column-major
 - **Status:** open · 2026-09-22
 - **From:** UI-Wizard agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7828a2d) · 2026-09-22
-- **Symptom:** wireframe-conventions §4 requires the sidebar pinned corner to corner; with it, a sidebar-layout screen's main column reads column-major (every x=400 item top to bottom, then the x=896 column, then x=1144) — [tour] button 'Take the tour' is numbered 15, after [invoices-table], and the bento's right-hand tiles follow the table. Shortening [sidebar] to 400px restores row order, so the full-height band is what merges the rows. Score stays clean (fallbacks 0, orphans 0), so the gate does not catch it.
+- **Symptom:** wireframe-conventions §4 requires the sidebar pinned corner to corner; with it, a sidebar-layout screen's main column reads column-major (every x=400 item top to bottom, then the x=896 column, then x=1144) — [tour] button 'Take the tour' is numbered 15, after [invoices-table], and the bento's right-hand tiles follow the table. Shortening [sidebar] to 400px restores row order, so the full-height band is what merges the rows. Score stays clean (fallbacks 0, orphans 0), so the gate does not catch it. **Seen again 2026-10-03, BlackBox WF-04:** screen `[s2]`, 23 main-column components numbered by x. That drawing now wraps its main column in one transparent `card` (`[s2-main]`, `[s3-main]`), which restores row order and is a workaround for this ticket: remove the two containers when this is fixed.
 - **Reproduce:** excalidraw-canvas import C:/Projects/UI-Wizard/wireframes/dashboard/dashboard.excalidraw --replace; excalidraw-canvas wireframe (main column numbered 3–16 column-major); excalidraw-canvas update sidebar --set '{"height":400}'; excalidraw-canvas wireframe (row order). Ask: leave edge-pinned sidebar/header bands out of row grouping for their siblings.
 - **Resolution:** —
 
