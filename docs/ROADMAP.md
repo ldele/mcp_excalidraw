@@ -52,10 +52,12 @@ Three measures, because "it looked right" has already proved too weak a bar once
 | 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — ADR-002 accepted 2026-08-07, not started | `docs/decisions/ADR-002-geometry-lint.md` |
 
 **Before PR 4:** the upstream merge is done (2026-10-07, § Upstream — taken ahead of T-001, the
-2026-09-07 order reversed by Lucas). Still ahead of the lint: the three defects the merge left that
-are ours — bound-label typography on export, the sync that deletes what a payload omits, the
-first-sync echo on `strokeColor` / `fontFamily` (DEVLOG 2026-10-07) — and T-001 in
-`docs/TICKETS.md`, a text element created without a size silently dropping out of the reading.
+2026-09-07 order reversed by Lucas). The three defects the merge left that were ours — bound-label
+typography on export, the sync that deletes what a payload omits, the first-sync echo on
+`strokeColor` / `fontFamily` — are fixed (T-012 to T-014, DEVLOG 2026-10-07 (b)), and so is the
+rest of that echo: a wrapped label, a shape grown to fit its label, a bound arrow's first sync
+(T-010, T-007, DEVLOG 2026-10-08 (g)). Still ahead of the lint: T-001 in `docs/TICKETS.md`, a
+text element created without a size silently dropping out of the reading when no tab is open.
 
 ## PR 4 — the geometry lint
 

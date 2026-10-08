@@ -407,6 +407,9 @@ already have*.
 
 - **`by human` vs `by agent`** — your own writes are tracked too, so you can tell
   your changes from theirs. Only `by human` entries are feedback.
+- **What the editor does by itself is not an entry.** Opening the canvas measures text, wraps a
+  label to its shape, grows a shape that is too small for its label and gives a bound arrow its
+  box. None of that is reported, and a shape the editor grew is stored at its new size.
 - **The `↳` line is the point.** Free-standing notes, circles, scribbles and arrows
   a person adds are attributed to the element they refer to — `points at` (a bound
   arrow), `circles / marks` (drawn around it), `sits on` (drawn over it), or

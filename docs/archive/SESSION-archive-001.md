@@ -4,6 +4,25 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-09-07 (d) — Claude Code — the next two steps made explicit: T-001 triaged, the order in the canon
+- **Corrects (c):** its "Uncommitted, staged" line is history — Lucas committed (c) as `ac0cede`.
+  The stale CONTEXT.md phase paragraph it listed under "Not done" is now rewritten.
+- **Done:** `.claude/CONTEXT.md` "Current phase" and `AGENTS.md` "State" rewritten to today's facts
+  with the agreed order (T-001, then the upstream merge as its own step, then PR 4);
+  `docs/ROADMAP.md` carries the same order under the PR table and a "Pending since 2026-09-07"
+  paragraph under § Upstream; **T-001 triaged** in `docs/TICKETS.md` with the trace — the API takes
+  a sizeless text element (`src/server.ts:426`), the reading drops an empty box silently
+  (`src/core/wireframe.ts:545`), and an open tab's measurement comes back through sync as a
+  **human** "resized" record, a second defect. No code changed.
+- **Verified:** `docs_check --strict`, `integrity_check --strict`, `cpc-ticket check` green.
+- **Uncommitted, staged:** the four docs, this entry, and the rotation (rule 11b).
+- **Next:** (1) Lucas commits and pushes; dispatch CI after the push (KI-8). (2) T-001: first the
+  repro pair — a sizeless text heading read with no tab, then with a tab after one sync — to
+  confirm the trace; then the diagnostic at `src/core/wireframe.ts:752` and a 400 at
+  `src/server.ts:426`, with server-side measurement as the real fix (the ticket's Triage line).
+  (3) The upstream merge, plan in DEVLOG 2026-09-07 (c). (4) KI-8's owner step; KI-3; PR 4.
+- **Picks up:** any session; (2) needs a terminal and, for the repro's second half, a browser tab.
+
 ## 2026-09-07 (c) — Claude Code — upstream is four commits ahead (2.0.0); merge deferred past T-001
 - **Done:** state read (clean at `70a3329`, level with `origin/main`); upstream fetched — four
   commits, `0db05c4`..`ff42de9`, the 2.0.0 release: MCP SDK v2, `src/index.ts` split into four

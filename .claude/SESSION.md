@@ -4,6 +4,24 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (g) — Claude Code — T-010 and T-007 fixed; staged, not committed
+- **Supersedes the Next of (f):** its first item is done. The tab's own layout — a wrapped label,
+  a shape grown to fit its label, a bound arrow given its box and default head — is no longer
+  recorded as an edit by human. `src/core/changes.ts`, one branch in the sync handler of
+  `src/server.ts`, 13 tests, one line in `SKILL.md`. DEVLOG 2026-10-08 (g).
+- **Where:** the main checkout, `main` at `44f9d47`, everything **staged** (`git diff --cached`).
+  Asked for from a UI-Wizard session; that repo's markup round on its dashboard waited on this.
+- **Verified:** `npm test` 79 / 79 plus wire, bind, render, state; Playwright 19 / 19 with the
+  system Chrome; `tests/expected/` untouched; `cpc-ticket check` OK. In a real tab, seven scenes:
+  28 records by human on the old build across the six that were run there, 0 on this one, and
+  the arrows read as flows again (table in the DEVLOG).
+- **Not verified:** a person's own resize or retyping driven by hand in a tab (tests cover the
+  payloads). Scribe's two scenes are not on this machine.
+- **Mind:** `dist/` here, and so `excalidraw-canvas` on PATH, carries the staged fix.
+- **Next:** (1) the owner reviews and commits; push; dispatch CI by hand (KI-8). (2) T-001 with no
+  tab, then PR 4; the 22 advisories. The pull request to upstream stays held.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (f) — Claude Code — the check is in the state script; entry (e)'s "not pinned" is closed
 - **Closes entry (e)'s "Not pinned by a test".** On the owner's word, one check in
   `scripts/check-state-integrity.mjs`: *bound arrows follow a shape an agent moves after a tab
@@ -171,22 +189,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `src/server.ts:426`. Then the upstream merge (DEVLOG 2026-09-07 (c)); KI-8's owner step; KI-3;
   PR 4.
 - **Picks up:** any session; the repro's second half needs a browser tab.
-
-## 2026-09-07 (d) — Claude Code — the next two steps made explicit: T-001 triaged, the order in the canon
-- **Corrects (c):** its "Uncommitted, staged" line is history — Lucas committed (c) as `ac0cede`.
-  The stale CONTEXT.md phase paragraph it listed under "Not done" is now rewritten.
-- **Done:** `.claude/CONTEXT.md` "Current phase" and `AGENTS.md` "State" rewritten to today's facts
-  with the agreed order (T-001, then the upstream merge as its own step, then PR 4);
-  `docs/ROADMAP.md` carries the same order under the PR table and a "Pending since 2026-09-07"
-  paragraph under § Upstream; **T-001 triaged** in `docs/TICKETS.md` with the trace — the API takes
-  a sizeless text element (`src/server.ts:426`), the reading drops an empty box silently
-  (`src/core/wireframe.ts:545`), and an open tab's measurement comes back through sync as a
-  **human** "resized" record, a second defect. No code changed.
-- **Verified:** `docs_check --strict`, `integrity_check --strict`, `cpc-ticket check` green.
-- **Uncommitted, staged:** the four docs, this entry, and the rotation (rule 11b).
-- **Next:** (1) Lucas commits and pushes; dispatch CI after the push (KI-8). (2) T-001: first the
-  repro pair — a sizeless text heading read with no tab, then with a tab after one sync — to
-  confirm the trace; then the diagnostic at `src/core/wireframe.ts:752` and a 400 at
-  `src/server.ts:426`, with server-side measurement as the real fix (the ticket's Triage line).
-  (3) The upstream merge, plan in DEVLOG 2026-09-07 (c). (4) KI-8's owner step; KI-3; PR 4.
-- **Picks up:** any session; (2) needs a terminal and, for the repro's second half, a browser tab.

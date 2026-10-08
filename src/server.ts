@@ -43,6 +43,7 @@ import {
   effectiveLabel,
   buildBoundLabelIndex,
   boundChildSupersedesLabel,
+  grewToFitLabel,
   CanonicalElement
 } from './core/changes.js';
 import { renderScene, RenderError, MAX_SCALE } from './core/render/index.js';
@@ -1060,6 +1061,11 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
     // label per element would otherwise make each sync quadratic.
     const previousLabels = buildBoundLabelIndex(previous);
     const incomingLabels = buildBoundLabelIndex(incomingContext);
+    // containerId → the bound text the tab sent for it, for the label-fit check.
+    const incomingBoundText = new Map<string, ServerElement>();
+    for (const element of incomingContext.values()) {
+      if (element.type === 'text' && element.containerId) incomingBoundText.set(element.containerId, element);
+    }
 
     let added = 0;
     let updated = 0;
@@ -1099,10 +1105,22 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
         canonicalizeElement(raw as ServerElement, incomingContext, incomingLabels)
       );
 
-      if (!delta) {
+      // The editor grows a shape that is too small for its label, by itself,
+      // the first time it lays the label out. Nobody resized it (T-010).
+      const fitted = delta !== null
+        && Object.keys(delta.after).every(field => field === 'width' || field === 'height')
+        && grewToFitLabel(existing, raw as ServerElement, incomingBoundText.get(id));
+
+      if (!delta || fitted) {
         // Untouched: keep the stored element (and its rev/origin/createdAt)
         // so an agent's authorship is not overwritten by a passive echo.
         existing.syncedAt = syncedAt;
+        // The fitted size is what is on the canvas now, so it is what the
+        // reading and the next export must see: taken without a record.
+        if (fitted) {
+          existing.width = (raw as ServerElement).width;
+          existing.height = (raw as ServerElement).height;
+        }
         // The merge path below drops a superseded `label`, but a passive echo
         // never reaches it — and since the echo stopped producing a delta
         // (changes.ts EDITOR_DEFAULTS), that is now the common case. Left here,
