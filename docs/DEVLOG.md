@@ -8,6 +8,137 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-10-07 (b) — S3: three toolkit hazards fixed on the merged code (T-012, T-013, T-014); T-001 re-tested
+- **Before this:** the merge was committed as `b8d3f39` on `merge/upstream-2.1.2` and the ledger
+  (T-007 to T-011) as `497e9cd` on `main`, both on Lucas's instruction, neither pushed. One thing
+  was added to the merge before it was committed: `tests/legacy/ui-wizard-dashboard.excalidraw`
+  was caught by the `*.excalidraw` ignore rule and had never been staged, so the new contract test
+  would have failed on a clean clone. `.gitignore` now carves `tests/legacy/` out.
+- **Where the work is:** code, tests and these docs are staged in the worktree, on the branch. The
+  three tickets and two notes are in the **main checkout's** `docs/TICKETS.md`, staged there: the
+  ledger's last commit is on `main` only, and the branch does not touch the file, so the two merge
+  without a conflict in either order.
+- **T-012, the echo (`src/core/changes.ts`):** `strokeColor: '#1e1e1e'` and `fontFamily: 5` join
+  `EDITOR_DEFAULTS`. A shape drawn with no stroke colour and text drawn with no font came back
+  from a tab's first sync as edits by human. Both values now have one definition, in
+  `src/types.ts` (`DEFAULT_STROKE_COLOR`, `DEFAULT_FONT_FAMILY`), read by the guard and by export.
+  In a real tab on a two-element scene: 2 human records before, 0 after.
+- **What the echo had been hiding (`src/server.ts`, the no-delta branch of the sync):** the server
+  learned an unsized text element's measured box only because the guard had those two holes: the
+  miscounted edit took the merge path, which stores what the page sent. With the holes closed, two
+  of upstream's browser tests failed (`text … is measured with its real font`): the text stayed
+  unsized. Now a text element stored without a box takes the box the page measured, on a passive
+  sync, with no record and with origin and rev unchanged. A box the author gave is left as given.
+- **T-013, labels (`src/core/expand-elements.ts`):** the bound text of a label is exported from the
+  label's own `fontSize`, `fontFamily`, `strokeColor`, `textAlign` and `verticalAlign`, then the
+  shape's, then the default. The create path moves the typography onto the label
+  (`LABEL_STYLE_KEYS`), and export read the shape only, so every label left as font 1 at 16 px in
+  the border colour. An unset font now exports as 5 for text and labels alike, which is what the
+  canvas and the headless renderer show; it was 1. Without that, closing T-012 would have made a
+  scene nobody restyled export in Virgil, because the echo no longer stores the 5.
+- **T-014, the sync (`src/server.ts`, `frontend/src/App.tsx`):** a sync that carries no usable
+  element against a canvas that holds some is answered **409** and deletes nothing.
+  `"allowEmpty": true` clears on purpose. The page sets it only when its scene holds deleted
+  elements, which is what a person deleting everything leaves and what a tab that never loaded
+  cannot have. A sync that omits *some* elements still deletes them: that is how a deletion in
+  the tab reaches the server, and KI-7 (two tabs) is unchanged. `tests/browser/scene-reload.spec.mjs`
+  cleared the server with an empty sync in four places; its `seed` now passes the flag.
+- **Tests, 10 new (7 failed before their fix; 3 guard what must keep working and passed
+  throughout):** `tests/frontend-echo.test.mjs` +3 (the two observed
+  payloads; a recoloured stroke and a changed font still report). `tests/server-contract.test.mjs`
+  +7 (label round trip; unset font; the refused sync, the refused junk payload, the allowed clear,
+  the partial delete; the measured box).
+- **Verified:** `npm test` — 66 / 66 `node:test` (56 before), MCP wire 6 / 6, bind, render, state.
+  `type-check:frontend`, `npm run build`. Upstream's Playwright suite 19 / 19 with the system
+  Chrome, `normal select-all deletion can still autosync an empty scene` among them.
+  `tests/expected/` untouched. Every server ran on a private port; `:3000` was not touched.
+- **T-001, re-tested (note on the ticket):** with no tab, unchanged: unsized text is stored with no
+  size, the reading drops it, `wireframe --score` gives `unnamedScreens: 1`. With a tab, after its
+  first sync, the heading is 178 x 30, still `agent`, no record, and the screen is named.
+- **Seen and not fixed (note on T-010):** UI-Wizard's dashboard as exported at `7828a2d`, imported,
+  one tab, one click: 7 records by human, each a label the tab re-wrapped (`Dismiss` to
+  `Dismis/s`), and the score went from 72 components to 69. The stored label is the bound text's
+  wrapped `text`; `originalText` keeps the unwrapped one. Whether the 16 px font-1 labels of that
+  old export are why they no longer fit was not checked.
+- **Not verified:** the page's `allowEmpty` beyond upstream's two tests (select-all delete,
+  explicit clear). One human drag = one human record still needs a person. A label with no
+  `fontSize` exports at 16; what the canvas draws it at was not measured.
+- **Next:** Lucas reviews and commits the staged S3 in the worktree and `docs/TICKETS.md` on
+  `main`; merges the branch into `main`; with no canvas running, `npm ci && npm run build &&
+  npm link` there; pushes; dispatches CI by hand (KI-8). Then T-010's re-wrap before the next
+  markup round on an imported scene, then T-001's no-tab case, then PR 4.
+
+## 2026-10-07 — Upstream 2.1.2 taken on `merge/upstream-2.1.2` (SPEC-002); staged for review, not committed
+- **What:** `git merge upstream/main` at `96d9c21` — 25 commits, 2.0.0 through 2.1.2 — into a branch
+  cut from `cf3617d`, in a separate worktree (`C:\Projects\mcp_excalidraw-merge`). Decided by Lucas
+  on 2026-10-07, reversing the 2026-09-07 order (T-001 first): upstream now fixes defects that were
+  live for us. The fork keeps its own version line, **1.3.0**; Node floor **20**.
+- **Why a worktree:** the canvas Lucas was drawing on runs from the main checkout's `dist/`. A build
+  in place would have swapped its frontend under an open tab. Every test server here ran on a
+  private port (35xxx, 51910); `:3000` was never touched.
+- **What upstream fixes for us (read from its code, then tested here):** export order keys are valid
+  and ascending (`orderKey`, #117) — ours were a decimal counter, `a0 … a10 …`, which Excalidraw
+  rejects; the canvas page refuses to sync a scene it did not load (`canSyncScene`, #110) — on
+  2026-09-24 an unloaded page synced nothing and the server deleted 98 elements; scenes load
+  through `restoreElements` with fonts preloaded (#123, #124), so free text is no longer drawn
+  centred on its left edge; rendering is headless (#114) — `screenshot` no longer needs a tab, and
+  `render` turns a `.excalidraw` file into PNG / SVG with no server at all.
+- **Conflicts (15 files):** the four modify / delete — both Dockerfiles, `docker.yml`,
+  `npm-publish.yml` — stay deleted (`FORK.md`). `src/index.ts`: upstream's, whole; our three tools
+  ported to `core/mcp-tools.ts` and `core/mcp-dispatch.ts`, the change cursor to
+  `core/canvas-state.ts` (a server instance is built per connection, so a cursor held on one would
+  reset), and the 2026-09-07 trap handled — `prepareElementUpdate(id, updates, existing ?? undefined)`.
+  `frontend/src/App.tsx`: upstream's, whole; our five lines (`rev`, `origin` stripped before
+  render) moved to where upstream moved the function, `frontend/src/utils/scene.ts`.
+  `src/server.ts`: four small hunks, both sides kept. `package.json`: our name, `private` and
+  binary, upstream's dependencies, scripts and `engines`; the lock regenerated by `npm install`.
+  `ci.yml`: ours, plus the frontend type-check and upstream's three node-side checks; 18 dropped
+  from `compat`. `.gitignore`: **upstream ignores `docs/` — not taken**; this fork commits it.
+  README and cheatsheet: our commands (`excalidraw-canvas`, never `npx`), upstream's headless text.
+- **Found by reading what git merged silently — one defect.** Upstream's atomic `replace` in
+  `POST /api/elements/batch` cleared the store without a change record, so `import --replace` and
+  `snapshot restore` read in the feed as additions with nothing removed. It now records each
+  delete first, as `DELETE /api/elements/clear` does. The sync handler itself came through whole:
+  upstream's only change inside it since the merge base is the body parsing.
+- **Old scenes — SPEC-002 work item 9 was needed.** `import` then `export` re-keyed a legacy scene
+  correctly, but `render` on the file threw `invalid order key: a80`. `repairOrderKeys`
+  (`core/expand-elements.ts`) drops every key when a scene's keys are not valid, unique and
+  ascending in array order — Excalidraw assigns keys from array order when there are none — and
+  runs on `import` and `render`. `isValidOrderKey` agrees with `fractional-indexing` on 4 000-odd
+  base-62 candidates; its one deliberate difference (it checks the alphabet) is pinned by a test.
+- **Tests added:** `tests/server-contract.test.mjs` — the first tests here that boot a server:
+  a replace is in the feed; our MCP tools answer over stdio; UI-Wizard's dashboard scene (98
+  elements, legacy keys, `tests/legacy/`) imports to exactly the reading that repo committed,
+  re-exports with valid keys, renders offline, and leaves no legacy key on the server.
+  `tests/order-keys.test.mjs`. One check added to upstream's `scripts/check-mcp-stdio.mjs`.
+- **Verified:** `type-check` and `type-check:frontend` clean; `npm run build`; `npm test` —
+  the `node:test` suite 56 / 56 (43 before the merge, 13 new) with **`tests/expected/` untouched**, MCP wire 6 / 6, local-bind, render, state.
+  Upstream's Playwright suite 19 / 19, run with the system Chrome (the cached Playwright Chromium
+  is build 1228, this version wants 1243) — it covers the forced case: a scene the page cannot
+  load blocks manual, automatic and Mermaid sync without changing server data. In headless Chrome
+  against the merged build: the legacy dashboard loads with no console error and a click plus a
+  zoom leave 98 elements on the server; twelve elements stored *with* bad keys load too and stay
+  twelve. `render` writes the dashboard as a 198 kB PNG with no server and no tab.
+- **Not changed by the merge, measured on both builds:**
+  - **T-001** stands: a sizeless text element is accepted, stored with no size, and absent from
+    the reading. #107 only touches export expansion.
+  - **The page's first sync still reads as a human edit** where the agent left `strokeColor` or
+    `fontFamily` unset: `{strokeColor: null → "#1e1e1e"}`, `{fontFamily: null → 5}`. Identical on
+    `main` (built in a second worktree and run through the same script), so not a regression —
+    `EDITOR_DEFAULTS` in `core/changes.ts` lacks those two. To be filed.
+  - Bound labels still export as `fontFamily: 1` at 16 px; the server's sync still deletes what a
+    payload omits (KI-7's mechanism). Both ours; the next spec.
+- **Not verified:** "one human drag is exactly one human record" (SPEC-002 test case 6, second
+  half) — a synthetic drag did not register as a move, and the echo above would have masked it.
+  It needs a person. Two early runs of the new server test failed to reach the server right after
+  a fresh build (a timeout at 8 s, then an early exit with no output); the wait is now 20 s and
+  the next six runs passed, three of them straight after a build — unexplained, not reproduced.
+  Upstream's README sections that auto-merged were not reviewed line by line.
+- **Next:** Lucas reviews `git diff --cached` in the worktree and commits the merge; then merge the
+  branch to `main`, `npm run build && npm link` there (with no canvas running), push, and
+  dispatch CI by hand (KI-8). Then file, with `cpc-ticket`: label typography on export; the
+  absent-means-deleted sync; `EDITOR_DEFAULTS` missing `strokeColor` / `fontFamily`.
+
 ## 2026-09-07 (c) — Upstream is four commits ahead (2.0.0); merge deferred until T-001 lands (rule 2)
 - **What:** `git fetch upstream` shows `0db05c4`, `6ddbe98`, `f17c886`, `ff42de9` on `upstream/main`
   past our merge base `ecf3cac`: MCP protocol revision 2026-07-28 on the SDK v2 split packages, with

@@ -45,6 +45,7 @@ import {
   boundChildSupersedesLabel,
   CanonicalElement
 } from './core/changes.js';
+import { renderScene, RenderError, MAX_SCALE } from './core/render/index.js';
 
 // Load environment variables
 dotenv.config();
@@ -768,14 +769,16 @@ function computeEdgePoint(
 }
 
 // Helper: resolve arrow bindings in a batch
-function resolveArrowBindings(batchElements: ServerElement[]): void {
+function resolveArrowBindings(batchElements: ServerElement[], includeExisting = true): void {
   const elementMap = new Map<string, ServerElement>();
   batchElements.forEach(el => elementMap.set(el.id, el));
 
   // Also check existing elements for cross-batch references
-  elements.forEach((el, id) => {
-    if (!elementMap.has(id)) elementMap.set(id, el);
-  });
+  if (includeExisting) {
+    elements.forEach((el, id) => {
+      if (!elementMap.has(id)) elementMap.set(id, el);
+    });
+  }
 
   for (const el of batchElements) {
     if (el.type !== 'arrow' && el.type !== 'line') continue;
@@ -854,12 +857,18 @@ function rerouteBoundArrows(movedId: string): { arrow: ServerElement; delta: Ret
 // Batch create elements
 app.post('/api/elements/batch', (req: Request, res: Response) => {
   try {
-    const { elements: elementsToCreate } = req.body;
+    const { elements: elementsToCreate, replace = false } = req.body ?? {};
 
     if (!Array.isArray(elementsToCreate)) {
       return res.status(400).json({
         success: false,
         error: 'Expected an array of elements'
+      });
+    }
+    if (typeof replace !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        error: 'replace must be a boolean'
       });
     }
 
@@ -881,8 +890,26 @@ app.post('/api/elements/batch', (req: Request, res: Response) => {
       createdElements.push(element);
     });
 
-    // Resolve arrow bindings (computes positions, startBinding, endBinding, boundElements)
-    resolveArrowBindings(createdElements);
+    // Fully prepare the batch before mutating storage. Replacement imports do
+    // not resolve bindings against elements that are about to be discarded.
+    resolveArrowBindings(createdElements, !replace);
+
+    if (replace) {
+      const count = elements.size;
+      // Recorded before the wipe, as DELETE /api/elements/clear does, so the
+      // change log can still name what went: `import --replace` and
+      // `snapshot restore` arrive here, and a replace the review loop cannot
+      // see reads as a scene of additions with nothing removed.
+      for (const element of elements.values()) {
+        track('delete', element, 'agent');
+      }
+      elements.clear();
+      broadcast({
+        type: 'canvas_cleared',
+        timestamp: new Date().toISOString()
+      });
+      logger.info(`Canvas replaced: ${count} existing elements removed`);
+    }
 
     // Store all elements after binding resolution
     createdElements.forEach(el => elements.set(el.id, el));
@@ -961,13 +988,31 @@ app.post('/api/elements/from-mermaid', (req: Request, res: Response) => {
 // makes the two-way review loop possible.
 app.post('/api/elements/sync', (req: Request, res: Response) => {
   try {
-    const { elements: frontendElements, timestamp } = req.body;
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const { elements: frontendElements, timestamp, allowEmpty } = body;
 
     // Validate input data
     if (!Array.isArray(frontendElements)) {
       return res.status(400).json({
         success: false,
         error: 'Expected elements to be an array'
+      });
+    }
+
+    // "Absent from the payload" means "deleted" below, so a payload with no
+    // element in it deletes the drawing. A page that failed to load its scene
+    // sent exactly that on 2026-10-06 and removed 98 elements (T-014). Emptying
+    // a canvas that holds a drawing therefore has to be said, not implied: the
+    // page sets `allowEmpty` only when a person deleted what it was showing.
+    const usable = frontendElements.filter(element => element && typeof element === 'object').length;
+    if (usable === 0 && elements.size > 0 && allowEmpty !== true) {
+      logger.warn(`Sync refused: an empty scene against ${elements.size} stored elements`);
+      return res.status(409).json({
+        success: false,
+        error: `Refused: this sync carries no elements and the canvas holds ${elements.size}. ` +
+          'A sync deletes whatever it leaves out, so this one would delete the whole drawing. ' +
+          'Send "allowEmpty": true to clear the canvas on purpose, or DELETE /api/elements/clear.',
+        count: elements.size
       });
     }
 
@@ -1047,6 +1092,18 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
         // client load, duplicating the label without bound.
         if (boundChildSupersedesLabel(!!(raw as any).label, id, incomingLabels)) {
           delete (existing as any).label;
+        }
+        // Text stored without a box has never been measured, and the editor
+        // has just measured it. Taking that box is not an edit: no record, and
+        // origin and rev stay. Without it the element has no extent, and the
+        // reading drops what has no extent (T-001). A box the author supplied
+        // is left as authored.
+        if (existing.type === 'text' && !(existing.width && existing.height)) {
+          const { width, height } = raw as { width?: unknown; height?: unknown };
+          if (typeof width === 'number' && width > 0 && typeof height === 'number' && height > 0) {
+            existing.width = width;
+            existing.height = height;
+          }
         }
         continue;
       }
@@ -1211,81 +1268,120 @@ interface PendingExport {
 }
 const pendingExports = new Map<string, PendingExport>();
 
-app.post('/api/export/image', (req: Request, res: Response) => {
-  try {
-    const { format, background } = req.body;
+const exportImageSchema = z.object({
+  format: z.enum(['png', 'svg']),
+  background: z.boolean().optional(),
+  renderer: z.enum(['auto', 'node', 'browser']).optional(),
+  dark: z.boolean().optional(),
+  scale: z.number().min(1).max(MAX_SCALE).optional(),
+  padding: z.number().min(0).optional(),
+  elementIds: z.array(z.string()).min(1).optional(),
+  frameId: z.string().optional(),
+  embedFonts: z.boolean().optional()
+});
+type ExportImageBody = z.infer<typeof exportImageSchema>;
 
-    if (!format || !['png', 'svg'].includes(format)) {
-      return res.status(400).json({
-        success: false,
-        error: 'format must be "png" or "svg"'
-      });
-    }
+const NO_BROWSER_TAB_ERROR = 'No frontend client connected. Open the canvas in a browser first.';
 
-    if (clients.size === 0) {
-      return res.status(503).json({
-        success: false,
-        error: 'No frontend client connected. Open the canvas in a browser first.'
-      });
-    }
+// Ask the open browser tab(s) to render — Excalidraw's own exporter in a real
+// browser. Slower (re-sync + 3 s collection window) and needs a tab, but it
+// is the reference rendering, so it stays available as renderer:'browser'.
+function exportViaBrowserTab(options: ExportImageBody): Promise<{ format: string; data: string }> {
+  const { format, background, renderer: _renderer, ...rest } = options;
+  const requestId = generateId();
 
-    const requestId = generateId();
+  const exportPromise = new Promise<{ format: string; data: string }>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      const pending = pendingExports.get(requestId);
+      pendingExports.delete(requestId);
+      // If we collected any result during the window, use it
+      if (pending?.bestResult) {
+        resolve(pending.bestResult);
+      } else {
+        reject(new Error('Export timed out after 30 seconds'));
+      }
+    }, 30000);
 
-    const exportPromise = new Promise<{ format: string; data: string }>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        const pending = pendingExports.get(requestId);
-        pendingExports.delete(requestId);
-        // If we collected any result during the window, use it
-        if (pending?.bestResult) {
-          resolve(pending.bestResult);
-        } else {
-          reject(new Error('Export timed out after 30 seconds'));
-        }
-      }, 30000);
+    pendingExports.set(requestId, { resolve, reject, timeout, collectionTimeout: null, bestResult: null });
+  });
 
-      pendingExports.set(requestId, { resolve, reject, timeout, collectionTimeout: null, bestResult: null });
-    });
+  // Re-broadcast current elements so all connected clients (including stale ones)
+  // sync to the canonical server state before exporting
+  const filesObj: Record<string, ExcalidrawFile> = {};
+  files.forEach((f, id) => { filesObj[id] = f; });
+  broadcast({
+    type: 'initial_elements',
+    elements: Array.from(elements.values()),
+    ...(files.size > 0 ? { files: filesObj } : {})
+  } as InitialElementsMessage & { files?: Record<string, ExcalidrawFile> });
 
-    // Re-broadcast current elements so all connected clients (including stale ones)
-    // sync to the canonical server state before exporting
-    const filesObj: Record<string, ExcalidrawFile> = {};
-    files.forEach((f, id) => { filesObj[id] = f; });
+  // Give browsers time to process the reload before requesting export
+  setTimeout(() => {
     broadcast({
-      type: 'initial_elements',
-      elements: Array.from(elements.values()),
-      ...(files.size > 0 ? { files: filesObj } : {})
-    } as InitialElementsMessage & { files?: Record<string, ExcalidrawFile> });
-
-    // Give browsers time to process the reload before requesting export
-    setTimeout(() => {
-      broadcast({
-        type: 'export_image_request',
-        requestId,
-        format,
-        background: background ?? true
-      });
-    }, 800);
-
-    exportPromise
-      .then(result => {
-        res.json({
-          success: true,
-          format: result.format,
-          data: result.data
-        });
-      })
-      .catch(error => {
-        res.status(500).json({
-          success: false,
-          error: (error as Error).message
-        });
-      });
-  } catch (error) {
-    logger.error('Error initiating image export:', error);
-    res.status(500).json({
-      success: false,
-      error: (error as Error).message
+      type: 'export_image_request',
+      requestId,
+      format,
+      background: background ?? true,
+      options: { background, ...rest }
     });
+  }, 800);
+
+  return exportPromise;
+}
+
+app.post('/api/export/image', async (req: Request, res: Response) => {
+  const parsed = exportImageSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const where = issue?.path.join('.');
+    return res.status(400).json({
+      success: false,
+      error: where === 'format'
+        ? 'format must be "png" or "svg"'
+        : `${where ? `${where}: ` : ''}${issue?.message ?? 'invalid request'}`
+    });
+  }
+  const options = parsed.data;
+  const renderer = options.renderer ?? 'auto';
+
+  const respondBrowser = async () => {
+    if (clients.size === 0) {
+      return res.status(503).json({ success: false, error: NO_BROWSER_TAB_ERROR });
+    }
+    try {
+      const result = await exportViaBrowserTab(options);
+      res.json({ success: true, format: result.format, data: result.data, renderer: 'browser' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  };
+
+  if (renderer === 'browser') return respondBrowser();
+
+  try {
+    const { renderer: _renderer, ...renderOptions } = options;
+    const scene = { elements: Array.from(elements.values()), files: Object.fromEntries(files) };
+    const result = await renderScene(scene, renderOptions);
+    res.json({
+      success: true,
+      format: result.format,
+      data: result.data,
+      renderer: 'node',
+      width: result.width,
+      height: result.height,
+      ...(result.warnings.length > 0 ? { warnings: result.warnings } : {})
+    });
+  } catch (error) {
+    if (error instanceof RenderError) {
+      return res.status(error.status).json({ success: false, error: error.message });
+    }
+    logger.error('Headless image export failed:', error);
+    if (renderer === 'auto' && clients.size > 0) {
+      // The reference renderer is available; use it rather than fail
+      logger.warn('Falling back to the browser tab for this export');
+      return respondBrowser();
+    }
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -1496,7 +1592,10 @@ app.post('/api/snapshots', (req: Request, res: Response) => {
 
     const snapshot: Snapshot = {
       name,
-      elements: Array.from(elements.values()),
+      // Snapshots are historical values, not aliases to live mutable elements.
+      // Bound-arrow rerouting mutates arrow objects in place. structuredClone
+      // is available across the supported Node.js >=20 runtime range.
+      elements: structuredClone(Array.from(elements.values())),
       createdAt: new Date().toISOString()
     };
 
@@ -1587,6 +1686,9 @@ app.get('/health', (req: Request, res: Response) => {
     websocket_clients: clients.size,
     // Current canvas revision — the cursor for GET /api/changes
     rev: changeLog.revision,
+    // Image renderers available right now: headless (always, in-process) and
+    // the number of browser tabs that can render on request
+    renderers: { node: true, browser: clients.size },
     // Identity for `stop`: it must only ever signal a process that both
     // identifies as this service AND self-reports its pid — never a pid
     // from a stale pidfile or an unrelated app squatting on the port.

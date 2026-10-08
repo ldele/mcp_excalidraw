@@ -1,4 +1,4 @@
-import { ServerElement, normalizeFontFamily } from '../types.js';
+import { ServerElement, normalizeFontFamily, DEFAULT_FONT_FAMILY, DEFAULT_STROKE_COLOR } from '../types.js';
 
 // Expand the server's agent-friendly element format into real Excalidraw
 // elements: strip server metadata, add Excalidraw defaults, generate bound
@@ -21,7 +21,7 @@ export interface ExpandOptions {
 // rest alphabetical — so a no-op import→export cycle is byte-identical and
 // committed .excalidraw files produce minimal git diffs.
 const KEY_ORDER = ['id', 'type', 'x', 'y', 'width', 'height'];
-function canonicalizeKeys(v: any): any {
+export function canonicalizeKeys(v: any): any {
   if (Array.isArray(v)) return v.map(canonicalizeKeys);
   if (v && typeof v === 'object') {
     const keys = Object.keys(v).sort((a, b) => {
@@ -36,8 +36,63 @@ function canonicalizeKeys(v: any): any {
   return v;
 }
 
+// Excalidraw orders elements by fractional-index keys that must be valid and
+// ascending as strings: an integer part whose head letter sets its length
+// ('a' + 1 base-62 digit, 'b' + 2, 'c' + 3, ...). A decimal counter ("a10",
+// "a80") fails both rules, and Excalidraw rejects the scene on load.
+const BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+export function orderKey(n: number): string {
+  let digits = 1;
+  let capacity = 62;
+  while (n >= capacity) {
+    n -= capacity;
+    digits++;
+    capacity *= 62;
+  }
+  let key = '';
+  for (let i = 0; i < digits; i++) {
+    key = BASE62[n % 62] + key;
+    n = Math.floor(n / 62);
+  }
+  return String.fromCharCode('a'.charCodeAt(0) + digits - 1) + key;
+}
+
+/** True when `key` satisfies both rules above — what Excalidraw's own check accepts. */
+export function isValidOrderKey(key: unknown): key is string {
+  if (typeof key !== 'string' || key.length === 0) return false;
+  for (const ch of key) if (!BASE62.includes(ch)) return false;
+  const head = key.charCodeAt(0);
+  let integerLength: number;
+  if (head >= 97 && head <= 122) integerLength = head - 97 + 2;        // 'a'..'z'
+  else if (head >= 65 && head <= 90) integerLength = 90 - head + 2;    // 'A'..'Z'
+  else return false;
+  if (key.length < integerLength) return false;
+  if (key === 'A' + '0'.repeat(26)) return false;                      // the smallest integer is reserved
+  return !key.slice(integerLength).endsWith('0');                      // no trailing zero in the fraction
+}
+
+/**
+ * Scenes this fork exported before 2.1.1 carry decimal keys ("a0 … a10 …"),
+ * which Excalidraw rejects outright ("invalid order key") — on the canvas page
+ * and in the headless renderer alike. Excalidraw treats array order as the
+ * truth and assigns keys from it whenever an element has none, so the repair is
+ * to drop every key when the set is not valid, unique and ascending in array
+ * order. Sound keys are left exactly as they are.
+ */
+export function repairOrderKeys<T extends Record<string, any>>(sourceElements: T[]): T[] {
+  const keys = sourceElements.map(el => el?.index);
+  if (keys.every(key => key === undefined || key === null)) return sourceElements;
+  const sound = keys.every((key, i) => isValidOrderKey(key) && (i === 0 || (keys[i - 1] as string) < key));
+  if (sound) return sourceElements;
+  return sourceElements.map(el => {
+    if (!el || typeof el !== 'object') return el;
+    const { index: _dropped, ...rest } = el;
+    return rest as T;
+  });
+}
+
 // FNV-1a 32-bit hash — stable positive int from a string
-function fnv1a(str: string): number {
+export function fnv1a(str: string): number {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
@@ -64,13 +119,23 @@ export function expandElementsForExport(
 
   const cleanedExportElements: Record<string, any>[] = [];
   const boundTextElements: Record<string, any>[] = [];
-  let indexCounter = 0;
+
+  // Shapes created without dimensions get the same 100x100 default the live
+  // tab's skeleton converter applies, so files and headless renders agree
+  // with what the canvas shows instead of collapsing to a 0x0 element.
+  const DEFAULT_DIMENSION = 100;
+  const hasOwnGeometry = (type: string) =>
+    type === 'arrow' || type === 'line' || type === 'freedraw' || type === 'text';
 
   function makeBaseElement(el: any, rest: any): Record<string, any> {
+    const width = rest.width ?? (hasOwnGeometry(el.type) ? undefined : DEFAULT_DIMENSION);
+    const height = rest.height ?? (hasOwnGeometry(el.type) ? undefined : DEFAULT_DIMENSION);
     return {
       ...rest,
+      ...(width !== undefined ? { width } : {}),
+      ...(height !== undefined ? { height } : {}),
       angle: rest.angle ?? 0,
-      strokeColor: rest.strokeColor ?? '#1e1e1e',
+      strokeColor: rest.strokeColor ?? DEFAULT_STROKE_COLOR,
       backgroundColor: rest.backgroundColor ?? 'transparent',
       fillStyle: rest.fillStyle ?? 'solid',
       strokeWidth: rest.strokeWidth ?? 2,
@@ -79,7 +144,6 @@ export function expandElementsForExport(
       opacity: rest.opacity ?? 100,
       groupIds: rest.groupIds ?? [],
       frameId: rest.frameId ?? null,
-      index: rest.index ?? `a${indexCounter++}`,
       roundness: rest.roundness ?? (
         el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse'
           ? { type: 3 } : null
@@ -114,15 +178,21 @@ export function expandElementsForExport(
       // Agent-created text often has no dimensions (server stores null);
       // third-party consumers clip width-less text, so estimate like the
       // design guide does (~0.6×fontSize per char, 1.25 line height).
-      if (base.width == null || base.height == null) {
+      // Treat 0 as unmeasured, not just null/undefined: pre-2.0.0 headless
+      // creation stored width/height 0, and re-imported scenes carry it back
+      // into the store — zero-size text renders invisible in consumers that
+      // trust stored dimensions.
+      if (!base.width || !base.height) {
         const lines = String(base.text).split('\n');
         const longestLine = Math.max(1, ...lines.map((l: string) => l.length));
-        base.width = base.width ?? Math.ceil(longestLine * base.fontSize * 0.6);
-        base.height = base.height ?? Math.ceil(lines.length * base.fontSize * 1.25);
+        base.width = base.width || Math.ceil(longestLine * base.fontSize * 0.6);
+        base.height = base.height || Math.ceil(lines.length * base.fontSize * 1.25);
       }
-      base.fontFamily = normalizeFontFamily(rest.fontFamily) ?? 1;
-      base.textAlign = rest.textAlign ?? 'center';
-      base.verticalAlign = rest.verticalAlign ?? 'middle';
+      base.fontFamily = normalizeFontFamily(rest.fontFamily) ?? DEFAULT_FONT_FAMILY;
+      // Excalidraw's own defaults for free text, which the live canvas uses:
+      // 'center' would centre the text on its estimated box once reopened.
+      base.textAlign = rest.textAlign ?? 'left';
+      base.verticalAlign = rest.verticalAlign ?? 'top';
       base.autoResize = rest.autoResize ?? true;
       base.lineHeight = rest.lineHeight ?? 1.25;
       base.containerId = rest.containerId ?? null;
@@ -203,7 +273,7 @@ export function expandElementsForExport(
         width: textW,
         height: textH,
         angle: 0,
-        strokeColor: isArrow ? '#1e1e1e' : base.strokeColor,
+        strokeColor: label?.strokeColor ?? (isArrow ? DEFAULT_STROKE_COLOR : base.strokeColor),
         backgroundColor: 'transparent',
         fillStyle: 'solid',
         strokeWidth: 1,
@@ -212,7 +282,6 @@ export function expandElementsForExport(
         opacity: 100,
         groupIds: [],
         frameId: null,
-        index: `a${indexCounter++}`,
         roundness: null,
         seed: seedFor(`${textId}:seed`),
         version: 1,
@@ -224,10 +293,14 @@ export function expandElementsForExport(
         locked: false,
         text: labelText,
         originalText: labelText,
-        fontSize: isArrow ? 14 : (rest.fontSize ?? 16),
-        fontFamily: normalizeFontFamily(rest.fontFamily) ?? 1,
-        textAlign: 'center',
-        verticalAlign: 'middle',
+        // Typography lives on the label: the create path moves fontSize and
+        // fontFamily off the shape (LABEL_STYLE_KEYS), so reading them from
+        // the shape alone exported every label in one font at one size (T-013).
+        // The shape's own keys are still read for scenes stored before that move.
+        fontSize: label?.fontSize ?? rest.fontSize ?? (isArrow ? 14 : 16),
+        fontFamily: normalizeFontFamily(label?.fontFamily ?? rest.fontFamily) ?? DEFAULT_FONT_FAMILY,
+        textAlign: label?.textAlign ?? 'center',
+        verticalAlign: label?.verticalAlign ?? 'middle',
         autoResize: true,
         lineHeight: 1.25,
         containerId: base.id
@@ -271,6 +344,11 @@ export function expandElementsForExport(
 
   // Append all bound text elements after their parents
   cleanedExportElements.push(...boundTextElements);
+
+  // Keys follow the final array order, so the file's z-order matches what the
+  // canvas drew. Incoming keys are replaced: a mix of kept and new keys could
+  // fall out of order.
+  cleanedExportElements.forEach((el, i) => { el.index = orderKey(i); });
 
   return deterministic ? canonicalizeKeys(cleanedExportElements) : cleanedExportElements;
 }

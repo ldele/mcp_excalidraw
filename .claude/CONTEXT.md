@@ -1,25 +1,29 @@
-<!-- status: active · updated: 2026-09-07 · class: living -->
+<!-- status: active · updated: 2026-10-07 · class: living -->
 
 # CONTEXT — mcp_excalidraw
 
-**Stack:** Node ≥ 18, TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`. Frontend is
+**Stack:** Node ≥ 20, TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`. Frontend is
 React 18 + Vite wrapping `@excalidraw/excalidraw` (`^0.18.0`, resolving to 0.18.1). Express canvas
 server on `http://127.0.0.1:3000`. Package manager: npm.
 **Goal:** give a coding agent a live Excalidraw canvas it can draw on, read back *as a user
 interface*, and share with a human who marks it up. The differentiator over upstream is the
 wireframe layer: a drawing is finished when `wireframe` reads it back as what you meant, not when
 the screenshot looks right.
-**Current phase (2026-09-07):** the fork stands on its own — renamed, private, `FORK.md` published,
-inherited branches cut — and has taken one upstream merge (2026-08-07, clean; it fixed a live import
-bug). PR 2 and PR 3 landed 2026-08-01 (test harness, five fixtures, `--score`). PR 1 — the human
+**Current phase (2026-10-07):** the fork stands on its own — renamed, private, `FORK.md` published,
+inherited branches cut — and has taken two upstream merges (2026-08-07, clean; 2026-10-07, upstream
+2.1.2 at `96d9c21`, fifteen conflicts, SPEC-002). PR 2 and PR 3 landed 2026-08-01 (test harness, five fixtures, `--score`). PR 1 — the human
 markup round — ran on 2026-08-07, exposed and fixed a browser-boundary defect, and **still has not
 taken the attribution measurement it exists for** (KI-3). The first outside consumer reported five
 findings on 2026-08-21, filed as T-001–T-005 in `docs/TICKETS.md`; T-001 — a text element created
 without a size silently drops out of the reading, screen headings included — is a defect in the
-product's own claim. **Upstream is four commits ahead** (2.0.0: MCP SDK v2, `src/index.ts` split
-into four core files, Node floor 20). **Order agreed 2026-09-07: T-001 first, then the upstream
-merge as its own reviewed step** — conflict map, port plan and trap in DEVLOG 2026-09-07 (c) — then
-PR 4 (ADR-002). CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
+product's own claim, and still stands after the merge. **Level with upstream as of 2026-10-07**
+(MCP SDK v2 with `src/index.ts` split into four core files, headless rendering, valid export order
+keys, a load guard before any sync; Node floor 20; our version line is 1.3.0). The merge was taken
+*before* T-001 — Lucas reversed the 2026-09-07 order because upstream's fixes had become live for
+us. **Next: the three defects the merge left that are ours** — bound-label typography on export,
+the sync that deletes whatever a payload omits (KI-7's mechanism), and the page's first sync
+reading as a human edit where `strokeColor` / `fontFamily` were unset — **then T-001, then PR 4**
+(ADR-002). What the merge found and verified: DEVLOG 2026-10-07. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings
 <!-- change only via an experiment/ADR; list the setting + its locked value + where enforced -->

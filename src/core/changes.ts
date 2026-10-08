@@ -2,7 +2,9 @@ import {
   ServerElement,
   ChangeRecord,
   ChangeOrigin,
-  ExcalidrawElementType
+  ExcalidrawElementType,
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_STROKE_COLOR
 } from '../types.js';
 
 // ─── Canonical form ────────────────────────────────────────────
@@ -139,6 +141,12 @@ const NUMERIC_TOLERANCE = 0.5;
 // and switches markup detection off entirely. Found by the first human markup
 // round (ROADMAP PR 1) — no fixture could catch it, because fixtures never
 // pass through a browser.
+//
+// `strokeColor` and `fontFamily` were added on 2026-10-07 (T-012): a shape drawn
+// with no stroke colour and text drawn with no font both came back from the
+// first sync as edits by human. Keep `fontFamily` equal to DEFAULT_FONT_FAMILY
+// in types.ts — export writes that value for an unset font, so the file, the
+// canvas and this table agree on what "unset" looks like.
 const EDITOR_DEFAULTS: Record<string, unknown> = {
   fillStyle: 'solid',
   strokeStyle: 'solid',
@@ -146,7 +154,9 @@ const EDITOR_DEFAULTS: Record<string, unknown> = {
   roughness: 1,
   opacity: 100,
   textAlign: 'left',
-  backgroundColor: 'transparent'
+  backgroundColor: 'transparent',
+  strokeColor: DEFAULT_STROKE_COLOR,
+  fontFamily: DEFAULT_FONT_FAMILY
 };
 
 // Equality for one canonical field. Unset on one side and the editor's own

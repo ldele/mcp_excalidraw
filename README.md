@@ -14,10 +14,10 @@ This gives AI agents a live [Excalidraw](https://excalidraw.com) canvas they can
 One canvas, three ways to drive it:
 
 - **Agent Skill + CLI** — recommended for coding agents (Claude Code, Codex CLI, Cursor, OpenCode): `excalidraw-canvas <command>` after `npm link`. Auto-starts the canvas, composable JSON in/out.
-- **MCP Server** — 29 tools over stdio for any Model Context Protocol client (Claude Desktop, Cursor, Codex CLI, Antigravity, ...).
+- **MCP Server** — 29 tools over stdio for any Model Context Protocol client (Claude Desktop, Cursor, Codex CLI, Antigravity, ...). Speaks MCP `2026-07-28` (`server/discover`, per-request `_meta` envelope, tool calls without a handshake) and stays compatible with 2025-era clients that open with `initialize`.
 - **REST API** — plain HTTP for LangChain and custom frameworks.
 
-Core drawing runs fully local (Node ≥ 18, MIT licensed) — no API keys. Mermaid conversion runs in the local browser canvas; `share` is optional and uploads an encrypted scene to excalidraw.com.
+Core drawing runs locally (Node ≥ 20, MIT licensed) — no API keys or accounts. Mermaid conversion runs in the local browser canvas; `share` is optional and uploads an encrypted scene to excalidraw.com. The canvas page loads Excalidraw's fonts from the esm.sh CDN.
 
 ## Table of Contents
 
@@ -28,6 +28,7 @@ Core drawing runs fully local (Node ≥ 18, MIT licensed) — no API keys. Merma
 - [Installation](#installation)
 - [Agent Skill](#agent-skill)
 - [CLI Reference](#cli-reference)
+- [Headless Rendering](#headless-rendering)
 - [Configure MCP Clients](#configure-mcp-clients)
   - [Claude Desktop](#claude-desktop)
   - [Claude Code](#claude-code)
@@ -79,7 +80,40 @@ Excalidraw has an [official MCP](https://github.com/excalidraw/excalidraw-mcp) �
 
 ## What's New
 
-Current package version: **1.1.0**. The current release line is **v1.1 — CLI-First**.
+Current package version: **2.1.2**. The current release line is **v2.1 — Headless Rendering**.
+
+### v2.1.2 — Fixes
+
+- Snapshot restore no longer wipes the canvas; frames restore and import. (#101, thanks @sanjayy0612; #120)
+- One label per shape, even across updates and renames. (#121, thanks @sdrshn-nmbr)
+- Dropped images survive reload and show up in exports. (#122, thanks @appdesigngeeks)
+- Text is no longer clipped when the font loads late. (#123, #124)
+
+### v2.1.1 — Fixes
+
+- Large exports no longer fail with `invalid order key`. (#115, thanks @fernandovmacedo)
+- Text and arrows no longer drift on each canvas sync. (#116, thanks @hidinginabunker)
+- Library installs work and persist; labels re-wrap on resize. (#113, thanks @lukemariano)
+
+### v2.1 — Headless Rendering
+
+- **Screenshots and image exports no longer need a browser tab.** `screenshot`, `export_to_image` and `get_canvas_screenshot` render inside the canvas server: Excalidraw's own SVG exporter runs under Node (jsdom) and resvg rasterizes to PNG with bundled Excalifont/Virgil/Cascadia/Liberation fonts. Same output as the tab, deterministic (byte-identical for an unchanged scene), a few milliseconds per render, works in CI and Docker. See [Headless Rendering](#headless-rendering).
+- **New render options** on the CLI, REST and MCP: `dark`, `scale` (1–4), `padding`, `elementIds` (render a subset), `frameId` (render one frame), `embedFonts`. `--renderer browser` keeps the old tab path.
+- **New `render` command**: `excalidraw-canvas render docs/arch.excalidraw --out docs/arch.png` renders a committed file offline — no canvas server at all.
+- Shapes created without `width`/`height` now default to 100×100 in exports and renders (matching the canvas) instead of collapsing to 0×0.
+- Text stored with `width: 0, height: 0` (scenes from pre-2.0 servers) is re-measured on export instead of exporting invisible. (#107)
+
+### v2.0 — Interchange-Grade Exports & MCP 2026-07-28
+
+- **Breaking: Node >= 20 required** (was 18) — the MCP TypeScript SDK v2 sets the floor. Everything else is backward compatible, including existing MCP client configs.
+- **MCP protocol revision 2026-07-28**: modern clients can call tools statelessly without an initialization handshake (`server/discover`, per-request `_meta` envelopes); legacy initialization-based clients keep working unchanged. (#98, thanks @anxkhn)
+- **Exports render everywhere now**: `.excalidraw` / `.excalidraw.md` files contain real Excalidraw elements — shape and arrow labels as bound text, live arrow bindings — so they open correctly on excalidraw.com and in the Obsidian Excalidraw plugin instead of losing labels (or being re-saved empty by the plugin). (#93, #95)
+- **Byte-stable exports**: deterministic ids, seeds, and key order — re-exporting an unchanged scene is byte-identical, so committed diagrams and vault files never produce phantom git diffs, and Obsidian block references survive re-exports.
+- **Obsidian vault fixes**: Windows/CRLF `.excalidraw.md` files import correctly (#94, thanks @cason-miles); `## Text Elements` block references now cover shape labels too.
+- **Element fields are never silently dropped**: unknown Excalidraw properties (`containerId`, `textAlign`, `originalText`, ...) pass through the server intact — fixes browser-edited text vanishing after sync. (#92, thanks @junuxyz)
+- **Mermaid conversion merges** into the existing canvas instead of replacing it, and each browser tab holds exactly one WebSocket connection (no more doubled labels). (#91)
+- **Viewport control**: `set_viewport` gains `scrollToElementIds` (multi-element zoom-to-fit) and `viewportZoomFactor`, with strict single-mode validation and real error reporting. (#86, thanks @acercyc)
+- **Dark mode**: the canvas page chrome follows the editor theme and persists it across reloads. (#89, thanks @danielsvane)
 
 ### Unreleased — Two-Way Wireframing
 
@@ -97,7 +131,7 @@ The canvas stops being a one-way output and becomes a shared design surface: the
 
 **The review loop**
 
-- **Change tracking**: every mutation bumps a canvas revision and records who made it (`agent` or `human`). `POST /api/elements/sync` now *reconciles* per element instead of clearing and rewriting the store, so a person's edits are detectable at all — previously any hand edit made the whole scene look brand new.
+- **Change tracking**: every mutation bumps a canvas revision and records who made it (`agent` or `human`). `POST /api/elements/sync` now *reconciles* per element instead of clearing and rewriting the store, so a person's edits are detectable at all — previously any hand edit made the whole scene look brand new. A sync that carries no elements against a canvas that holds some is refused (409) unless it sends `"allowEmpty": true`: the handler deletes whatever a payload leaves out, and a page that had failed to load once deleted a whole drawing that way.
 - **`changes` / `get_canvas_changes`**: what changed since a given revision, phrased in design terms — *moved down 60px*, *resized 360x52 → 360x64*, *text "Continue" → "Log in"*.
 - **Markup attribution**: sticky notes, circled shapes, scribbles and arrows a person adds are attributed to the element they refer to, so feedback arrives attached to its subject rather than as an orphan text element at some coordinate. Background panels are treated as structure and never absorb a nearby note.
 - **`watch` / `wait_for_changes`**: long-poll that blocks until someone edits the canvas, with a settle window so a whole round of markup returns as one batch.
@@ -123,7 +157,7 @@ The canvas stops being a one-way output and becomes a shared design surface: the
 
 ## Installation
 
-The only prerequisite is **Node.js ≥ 18**.
+The only prerequisite is **Node.js ≥ 20**.
 
 ### Easiest: let your agent install it
 
@@ -136,7 +170,7 @@ Install the Excalidraw canvas toolkit so you can draw diagrams for me:
 2. Run: excalidraw-canvas install-skill --dir <that-skills-directory>
 3. Read the installed excalidraw-skill/SKILL.md so you know the drawing workflow.
 4. Start the canvas with: excalidraw-canvas start
-   then tell me to open http://127.0.0.1:3000 in my browser (screenshots need an open tab).
+   then tell me I can open http://127.0.0.1:3000 to watch you draw (optional).
 5. Draw a small test diagram — two labeled boxes connected by an arrow — take a
    screenshot, and show me the result to confirm everything works.
 ```
@@ -161,7 +195,7 @@ No clone, no config:
 ```bash
 # start the canvas (drawing commands auto-start it too) and open it
 excalidraw-canvas start
-open http://127.0.0.1:3000   # browser tab enables screenshots & mermaid
+open http://127.0.0.1:3000   # optional: watch live (only mermaid needs the tab)
 
 # draw something
 echo '[
@@ -212,7 +246,7 @@ Where the skill shines:
 
 `excalidraw-canvas <command>` or (after `npm link   # from this repo`) `excalidraw-canvas <command>`.
 
-Conventions: JSON results on stdout — except `describe` (plain text by design) and raw-content output when `--out` is omitted (`export` prints the scene JSON, `screenshot --format svg` prints SVG). Diagnostics on stderr. Exit codes: `0` ok, `1` error, `2` usage, `3` canvas unreachable, `4` browser tab required. Canvas URL from `EXPRESS_SERVER_URL` or `--url`. Canvas-driving commands auto-start the server; `status` only reports current state. Explicit `start` overrides the `EXCALIDRAW_NO_AUTOSTART=1` opt-out (it's user intent, not auto-start).
+Conventions: JSON results on stdout — except `describe` (plain text by design) and raw-content output when `--out` is omitted (`export` prints the scene JSON, `screenshot --format svg` prints SVG). Diagnostics on stderr. Exit codes: `0` ok, `1` error, `2` usage, `3` canvas unreachable, `4` browser tab required (only `mermaid` and `screenshot --renderer browser`). Canvas URL from `EXPRESS_SERVER_URL` or `--url`. Canvas-driving commands auto-start the server; `status` only reports current state. Explicit `start` overrides the `EXCALIDRAW_NO_AUTOSTART=1` opt-out (it's user intent, not auto-start).
 
 | Command | Description |
 |---------|-------------|
@@ -226,7 +260,8 @@ Conventions: JSON results on stdout — except `describe` (plain text by design)
 | `wireframe [--json]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations |
 | `changes [--since <rev>]` | What changed on the canvas and who changed it, in design terms (plain text; `--json` for raw records) |
 | `watch [--timeout 60]` | Block until someone edits the canvas, then report (`--since`, `--settle`, `--json`) |
-| `screenshot` | `--out f.png`, `--format png\|svg`, `--no-background` (browser tab required) |
+| `screenshot` | Render the canvas headless (no browser tab): `--out f.png\|f.svg`, `--format png\|svg`, `--scale 1-4`, `--dark`, `--padding N`, `--no-background`, `--ids a,b`, `--frame <id>`, `--no-embed-fonts`; `--renderer browser` uses an open tab instead |
+| `render [file\|-]` | Render a `.excalidraw` / `.excalidraw.md` file to PNG/SVG offline — no canvas server, same flags as `screenshot` |
 | `export [--out f.excalidraw] [--format json\|obsidian]` / `import [file\|-] [--replace]` | Scene file I/O — a `.md` out path writes Obsidian's `.excalidraw.md` format; `import` reads it back |
 | `mermaid [file\|-]` | Mermaid → canvas (browser tab required) |
 | `snapshot save\|list\|restore <name>` | Named snapshots |
@@ -235,7 +270,19 @@ Conventions: JSON results on stdout — except `describe` (plain text by design)
 | `clear --yes` | Wipe the canvas |
 | `install-skill [--dir <skills-root>]` | Install the portable agent skill |
 
-Labels and arrow bindings use the agent-friendly format everywhere in the CLI: `"text"` on any shape, `"startElementId"`/`"endElementId"` on arrows — normalization is automatic. Label typography (`fontSize`, `fontFamily`, `textAlign`, `verticalAlign`) passed next to `text` follows the text into the label; for label colour pass the label explicitly (`"label": {"text": "Save", "strokeColor": "#d03b3b"}`), since a shape's own `strokeColor` paints its border.
+Labels and arrow bindings use the agent-friendly format everywhere in the CLI: `"text"` on any shape, `"startElementId"`/`"endElementId"` on arrows — normalization is automatic. Label typography (`fontSize`, `fontFamily`, `textAlign`, `verticalAlign`) passed next to `text` follows the text into the label; for label colour pass the label explicitly (`"label": {"text": "Save", "strokeColor": "#d03b3b"}`), since a shape's own `strokeColor` paints its border. For a native frame, add a `"type":"frame"` element with a `"name"` and set `"frameId"` on its children.
+
+## Headless Rendering
+
+Since v2.1, `screenshot`, `export_to_image` and `get_canvas_screenshot` render without a browser. Inside the canvas server, the scene is prepared with the canvas tab's own code (label sizing, wrapping and centering, defaults) and Excalidraw's own `exportToSvg` draws it under Node (a small jsdom shim supplies the DOM it expects, and text is measured with the bundled fonts' real glyph widths); [resvg](https://github.com/thx/resvg-js) rasterizes the SVG to PNG. The output is what the Excalidraw canvas draws — same SVG structure as a browser export, text within half a pixel — and it is deterministic: an unchanged scene renders to byte-identical SVG and PNG, so committed images stay diff-clean.
+
+- **Fonts**: Excalifont, Virgil, Cascadia Code and Liberation Sans ship as TTFs in `assets/fonts` (all SIL OFL 1.1; see `assets/fonts/LICENSES.md`). SVGs embed the faces they use, so they look right in browsers, GitHub and editors. Nunito, Lilita One and Comic Shanns render with the closest bundled face for now. Text in other scripts (CJK, emoji) falls back to the machine's fonts, with a warning.
+- **Options** (CLI flags / REST body / MCP params): `background`, `dark`, `scale` 1–4 (PNG), `padding`, `elementIds` or `frameId` to render a subset, `embedFonts`. `EXCALIDRAW_RENDER_MAX_DIM` (default 8192) caps the PNG's largest side.
+- **`--renderer browser`** asks an open canvas tab to render instead (the pre-2.1 path). Useful for a second opinion; it is slower and the tab's unsynced edits are discarded first.
+- **Offline**: `render docs/arch.excalidraw --out docs/arch.png` needs no canvas server at all — a natural fit for CI jobs that keep images next to committed diagrams.
+- **Still browser-bound**: Mermaid conversion (`mermaid`, `create_from_mermaid`) and `set_viewport`.
+
+The renderer bundle is built by `npm run build:server` (`dist/render/excalidraw-node.mjs`); `npm run test:render` exercises it without a browser.
 
 ## Configure MCP Clients
 
@@ -249,7 +296,10 @@ The MCP server runs over stdio. Since v1.1 the simplest config is `npx` — no c
 | `ENABLE_CANVAS_SYNC` | Enable real-time canvas sync | `true` |
 | `EXCALIDRAW_NO_AUTOSTART` | Set `1` to disable canvas auto-start | (unset) |
 | `EXCALIDRAW_EXPORT_DIR` | Base directory MCP file exports may write to | current working dir |
+| `EXCALIDRAW_RENDER_MAX_DIM` | Largest side of a headless PNG, in pixels | `8192` |
 | `PORT` / `HOST` | Canvas server bind address | `3000` / `127.0.0.1` |
+| `LOG_LEVEL` | Log verbosity (`error`, `warn`, `info`, `debug`) | `info` |
+| `LOG_FILE_PATH` | Log file location | `~/Library/Logs/excalidraw-mcp.log` (macOS), `$XDG_STATE_HOME/excalidraw-mcp/excalidraw.log` (Linux), `%LOCALAPPDATA%\Excalidraw-MCP\excalidraw.log` (Windows) |
 
 ---
 
@@ -421,7 +471,7 @@ Viewport group focus can tune framing with `viewportZoomFactor`:
 
 ## Quick Start (From Source)
 
-From source (Node >= 18):
+From source (Node >= 20):
 
 ```bash
 npm ci
@@ -458,10 +508,41 @@ excalidraw-canvas describe
 curl http://127.0.0.1:3000/health
 ```
 
-### Local Bind Regression Test
+### Regression Checks
+
+`npm test` builds the server and runs four suites, each also available on its own:
 
 ```bash
-npm run test:bind
+npm test
+npm run test:mcp      # MCP stdio wire protocol (see below)
+npm run test:bind     # default loopback bind, duplicate-start refusal
+npm run test:render   # headless renderer, export order keys, scene-prep stability
+npm run test:state    # atomic import and snapshot restore, sync validation
+```
+
+### Canvas Browser Regression Tests
+
+These Chromium tests build the app and start an isolated localhost server. They
+cover frame reload/reconnect, mixed scenes, failed-load sync protection, stale
+responses, clearing/deletion, Mermaid imports, SVG export, dropped images, and
+text measurement after fonts load. They refuse to reuse an existing server; set
+`CANVAS_TEST_PORT` if port 51910 is occupied.
+
+```bash
+npx playwright install chromium
+npm run type-check:frontend
+npm run test:canvas
+```
+
+### MCP Stdio Wire Test
+
+Drives `dist/index.js` with raw JSON-RPC frames and checks both protocol eras:
+`server/discover`, tool calls sent without any handshake, refusal of unsupported
+protocol revisions and malformed `_meta` envelopes, and the legacy `initialize`
+path.
+
+```bash
+npm run test:mcp
 ```
 
 ### MCP Smoke Test (MCP Inspector)
@@ -510,7 +591,7 @@ Yes — that's the core feature. `describe` returns a structured text summary (i
 
 ### Do I need a browser open?
 
-Only for rendering-dependent features: screenshots, PNG/SVG export, viewport control, and Mermaid conversion (they render in the Excalidraw frontend). Creating, querying, updating elements and exporting `.excalidraw` JSON all work headless. The CLI exits with code `4` and tells you when a browser tab is needed.
+No. Screenshots and PNG/SVG exports render headless inside the canvas server (see [Headless Rendering](#headless-rendering)), and everything else — creating, querying, updating elements, `.excalidraw` files — never needed one. Only two things still need an open tab: Mermaid conversion (it lays out in the browser) and viewport control (it moves a camera). The CLI exits with code `4` and tells you when that is the case. Opening the URL is still the way for a human to watch the agent draw.
 
 ### Are my diagrams persistent?
 
@@ -522,7 +603,7 @@ The canvas is in-memory by design (restart = blank canvas). Persist by exporting
 
 ### Does it need an API key or cloud service?
 
-No API key is required. Core drawing runs locally under MIT license. The only outbound call is the optional `share` upload to excalidraw.com.
+No API key is required. Core drawing runs locally under MIT license. Outbound traffic is limited to the canvas page loading Excalidraw's fonts from the esm.sh CDN and the optional `share` upload to excalidraw.com. The CLI, MCP server and headless renderer make no other network calls.
 
 ### Can I use it without configuring MCP?
 
@@ -531,14 +612,17 @@ Yes — that's the recommended path for coding agents: `excalidraw-canvas instal
 ## Troubleshooting
 
 - **CLI exit code 3** (canvas unreachable): the server is not running for an inspecting command such as `status`, auto-start is disabled (`EXCALIDRAW_NO_AUTOSTART=1`), or `EXPRESS_SERVER_URL` points at a non-loopback host. Run `start` explicitly or fix the env.
-- **CLI exit code 4** (browser required): screenshots, image export, viewport, and mermaid conversion render in the frontend — open `http://127.0.0.1:3000` in a browser and retry.
+- **CLI exit code 4** (browser required): only `mermaid` and `screenshot --renderer browser` need an open tab — open `http://127.0.0.1:3000` in a browser and retry, or drop `--renderer browser` to render headless.
+- **Headless PNG shows boxes instead of CJK/emoji text**: the bundled fonts cover Latin scripts; for other scripts resvg falls back to the machine's fonts (a warning is printed). Install a CJK font on the machine running the canvas server.
 - **Canvas not updating**: confirm `EXPRESS_SERVER_URL` points at the running canvas server (`status` shows the URL in use).
-- **Updates/deletes fail after batch creation**: ensure you are on a build that includes the batch id preservation fix (merged via PR #34).
+- **Canvas page shows plain fonts offline**: the page loads Excalidraw's hand-drawn fonts from the esm.sh CDN, so without internet access it falls back to system fonts. Headless screenshots and `render` use the bundled fonts and are unaffected.
+- **Something else looks wrong**: the server log has the details; its location is in [Environment Variables](#environment-variables) (`LOG_FILE_PATH`).
 
 ## Known Issues / TODO
 
 - [ ] **Persistent storage**: Elements are stored in-memory — restarting the server clears everything. Use `export` / snapshots as a workaround.
-- [ ] **Image export requires a browser**: screenshots and image export rely on the frontend doing the actual rendering. A headless rendering mode is planned.
+- [ ] **Mermaid conversion requires a browser**: `mermaid` / `create_from_mermaid` lay out the diagram in the frontend. Image export and screenshots are headless since v2.1.
+- [ ] **Canvas page fonts come from a CDN**: serving them from the canvas server would make the page work fully offline.
 
 Contributions welcome!
 
@@ -558,3 +642,5 @@ Bug reports and pull requests are welcome on [GitHub issues](https://github.com/
 [MIT](LICENSE) © [yctimlin](https://github.com/yctimlin) — not affiliated with the Excalidraw team. [Excalidraw](https://github.com/excalidraw/excalidraw) is its own MIT-licensed project; this toolkit builds on it with love.
 
 **Links:** [npm package](https://www.npmjs.com/package/mcp-excalidraw-server) · [GitHub](https://github.com/yctimlin/mcp_excalidraw) · [Issues](https://github.com/yctimlin/mcp_excalidraw/issues) · [Demo video](https://youtu.be/ufW78Amq5qA)
+
+If you're interested in what comes next, follow me on X: [@ycalintim](https://x.com/ycalintim).
