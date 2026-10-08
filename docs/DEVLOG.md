@@ -8,6 +8,63 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-10-08 (d) — The offer to upstream is held; the tab test and upstream's browser suite run; our own use counted
+- **Decided** (owner, 2026-10-08): *"hold the PR"*. The steps to it, the same day: shown the two
+  commands of entry (c), the owner wrote *"Don't make the PR for now. I'd like to have a look at
+  the PR before doing anything. Plus did you check the issues ?"*; then asked for the tab test
+  and the browser suite first, for a text that does not cite this fork, and whether so small a
+  change is justified. Nothing was pushed and nothing opened: `git ls-remote --heads origin
+  t009-waypoints-upstream` is empty. The fix stays in the fork.
+- **CI on `ac7d8dd` is green**, run 37758104927, five jobs. The new check ran on Linux for the
+  first time, in *Build + wireframe corpus* under Node 22: `ok - bound arrows keep the waypoints
+  they were given`.
+- **Upstream's issues, searched** (2026-10-08): 33 open, 17 closed, 6 open pull requests; ten
+  terms over issues and pull requests in every state (arrow, waypoint, points, bind, binding,
+  elbow, route, connector, `resolveArrowBindings`, `startElementId`). **No issue reports this or
+  asks for it.** Nearest: #26 (open since 2025-09, arrows misaligned and too short, older than
+  binding, answered with a prompting tip); #116 (closed by #117, where the maintainer says the
+  tab re-ran arrows through Excalidraw's converter); #57 and #60 (wrote the binding code; their
+  test plans never mention `points`). Open pull requests in the same function: #130 rearranges
+  its callers, #74 changes one line inside it. There is no contributing guide; #126 and #127,
+  the last outside pull requests merged, had no linked issue.
+- **A tab and a routed bound arrow, tested.** One Playwright script, a real Chrome tab, a
+  private port, against upstream with the patch (`527500b`) and upstream as it is (`96d9c21`,
+  the arrow routed there by a later `update`). The table with the stored points is in SPEC-003
+  § Verified. In words: the tab keeps the four points when it attaches, on a manual sync, after
+  a click and a pan, and after a reload, on both builds; when a person drags the bound shape the
+  tab moves that end and leaves the waypoints, on both builds; when an agent moves the shape
+  through the API with no tab sync before it, the patch keeps the waypoints and unpatched
+  upstream flattens the arrow to two points. **So the tab does not undo a route, and the patch
+  changes two server paths only:** creation, and an API move before any tab has synced.
+- **Found on the way; upstream's, not the patch's.** After a tab's first sync the stored arrows
+  carry `startBinding` / `endBinding` and no `start` / `end`. `rerouteBoundArrows` matches on
+  `start` / `end` alone, so from then on a shape moved through the API leaves its arrows where
+  they were, routed or plain, with or without the patch. **Not checked on the fork**, whose sync
+  reconciles per element; no ticket filed. A task was put to the owner for it.
+- **Upstream's Playwright suite: 19 / 19** on the patched build, with the installed Chrome
+  (`channel: 'chrome'`): the Chromium build that Playwright version pins is not on this machine.
+- **Our own use, counted.** The saved scenes under Scribe's `docs/wireframes`, under
+  `C:\Projects\*\docs\wireframes` (three other projects) and under this repository's `tests/`;
+  nowhere else was searched. 21 scenes read, 8 with an arrow, 17 arrows, 16 bound at both ends
+  by any of the three binding forms, **3 with more than two points, all in Scribe's
+  `library.excalidraw`.** One caution about the figure: the defect was silent, so a saved scene
+  cannot show a route that was asked for and dropped.
+- **Why held** (the session's reasoning, given to the owner with the count; the decision is the
+  owner's): in the fork the fix is justified — a silent wrong result against our own rule, one
+  function, a check, no existing arrow changed. For upstream the case is marginal: three arrows
+  in one drawing, nobody upstream asking, and a gain to us of not carrying 40 lines. The session
+  had recommended sending before it had counted, and said so.
+- **A count corrected.** Entries (b) and (c) and `FORK.md` said upstream had edited
+  `resolveArrowBindings` twice. `git log -L` on the function at `96d9c21` lists four commits: #41
+  wrote it; #60, #61 and `9c4be39` changed it; `9c4be39` is among the 25 commits of the last
+  merge. `FORK.md` says so now.
+- **Where things are.** The patch: local commit `527500b` on `t009-waypoints-upstream` in
+  `C:\Projects\mcp_excalidraw-upstream`. Untracked beside it, and lost if that worktree is
+  removed: `PR_BODY.md`, which now carries these results and does not name this fork, and the
+  tab script, `tests/probe/t009-tab.spec.mjs` with `playwright.probe.config.mjs`.
+- **Not proved:** upstream's tree on Linux; a person's drag in the *fork's* tab; whether the fork
+  leaves arrows behind after a tab sync.
+
 ## 2026-10-08 (c) — T-009 fixed in the fork; the offer to upstream is decided and not yet sent
 - **Decided** (owner, 2026-10-08, *"yes to all four"*, answering the four questions of the
   hand-off): the red-run fix and SPEC-003's results committed and pushed — `cfa2eae`, `265f7a9`;

@@ -111,9 +111,10 @@ body in `frontend/src/App.tsx`, and the `seed` helper of `tests/browser/scene-re
 
 One change sits *inside* a function upstream wrote: `resolveArrowBindings` in `src/server.ts` now
 keeps the waypoints of a bound arrow (T-009, SPEC-003; +29 −11, with a check in
-`scripts/check-state-integrity.mjs`). Upstream has edited that function twice, so expect a
-conflict there until upstream carries the same change. It is to be offered upstream as one pull
-request; none has been sent yet (`docs/DEVLOG.md`, 2026-10-08 (c)).
+`scripts/check-state-integrity.mjs`). Upstream has changed that function three times since
+writing it, once within the 25 commits of the last merge, so a conflict there is possible until
+upstream carries the same change. Offering it upstream as one pull request was prepared and then
+held by the owner on 2026-10-08; nothing was sent (`docs/DEVLOG.md`, 2026-10-08 (d)).
 
 ## Specs
 
