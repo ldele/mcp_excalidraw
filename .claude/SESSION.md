@@ -4,6 +4,20 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (k) — Claude Code — T-016 fixed: the skill names `icon`, and a test holds its role lists to the code
+- **Done, from a UI-Wizard session on the owner's word:** the skill's two role lists name `icon`,
+  the conventions say to declare it on every glyph, and `tests/role-docs.test.mjs` fails when a
+  role in `COMPONENT_ROLES` is missing from either list. T-016 closed. DEVLOG 2026-10-08 (k).
+- **Where:** committed on `main` on the owner's word, after entry (j), which its own session had
+  committed as `d50f8ff`. While both were uncommitted this work was kept out of the index so the
+  two stayed two commits.
+- **Verified:** `npm test` 85 / 85 plus wire, bind, render, state; `tests/expected/` untouched;
+  `cpc-ticket check` and `docs_check --strict` on the working tree.
+- **Mind:** `dist/` was rebuilt by the tests at `47b9c66`; no source changed, so the command on
+  PATH behaves as entry (j) left it.
+- **Next:** T-001 with no tab, then PR 4. The pull request to upstream stays held.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (j) — Claude Code — main checkout reinstalled and rebuilt; the guard and the new dependencies are live
 - **Supersedes the "Mind this first" of entry (h) and the Where and Next (1), (2) of entry (i).**
   The guard is on `main` (`23e4afc`, pushed, CI green). The main checkout was reinstalled and
@@ -166,21 +180,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `t009-waypoints-upstream` and the pull request are each on the owner's word. (4) T-010, T-001,
   PR 4.
 - **Picks up:** any session with a terminal. No canvas is running.
-
-## 2026-10-08 — Claude Code — SPEC-002 landed on `main` (`6f25cb7`), pushed; first CI run red, fix staged
-- **Supersedes the Next of 2026-10-07 (b):** its steps (1) and (2) are done, on the owner's
-  instruction given from a Scribe session. `8913747` (S3) on the branch, `41a3ba7` (ledger,
-  SPEC-002 refreshed, SPEC-003 new) on `main`, `6f25cb7` the merge. Pushed. Built and linked: the
-  command on PATH is 1.3.0.
-- **CI is red on `6f25cb7`**, run 37752960857: the docs gate (the ledger's date, rule 12) and the
-  render test on Linux under Node 22 and 24 (upstream's PNG worker cuts off output larger than a
-  pipe buffer). Node 20 and Windows pass. Detail: DEVLOG 2026-10-08.
-- **Staged, not committed, in the main checkout:** upstream's open #131 for the worker, taken as
-  it stands; the ledger with T-011 closed as fixed by the merge; SPEC-002's status; this entry
-  and the DEVLOG's. The fix is not proved on Linux: only a dispatched run can.
-- **Not done:** the worktree `C:\Projects\mcp_excalidraw-merge` is still there, clean. No canvas
-  is running.
-- **Next:** (1) the owner commits and pushes the staged set; dispatch CI by hand and read the run.
-  (2) SPEC-003 — whether the fix for T-009 is worth sending upstream — placed by the owner right
-  after the merge, ahead of T-010's re-wrap, T-001 with no tab and PR 4.
-- **Picks up:** any session with a terminal.

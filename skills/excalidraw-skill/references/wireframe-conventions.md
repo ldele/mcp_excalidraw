@@ -184,6 +184,7 @@ Geometry and colour, chosen so inference lands on the right role without help.
 | Divider | h 2, w ≥ 400 | `#d7d5cc` | ≤ 6px thin is the trigger | `divider` |
 | List item | identical boxes stacked, gap ≤ 16 | `#ffffff` / `#d7d5cc` | needs ≥ 3 to read as a set | `list-item` |
 | Avatar | circle 32–48 | `#d7d5cc` | | `avatar` |
+| Icon glyph | square or circle 16–28, no label | transparent / `#8a867d` | **declare `icon`** — undeclared it reads as a checkbox or a radio | `icon` |
 
 **Tabs and segmented controls** are just a row of buttons on a shared `y` with
 exactly one filled in the primary accent. There is no `tab` role — that is fine, and
@@ -229,8 +230,15 @@ secondary button, a search bar wide enough to look like a banner, a single list 
 Cheap to add, and it's the difference between a spec and a suggestion.
 
 Valid roles: `button`, `input`, `heading`, `header`, `footer`, `sidebar`, `card`,
-`checkbox`, `radio`, `avatar`, `list-item`, `divider`, `chart`, `table`, `image`,
+`checkbox`, `radio`, `avatar`, `icon`, `list-item`, `divider`, `chart`, `table`, `image`,
 `text`. An unknown role is rejected by the API.
+
+Three more are in the vocabulary and are the reader's own, so there is nothing to gain by
+declaring them: `screen` and `panel` come from containment (a frame; a region holding half its
+parent or more), and `shape` is the fallback the gate counts, declared or not.
+
+**Declare `icon` on every glyph.** A small box with no label is the one thing inference cannot
+tell apart from a control: up to 28 px, a square reads as `checkbox?` and a circle as `radio?`.
 
 ### Write placeholder captions as build instructions
 
