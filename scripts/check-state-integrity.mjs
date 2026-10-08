@@ -211,6 +211,76 @@ async function checkBoundArrowsKeepWaypoints() {
   assert((await byId()).get('plain').points.length === 4, 'an update with waypoints dropped them');
 }
 
+// Fork: a browser tab syncs native elements, whose arrows carry `startBinding` / `endBinding`
+// and not the agent-format `start` / `end` that rerouteBoundArrows looks for. A sync that
+// loses those refs leaves every arrow behind when an agent next moves a shape.
+async function checkArrowsFollowAfterSync() {
+  await request('/api/elements/clear', { method: 'DELETE' });
+  const from = { id: 'from', type: 'rectangle', x: 100, y: 100, width: 160, height: 44 };
+  const to = { id: 'to', type: 'rectangle', x: 600, y: 400, width: 160, height: 44 };
+  await request('/api/elements/batch', {
+    method: 'POST',
+    ...json({ elements: [
+      from,
+      to,
+      { id: 'routed', type: 'arrow', x: 260, y: 122, points: [[0, 0], [120, 0], [120, 300], [340, 300]], start: { id: 'from' }, end: { id: 'to' } },
+      { id: 'plain', type: 'arrow', x: 0, y: 0, start: { id: 'from' }, end: { id: 'to' } },
+    ] }),
+  });
+  const scene = async () => (await request('/api/elements')).body.elements;
+  const absolute = el => el.points.map(([px, py]) => [el.x + px, el.y + py]);
+  const outside = (pt, box) => Math.hypot(
+    Math.max(box.x - pt[0], 0, pt[0] - (box.x + box.width)),
+    Math.max(box.y - pt[1], 0, pt[1] - (box.y + box.height)),
+  );
+  const anchored = (pt, box) => outside(pt, box) > 0 && outside(pt, box) <= 8.01;
+  // The stored scene as a tab sends it back, after `edit` has applied what a person changed.
+  const fromTab = async (edit = el => el) => (await scene()).map(el => {
+    if (el.type !== 'arrow') return edit({ ...el });
+    const { start, end, ...native } = el;
+    return edit({
+      ...native,
+      startBinding: { elementId: 'from', focus: 0, gap: 8 },
+      endBinding: { elementId: 'to', focus: 0, gap: 8 },
+    });
+  });
+  const sync = async elements => {
+    const result = await request('/api/elements/sync', { method: 'POST', ...json({ elements }) });
+    assert(result.status === 200, `sync returned HTTP ${result.status}`);
+  };
+  const expectFollowed = async (when, boxes) => {
+    const stored = new Map((await scene()).map(el => [el.id, el]));
+    for (const id of ['routed', 'plain']) {
+      const path = absolute(stored.get(id));
+      assert(
+        anchored(path[0], boxes.from) && anchored(path[path.length - 1], boxes.to),
+        `${when}, the arrow "${id}" did not follow the shape an agent moved: ${JSON.stringify(path)}`,
+      );
+    }
+    assert(stored.get('routed').points.length === 4, `${when}, the routed arrow lost its waypoints`);
+  };
+
+  // A tab that changed nothing echoes the scene; the stored elements are kept as they are.
+  await sync(await fromTab());
+  await request('/api/elements/to', { method: 'PUT', ...json({ y: 500 }) });
+  await expectFollowed('after a tab synced an unchanged scene', { from, to: { ...to, y: 500 } });
+
+  // A tab in which a person dragged `to` back up: the shape and both arrows come back changed,
+  // and each is merged into the stored element.
+  await sync(await fromTab(el => {
+    if (el.id === 'to') return { ...el, y: 400 };
+    if (el.type !== 'arrow') return el;
+    const points = el.points.map(point => [...point]);
+    points[points.length - 1][1] -= 100;
+    return { ...el, points };
+  }));
+  await request('/api/elements/from', { method: 'PUT', ...json({ y: 40 }) });
+  await expectFollowed(
+    'after a tab synced a scene a person had changed',
+    { from: { ...from, y: 40 }, to: { ...to, y: 400 } },
+  );
+}
+
 function runCli(args) {
   return new Promise(resolve => {
     const cli = spawn(process.execPath, [join(repoRoot, 'dist', 'bin.js'), ...args], {
@@ -339,6 +409,7 @@ try {
     ['sync input is validated before use', checkSyncValidatesBeforeUse],
     ['saved snapshots are immutable', checkSnapshotsAreImmutable],
     ['bound arrows keep the waypoints they were given', checkBoundArrowsKeepWaypoints],
+    ['bound arrows follow a shape an agent moves after a tab has synced', checkArrowsFollowAfterSync],
     ['CLI snapshot restore is atomic and keeps frames', checkCliSnapshotRestore],
     ['MCP snapshot restore is atomic and keeps frames', () => checkMcpSnapshotRestore(callExcalidrawTool)],
   ];

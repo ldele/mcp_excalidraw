@@ -162,8 +162,9 @@ attached and not synced; after a manual sync; after a reload; after the tab's ow
 after a person dragged the shape in the tab — and both arrows followed every time. The stored
 arrows keep `start` / `end` beside `startBinding` / `endBinding`, because the fork's sync merges
 each element into the stored one where upstream's clears the store and rewrites it. A person's
-drag in the fork's tab keeps the waypoints and moves the end, as on upstream. No test pins this
-(DEVLOG 2026-10-08 (e)).
+drag in the fork's tab keeps the waypoints and moves the end, as on upstream. Pinned since
+2026-10-08 (f) by a check in `scripts/check-state-integrity.mjs`, *bound arrows follow a shape an
+agent moves after a tab has synced*; it fails on upstream's build.
 
 One thing about this machine, not about the fix: upstream's `npm run test:state` timed out twice,
 because it starts a server straight after a build and waits 5 s. The same script run on its own

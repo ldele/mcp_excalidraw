@@ -116,6 +116,12 @@ writing it, once within the 25 commits of the last merge, so a conflict there is
 upstream carries the same change. Offering it upstream as one pull request was prepared and then
 held by the owner on 2026-10-08; nothing was sent (`docs/DEVLOG.md`, 2026-10-08 (d)).
 
+`scripts/check-state-integrity.mjs` is upstream's file and carries two checks of ours: the
+waypoint check above, and *bound arrows follow a shape an agent moves after a tab has synced*.
+The second fails on upstream as it is: upstream's sync clears the store and rewrites it, ours
+merges each element into the stored one, and the references the server finds bound arrows by
+survive only the merge. If a later merge takes upstream's sync handler, that check is what says so.
+
 ## Specs
 
 - **Node ≥ 20** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`

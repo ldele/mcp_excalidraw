@@ -4,6 +4,16 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-07-31 — Adopt the claude-project-conventions standard
+- **What:** `cpc-init --profile standard`, then filled `AGENTS.md`, `.claude/CONTEXT.md`,
+  `docs/ROADMAP.md`, `.claude/KNOWN_ISSUES.md`. Cut the 8 branches inherited from upstream off
+  `origin` (each verified byte-identical to its `upstream/` counterpart first) and deleted the
+  merged local `fix/wireframe-role-inference`. Only `main` remains. Commit `f559c7f`.
+- **Why:** the fork had no coordination layer of its own — no baton, no context file, no roadmap —
+  so every session re-derived the state from git log.
+- **Opens:** the roadmap's PR 1 (human markup round) and PR 2 (fixture corpus) as the named next
+  work.
+
 ## 2026-07-31 — Make the fork stand on its own
 - **What:** renamed the package to `@ldele/mcp-excalidraw-server`, set `"private": true`, bumped to
   1.2.0, and repointed all 35 `npx mcp-excalidraw-server` invocations at the local

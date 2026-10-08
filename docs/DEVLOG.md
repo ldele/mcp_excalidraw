@@ -6,8 +6,35 @@ One entry per logical change, newest first. Bounded (ADR-023): past `[budgets] d
 the oldest entries rotate **verbatim** to `docs/archive/DEVLOG-archive-NNN.md` — see the pointer
 below; never edit or summarize a past entry.
 
-Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md), from
-2026-10-08 on (the first rotation; one entry, 2026-07-31).
+Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
+began on 2026-10-08; the archive holds everything older than the twenty entries kept here.
+
+## 2026-10-08 (f) — A check pins what entry (e) found: arrows follow a moved shape after a sync
+- **What** (owner, 2026-10-08: *"add the check to the state script"*): one check in
+  `scripts/check-state-integrity.mjs`, *bound arrows follow a shape an agent moves after a tab
+  has synced*, +71 lines. Nothing in `src/` changed.
+- **What it does.** Two rectangles, a routed bound arrow and a plain one. It sends the stored
+  scene back to `/api/elements/sync` the way a tab does — arrows with `startBinding` /
+  `endBinding` and without `start` / `end` — twice. Once unchanged, which takes the handler's
+  kept-as-stored path; once with the target moved and both arrows' ends changed, as after a
+  person's drag, which takes its merge path. After each sync it moves a shape through the API
+  and asserts that both arrows are anchored at that shape's new edge and that the routed one
+  still has four points.
+- **Shown to catch what it is for, three ways.** Two defects seeded in the spare worktree, each
+  rebuilt and run: the merge path forgetting the stored element (`{...existing, ...raw}` made
+  `{...raw}`) exits 1 at the second assertion; the kept path replacing the stored element with
+  what the tab sent exits 1 at the first. Each time the other seven checks passed, so nothing
+  else covered this. And against the local build of upstream (`527500b`) it fails at its first
+  assertion while the other seven pass there: it catches upstream's real behaviour, not only a
+  seeded one.
+- **What it is not:** a browser test. The script builds the payload itself, modelled on what
+  entry (e)'s probe read back from a real tab. If the page changes what it sends, this check
+  will not see it; the probe would.
+- **Run:** `type-check` clean; `npm test` 66 / 66 plus wire, bind, render and state, now eight
+  checks; `tests/expected/` untouched. Windows, Node 24.
+- **Also:** CI on `69bf6e9` is green, run 37771956776, five jobs.
+- **Docs:** SPEC-003 § Verified says "pinned"; `FORK.md` names the two checks we carry in
+  upstream's script and why the second one matters at a merge.
 
 ## 2026-10-08 (e) — The fork keeps its arrows attached after a tab sync; upstream does not
 - **The question** entry (d) left open, taken up on the owner's word the same day: on upstream,
@@ -681,13 +708,3 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.
-
-## 2026-07-31 — Adopt the claude-project-conventions standard
-- **What:** `cpc-init --profile standard`, then filled `AGENTS.md`, `.claude/CONTEXT.md`,
-  `docs/ROADMAP.md`, `.claude/KNOWN_ISSUES.md`. Cut the 8 branches inherited from upstream off
-  `origin` (each verified byte-identical to its `upstream/` counterpart first) and deleted the
-  merged local `fix/wireframe-role-inference`. Only `main` remains. Commit `f559c7f`.
-- **Why:** the fork had no coordination layer of its own — no baton, no context file, no roadmap —
-  so every session re-derived the state from git log.
-- **Opens:** the roadmap's PR 1 (human markup round) and PR 2 (fixture corpus) as the named next
-  work.

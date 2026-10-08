@@ -4,6 +4,31 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-09-07 (c) — Claude Code — upstream is four commits ahead (2.0.0); merge deferred past T-001
+- **Done:** state read (clean at `70a3329`, level with `origin/main`); upstream fetched — four
+  commits, `0db05c4`..`ff42de9`, the 2.0.0 release: MCP SDK v2, `src/index.ts` split into four
+  core files, Node floor 20. Dry-run merge: eight conflicting files, `src/index.ts` whole-file.
+  **Decision (Lucas): defer the merge until T-001 is answered, then take it as its own reviewed
+  step.** Recorded with the port plan and its trap: DEVLOG 2026-09-07 (c).
+- **Verified at HEAD:** type-check clean; `docs_check --strict` and `integrity_check --strict` 0/0;
+  corpus and bind covered by the 2026-09-07 dispatch (the two commits since were docs-only).
+- **Not done:** no code change. `.claude/CONTEXT.md:13` still says the upstream merge is deferred —
+  that was August's, which landed the same day. KI-1/KI-2 still sit as full entries over an empty
+  Resolved index (the 2026-08-07 review request, item 2).
+- **Committed and pushed by Lucas:** `65b6452`, the DEVLOG entry. Its push made no run either —
+  the third: three pushes, zero runs; a dispatch on `899c365` at 09:34Z ran green (KI-8 holds).
+- **Uncommitted, staged:** this entry, and the rotation the session-close gate asked for (rule 11b,
+  11 entries > 10): the 2026-08-01 entry moved verbatim to `docs/archive/SESSION-archive-001.md`.
+- **Next:** (1) Lucas commits. (2) KI-8: Lucas, logged in, opens the fork's Actions tab — an
+  enable banner, or none; until the trigger fires, `gh workflow run ci.yml --ref main` after each
+  push. (3) T-001: a standalone text element passes `src/core/normalize.ts:52` unmeasured and
+  `src/server.ts:426` stores it with a null bbox; the ticket's fix order is measure server-side,
+  else reject at the API, at minimum name the cause at `src/core/wireframe.ts:752`. (4) Then the
+  upstream merge, as its own reviewed step — plan and trap in DEVLOG 2026-09-07 (c). (5)
+  Pre-existing: KI-3, PR 4 (ADR-002), `share` untested since the August merge.
+- **Picks up:** any session; (2) needs the owner's browser; (4) needs a terminal and, for the MCP
+  round-trip, a client with the MCP server configured.
+
 ## 2026-09-07 (b) — Claude Code — the push trigger is dead on this fork; dispatch after each push
 - **Done:** the second push (`899c365`, 08:46Z) made no run either; the morning's enable-after-push
   cause is retracted; logged as a known issue. Detail: DEVLOG 2026-09-07 (b).
