@@ -4,6 +4,17 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-09-07 (e) — Claude Code — (d) committed and pushed; CI green on `2948946` by dispatch
+- **Corrects (d):** its staged set is committed as `2948946` and pushed. Run 34124916242
+  (`workflow_dispatch`): six jobs green, the Node 18–24 matrix included. The push itself made no
+  run — the fourth on this fork today; KI-8's symptom line now says four.
+- **Uncommitted, staged:** the KI-8 count, this entry, and the rotation (rule 11b).
+- **Next:** as (d), minus its (1). T-001's repro pair first — a sizeless heading read with no tab,
+  then with a tab after one sync — then the diagnostic at `src/core/wireframe.ts:752` and a 400 at
+  `src/server.ts:426`. Then the upstream merge (DEVLOG 2026-09-07 (c)); KI-8's owner step; KI-3;
+  PR 4.
+- **Picks up:** any session; the repro's second half needs a browser tab.
+
 ## 2026-09-07 (d) — Claude Code — the next two steps made explicit: T-001 triaged, the order in the canon
 - **Corrects (c):** its "Uncommitted, staged" line is history — Lucas committed (c) as `ac0cede`.
   The stale CONTEXT.md phase paragraph it listed under "Not done" is now rewritten.

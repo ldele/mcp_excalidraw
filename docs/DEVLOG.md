@@ -9,6 +9,61 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the twenty entries kept here.
 
+## 2026-10-08 (h) — The 22 advisories read; two dependency fixes take them to 14; T-015 filed
+- **What** (owner, 2026-10-08: *"look at the 22 advisories"*, then *"commit the ticket and apply
+  both dependency fixes"*). `package.json` one line, `package-lock.json`. Nothing in `src/`.
+- **The reading.** `npm audit` flags 22 packages: 2 critical, 7 high, 12 moderate, 1 low. All are
+  upstream's — the dependency lists were identical, and upstream's audit gives the same 22. By
+  cause, and whether our use can reach it:
+  - *the web server's request parsing* — `express`, `body-parser`, `qs`, `proxy-addr` (critical).
+    `qs` is reachable by anything that can send a request to the port and could stall the
+    server. `proxy-addr` is not: the server never enables proxy trust.
+  - *the dev command runner* — `shell-quote` (critical, dev only): it joins our own two commands
+    in `npm run dev`.
+  - *build tooling* — `source-map-js`, `sass`, `chokidar`, `braces`: run only when the page is
+    built, on our own files. `sass` 1.51.0 arrives as a dependency of Excalidraw.
+  - *Mermaid in the page* — `mermaid`, `dompurify`, `uuid`, `katex` and the converter: **the one
+    group with a plausible path.** The page's Mermaid import
+    (`frontend/src/utils/mermaidConverter.ts`) was the only user of the converter's 1.x line,
+    which brought a second Mermaid, 10.9.4, with DOMPurify 3.1.6: 7 and 22 advisories, mostly
+    HTML and CSS injection, on diagram text an agent supplies.
+  - *Mermaid's parser chain* — `lodash-es`, `chevrotain` and two of its parts, `langium`,
+    `@mermaid-js/parser`: the advisories are about `template`, `unset` and `omit`, and none of
+    these libraries imports any of the three (checked in `node_modules`).
+  - *ids* — `nanoid`: needs a caller passing a negative, zero or fractional size. Our code never
+    calls it; Excalidraw's calls were not audited.
+  - `@excalidraw/excalidraw` has no advisory of its own; npm's proposed fix for it is a downgrade.
+- **Fix 1, `npm audit fix`, lock file only: 22 → 16, both criticals gone.** express 4.22.2 →
+  4.22.3, body-parser 1.20.6 → 1.20.8, qs 6.15.3 → 6.16.0, proxy-addr 2.0.7 → 2.0.8, shell-quote
+  1.10.0 → 1.12.0, source-map-js 1.2.1 → 1.2.2, dompurify 3.4.14 → 3.4.16, mermaid 11.17.0 →
+  11.17.2.
+- **Fix 2, the converter: 16 → 14.** `@excalidraw/mermaid-to-excalidraw` `^1.1.3` → `^2.2.2`,
+  the version `@excalidraw/excalidraw` 0.18.1 itself uses, so the second Mermaid goes. Mermaid's
+  own advisories 7 → 0, DOMPurify's 22 → 0. The call we make,
+  `parseMermaidToExcalidraw(definition, config)`, is the same in both. The built page has 47
+  fewer files.
+- **The 14 left, and why they stay:** `sass` → `chokidar` → `braces` (pinned by Excalidraw; no
+  fixed `braces` exists), the parser chain (pinned by the converter), `nanoid` (pinned by both),
+  `katex` (low), and three entries flagged only for depending on these. None reachable as far
+  as was checked; none fixable without overriding Excalidraw's own pins, which was not tried.
+- **Verified in the spare worktree, on `main`'s code at `9d2beff` with these two files:** `npm
+  ci`; `npm audit` 14; both type checks; build; `npm test` 79 / 79 plus wire, bind, render and
+  state; `tests/expected/` untouched; Playwright 19 / 19 with the system Chrome, the Mermaid
+  import test at 5.0 s against 4.9 s before. Windows, Node 24.
+- **Seen again, this machine:** the first browser run straight after an install is slow (1.4 to
+  1.8 min against 35 s) and once did not start at all, the test server not ready in 15 s. A
+  second run is normal. Not explained; the same symptom as on 2026-10-07 and in entry (b).
+- **NOT DONE — the main checkout is not reinstalled.** A canvas was running from it (pid 91356,
+  98 elements, one tab, started 16:17), so `npm ci` and the build were not run there: its
+  `node_modules`, its `dist/frontend` and `excalidraw-canvas` on PATH still carry the old
+  converter. With no canvas running: `npm ci && npm run build` in the main checkout.
+- **T-015 filed** (`9d2beff`), found while reading the advisories and not one of them: the
+  server answers every origin and checks neither Origin nor Host. Assessed, demonstrated, a
+  restriction proposed in the ticket; not fixed. It meets Fix 2 at one point: `from-mermaid` is
+  among the routes a foreign page can call.
+- **Docs:** `FORK.md` says how the dependencies now differ from upstream's and what to do at a
+  merge.
+
 ## 2026-10-08 (g) — T-010 and T-007 fixed: the tab's own layout is no longer a person's edit
 - **What** (owner, 2026-10-08, from a UI-Wizard session: *"start T-010 in the fork"*): three kinds
   of the editor's own layout came back from a tab's first click as `Edited, by human`. All three
@@ -727,25 +782,6 @@ began on 2026-10-08; the archive holds everything older than the twenty entries 
   collision zone, so the merge was not needed to proceed. It is directly relevant to Phase 2's
   `customData` plan (`.passthrough()` is the mechanism that would let it survive), and to KI-5.
   Decide next session.
-
-## 2026-08-01 — `wireframe --score`, and the reading now reports its own failures (ROADMAP PR 3)
-- **What:** `wireframe --score` emits the pre-flight counts as JSON and nothing else; `wireframe
-  --json` carries the same object under `score`; and `formatWireframe` grew a `### Reading quality`
-  block that appears **only** when `fallbacks`, `unnamedScreens` or `orphans` is non-zero. Skill,
-  cheatsheet and conventions §9 updated, then `npm run sync:skills`.
-- **Why:** the roadmap asked for the flag. The report block is the same counts aimed at the other
-  consumer: the MCP tool `describe_wireframe` takes no arguments, so a CLI-only flag would leave an
-  agent reading its own drawing back with no way to be told the reading gave up — which is exactly
-  who needs telling.
-- **Rejected:** always printing the quality block (a clean reading should not carry a paragraph
-  saying nothing is wrong, and it would have churned every golden); making `inferred` a warning
-  (`?` marks are normal — `list-detail` has 5 and reads correctly, so warning on them would train
-  the reader to ignore the block); a `--check` flag that exits non-zero on a bad score (a gate is a
-  bigger decision than "emit the number", and nothing asked for it yet).
-- **Verified:** live CLI round-trip on both a clean and a deliberately-bad drawing — 21 components
-  all zero, versus 3 fallbacks and 1 unnamed screen. The corpus caught the report change and scoped
-  it exactly: 1 of 5 goldens moved, +5 lines, the other four byte-identical.
-- **Opens:** nothing new. Phase 1 now hangs entirely on PR 1, the human markup round.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

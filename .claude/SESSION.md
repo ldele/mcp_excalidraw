@@ -4,6 +4,28 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (h) — Claude Code — advisories 22 → 14 by two dependency fixes; MAIN CHECKOUT NOT REINSTALLED; T-015 filed
+- **Mind this first.** `package.json` and `package-lock.json` changed, and the main checkout was
+  **not** reinstalled: a canvas was running from it (pid 91356, 98 elements, one tab — entry
+  (g)'s "No canvas is running" no longer held). Its `node_modules`, `dist/frontend` and
+  `excalidraw-canvas` on PATH are still the old dependency set. **With no canvas running:**
+  `npm ci && npm run build` in the main checkout, then `excalidraw-canvas status`. Do not stop
+  that canvas to do it: it holds a drawing with a tab on it.
+- **Done:** the 22 advisories read (all upstream's); `npm audit fix` and the Mermaid converter
+  to `^2.2.2` take them to 14, none reachable as far as checked. Verified in the spare worktree
+  on `main`'s code: tests 79 / 79 plus scripts, Playwright 19 / 19. DEVLOG 2026-10-08 (h);
+  `FORK.md` says what to redo at a merge. Closes "the 22 advisories" in the Next of (d) to (g).
+- **T-015 filed and committed (`9d2beff`):** any origin can read, change and wipe a running
+  canvas; a write through sync is logged as a person's. Assessed and demonstrated, a guard
+  proposed in the ticket, **not built** — the owner has not said.
+- **Standing, local only:** the spare worktree `C:\Projects\mcp_excalidraw-merge` now holds three
+  untracked probes in `tests/probe/` (tab sync, cross-origin HTTP, cross-origin browser) and two
+  Playwright configs. Two test servers from this morning were still running on private ports
+  34877 and 35713 (pids 23164 and 31452, no tab on either); left alone.
+- **Next:** (1) the reinstall above. (2) T-015, if the owner wants the guard. (3) T-001 with no
+  tab, then PR 4. The pull request to upstream stays held.
+- **Picks up:** any session with a terminal.
+
 ## 2026-10-08 (g) — Claude Code — T-010 and T-007 fixed; staged, not committed
 - **Supersedes the Next of (f):** its first item is done. The tab's own layout — a wrapped label,
   a shape grown to fit its label, a bound arrow given its box and default head — is no longer
@@ -178,14 +200,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   omits (KI-7); `EDITOR_DEFAULTS` lacking `strokeColor` / `fontFamily`. Add T-001's re-test line
   (unchanged by the merge). (4) Those three, then T-001, then PR 4.
 - **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
-
-## 2026-09-07 (e) — Claude Code — (d) committed and pushed; CI green on `2948946` by dispatch
-- **Corrects (d):** its staged set is committed as `2948946` and pushed. Run 34124916242
-  (`workflow_dispatch`): six jobs green, the Node 18–24 matrix included. The push itself made no
-  run — the fourth on this fork today; KI-8's symptom line now says four.
-- **Uncommitted, staged:** the KI-8 count, this entry, and the rotation (rule 11b).
-- **Next:** as (d), minus its (1). T-001's repro pair first — a sizeless heading read with no tab,
-  then with a tab after one sync — then the diagnostic at `src/core/wireframe.ts:752` and a 400 at
-  `src/server.ts:426`. Then the upstream merge (DEVLOG 2026-09-07 (c)); KI-8's owner step; KI-3;
-  PR 4.
-- **Picks up:** any session; the repro's second half needs a browser tab.
