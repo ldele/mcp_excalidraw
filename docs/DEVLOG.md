@@ -8,6 +8,66 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-10-07 (b) — S3: three toolkit hazards fixed on the merged code (T-012, T-013, T-014); T-001 re-tested
+- **Before this:** the merge was committed as `b8d3f39` on `merge/upstream-2.1.2` and the ledger
+  (T-007 to T-011) as `497e9cd` on `main`, both on Lucas's instruction, neither pushed. One thing
+  was added to the merge before it was committed: `tests/legacy/ui-wizard-dashboard.excalidraw`
+  was caught by the `*.excalidraw` ignore rule and had never been staged, so the new contract test
+  would have failed on a clean clone. `.gitignore` now carves `tests/legacy/` out.
+- **Where the work is:** code, tests and these docs are staged in the worktree, on the branch. The
+  three tickets and two notes are in the **main checkout's** `docs/TICKETS.md`, staged there: the
+  ledger's last commit is on `main` only, and the branch does not touch the file, so the two merge
+  without a conflict in either order.
+- **T-012, the echo (`src/core/changes.ts`):** `strokeColor: '#1e1e1e'` and `fontFamily: 5` join
+  `EDITOR_DEFAULTS`. A shape drawn with no stroke colour and text drawn with no font came back
+  from a tab's first sync as edits by human. Both values now have one definition, in
+  `src/types.ts` (`DEFAULT_STROKE_COLOR`, `DEFAULT_FONT_FAMILY`), read by the guard and by export.
+  In a real tab on a two-element scene: 2 human records before, 0 after.
+- **What the echo had been hiding (`src/server.ts`, the no-delta branch of the sync):** the server
+  learned an unsized text element's measured box only because the guard had those two holes: the
+  miscounted edit took the merge path, which stores what the page sent. With the holes closed, two
+  of upstream's browser tests failed (`text … is measured with its real font`): the text stayed
+  unsized. Now a text element stored without a box takes the box the page measured, on a passive
+  sync, with no record and with origin and rev unchanged. A box the author gave is left as given.
+- **T-013, labels (`src/core/expand-elements.ts`):** the bound text of a label is exported from the
+  label's own `fontSize`, `fontFamily`, `strokeColor`, `textAlign` and `verticalAlign`, then the
+  shape's, then the default. The create path moves the typography onto the label
+  (`LABEL_STYLE_KEYS`), and export read the shape only, so every label left as font 1 at 16 px in
+  the border colour. An unset font now exports as 5 for text and labels alike, which is what the
+  canvas and the headless renderer show; it was 1. Without that, closing T-012 would have made a
+  scene nobody restyled export in Virgil, because the echo no longer stores the 5.
+- **T-014, the sync (`src/server.ts`, `frontend/src/App.tsx`):** a sync that carries no usable
+  element against a canvas that holds some is answered **409** and deletes nothing.
+  `"allowEmpty": true` clears on purpose. The page sets it only when its scene holds deleted
+  elements, which is what a person deleting everything leaves and what a tab that never loaded
+  cannot have. A sync that omits *some* elements still deletes them: that is how a deletion in
+  the tab reaches the server, and KI-7 (two tabs) is unchanged. `tests/browser/scene-reload.spec.mjs`
+  cleared the server with an empty sync in four places; its `seed` now passes the flag.
+- **Tests, 10 new (7 failed before their fix; 3 guard what must keep working and passed
+  throughout):** `tests/frontend-echo.test.mjs` +3 (the two observed
+  payloads; a recoloured stroke and a changed font still report). `tests/server-contract.test.mjs`
+  +7 (label round trip; unset font; the refused sync, the refused junk payload, the allowed clear,
+  the partial delete; the measured box).
+- **Verified:** `npm test` — 66 / 66 `node:test` (56 before), MCP wire 6 / 6, bind, render, state.
+  `type-check:frontend`, `npm run build`. Upstream's Playwright suite 19 / 19 with the system
+  Chrome, `normal select-all deletion can still autosync an empty scene` among them.
+  `tests/expected/` untouched. Every server ran on a private port; `:3000` was not touched.
+- **T-001, re-tested (note on the ticket):** with no tab, unchanged: unsized text is stored with no
+  size, the reading drops it, `wireframe --score` gives `unnamedScreens: 1`. With a tab, after its
+  first sync, the heading is 178 x 30, still `agent`, no record, and the screen is named.
+- **Seen and not fixed (note on T-010):** UI-Wizard's dashboard as exported at `7828a2d`, imported,
+  one tab, one click: 7 records by human, each a label the tab re-wrapped (`Dismiss` to
+  `Dismis/s`), and the score went from 72 components to 69. The stored label is the bound text's
+  wrapped `text`; `originalText` keeps the unwrapped one. Whether the 16 px font-1 labels of that
+  old export are why they no longer fit was not checked.
+- **Not verified:** the page's `allowEmpty` beyond upstream's two tests (select-all delete,
+  explicit clear). One human drag = one human record still needs a person. A label with no
+  `fontSize` exports at 16; what the canvas draws it at was not measured.
+- **Next:** Lucas reviews and commits the staged S3 in the worktree and `docs/TICKETS.md` on
+  `main`; merges the branch into `main`; with no canvas running, `npm ci && npm run build &&
+  npm link` there; pushes; dispatches CI by hand (KI-8). Then T-010's re-wrap before the next
+  markup round on an imported scene, then T-001's no-tab case, then PR 4.
+
 ## 2026-10-07 — Upstream 2.1.2 taken on `merge/upstream-2.1.2` (SPEC-002); staged for review, not committed
 - **What:** `git merge upstream/main` at `96d9c21` — 25 commits, 2.0.0 through 2.1.2 — into a branch
   cut from `cf3617d`, in a separate worktree (`C:\Projects\mcp_excalidraw-merge`). Decided by Lucas

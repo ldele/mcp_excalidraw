@@ -11,7 +11,8 @@ async function serverScene(request) {
 }
 
 async function seed(request, elements) {
-  const response = await request.post('/api/elements/sync', { data: { elements } });
+  // Fork: an empty sync against a drawing is refused unless it says it is meant (T-014).
+  const response = await request.post('/api/elements/sync', { data: { elements, allowEmpty: elements.length === 0 } });
   expect(response.ok()).toBeTruthy();
 }
 

@@ -419,6 +419,14 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
+// What the editor shows for an element that leaves these unset: text in
+// Excalifont, strokes in near-black. One definition for the three places that
+// must agree on it — the echo guard (core/changes.ts), export
+// (core/expand-elements.ts) and, with its own copy of the font id, the headless
+// renderer (core/render/fonts.ts).
+export const DEFAULT_FONT_FAMILY = 5;
+export const DEFAULT_STROKE_COLOR = '#1e1e1e';
+
 // Normalize fontFamily from string names to numeric values that Excalidraw expects
 // Excalidraw uses: 1 = Virgil (handwritten), 2 = Helvetica (sans-serif), 3 = Cascadia (monospace)
 // 5 = Excalifont, 6 = Nunito, 7 = Lilita One, 8 = Comic Shanns

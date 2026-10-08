@@ -4,6 +4,31 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-07 (b) — Claude Code — merge committed (`b8d3f39`); S3 staged: T-012, T-013, T-014 fixed
+- **Where:** two places. (1) `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`: the
+  merge is committed there as `b8d3f39`; S3's code, tests and docs are **staged** on top
+  (`git diff --cached`). (2) The main checkout, `main` at `497e9cd` (T-007 to T-011, committed):
+  `docs/TICKETS.md` is **staged** with T-012 to T-014 (filed and closed) and dated notes on T-001
+  and T-010. Nothing is pushed. The branch does not contain `497e9cd` and does not touch the
+  ledger, so the two merge cleanly. The canvas on `:3000` (pid 39264, 69 elements) was not touched.
+- **Done:** the echo guard knows `strokeColor` and `fontFamily` (T-012); an unsized text element
+  takes the page's measured box on a passive sync, with no record; export writes a label's own
+  font, size and colour, and 5 for an unset font (T-013); a sync that would empty a non-empty
+  canvas is refused with 409 unless it carries `allowEmpty: true` (T-014). Detail: DEVLOG
+  2026-10-07 (b).
+- **Verified:** `npm test` 66 / 66 plus wire, bind, render, state; frontend type-check and build;
+  Playwright 19 / 19 with the system Chrome; `tests/expected/` untouched; `cpc-ticket check` OK
+  (14 tickets, 11 open).
+- **Not verified:** one human drag = one human record (needs a person). T-010's label re-wrap is
+  seen on the merged build and not fixed: an imported scene still collects records by human on
+  the first click in a tab.
+- **Next:** (1) Lucas commits S3 in the worktree and `docs/TICKETS.md` on `main` (commit the
+  ledger before merging: `git merge` refuses a dirty index). (2) `main` takes the branch; with
+  **no canvas running**, `npm ci && npm run build && npm link` in the main checkout; push;
+  dispatch CI by hand (KI-8); `git worktree remove ../mcp_excalidraw-merge`. (3) T-010 (compare
+  `originalText`, not the wrapped `text`), then T-001 with no tab, then PR 4.
+- **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
+
 ## 2026-10-07 — Claude Code — upstream 2.1.2 merged on a branch (SPEC-002); staged in a worktree, not committed
 - **Where:** `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`, a `git worktree` of this
   repo — the merge is **in progress and staged** there (`git diff --cached`). The main checkout is
@@ -146,50 +171,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   (4) Pre-existing: KI-3's attribution measurement, PR 4's geometry lint (ADR-002), `share` untested
   since the upstream merge.
 - **Picks up:** any session.
-
-## 2026-08-07 (close 3) — Claude Code — Lucas + agent
-- **Done: the upstream merge** (`1c5925b`), the first since the fork, at 14 commits of divergence —
-  clean, no conflicts. **Rule 2's open deferral is now closed.**
-- **It was not hygiene — it fixed a live bug.** Reproduced *before* merging: our schema lacked
-  `containerId`, and zod strips unknown keys, so `import` turned 10 bound text children into **0**.
-  Every label detached, and the reading changed silently — `input? "Project name"` became `card?`,
-  23 components/5 inferred became 33/7, with `--score` reporting `fallbacks: 0` throughout.
-  `snapshot restore` had the same defect. Both documented recovery paths were corrupting drawings.
-  After the merge the same file round-trips **35/10 in → 35/10 out** and the reading is identical to
-  the original.
-- **Unlocked:** `.passthrough()` means `customData` is finally possible — what **KI-5** and Phase 3
-  were waiting on. Needs an ADR (moving `role` into `customData` changes the element contract).
-- **Not tested: `share`.** It publishes the scene to excalidraw.com, and `share-url.ts` is the file
-  upstream rewrote most heavily — so it is both the most-changed path and the one needing a
-  deliberate choice to upload. Smoke-test before relying on it.
-- **Uncommitted:** the doc updates for this merge are **staged, not committed** — rule 1. The merge
-  commit itself is in (`1c5925b`); `main` is **ahead of `origin/main` by 3, unpushed**.
-- **Also fixed at close:** `AGENTS.md`'s State line still read 2026-07-31 and claimed the markup leg
-  "has never been exercised by a human" — wrong for a week, in the first file every agent reads.
-  Nothing enforces that line; it is judgment, so it goes stale silently.
-- **Next:** **PR 1 is still the open item** — three attempts on 2026-08-07, never measured. Then
-  PR 4 to ADR-002 (calibrate tolerances against the corpus first), and a `customData` ADR.
-- **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
-
-### Requested for next session: a documentation review (Lucas, 2026-08-07)
-
-Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG entries, 3 KIs, an ADR,
-3 baton entries) and none of it has been read back critically.
-
-1. **Rotation is switched off and nothing will ever say so.** `devlog_max_entries` and
-   `session_max_entries` are both `0` (= disabled) in the cpc defaults, so `docs_check` stays silent
-   while the files grow: `docs/DEVLOG.md` is at **8 entries / 223 lines**, `.claude/SESSION.md` at
-   **7 / 163**, and `AGENTS.md` tells agents to read only the **newest 3** of each. Either set the
-   caps and rotate to `docs/archive/` as ADR-023 describes, or decide unbounded growth is fine and
-   say so — right now it is neither, just unexamined.
-2. **`.claude/KNOWN_ISSUES.md` (7 entries).** KI-1 is "done for our own docs" and KI-2 is
-   explicitly "descoped", yet both still sit as full entries while the Resolved index at the bottom
-   holds nothing but its commented-out template line. The file documents its own process for this
-   and it has never been used.
-3. **Entry length.** Today's DEVLOG entries are long. They are append-only so this is not about
-   editing them — it is about agreeing the right level for the next ones.
-4. **`docs/ROADMAP.md`** gained a PR 4 section and rewritten measures 3 and 4; worth one read for
-   coherence rather than accretion.
-5. **ADR-002's two ⚠ Confidence items** are the gate on PR 4 starting — every numeric tolerance is
-   currently a guess, and the error/advisory split is asserted rather than demonstrated.
 

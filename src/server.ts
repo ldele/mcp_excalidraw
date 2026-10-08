@@ -989,13 +989,30 @@ app.post('/api/elements/from-mermaid', (req: Request, res: Response) => {
 app.post('/api/elements/sync', (req: Request, res: Response) => {
   try {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
-    const { elements: frontendElements, timestamp } = body;
+    const { elements: frontendElements, timestamp, allowEmpty } = body;
 
     // Validate input data
     if (!Array.isArray(frontendElements)) {
       return res.status(400).json({
         success: false,
         error: 'Expected elements to be an array'
+      });
+    }
+
+    // "Absent from the payload" means "deleted" below, so a payload with no
+    // element in it deletes the drawing. A page that failed to load its scene
+    // sent exactly that on 2026-10-06 and removed 98 elements (T-014). Emptying
+    // a canvas that holds a drawing therefore has to be said, not implied: the
+    // page sets `allowEmpty` only when a person deleted what it was showing.
+    const usable = frontendElements.filter(element => element && typeof element === 'object').length;
+    if (usable === 0 && elements.size > 0 && allowEmpty !== true) {
+      logger.warn(`Sync refused: an empty scene against ${elements.size} stored elements`);
+      return res.status(409).json({
+        success: false,
+        error: `Refused: this sync carries no elements and the canvas holds ${elements.size}. ` +
+          'A sync deletes whatever it leaves out, so this one would delete the whole drawing. ' +
+          'Send "allowEmpty": true to clear the canvas on purpose, or DELETE /api/elements/clear.',
+        count: elements.size
       });
     }
 
@@ -1075,6 +1092,18 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
         // client load, duplicating the label without bound.
         if (boundChildSupersedesLabel(!!(raw as any).label, id, incomingLabels)) {
           delete (existing as any).label;
+        }
+        // Text stored without a box has never been measured, and the editor
+        // has just measured it. Taking that box is not an edit: no record, and
+        // origin and rev stay. Without it the element has no extent, and the
+        // reading drops what has no extent (T-001). A box the author supplied
+        // is left as authored.
+        if (existing.type === 'text' && !(existing.width && existing.height)) {
+          const { width, height } = raw as { width?: unknown; height?: unknown };
+          if (typeof width === 'number' && width > 0 && typeof height === 'number' && height > 0) {
+            existing.width = width;
+            existing.height = height;
+          }
         }
         continue;
       }

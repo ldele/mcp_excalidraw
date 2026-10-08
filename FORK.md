@@ -105,7 +105,9 @@ Upstream moves in bursts: nothing for weeks, then three releases in three days (
 2026-10-03..05). Two merges so far; what each cost and taught is in `docs/ROADMAP.md` § Upstream.
 Our changes concentrate in `src/core/` (`wireframe.ts`, `changes.ts`, and our tools inside
 `mcp-tools.ts` / `mcp-dispatch.ts`), `src/server.ts` and `frontend/src/utils/scene.ts`, so conflicts
-would land mostly in the latter two.
+would land mostly in the latter two. Two smaller touches in upstream's files, both for the sync
+guard (a sync may not empty a non-empty canvas unless it says `allowEmpty`): one field in the sync
+body in `frontend/src/App.tsx`, and the `seed` helper of `tests/browser/scene-reload.spec.mjs`.
 
 ## Specs
 

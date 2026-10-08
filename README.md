@@ -131,7 +131,7 @@ The canvas stops being a one-way output and becomes a shared design surface: the
 
 **The review loop**
 
-- **Change tracking**: every mutation bumps a canvas revision and records who made it (`agent` or `human`). `POST /api/elements/sync` now *reconciles* per element instead of clearing and rewriting the store, so a person's edits are detectable at all — previously any hand edit made the whole scene look brand new.
+- **Change tracking**: every mutation bumps a canvas revision and records who made it (`agent` or `human`). `POST /api/elements/sync` now *reconciles* per element instead of clearing and rewriting the store, so a person's edits are detectable at all — previously any hand edit made the whole scene look brand new. A sync that carries no elements against a canvas that holds some is refused (409) unless it sends `"allowEmpty": true`: the handler deletes whatever a payload leaves out, and a page that had failed to load once deleted a whole drawing that way.
 - **`changes` / `get_canvas_changes`**: what changed since a given revision, phrased in design terms — *moved down 60px*, *resized 360x52 → 360x64*, *text "Continue" → "Log in"*.
 - **Markup attribution**: sticky notes, circled shapes, scribbles and arrows a person adds are attributed to the element they refer to, so feedback arrives attached to its subject rather than as an orphan text element at some coordinate. Background panels are treated as structure and never absorb a nearby note.
 - **`watch` / `wait_for_changes`**: long-poll that blocks until someone edits the canvas, with a settle window so a whole round of markup returns as one batch.
