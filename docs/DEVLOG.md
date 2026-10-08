@@ -9,6 +9,29 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the twenty entries kept here.
 
+## 2026-10-08 (j) — The main checkout reinstalled and rebuilt: the command on PATH has the guard and the new dependencies
+- **What** (owner, 2026-10-08: *"the canvas is free, reinstall and rebuild the main checkout"*).
+  No tracked file changed. This closes the NOT DONE of entry (h) and the "to land" of entry (i).
+- **On `main` since entry (i):** `t015-origin-guard` was committed and taken as `23e4afc`, on the
+  owner's word. CI is green on it (run 37807191566, five jobs; *requests from another site are
+  refused* passed on Linux) and on `438ef80` before it (run 37802453241; the Linux install
+  reports the same 14 advisories).
+- **Before the reinstall:** the canvas of entry (h) was still running (pid 91356, by then 105
+  elements, one tab). Its scene, its change log and its reading were saved outside the
+  repository first, and it was stopped with `excalidraw-canvas stop`.
+- **Then,** at `23e4afc`: `npm ci`, `npm run build`. One converter (2.2.2), Mermaid 11.17.2,
+  DOMPurify 3.4.16, express 4.22.3, qs 6.16.0; `npm audit` 14.
+- **Verified in the main checkout:** `type-check`; `npm test` 79 / 79 plus wire, bind, render and
+  state 9; `tests/expected/` untouched; Playwright 19 / 19 with the system Chrome, the Mermaid
+  import at 4.8 s.
+- **Verified with `excalidraw-canvas` from PATH,** on a private port: the canvas starts on its
+  own, `add` draws four elements, the routed bound arrow keeps its four points (T-009), a
+  request with a foreign `Origin` gets 403 on GET and on DELETE and one without gets 200
+  (T-015), a headless screenshot is written, `clear`, `stop`.
+- **Also stopped,** on the owner's word: two test servers left running since the morning on
+  private ports 34877 and 35713, no tab on either.
+- **State:** no canvas is running.
+
 ## 2026-10-08 (i) — T-015 fixed on a branch: the canvas answers its own page and local tools only
 - **What** (owner, 2026-10-08: *"build the guard for T-015"*). On branch `t015-origin-guard`, cut
   from `main` at `438ef80`, in the spare worktree. Staged there, not committed, not on `main`.
@@ -754,27 +777,6 @@ began on 2026-10-08; the archive holds everything older than the twenty entries 
   **deliberately deferred** so a bug fix and a five-file upstream merge are not reviewed together.
   The deferral is the decision rule 2 asks for, not an omission. Take the merge as its own step;
   `ecf3cac`'s `.passthrough()` remains what `customData` and KI-5 need.
-
-## 2026-08-07 — ADR-002 accepted: the geometry lint's shape (ROADMAP PR 4)
-- **What:** `docs/decisions/ADR-002-geometry-lint.md`, accepted. A `--lint` flag on `wireframe` with
-  the findings also under `lint` in `wireframe --json`; two severities, only reading-affecting rules
-  as errors; reporting only, no exit-code gate. No code yet.
-- **Why:** the lint's central check *is* the reader's nesting computation, so it must consume
-  `readWireframe`'s model rather than re-derive geometry — a lint that disagreed with the reader
-  about containment would be worse than none. Carrying `lint` inside `wireframe --json` also hands
-  the planned browser panel tree, score and findings in one request, against one consistent snapshot
-  of a canvas someone may still be editing.
-- **Rejected:** folding findings into `--score` (conflates "the reading succeeded" with "the drawing
-  is well-formed", and changes a contract four consumers already assert on); a separate `lint`
-  command (splits the canvas into two reads that can race); relying on Excalidraw's own grid and
-  object snapping (helps only a human, only at draw time, only for position — and the 4.29px failure
-  that motivated this was produced by a human dragging *with* those aids on); gating now
-  (the tolerances are uncalibrated, and gating on unvalidated numbers teaches people to bypass it).
-- **Opens:** two ⚠ in the ADR's Confidence block. Every numeric tolerance is currently a guess — the
-  conventions state targets, not tolerances — and the error/advisory split is a judgement call in
-  which only containment has been *demonstrated* to change a reading. Both need calibrating against
-  the corpus before the advisory rules ship, with the chosen values and their evidence recorded in a
-  SPEC alongside the code.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

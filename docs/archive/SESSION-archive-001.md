@@ -4,6 +4,31 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-10-07 (b) — Claude Code — merge committed (`b8d3f39`); S3 staged: T-012, T-013, T-014 fixed
+- **Where:** two places. (1) `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`: the
+  merge is committed there as `b8d3f39`; S3's code, tests and docs are **staged** on top
+  (`git diff --cached`). (2) The main checkout, `main` at `497e9cd` (T-007 to T-011, committed):
+  `docs/TICKETS.md` is **staged** with T-012 to T-014 (filed and closed) and dated notes on T-001
+  and T-010. Nothing is pushed. The branch does not contain `497e9cd` and does not touch the
+  ledger, so the two merge cleanly. The canvas on `:3000` (pid 39264, 69 elements) was not touched.
+- **Done:** the echo guard knows `strokeColor` and `fontFamily` (T-012); an unsized text element
+  takes the page's measured box on a passive sync, with no record; export writes a label's own
+  font, size and colour, and 5 for an unset font (T-013); a sync that would empty a non-empty
+  canvas is refused with 409 unless it carries `allowEmpty: true` (T-014). Detail: DEVLOG
+  2026-10-07 (b).
+- **Verified:** `npm test` 66 / 66 plus wire, bind, render, state; frontend type-check and build;
+  Playwright 19 / 19 with the system Chrome; `tests/expected/` untouched; `cpc-ticket check` OK
+  (14 tickets, 11 open).
+- **Not verified:** one human drag = one human record (needs a person). T-010's label re-wrap is
+  seen on the merged build and not fixed: an imported scene still collects records by human on
+  the first click in a tab.
+- **Next:** (1) Lucas commits S3 in the worktree and `docs/TICKETS.md` on `main` (commit the
+  ledger before merging: `git merge` refuses a dirty index). (2) `main` takes the branch; with
+  **no canvas running**, `npm ci && npm run build && npm link` in the main checkout; push;
+  dispatch CI by hand (KI-8); `git worktree remove ../mcp_excalidraw-merge`. (3) T-010 (compare
+  `originalText`, not the wrapped `text`), then T-001 with no tab, then PR 4.
+- **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
+
 ## 2026-10-07 — Claude Code — upstream 2.1.2 merged on a branch (SPEC-002); staged in a worktree, not committed
 - **Where:** `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`, a `git worktree` of this
   repo — the merge is **in progress and staged** there (`git diff --cached`). The main checkout is
