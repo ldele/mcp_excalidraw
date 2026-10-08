@@ -26,6 +26,13 @@ run from the global install: `cpc-ticket --root . …`.
      - **Reproduce:** the command, or the file and line
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
 
+## T-016 — The conventions' list of valid roles leaves out icon, which the toolkit accepts and a small glyph needs
+- **Status:** open · 2026-10-08
+- **From:** UI-Wizard agent session driving the CLI (excalidraw-canvas 1.3.0, fork at b3a6f81) · 2026-10-08
+- **Symptom:** wireframe-conventions.md section 5 says: Valid roles: button, input, heading, header, footer, sidebar, card, checkbox, radio, avatar, list-item, divider, chart, table, image, text. An unknown role is rejected by the API. The API also accepts icon (COMPONENT_ROLES in src/types.ts has 20). Nothing in SKILL.md, the cheatsheet or the conventions says icon can be declared, and an agent that follows the list has no way to draw a glyph: a 24x24 rectangle with no label inside a card reads checkbox? (inferred), because a square up to 28 px is a tick box. With role icon the same rectangle is stored and reads icon, not inferred. Met while retro-drawing UI-Wizard's landing page: four feature cells each carry a 24 px icon, and the first draft of that drawing's guide said they could not be drawn. Not tested: whether panel, screen and shape, the other three the list omits, are meant to be declarable (T-002 covers shape).
+- **Reproduce:** excalidraw-canvas add a card holding a rectangle 24x24 with no label: wireframe prints checkbox? for it. Add the same rectangle with role icon: add succeeds and wireframe prints icon. skills/excalidraw-skill/references/wireframe-conventions.md lines 231-233. Ask: name icon in the list, with when to declare it (a glyph of 28 px or less).
+- **Resolution:** —
+
 ## T-015 — Any origin can read, change and wipe a running canvas; a write through sync is logged as a person's
 - **Status:** fixed · 2026-10-08
 - **From:** Scribe agent session, while reading the npm advisories (1.3.0) · 2026-10-08
