@@ -4,6 +4,21 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (e) — Claude Code — checked: the fork keeps arrows attached after a tab sync; no ticket
+- **Closes entry (d)'s Open item and its Next (2).** On the fork's build a shape moved through
+  the API drags its bound arrows in every state tried, a tab sync and a person's drag included.
+  Upstream's sync clears and rewrites the store; ours merges, so `start` / `end` survive. DEVLOG
+  2026-10-08 (e); SPEC-003 § Verified.
+- **Not pinned by a test.** Nothing syncs a scene with a bound arrow and then moves a shape
+  through the API. A candidate for `scripts/check-state-integrity.mjs`; not written, not
+  ticketed — the owner has not asked for it.
+- **Standing, local only:** the script is untracked in `C:\Projects\mcp_excalidraw-merge`
+  (`tests/probe/`), so that worktree now holds something not kept elsewhere. Entry (d)'s Next
+  (3) said it could be removed on the owner's word: say so before removing it.
+- **Next:** entry (d)'s (1) and (4), unchanged: T-010's re-wrap, T-001 with no tab, PR 4; the
+  22 advisories. The pull request to upstream stays held.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (d) — Claude Code — the offer to upstream is HELD; tab test and browser suite run
 - **Supersedes entry (c)'s "Not done — step (4)" and its Next (1) and (2).** The owner holds the
   pull request (2026-10-08, *"hold the PR"*). **Do not push `t009-waypoints-upstream`, do not
@@ -187,12 +202,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   Pre-existing: KI-3, PR 4 (ADR-002), `share` untested since the August merge.
 - **Picks up:** any session; (2) needs the owner's browser; (4) needs a terminal and, for the MCP
   round-trip, a client with the MCP server configured.
-
-## 2026-09-07 (b) — Claude Code — the push trigger is dead on this fork; dispatch after each push
-- **Done:** the second push (`899c365`, 08:46Z) made no run either; the morning's enable-after-push
-  cause is retracted; logged as a known issue. Detail: DEVLOG 2026-09-07 (b).
-- **Uncommitted, staged:** DEVLOG, KNOWN_ISSUES, this entry.
-- **Next:** (1) Lucas, logged in, opens the fork's Actions tab: an enable banner, or none. (2) Until
-  the trigger fires, `gh workflow run ci.yml --ref main` after each push. (3) T-001 first — the
-  silent text-size drop. (4) KI-3, PR 4, `share` untested since the upstream merge.
-- **Picks up:** any session; step (1) needs the owner's browser.

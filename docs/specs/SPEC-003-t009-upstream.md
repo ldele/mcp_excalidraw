@@ -154,8 +154,16 @@ the arrow is flattened at creation, so the script routes it there with a later `
 So the tab does not undo a route, and the patch changes two server paths only: creation, and a
 shape moved through the API before any tab has synced. The last row is upstream's and not the
 patch's: a tab's sync stores arrows with `startBinding` / `endBinding` and without `start` /
-`end`, and `rerouteBoundArrows` matches on `start` / `end` alone, so it finds nothing. **Not
-checked on the fork**, whose sync reconciles per element.
+`end`, and `rerouteBoundArrows` matches on `start` / `end` alone, so it finds nothing.
+
+**The fork does not have that gap** (checked 2026-10-08 (e), the same kind of script on the
+fork's build at `ac7d8dd`). A bound shape was moved through the API in six states — no tab; a tab
+attached and not synced; after a manual sync; after a reload; after the tab's own automatic sync;
+after a person dragged the shape in the tab — and both arrows followed every time. The stored
+arrows keep `start` / `end` beside `startBinding` / `endBinding`, because the fork's sync merges
+each element into the stored one where upstream's clears the store and rewrites it. A person's
+drag in the fork's tab keeps the waypoints and moves the end, as on upstream. No test pins this
+(DEVLOG 2026-10-08 (e)).
 
 One thing about this machine, not about the fix: upstream's `npm run test:state` timed out twice,
 because it starts a server straight after a build and waits 5 s. The same script run on its own

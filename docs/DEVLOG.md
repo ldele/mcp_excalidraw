@@ -6,7 +6,40 @@ One entry per logical change, newest first. Bounded (ADR-023): past `[budgets] d
 the oldest entries rotate **verbatim** to `docs/archive/DEVLOG-archive-NNN.md` — see the pointer
 below; never edit or summarize a past entry.
 
-Older entries: none archived yet.
+Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md), from
+2026-10-08 on (the first rotation; one entry, 2026-07-31).
+
+## 2026-10-08 (e) — The fork keeps its arrows attached after a tab sync; upstream does not
+- **The question** entry (d) left open, taken up on the owner's word the same day: on upstream,
+  a tab's first sync strips `start` / `end` from the stored arrows, and from then on a shape
+  moved through the API leaves its arrows behind. Does this fork do the same?
+- **It does not.** One Playwright script, a real Chrome tab, a private port, the fork's build at
+  `ac7d8dd`; the scene is two filled rectangles, one bound arrow given four points and one bound
+  arrow given none. A bound shape was moved through the API seven times in six states, and both
+  arrows followed every time: with no tab; with a tab attached and not yet synced; after a
+  manual sync; after a reload; after the tab's own automatic sync, set off by a click on empty
+  canvas; and twice after a person had dragged the bound shape in the tab. At every reading the
+  stored arrows carried `start` / `end`, and from the first sync on `startBinding` /
+  `endBinding` beside them.
+- **Why the two differ.** Upstream's sync handler clears the store and writes what the tab sent
+  (`elements.clear()`), so the agent-format refs are gone and `rerouteBoundArrows`, which
+  matches on them alone, finds nothing. Ours reconciles per element: one with no canonical
+  change is kept as stored, and a changed one is merged, `{...existing, ...raw}`, under a
+  comment that names `start` / `end` and `rerouteBoundArrows` as the reason for merging.
+- **A person's drag in the fork's tab,** which entry (d) listed as not proved: the routed arrow
+  keeps its waypoints at 380, 122 and 380, 422 and its end follows the shape to 597.5, 422; the
+  plain arrow follows too. A move through the API straight after re-anchors both again.
+- **No ticket:** there is no defect in the fork to file. **One thing is not pinned:** no test
+  syncs a scene holding a bound arrow and then moves a shape through the API —
+  `tests/server-contract.test.mjs`, `scripts/check-state-integrity.mjs` and the browser suite
+  were searched. The behaviour rests on that merge and its comment, in a handler that had a
+  conflict hunk at the last upstream merge (SPEC-002). No test was written here: the task was
+  to check.
+- **Upstream** has the gap at `96d9c21`, with or without the T-009 patch (entry (d)). It was not
+  reported there.
+- **The script:** `tests/probe/tab-sync-reroute.spec.mjs` with `playwright.probe.config.mjs`,
+  untracked in `C:\Projects\mcp_excalidraw-merge`, run with `PW_CHANNEL=chrome`. Removing that
+  worktree loses it.
 
 ## 2026-10-08 (d) — The offer to upstream is held; the tab test and upstream's browser suite run; our own use counted
 - **Decided** (owner, 2026-10-08): *"hold the PR"*. The steps to it, the same day: shown the two
@@ -658,17 +691,3 @@ Older entries: none archived yet.
   so every session re-derived the state from git log.
 - **Opens:** the roadmap's PR 1 (human markup round) and PR 2 (fixture corpus) as the named next
   work.
-
-## 2026-07-31 — Make the fork stand on its own
-- **What:** renamed the package to `@ldele/mcp-excalidraw-server`, set `"private": true`, bumped to
-  1.2.0, and repointed all 35 `npx mcp-excalidraw-server` invocations at the local
-  `excalidraw-canvas` binary. Dropped `demo.gif`, both Dockerfiles, compose, and the docker and
-  npm-publish workflows. Fixed CI badges pointing at upstream's Actions. Added `FORK.md`.
-  Commit `8bc6afb`.
-- **Why:** the skill told agents to `npx mcp-excalidraw-server` — upstream's package, at the same
-  version number this fork carried. `npx` therefore fetched a build with no `wireframe` and no
-  `changes` command, silently.
-- **Rejected:** publishing the fork under its own name on npm — nothing outside this machine
-  consumes it, so `private` is the cheaper guarantee.
-- **Opens:** KI-1 (anything outside this repo that memorised the old `npx` line is still wrong) and
-  KI-2 (the `demo.gif` blob is still in history).
