@@ -122,6 +122,14 @@ The second fails on upstream as it is: upstream's sync clears the store and rewr
 merges each element into the stored one, and the references the server finds bound arrows by
 survive only the merge. If a later merge takes upstream's sync handler, that check is what says so.
 
+Since 2026-10-08 the dependencies differ from upstream's in one declared line:
+`@excalidraw/mermaid-to-excalidraw` is `^2.2.2` here and `^1.1.3` upstream. The lock file also
+carries the eight patch updates of `npm audit fix`. Together they take `npm audit` from upstream's
+22 flagged packages to 14, none of which can be reached in our use or fixed from here
+(`docs/DEVLOG.md`, 2026-10-08 (h)). At a merge the lock file conflicts, as it did last time: take
+upstream's, then run `npm install @excalidraw/mermaid-to-excalidraw@^2.2.2` and `npm audit fix`,
+and read `npm audit` again.
+
 ## Specs
 
 - **Node ≥ 20** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`
