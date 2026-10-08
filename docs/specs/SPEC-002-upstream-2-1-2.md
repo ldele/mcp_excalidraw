@@ -9,11 +9,12 @@
 > Planned from UI-Wizard on 2026-10-07 (`C:\Projects\UI-Wizard\plans\SIDE-ISSUES.md`, session S2);
 > no code in this repo was changed while planning.
 >
-> **Refreshed 2026-10-08: executed, and not on `main` yet.** The merge is committed as `b8d3f39` on
-> `merge/upstream-2.1.2`, in the worktree `C:\Projects\mcp_excalidraw-merge`. A second pass (S3:
-> T-012, T-013, T-014) is staged on top of it there, uncommitted. `main` is at `497e9cd`. What
-> each step and test case came to is marked below; **§ What is left** is the owner's part. The
-> detail is that branch's `docs/DEVLOG.md`, entries 2026-10-07 and 2026-10-07 (b).
+> **Landed 2026-10-08.** `main` took the branch as `6f25cb7` and is pushed: S3 committed as
+> `8913747`, the staged ledger and specs as `41a3ba7`, on the owner's instruction (*"run all the
+> steps"*). **The first CI run on it, 37752960857, was red**, for two reasons given under
+> § What is left; the fix for both is staged, not committed. What each step and test case came to
+> is marked below. The detail is `docs/DEVLOG.md`, entries 2026-10-07, 2026-10-07 (b) and
+> 2026-10-08.
 
 ## Goal
 
@@ -152,7 +153,28 @@ store without a change record. It now records each delete first.
 
 ## What is left
 
-In this order. Steps 1 to 5 are the owner's (rule 1), from that branch's baton, 2026-10-07 (b).
+**Done 2026-10-08: steps 1 to 4, the push and the dispatch of step 5, and step 6.** Still open:
+
+- **CI is red on `6f25cb7`** (run 37752960857). (a) The docs gate: `docs/TICKETS.md` was staged on
+  2026-10-07 and committed on 2026-10-08 with its header still saying the 7th (rule 12). (b) On
+  Linux under Node 22 and 24, `render` of the legacy dashboard fails with *PNG worker exited with
+  code 0*: the worker calls `process.exit()` right after writing 198 kB to a pipe, and the write
+  is cut off. Node 20 passes, and so does Windows, which is why every local run was green. It is
+  upstream's defect and upstream's open pull request #131 fixes it in one file. **Staged, not
+  committed:** that change, taken as it stands (`ff15e51`), and the ledger with T-011 closed and
+  its date brought to the 8th. It cannot be proved here; a dispatched run after the push is the
+  proof.
+- **The worktree is still there** (`C:\Projects\mcp_excalidraw-merge`, clean, at `8913747`).
+  Removing it deletes a directory, and that was not put to the owner in so many words.
+- **Step 6, T-011: fixed by the merge.** Re-run on 1.3.0 with its own steps: both of Scribe's
+  saved scenes keep every text in place after a scroll and a click (97 and 65 components). The
+  same click still rewrites a bound arrow by a pixel as an edit by human, and the reading then
+  lists that flow as an annotation: T-007 and T-010 stand.
+- **Step 7 is decided:** SPEC-003 comes right after the merge, before T-010, T-001 and PR 4
+  (owner, 2026-10-08).
+
+The steps as they were written, in this order. Steps 1 to 5 are the owner's (rule 1), from that
+branch's baton, 2026-10-07 (b).
 
 1. Review and commit S3 in the worktree (`git diff --cached` in `C:\Projects\mcp_excalidraw-merge`).
 2. Commit what is staged in the main checkout — `docs/TICKETS.md`, and since 2026-10-08 this file

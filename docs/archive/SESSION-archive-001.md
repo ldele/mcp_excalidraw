@@ -4,6 +4,22 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-09-05 — Claude Code — the ledger is laid; five tickets open; the tree still carries an older staged re-vendor
+- **Done:** `docs/TICKETS.md` with T-001–T-005 from the 2026-08-21 feedback note; `AGENTS.md`
+  Reference line; a pointer atop the note. Detail: DEVLOG 2026-09-05. Staged, not committed (rule 1).
+- **Found in the index, not this session's:** a **staged re-vendor of cpc 1.5.0 → 1.8.0** (29 files
+  under `tools/conventions/cpc/`, +755/−22) plus `b6eaa3f fix(justfile)` already committed. Nobody
+  wrote it up; review it separately from this session's three files before committing either.
+- **Not on this machine:** `excalidraw-canvas` is not on PATH (`npm link` never ran here) and no
+  excalidraw MCP server is configured in Claude Code; `dist/bin.js` (2026-08-07) exists, so
+  `node dist/bin.js` works. The `wireframe-first` skill in `claude-skills` (v0.56.0) finds the toolkit
+  by that ladder and files wrong readings here.
+- **Next, in order:** (1) Lucas reviews the three files and the re-vendor, and commits. (2) Answer
+  T-001 first — the documented screen-heading path silently does nothing. (3) `npm link`.
+  (4) Pre-existing: KI-3's attribution measurement, PR 4's geometry lint (ADR-002), `share` untested
+  since the upstream merge.
+- **Picks up:** any session.
+
 ## 2026-08-07 (close 3) — Claude Code — Lucas + agent
 - **Done: the upstream merge** (`1c5925b`), the first since the fork, at 14 commits of divergence —
   clean, no conflicts. **Rule 2's open deferral is now closed.**
@@ -186,5 +202,3 @@ Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG e
 - **Watch out:** `excalidraw-canvas` is not on PATH on this machine; `npm link` from the repo or the
   skill's commands will not resolve. Never `npx mcp-excalidraw-server` — that is upstream's package
   and carries none of this fork's features (`FORK.md`).
-
-

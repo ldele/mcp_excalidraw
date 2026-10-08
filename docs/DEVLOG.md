@@ -8,6 +8,50 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-10-08 — SPEC-002 landed on `main` (`6f25cb7`), pushed; the first CI run on it is red; fix staged
+- **What, on the owner's instruction** (*"run all the steps"*, given from a Scribe session): S3
+  committed on the branch as `8913747`; the staged ledger with the refreshed SPEC-002 and the new
+  SPEC-003 committed on `main` as `41a3ba7`; `main` took `merge/upstream-2.1.2` as `6f25cb7`, with
+  no conflict; `npm ci`, `npm run build` and `npm link` in the main checkout, with no canvas
+  running; pushed; CI dispatched by hand (KI-8: the push started no run, the fifth time).
+- **Checked before each commit.** In the worktree before `8913747`: `type-check`,
+  `type-check:frontend`, `npm test` 66 / 66 plus wire, bind, render and state. On the merged tree in
+  the main checkout before `6f25cb7`: the same, plus `npm run build`, with `tests/expected/`
+  identical to the pre-merge `main`. The linked command answers as 1.3.0 and lists `render`.
+- **CI run 37752960857 on `6f25cb7`: red.** Node 20 passed. The main job (Node 22), Node 24 and the
+  docs gate failed.
+  - *The docs gate (mine).* `docs/TICKETS.md` had been staged on 2026-10-07 with that date in its
+    header and was committed on the 8th, which rule 12 reads as an edit without a date bump. The
+    gate was run before the commit and passed; it was not run after.
+  - *The render test (upstream's defect, found by our test).* `tests/server-contract.test.mjs`,
+    *it renders offline, without a canvas server*: `render` of the legacy dashboard fails on Linux
+    under Node 22 and 24 with *PNG worker exited with code 0*. `src/core/render/png-worker.ts`
+    (upstream's #127) calls `process.exit()` right after `stdout.write()`; a payload larger than
+    the pipe buffer, about 64 KiB, is cut off, and this scene's PNG is 198 kB. Upstream's CI is
+    green because its render checks use small scenes. Every run here was on Windows, where it
+    passes.
+- **Staged, not committed:** upstream's open pull request #131 (`ff15e51`, one file, 14 lines
+  added and 5 removed: exit from the write's flush callback, with a 10 s watchdog), taken exactly
+  as it stands so that it merges without a conflict when upstream takes it; and the ledger, with
+  T-011 closed, which brings its date to the 8th. With it staged, on Windows: `type-check`,
+  `npm test` 66 / 66 plus the four scripts, and the dashboard renders to 197,609 bytes.
+  **Not proved:** that it fixes Linux. WSL here has no Node, so only a dispatched run can say.
+- **T-011, re-tested on the merged build and closed as fixed.** Scribe's
+  `findings-beside-text.excalidraw`, imported with no tab, then one tab, one scroll and one click:
+  97 components throughout, the heading still at 152, 130. `library.excalidraw` imported into that
+  same already-clicked tab: 65 components and 4 flows. On 1.2.0 the first dropped to 47.
+- **Seen in the same run, not fixed:** that click rewrote the bound arrow `f-open` as an edit by
+  human (476 x 58 to 475 x 57, path reshaped), and the reading went from 1 connection to
+  0 connections and 1 annotation. T-007 and T-010 stand on the merged build.
+- **Not done:** `git worktree remove ../mcp_excalidraw-merge`. The worktree is clean at `8913747`.
+  `npm ci` reported 22 advisories in the merged dependency tree (1 low, 12 moderate, 7 high,
+  2 critical); they were not looked at.
+- **What I would do differently.** Push the branch and dispatch CI on it *before* merging. A push
+  starts no run here, so the first Linux run of the merged code was on `main`, after it was
+  public. And run the docs gate on the commit, not on the tree before it.
+- **Next:** the owner's word on the staged fix (commit, push, dispatch, read the run). Then
+  SPEC-003, which he placed right after the merge on 2026-10-08.
+
 ## 2026-10-07 (b) — S3: three toolkit hazards fixed on the merged code (T-012, T-013, T-014); T-001 re-tested
 - **Before this:** the merge was committed as `b8d3f39` on `merge/upstream-2.1.2` and the ledger
   (T-007 to T-011) as `497e9cd` on `main`, both on Lucas's instruction, neither pushed. One thing
