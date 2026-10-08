@@ -11,9 +11,10 @@
 >
 > **Executed 2026-10-08, the same day, on the owner's word** (*"SPEC-003 right after the merge"*).
 > Rows 1 to 3 were resolved by the run (`docs/DEVLOG.md`, 2026-10-08 (b)). **Rows 4 and 5 were
-> decided by the owner the same day: keep the fix in the fork, and offer it upstream as one pull
-> request.** The fix is on `main`. **The pull request has not been sent**; § Verified says where
-> the patch waits and why (`docs/DEVLOG.md`, 2026-10-08 (c)).
+> decided by the owner the same day, in two steps: keep the fix in the fork — done, on `main` —
+> and, after asking for the pull request's text, the issue search, a tab test and a count of our
+> own use, hold the offer to upstream.** Nothing was sent. § Verified has the results and says
+> where the patch waits (`docs/DEVLOG.md`, 2026-10-08 (c) and (d)).
 
 ## Goal
 
@@ -71,8 +72,8 @@ smallest fix on upstream's own tree, and measures what the fix costs. **It sends
 | 1 | Does T-009 reproduce on upstream alone? | resolved | **Yes.** In a clean worktree of `upstream/main` at `96d9c21`, built and run on a private port: a bound arrow posted with four points is stored with two, `[[0,0],[412.9,247.8]]` — the fork's values to the last digit | upstream changes `resolveArrowBindings` |
 | 2 | Is a straight line what upstream intends for a bound arrow? | resolved | **It is what upstream documents, and it leaves a gap between two of its own rules.** Its skill says a bound arrow "auto-route[s] to element edges", shows waypoints only on *unbound* arrows, and then rules: "If an arrow would pass through an unrelated shape, add a waypoint to route around it." A caller must choose between an arrow that follows its shapes and one that goes round an obstacle. No upstream issue asks for both (searched 2026-10-08). So this is a small feature that closes that gap, not a bug by upstream's own account, and it has to be argued | upstream documents bound arrows with waypoints |
 | 3 | What should the fix do with a caller's points? | resolved | **As built.** More than two points: the ones between the first and last stay where the caller put them, and each bound end is re-anchored to its shape's edge, facing the waypoint next to it. The same rule holds when a bound shape moves, because it is the same function. An *unbound* end of a routed arrow stays exactly where it was put. None or two points: unchanged, and shown identical on three arrows | a kept waypoint ends up inside the shape it is bound to — not handled, not seen |
-| 4 | Send it upstream, keep it in the fork, or drop it? | resolved | **Keep it in the fork, and offer it upstream** (owner, 2026-10-08, *"yes to all four"*, answering the proposal as put). On `main` since that day. The reasons, as proposed. For the fork: its own conventions ask for bound arrows routed with waypoints (§7), which the server cannot store, and Scribe carries a second pass to work round it. For upstream: one function, 29 lines added and 11 removed, a check in upstream's own state script, and no change to any arrow that has no waypoints. Against: upstream may answer that bound arrows auto-route by design; then the fork carries 40 lines in a function upstream has edited twice | the fork stops tracking upstream |
-| 5 | If sent: an issue first, or a pull request directly; from which branch? | resolved | **One pull request, no issue first** (owner, 2026-10-08), its description carrying the reproduction and the gap in row 2, from the branch `t009-waypoints-upstream`. **Not sent yet:** pushing that branch to `origin` publishes it, and the push and the pull request are each on the owner's word or by the owner's hand | upstream asks for an issue first |
+| 4 | Send it upstream, keep it in the fork, or drop it? | resolved | **Keep it in the fork; the offer to upstream is held.** The owner, 2026-10-08: first *"yes to all four"* to the proposal as put (keep, and offer) — the fix is on `main` since that day — then, having asked to see the pull request, the issue search, a tab test and whether so small a change is justified: *"hold the PR"*. For the fork, the reasons as proposed: its own conventions ask for bound arrows routed with waypoints (§7), which the server could not store, and Scribe carried a second pass to work round it. For upstream the case is thinner than it was put: one function, 29 lines added and 11 removed, a check in upstream's own state script, no change to any arrow without waypoints — but, counted, our own use is three routed bound arrows in one drawing, no upstream issue asks for it, and what the fork gains is not carrying 40 lines in a function upstream changed once in the 25 commits of the last merge (DEVLOG 2026-10-08 (d)) | the owner says so. Triggers the session proposes: a merge that conflicts in `resolveArrowBindings`; an upstream issue asking for routed bound arrows |
+| 5 | If sent: an issue first, or a pull request directly; from which branch? | resolved | **Held with row 4** (owner, 2026-10-08). If it is sent later: one pull request with no issue first was the owner's first answer; the session's later note is that an issue first is the more cautious route, since upstream documents the straight line and has no contributing guide either way. The branch is `t009-waypoints-upstream`, one local commit; pushing it to `origin` publishes it, and that push and the pull request are the owner's to do. Its text, `PR_BODY.md`, does not name this fork (the owner's wish, 2026-10-08) | row 4 reopens |
 
 ## Execution checklist
 
@@ -132,24 +133,47 @@ smallest fix on upstream's own tree, and measures what the fix costs. **It sends
 | 6 · the consumer's workaround becomes unnecessary | **Pass.** On the fixed fork build, Scribe's Library scene drawn with one `add` keeps its arrows at 5, 4, 3 and 2 points and reads 3 screens, 65 components, 4 flows |
 
 Upstream's own scripts with the fix, in its worktree: MCP wire, local-bind, render and state all
-pass. **Not run:** upstream's Playwright suite; anything on Linux; a tab on a scene with a routed
-bound arrow (what the page does with it on its first sync is not known).
+pass. **Upstream's Playwright suite: 19 / 19** on the patched build (2026-10-08 (d)), run with the
+installed Chrome (`channel: 'chrome'`), because the Chromium build that Playwright version pins is
+not on this machine. **Not run:** anything on Linux for upstream's tree. The fork's own tree did
+run there: CI run 37758104927 on `ac7d8dd`, green, the new check passing under Node 22.
+
+**With a browser tab** (2026-10-08 (d)). One script, a real Chrome tab on a private port, against
+upstream with the patch and against upstream as it is. The scene is the pull request's own: two
+rectangles, one bound arrow given four points, one bound arrow given none. On unpatched upstream
+the arrow is flattened at creation, so the script routes it there with a later `update`.
+
+| Stage | Upstream + patch | Upstream at `96d9c21` |
+|---|---|---|
+| created with four points, no tab | four kept: `[[268,122],[380,122],[380,422],[592,422]]` | two: `[[223.5,148.1],[636.5,395.9]]` |
+| tab attaches, left alone 3.5 s; manual sync; a click and a pan; reload | four kept, unchanged | four kept, unchanged (once routed by `update`) |
+| a person drags the target 100 px down in the tab | waypoints stay, the end follows: `…,[592,492.7]` | the same values |
+| an agent moves the target through the API, no tab sync before it | waypoints stay, the end follows: `…,[606.4,497.5]` | flattened to two: `[[213.7,149],[646.3,495]]` |
+| an agent moves the source through the API after a tab has synced | no arrow moves, routed or plain | the same |
+
+So the tab does not undo a route, and the patch changes two server paths only: creation, and a
+shape moved through the API before any tab has synced. The last row is upstream's and not the
+patch's: a tab's sync stores arrows with `startBinding` / `endBinding` and without `start` /
+`end`, and `rerouteBoundArrows` matches on `start` / `end` alone, so it finds nothing. **Not
+checked on the fork**, whose sync reconciles per element.
 
 One thing about this machine, not about the fix: upstream's `npm run test:state` timed out twice,
 because it starts a server straight after a build and waits 5 s. The same script run on its own
 passes. The 2026-10-07 entry saw the same and could not explain it either.
 
-**Where the two patches are**, the same change in both (as of 2026-10-08 (c)):
+**Where the two patches are**, the same change in both (as of 2026-10-08 (d)):
 
 - for the fork: **on `main`.** Re-run after rebasing from `6f25cb7` onto `265f7a9`: `type-check`
   clean, `npm test` 66 / 66 plus wire, bind, render and state with the new check,
   `tests/expected/` untouched. The branch it came from, `t009-waypoints-fork` in
   `C:\Projects\mcp_excalidraw-merge`, is merged and can go.
-- for upstream: **one local commit, not pushed** — `527500b`, *fix: keep waypoints on bound
+- for upstream: **held; one local commit, not pushed** — `527500b`, *fix: keep waypoints on bound
   arrows*, on branch `t009-waypoints-upstream`, cut from `upstream/main` at `96d9c21`, in
-  `C:\Projects\mcp_excalidraw-upstream`. The pull request's text is `PR_BODY.md` in that
-  worktree, untracked. The session that made the commit was refused the push of a new branch to
-  a public repository by its own permission check, and did not route round it.
+  `C:\Projects\mcp_excalidraw-upstream`. Untracked in that worktree, and lost if it is removed:
+  the pull request's text, `PR_BODY.md`, which carries the suite and tab results and does not
+  name this fork; and the tab script, `tests/probe/t009-tab.spec.mjs` with
+  `playwright.probe.config.mjs`. The session that made the commit was refused the push of a new
+  branch to a public repository by its own permission check, and did not route round it.
 
 ## Estimate
 

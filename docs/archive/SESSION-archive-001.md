@@ -4,6 +4,14 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-09-07 — Claude Code — CI proven by a dispatch; the push trigger waits for the next push
+- **Done:** run 34097250095 (`workflow_dispatch` on `main`) — all six jobs green, the compat
+  matrix included. The push of `49afba0` made no run. Detail: DEVLOG 2026-09-07.
+- **Uncommitted, staged:** DEVLOG, this entry.
+- **Next:** (1) Lucas commits; on the next push, check that a run appears by itself. (2) T-001
+  first — the silent text-size drop. (3) KI-3, PR 4, `share` untested since the upstream merge.
+- **Picks up:** any session.
+
 ## 2026-09-06 — Claude Code — CI is two jobs per push; the Node range waits for a tag
 - **Done:** `ci.yml` rewritten (6 jobs per push → 2, plus a keypoint matrix), NORTH_STAR date
   bumped, strict docs gate green, the exact CI commands run green locally (corpus 43/43). Detail:

@@ -4,6 +4,27 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (d) — Claude Code — the offer to upstream is HELD; tab test and browser suite run
+- **Supersedes entry (c)'s "Not done — step (4)" and its Next (1) and (2).** The owner holds the
+  pull request (2026-10-08, *"hold the PR"*). **Do not push `t009-waypoints-upstream`, do not
+  open a pull request, and do not put the two commands to the owner again** unless the owner
+  raises it. CI on `ac7d8dd` is green (run 37758104927; the new check passed on Linux).
+- **Done:** the issue search on upstream, the tab test on patched and unpatched upstream, its
+  Playwright suite (19 / 19), and a count of our own use (3 routed bound arrows, one drawing).
+  DEVLOG 2026-10-08 (d); the table is in SPEC-003 § Verified. `docs/ROADMAP.md` § Upstream and
+  `FORK.md` say "held".
+- **Standing, local only:** the patch is commit `527500b` on `t009-waypoints-upstream` in
+  `C:\Projects\mcp_excalidraw-upstream`; `PR_BODY.md` and the tab script (`tests/probe/`) are
+  untracked there, so removing that worktree loses them.
+- **Open:** after a tab's first sync, a shape moved through the API leaves its arrows behind on
+  upstream. Whether this fork does the same is **not checked**; no ticket. A task was put to the
+  owner.
+- **Next:** (1) the order that stood before SPEC-003: T-010's re-wrap, T-001 with no tab, PR 4.
+  (2) the open item above, if the owner starts it. (3) on the owner's word only: remove the
+  worktree `C:\Projects\mcp_excalidraw-merge` and the branch `t009-waypoints-fork`, both merged.
+  (4) unread: the 22 advisories from `npm ci`.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (c) — Claude Code — T-009 fixed on `main`; the offer to upstream decided, not sent
 - **Supersedes the Next of (b):** its steps (1) to (3) are done, on the owner's *"yes to all
   four"*. (1) and (2) are `cfa2eae` and `265f7a9`, pushed, **CI green** (run 37756642052, five
@@ -175,11 +196,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   the trigger fires, `gh workflow run ci.yml --ref main` after each push. (3) T-001 first — the
   silent text-size drop. (4) KI-3, PR 4, `share` untested since the upstream merge.
 - **Picks up:** any session; step (1) needs the owner's browser.
-
-## 2026-09-07 — Claude Code — CI proven by a dispatch; the push trigger waits for the next push
-- **Done:** run 34097250095 (`workflow_dispatch` on `main`) — all six jobs green, the compat
-  matrix included. The push of `49afba0` made no run. Detail: DEVLOG 2026-09-07.
-- **Uncommitted, staged:** DEVLOG, this entry.
-- **Next:** (1) Lucas commits; on the next push, check that a run appears by itself. (2) T-001
-  first — the silent text-size drop. (3) KI-3, PR 4, `share` untested since the upstream merge.
-- **Picks up:** any session.

@@ -169,14 +169,23 @@ a test now covers this one. **A fix upstream makes for its own files does not re
 already wrote:** our scenes exported before 2.1.1 still carried the bad keys, and only `import` →
 `export` repaired them until `repairOrderKeys` did it on read.
 
-**A base fix to offer upstream, decided 2026-10-08** — the first one. T-009: a bound arrow lost
+**A base fix considered for upstream, 2026-10-08** — the first one. T-009: a bound arrow lost
 the waypoints it was created with, in a function upstream wrote (`resolveArrowBindings`). It
-reproduces on upstream alone, so the fix is kept here and is to be offered there as one small pull
-request (SPEC-003; the owner's decision). Not sent yet: DEVLOG 2026-10-08 (c).
+reproduces on upstream alone, and the fix is kept here. Offering it there as one small pull
+request was decided, prepared and tested, and then **held by the owner the same day**; nothing
+was sent (SPEC-003; DEVLOG 2026-10-08 (c) and (d)).
 
-Why offer it at all: a change we carry inside a function upstream edits is a conflict waiting at
+Why offer one at all: a change we carry inside a function upstream edits is a conflict waiting at
 the next merge, and a patch upstream takes removes it. The bar this one met, proposed as the bar
 for the next (the session's wording — the owner decided this case, not a rule): it reproduces on a
 clean checkout of upstream; the patch touches nothing of our own layer; and it comes with a check
 in upstream's own test scripts. A fix that does not meet it stays a fork change and is named in
 `FORK.md` § Keeping current with upstream, so the next merge knows where to look.
+
+What holding this one adds to that bar (again the session's wording): **count our own use before
+preparing the offer.** Here the count came last — three routed bound arrows, in one drawing, of
+sixteen bound arrows in the saved scenes that were searched (DEVLOG 2026-10-08 (d)) — after the
+patch, its check and the pull request's text were written, and the session's recommendation
+turned on it. And show the
+owner the pull request itself, with what a search of upstream's issues found, before asking
+whether to send it.
