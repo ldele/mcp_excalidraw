@@ -353,3 +353,65 @@ describe('the first sync from a tab is not an edit, and is not thrown away eithe
     assert.equal(stored('sized').width, 400, 'a box the author gave is the author\'s');
   });
 });
+
+describe("a tab's first click leaves the agent's scene the agent's (T-010, T-007)", () => {
+  // The whole path, against the server: what the agent drew, then the sync one tab sent after its
+  // first click (shapes grown to fit their labels, a label wrapped, a bound arrow given its box).
+  test('fitted labels and a routed arrow leave no record, and the reading keeps its flow', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await api('/api/elements/batch', {
+      method: 'POST',
+      ...json({ elements: [
+        { id: 'screen', type: 'rectangle', x: 0, y: 0, width: 900, height: 500, backgroundColor: '#ffffff', strokeColor: '#14130f', role: 'screen' },
+        { id: 'title', type: 'text', x: 24, y: 24, width: 200, height: 32, text: 'Probe screen', fontSize: 26, fontFamily: 2, strokeColor: '#14130f' },
+        { id: 'badge', type: 'rectangle', x: 40, y: 100, width: 36, height: 20, backgroundColor: '#74c0fc', strokeColor: '#1971c2', label: { text: '3', fontSize: 11 } },
+        { id: 'narrow', type: 'rectangle', x: 120, y: 100, width: 64, height: 28, backgroundColor: '#74c0fc', strokeColor: '#1971c2', label: { text: 'Dismiss', fontSize: 16 } },
+        { id: 'from', type: 'rectangle', x: 40, y: 220, width: 160, height: 80, backgroundColor: '#ffffff', strokeColor: '#d7d5cc', role: 'card' },
+        { id: 'to', type: 'rectangle', x: 500, y: 320, width: 160, height: 80, backgroundColor: '#ffffff', strokeColor: '#d7d5cc', role: 'card' },
+        { id: 'flow', type: 'arrow', x: 0, y: 0, start: { id: 'from' }, end: { id: 'to' }, strokeColor: '#14130f' }
+      ] })
+    });
+    const { elements: drawn } = await api('/api/elements');
+    const { rev: since } = await api('/api/changes?since=0');
+    const wireframe = () => JSON.parse(execFileSync(process.execPath, [join(__dirname, '..', 'dist', 'bin.js'), 'wireframe', '--json'], {
+      env: { ...process.env, EXPRESS_SERVER_URL: baseUrl, EXCALIDRAW_NO_AUTOSTART: '1' }, encoding: 'utf-8'
+    }));
+    assert.equal(wireframe().flows.length, 1, 'the arrow reads as a flow before any tab');
+
+    // What the tab sends back: every shape with the editor's defaults, labels as bound text.
+    const filled = { fillStyle: 'solid', strokeStyle: 'solid', strokeWidth: 2, roughness: 1, opacity: 100 };
+    const boundText = (id, text, originalText, height, fontSize) => ({
+      id: `${id}-label`, type: 'text', x: 0, y: 0, width: 40, height, text, originalText, containerId: id,
+      fontSize, fontFamily: 5, textAlign: 'center', verticalAlign: 'middle', ...filled, strokeColor: '#1971c2', backgroundColor: 'transparent'
+    });
+    const echoed = drawn.flatMap(el => {
+      const { label, start, end, rev, origin, createdAt, updatedAt, version, ...rest } = el;
+      if (el.id === 'badge') return [{ ...rest, ...filled, height: 24, boundElements: [{ type: 'text', id: 'badge-label' }] }, boundText('badge', '3', '3', 13.75, 11)];
+      if (el.id === 'narrow') return [{ ...rest, ...filled, height: 50, boundElements: [{ type: 'text', id: 'narrow-label' }] }, boundText('narrow', 'Dismis\ns', 'Dismiss', 40, 16)];
+      if (el.id === 'flow') {
+        const last = el.points[el.points.length - 1];
+        return [{ ...rest, ...filled, width: Math.abs(last[0]), height: Math.abs(last[1]), startArrowhead: null, endArrowhead: 'arrow',
+          startBinding: { elementId: 'from', focus: 0, gap: 8 }, endBinding: { elementId: 'to', focus: 0, gap: 8 } }];
+      }
+      return [{ ...rest, ...filled }];
+    });
+    const result = await api('/api/elements/sync', { method: 'POST', ...json({ elements: echoed }) });
+    assert.equal(result.success, true);
+    assert.equal(result.updated, 0, 'nothing a person did');
+
+    const feed = await api(`/api/changes?since=${since}`);
+    assert.deepEqual(feed.records.map(r => `${r.origin} ${r.kind} ${r.id}`), []);
+
+    const { elements } = await api('/api/elements');
+    const stored = id => elements.find(e => e.id === id);
+    assert.equal(stored('badge').height, 24, 'the size on the canvas is the size on the server');
+    assert.equal(stored('narrow').height, 50);
+    assert.equal(stored('badge').origin, 'agent');
+    assert.equal(stored('flow').origin, 'agent');
+
+    const reading = wireframe();
+    assert.equal(reading.flows.length, 1, 'still a flow, not an annotation');
+    assert.equal(reading.markup.length, 0);
+    assert.match(JSON.stringify(reading.screens), /"label":"Dismiss"/, 'the label reads unwrapped');
+  });
+});

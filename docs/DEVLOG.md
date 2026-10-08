@@ -9,6 +9,66 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the twenty entries kept here.
 
+## 2026-10-08 (g) — T-010 and T-007 fixed: the tab's own layout is no longer a person's edit
+- **What** (owner, 2026-10-08, from a UI-Wizard session: *"start T-010 in the fork"*): three kinds
+  of the editor's own layout came back from a tab's first click as `Edited, by human`. All three
+  are closed in `src/core/changes.ts`, with one branch in the sync handler of `src/server.ts`.
+  Staged, not committed.
+- **Reproduced first, in a real tab.** One Chrome tab, a private port, the build at `44f9d47`.
+  Nothing is written back while the tab is only looked at (7 s, 0 records); the first click on
+  empty canvas syncs. A scene of eight elements drawn through `add` gave 3 records; UI-Wizard's
+  dashboard as exported at `7828a2d` gave 7 and its score fell from 72 components to 69. The
+  stored element and what the tab sent for it are the test cases.
+- **A wrapped label is the same label.** The editor wraps a label to its shape and keeps the
+  result in `text` (`"Dismis\ns"`); the words stay in `originalText`. The label index read `text`.
+  `writtenText()` reads `originalText` when there is one, for bound and free text alike, so the
+  change log and the reading both see the label on one line. The server already keeps
+  `originalText` level with `text` when an agent updates a text element (upstream's code).
+- **A shape grown to fit its label was not resized.** 36 x 20 with an 11 px label comes back
+  36 x 24: `ceil(13.75) + 2 x 5`, the editor's own rule (`computeContainerDimensionForBoundText`).
+  `grewToFitLabel()` is true when a shape kept its place, shrank on no side, and each side that
+  changed is within 1 px of the smallest box that rule allows around the label the tab measured.
+  The sync handler then keeps the element as the agent's and takes the new size with no record,
+  the same way S3 took an unsized text's box: the size on the canvas is the size the reading and
+  the next export see. Rectangles are observed; ellipses and diamonds are computed from the rule.
+- **A path has no size of its own (T-007).** The server routes a bound arrow and stores its
+  points, no width or height; the tab sends the box the points span and the arrowhead it draws by
+  default. Width and height are no longer compared on arrows, lines and strokes (`points` is, so
+  a reshaping is still seen), and an arrow with no `endArrowhead` compares as `arrow`; an explicit
+  `null` is still the author taking the head off, and a line has no default head.
+- **The consequence T-010 called worse is gone with the cause:** an arrow stamped `human` reads
+  as markup, so a flow left Navigation for Annotations. The arrows stay `agent` now.
+- **Tests, 13 new** (`tests/frontend-echo.test.mjs` +12, `tests/server-contract.test.mjs` +1):
+  11 failed before the fix; 2 guard what must keep reporting (a retyped label, a moved arrow end)
+  and passed throughout.
+- **Verified:** `npm test` 79 / 79 `node:test` (66 before), wire, bind, render, state — the state
+  script's new arrows-follow check included. Upstream's Playwright suite 19 / 19 with the system
+  Chrome. `tests/expected/` untouched. Every server ran on a private port; nothing was on `:3000`.
+- **In a real tab, records by human after one click, old build then this one:**
+
+  | Scene | elements | before | after | reading after |
+  |---|---|---|---|---|
+  | eight elements through `add` (badge, narrow button, bound arrow) | 9 | 3 | 0 | 1 flow, 0 markup |
+  | the same, exported after the tab and imported again | 12 | not run | 0 | 1 flow |
+  | UI-Wizard dashboard as exported at `7828a2d` | 98 | 7 | 0 | 72 components (was 69) |
+  | UI-Wizard dashboard re-exported with 1.3.0 | 98 | 0 | 0 | 72 components |
+  | meeting-app `native-v1-surfaces` (3 bound arrows) | 86 | 3 | 0 | 3 flows (was 3 markup) |
+  | doc_assistant `add-documents` (55 labels) | 169 | 10 | 0 | no wrapped label |
+  | mlflow-drift-loop `streamlit_app_wireframe` (5 arrows) | 74 | 5 | 0 | 5 flows (was 5 markup) |
+
+  "Before" for the last three is the build at `ac7d8dd` in the T-009 worktree (T-009's fix, none
+  of this). The three arrows of `native-v1-surfaces` are the one-pixel rewrite T-011's
+  resolution left to T-007 and T-010: width and height each one more, nothing else.
+- **Not verified:** a person's real resize or retyping in a tab still being reported — covered by
+  tests on payloads, not driven by hand. Ellipse and diamond fits in a tab. Scribe's own two
+  scenes (T-010's and T-011's reports) are not on this machine.
+- **Changes behaviour an agent can see:** a shape drawn too small for its label is stored at the
+  size the editor gave it once a tab has synced, and `changes` says nothing about it. One line in
+  `SKILL.md`.
+- **The linked command runs this:** `dist/` in the main checkout was rebuilt by `npm test`, so
+  `excalidraw-canvas` on PATH carries the staged fix until it is committed or rebuilt from `HEAD`.
+- **Next:** the owner reviews and commits. Then T-001 with no tab, PR 4; the 22 advisories.
+
 ## 2026-10-08 (f) — A check pins what entry (e) found: arrows follow a moved shape after a sync
 - **What** (owner, 2026-10-08: *"add the check to the state script"*): one check in
   `scripts/check-state-integrity.mjs`, *bound arrows follow a shape an agent moves after a tab
@@ -686,25 +746,6 @@ began on 2026-10-08; the archive holds everything older than the twenty entries 
   all zero, versus 3 fallbacks and 1 unnamed screen. The corpus caught the report change and scoped
   it exactly: 1 of 5 goldens moved, +5 lines, the other four byte-identical.
 - **Opens:** nothing new. Phase 1 now hangs entirely on PR 1, the human markup round.
-
-## 2026-08-01 — Fixture corpus + the repo's first test harness (ROADMAP PR 2)
-- **What:** five `.excalidraw` fixtures drawn through the real CLI, each with a hand-authored
-  expectation and a golden reading; a `node:test` harness (28 assertions) reading them off disk;
-  `scoreWireframe()` exported from `src/core/wireframe.ts`; `npm test` / `test:corpus` /
-  `corpus:update`; and a CI `test` job. Decision in `docs/decisions/ADR-001-fixture-corpus-harness.md`,
-  the how-to in `docs/specs/SPEC-001-fixture-corpus.md`.
-- **Why:** `wireframe.ts` (32 KB) and `changes.ts` (27 KB) carry the whole differentiator and had no
-  regression coverage at all — CI ran `type-check` and `build` and nothing else. Every inference
-  change was being validated by looking at a screenshot, which the roadmap already calls too weak.
-- **Rejected:** Vitest (a dependency tree and a transform this project does not otherwise need);
-  driving the canvas server inside the tests (slow, order-dependent, and it *destroys* the thing
-  being tested — the server stamps `origin: "agent"`, so markup attribution becomes untestable);
-  a text-golden-only corpus (regenerable in one command, so eventually regenerated unread).
-- **Verified:** the harness was proved to fail before being trusted — moving
-  `HEADING_MIN_FONT_SIZE` 20 → 24 broke all five golden readings (23 pass / 5 fail), then reverted.
-- **Opens:** PR 3 is now just a CLI flag over `scoreWireframe()`. Markup attribution has a first
-  number (4/5) and a miss worth chasing: a note binds to the input above the card it sits level
-  with. The corpus does not cover the create/normalize path, since fixtures are read from disk.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

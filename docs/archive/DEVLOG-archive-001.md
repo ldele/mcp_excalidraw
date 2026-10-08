@@ -4,6 +4,25 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-08-01 — Fixture corpus + the repo's first test harness (ROADMAP PR 2)
+- **What:** five `.excalidraw` fixtures drawn through the real CLI, each with a hand-authored
+  expectation and a golden reading; a `node:test` harness (28 assertions) reading them off disk;
+  `scoreWireframe()` exported from `src/core/wireframe.ts`; `npm test` / `test:corpus` /
+  `corpus:update`; and a CI `test` job. Decision in `docs/decisions/ADR-001-fixture-corpus-harness.md`,
+  the how-to in `docs/specs/SPEC-001-fixture-corpus.md`.
+- **Why:** `wireframe.ts` (32 KB) and `changes.ts` (27 KB) carry the whole differentiator and had no
+  regression coverage at all — CI ran `type-check` and `build` and nothing else. Every inference
+  change was being validated by looking at a screenshot, which the roadmap already calls too weak.
+- **Rejected:** Vitest (a dependency tree and a transform this project does not otherwise need);
+  driving the canvas server inside the tests (slow, order-dependent, and it *destroys* the thing
+  being tested — the server stamps `origin: "agent"`, so markup attribution becomes untestable);
+  a text-golden-only corpus (regenerable in one command, so eventually regenerated unread).
+- **Verified:** the harness was proved to fail before being trusted — moving
+  `HEADING_MIN_FONT_SIZE` 20 → 24 broke all five golden readings (23 pass / 5 fail), then reverted.
+- **Opens:** PR 3 is now just a CLI flag over `scoreWireframe()`. Markup attribution has a first
+  number (4/5) and a miss worth chasing: a note binds to the input above the card it sits level
+  with. The corpus does not cover the create/normalize path, since fixtures are read from disk.
+
 ## 2026-07-31 — Adopt the claude-project-conventions standard
 - **What:** `cpc-init --profile standard`, then filled `AGENTS.md`, `.claude/CONTEXT.md`,
   `docs/ROADMAP.md`, `.claude/KNOWN_ISSUES.md`. Cut the 8 branches inherited from upstream off

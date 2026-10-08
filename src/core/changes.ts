@@ -30,13 +30,24 @@ export function isChangeTracked(el: ServerElement): boolean {
   return !(el.type === 'text' && !!el.containerId);
 }
 
+// What a text element says, as its author wrote it. The editor wraps a label
+// to the width of its shape and keeps the result in `text` ("Dismis\ns"); the
+// words themselves stay in `originalText`. Wrapping is layout, so every label
+// is read from `originalText` when the element has one: a label the tab
+// re-wrapped is the same label, and the reading prints it on one line (T-010).
+export function writtenText(el: ServerElement): string {
+  const original = el.originalText;
+  const text = typeof original === 'string' && original.trim() ? original : (el.text || '');
+  return text.trim();
+}
+
 // containerId → text of the bound child, so resolving labels across a whole
 // scene stays linear instead of rescanning the context for every element.
 export function buildBoundLabelIndex(context: Map<string, ServerElement>): Map<string, string> {
   const index = new Map<string, string>();
   for (const el of context.values()) {
     if (el.type !== 'text' || !el.containerId) continue;
-    const text = (el.text || '').trim();
+    const text = writtenText(el);
     if (text) index.set(el.containerId, text);
   }
   return index;
@@ -49,14 +60,14 @@ export function effectiveLabel(
   context: Map<string, ServerElement>,
   boundLabels?: Map<string, string>
 ): string | undefined {
-  const own = el.type === 'text' ? el.text : el.label?.text;
+  const own = el.type === 'text' ? writtenText(el) : el.label?.text;
   if (typeof own === 'string' && own.trim()) return own.trim();
 
   if (boundLabels) return boundLabels.get(el.id);
 
   for (const other of context.values()) {
     if (other.type === 'text' && other.containerId === el.id) {
-      const text = (other.text || '').trim();
+      const text = writtenText(other);
       if (text) return text;
     }
   }
@@ -93,12 +104,19 @@ export function canonicalizeElement(
   // is a hint being corrected, not a resize anyone performed, so text metrics
   // are outside what a designer can be said to have changed.
   const isText = el.type === 'text';
+  // An arrow, line or stroke is its `points`; width and height are the box
+  // those points span, which the server never stores for an arrow it routed
+  // and the editor always sends. Comparing them reported every bound arrow as
+  // "resized 0x0 to 284x62" on the first sync (T-007). The path is compared
+  // through `points` below, so a real reshaping is still seen.
+  const isPath = el.type === 'arrow' || el.type === 'line' || el.type === 'freedraw';
+  const sized = !isText && !isPath;
   return {
     type: el.type,
     x: el.x,
     y: el.y,
-    width: isText ? null : (el.width ?? 0),
-    height: isText ? null : (el.height ?? 0),
+    width: sized ? (el.width ?? 0) : null,
+    height: sized ? (el.height ?? 0) : null,
     angle: el.angle ?? 0,
     points: normalizePoints(anyEl.points),
     strokeColor: el.strokeColor ?? null,
@@ -119,7 +137,9 @@ export function canonicalizeElement(
     startTarget: bindingTarget(anyEl.startBinding, anyEl.start),
     endTarget: bindingTarget(anyEl.endBinding, anyEl.end),
     startArrowhead: anyEl.startArrowhead ?? null,
-    endArrowhead: anyEl.endArrowhead ?? null,
+    // Unset on an arrow means the head the editor draws; `null` means the
+    // author took it off. Only an arrow has that default — a line has none.
+    endArrowhead: anyEl.endArrowhead === undefined && el.type === 'arrow' ? 'arrow' : (anyEl.endArrowhead ?? null),
     locked: el.locked ?? false,
     link: el.link ?? null
   };
@@ -127,6 +147,47 @@ export function canonicalizeElement(
 
 // Sub-pixel deltas are float noise from Excalidraw's own maths, not an edit.
 const NUMERIC_TOLERANCE = 0.5;
+
+// The room the editor leaves around a bound label, and the smallest box it
+// allows a shape around a label of a given size
+// (computeContainerDimensionForBoundText, @excalidraw/excalidraw 0.18).
+const BOUND_TEXT_PADDING = 5;
+function smallestBoxAround(labelDimension: number, containerType: string): number {
+  const inner = Math.ceil(labelDimension) + BOUND_TEXT_PADDING * 2;
+  if (containerType === 'ellipse') return Math.round((inner / Math.SQRT2) * 2);
+  if (containerType === 'diamond') return 2 * inner;
+  return inner;
+}
+
+// True when `after` is `before` grown by the editor to fit its label: same
+// place, neither side smaller, and each side that changed is now exactly the
+// smallest the editor allows around the label's measured box. The editor does
+// this on its own the first time it lays a label out, to a shape drawn too
+// short for it — ten of eleven "edits by human" on a wireframe a person had
+// only looked at (T-010). A person dragging a shape to that exact size cannot
+// be told apart, and changes nothing a designer would see.
+export function grewToFitLabel(
+  before: ServerElement,
+  after: ServerElement,
+  boundText: ServerElement | undefined
+): boolean {
+  if (!boundText || boundText.type !== 'text') return false;
+  if (!['rectangle', 'ellipse', 'diamond'].includes(after.type)) return false;
+  if (Math.abs((after.x ?? 0) - (before.x ?? 0)) >= NUMERIC_TOLERANCE) return false;
+  if (Math.abs((after.y ?? 0) - (before.y ?? 0)) >= NUMERIC_TOLERANCE) return false;
+
+  let grew = false;
+  for (const side of ['width', 'height'] as const) {
+    const was = before[side] ?? 0;
+    const is = after[side] ?? 0;
+    if (Math.abs(is - was) < NUMERIC_TOLERANCE) continue;
+    const label = boundText[side];
+    if (is < was || typeof label !== 'number') return false;
+    if (Math.abs(is - smallestBoxAround(label, after.type)) > 1) return false;
+    grew = true;
+  }
+  return grew;
+}
 
 // Style properties the editor fills in when the author left them unset, and
 // the value it fills them with. An unset property *renders as* this value, so
