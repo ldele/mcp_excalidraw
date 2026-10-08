@@ -4,6 +4,24 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (j) — Claude Code — main checkout reinstalled and rebuilt; the guard and the new dependencies are live
+- **Supersedes the "Mind this first" of entry (h) and the Where and Next (1), (2) of entry (i).**
+  The guard is on `main` (`23e4afc`, pushed, CI green). The main checkout was reinstalled and
+  rebuilt at that commit, so `excalidraw-canvas` on PATH carries the T-015 guard, the T-009 fix
+  and the new dependencies (`npm audit` 14). DEVLOG 2026-10-08 (j).
+- **Verified:** `npm test` 79 / 79 plus scripts and Playwright 19 / 19 in the main checkout; with
+  the command from PATH on a private port, a foreign `Origin` gets 403 and the tool works.
+- **A canvas was stopped to do it** (pid 91356, 105 elements, one tab), the owner having said it
+  was free. Its scene, change log and reading were saved first, outside the repository, in the
+  session's temporary folder; the owner was given the path. **No canvas is running.**
+- **Standing, local only:** the spare worktree `C:\Projects\mcp_excalidraw-merge` is on
+  `t015-origin-guard` (merged) and holds three untracked probes and two Playwright configs; the
+  branches `t009-waypoints-fork` and `t015-origin-guard` are merged. Removal is the owner's word.
+  `C:\Projects\mcp_excalidraw-upstream` holds the held upstream patch.
+- **Next:** T-001 with no tab, then PR 4. T-016 (filed from UI-Wizard) is open. The pull request
+  to upstream stays held.
+- **Picks up:** any session with a terminal.
+
 ## 2026-10-08 (i) — Claude Code — T-015's guard built; STAGED ON A BRANCH in the spare worktree, not on main
 - **Where:** branch `t015-origin-guard`, cut from `main` at `438ef80`, in
   `C:\Projects\mcp_excalidraw-merge`. Everything staged (`git diff --cached` there), nothing
@@ -166,28 +184,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   (2) SPEC-003 — whether the fix for T-009 is worth sending upstream — placed by the owner right
   after the merge, ahead of T-010's re-wrap, T-001 with no tab and PR 4.
 - **Picks up:** any session with a terminal.
-
-## 2026-10-07 (b) — Claude Code — merge committed (`b8d3f39`); S3 staged: T-012, T-013, T-014 fixed
-- **Where:** two places. (1) `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`: the
-  merge is committed there as `b8d3f39`; S3's code, tests and docs are **staged** on top
-  (`git diff --cached`). (2) The main checkout, `main` at `497e9cd` (T-007 to T-011, committed):
-  `docs/TICKETS.md` is **staged** with T-012 to T-014 (filed and closed) and dated notes on T-001
-  and T-010. Nothing is pushed. The branch does not contain `497e9cd` and does not touch the
-  ledger, so the two merge cleanly. The canvas on `:3000` (pid 39264, 69 elements) was not touched.
-- **Done:** the echo guard knows `strokeColor` and `fontFamily` (T-012); an unsized text element
-  takes the page's measured box on a passive sync, with no record; export writes a label's own
-  font, size and colour, and 5 for an unset font (T-013); a sync that would empty a non-empty
-  canvas is refused with 409 unless it carries `allowEmpty: true` (T-014). Detail: DEVLOG
-  2026-10-07 (b).
-- **Verified:** `npm test` 66 / 66 plus wire, bind, render, state; frontend type-check and build;
-  Playwright 19 / 19 with the system Chrome; `tests/expected/` untouched; `cpc-ticket check` OK
-  (14 tickets, 11 open).
-- **Not verified:** one human drag = one human record (needs a person). T-010's label re-wrap is
-  seen on the merged build and not fixed: an imported scene still collects records by human on
-  the first click in a tab.
-- **Next:** (1) Lucas commits S3 in the worktree and `docs/TICKETS.md` on `main` (commit the
-  ledger before merging: `git merge` refuses a dirty index). (2) `main` takes the branch; with
-  **no canvas running**, `npm ci && npm run build && npm link` in the main checkout; push;
-  dispatch CI by hand (KI-8); `git worktree remove ../mcp_excalidraw-merge`. (3) T-010 (compare
-  `originalText`, not the wrapped `text`), then T-001 with no tab, then PR 4.
-- **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
