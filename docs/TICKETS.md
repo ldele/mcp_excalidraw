@@ -63,12 +63,12 @@ run from the global install: `cpc-ticket --root . …`.
 - **Resolution:** —
 
 ## T-009 — A bound arrow's waypoints are dropped when it is created; update keeps them
-- **Status:** triaged · 2026-10-08
+- **Status:** fixed · 2026-10-08
 - **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
 - **Symptom:** add of an arrow with startElementId, endElementId and "points": [[0,0],[120,0],[120,300],[340,300]] stores two points, a straight line between the two shapes: [[0,0],[412.9,247.8]]. No tab is attached, so the server does it. update of the same arrow with the same four points keeps all four.
 - **Reproduce:** With no tab: excalidraw-canvas add two rectangles and an arrow bound to both with the four points above; excalidraw-canvas get <arrow id> shows two points. Then excalidraw-canvas update <arrow id> with the same points; get shows four. Wireframe-conventions section 7 says to route around intervening screens with waypoints, which a created arrow cannot do.
 - **Note:** 2026-10-08 — SPEC-003, DEVLOG 2026-10-08 (b). Reproduces on upstream alone at 96d9c21, with the same stored points. The fix is in resolveArrowBindings only (src/server.ts +29 -11): waypoints between the ends stay where the caller put them, each bound end is re-anchored facing the waypoint beside it; arrows with no waypoints are stored identically with and without it. Staged on local branches t009-waypoints-fork and t009-waypoints-upstream; not on main, nothing sent. Whether it is kept, sent upstream or dropped is the owner's (SPEC-003 rows 4 and 5).
-- **Resolution:** —
+- **Resolution:** DEVLOG 2026-10-08 (c). Fixed in resolveArrowBindings (src/server.ts): a bound arrow keeps the points between its ends, in the add that creates it and when a shape it is bound to is moved through the API; each bound end is re-anchored to its shape's edge, facing the waypoint beside it. Arrows with no waypoints are stored as before. Check: bound arrows keep the waypoints they were given, in scripts/check-state-integrity.mjs. Kept in the fork and to be offered upstream as one pull request (owner, 2026-10-08; SPEC-003 rows 4 and 5); the pull request is not sent yet.
 
 ## T-008 — A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border
 - **Status:** open · 2026-10-07
