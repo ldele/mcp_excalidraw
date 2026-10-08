@@ -4,6 +4,19 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (f) — Claude Code — the check is in the state script; entry (e)'s "not pinned" is closed
+- **Closes entry (e)'s "Not pinned by a test".** On the owner's word, one check in
+  `scripts/check-state-integrity.mjs`: *bound arrows follow a shape an agent moves after a tab
+  has synced*. It passes here, fails on two seeded defects in the sync handler and on upstream's
+  build. No change in `src/`. DEVLOG 2026-10-08 (f).
+- **Its limit:** it builds the tab's payload itself. The browser probe in
+  `C:\Projects\mcp_excalidraw-merge` (`tests/probe/`, untracked) is still the only thing that
+  reads a real tab; entry (e)'s caution about removing that worktree stands.
+- **Also:** CI on `69bf6e9` is green (run 37771956776).
+- **Next:** unchanged: T-010's re-wrap, T-001 with no tab, PR 4; the 22 advisories. The pull
+  request to upstream stays held.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (e) — Claude Code — checked: the fork keeps arrows attached after a tab sync; no ticket
 - **Closes entry (d)'s Open item and its Next (2).** On the fork's build a shape moved through
   the API drags its bound arrows in every state tried, a tab sync and a person's drag included.
@@ -177,28 +190,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `src/server.ts:426`, with server-side measurement as the real fix (the ticket's Triage line).
   (3) The upstream merge, plan in DEVLOG 2026-09-07 (c). (4) KI-8's owner step; KI-3; PR 4.
 - **Picks up:** any session; (2) needs a terminal and, for the repro's second half, a browser tab.
-
-## 2026-09-07 (c) — Claude Code — upstream is four commits ahead (2.0.0); merge deferred past T-001
-- **Done:** state read (clean at `70a3329`, level with `origin/main`); upstream fetched — four
-  commits, `0db05c4`..`ff42de9`, the 2.0.0 release: MCP SDK v2, `src/index.ts` split into four
-  core files, Node floor 20. Dry-run merge: eight conflicting files, `src/index.ts` whole-file.
-  **Decision (Lucas): defer the merge until T-001 is answered, then take it as its own reviewed
-  step.** Recorded with the port plan and its trap: DEVLOG 2026-09-07 (c).
-- **Verified at HEAD:** type-check clean; `docs_check --strict` and `integrity_check --strict` 0/0;
-  corpus and bind covered by the 2026-09-07 dispatch (the two commits since were docs-only).
-- **Not done:** no code change. `.claude/CONTEXT.md:13` still says the upstream merge is deferred —
-  that was August's, which landed the same day. KI-1/KI-2 still sit as full entries over an empty
-  Resolved index (the 2026-08-07 review request, item 2).
-- **Committed and pushed by Lucas:** `65b6452`, the DEVLOG entry. Its push made no run either —
-  the third: three pushes, zero runs; a dispatch on `899c365` at 09:34Z ran green (KI-8 holds).
-- **Uncommitted, staged:** this entry, and the rotation the session-close gate asked for (rule 11b,
-  11 entries > 10): the 2026-08-01 entry moved verbatim to `docs/archive/SESSION-archive-001.md`.
-- **Next:** (1) Lucas commits. (2) KI-8: Lucas, logged in, opens the fork's Actions tab — an
-  enable banner, or none; until the trigger fires, `gh workflow run ci.yml --ref main` after each
-  push. (3) T-001: a standalone text element passes `src/core/normalize.ts:52` unmeasured and
-  `src/server.ts:426` stores it with a null bbox; the ticket's fix order is measure server-side,
-  else reject at the API, at minimum name the cause at `src/core/wireframe.ts:752`. (4) Then the
-  upstream merge, as its own reviewed step — plan and trap in DEVLOG 2026-09-07 (c). (5)
-  Pre-existing: KI-3, PR 4 (ADR-002), `share` untested since the August merge.
-- **Picks up:** any session; (2) needs the owner's browser; (4) needs a terminal and, for the MCP
-  round-trip, a client with the MCP server configured.
