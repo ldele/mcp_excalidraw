@@ -8,6 +8,54 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-10-08 (b) — SPEC-003: T-009 is upstream's as well; the fix is one function; the decision is the owner's
+- **The question** (owner, 2026-10-08): with the fork level with upstream, is the fix for T-009 —
+  a bound arrow's waypoints dropped when it is created — worth sending upstream?
+- **It reproduces on upstream alone.** Clean worktree of `upstream/main` at `96d9c21`
+  (`C:\Projects\mcp_excalidraw-upstream`), `npm ci`, built, its server on a private port: a
+  bound arrow posted with `[[0,0],[120,0],[120,300],[340,300]]` is stored as
+  `[[0,0],[412.9,247.8]]`, the fork's values to the last digit.
+- **What upstream means by it.** Its skill says a bound arrow auto-routes to element edges, and
+  shows waypoints only on arrows that are *not* bound. The same section then rules that an arrow
+  which would pass through an unrelated shape gets a waypoint. Both cannot be had at once. No
+  issue asks for it. So upstream has no bug by its own account; it has two rules that cannot both
+  be followed, and a pull request has to say that.
+- **The fix, in `resolveArrowBindings` only:** `src/server.ts` +29 −11. More than two points: the
+  ones between the ends stay where the caller put them, and each bound end is re-anchored to its
+  shape's edge facing the waypoint beside it. An unbound end of a routed arrow stays put. With
+  none or two points nothing changes: three such arrows (rectangle to rectangle, ellipse to
+  diamond, bound at one end) are stored identically by the fixed and unfixed builds. Because
+  `rerouteBoundArrows` calls the same function, a routed arrow now keeps its waypoints when a
+  shape it is bound to moves; before, it was flattened then as well.
+- **The test,** one check in upstream's `scripts/check-state-integrity.mjs`, +78: fails on
+  unmodified upstream at its first assertion, passes with the fix. Upstream's wire, bind and
+  render scripts still pass. On the fork's code the same change gives `npm test` 66 / 66 plus the
+  four scripts, `tests/expected/` untouched, and Scribe's Library scene drawn in one `add` keeps
+  arrows of 5, 4, 3 and 2 points.
+- **Not run:** upstream's Playwright suite; Linux; a browser tab on a routed bound arrow.
+- **Where it is:** staged on two local branches, `t009-waypoints-upstream` and
+  `t009-waypoints-fork`, in the two side worktrees. **Not in the main checkout:** `npm test`
+  rebuilds `dist/`, the command on PATH runs from it, and an undecided change should not reach
+  other projects through a test run. (The staged PNG-worker change already did, this morning, the
+  same way. It changes nothing on Windows.)
+- **Proposal for the owner (SPEC-003 rows 4 and 5):** keep it in the fork, whose own conventions
+  ask for bound arrows routed with waypoints, and offer it upstream as one small pull request.
+  If upstream declines, the fork carries 40 lines in a function upstream has edited twice.
+  **Nothing has been sent, and no branch pushed.**
+- **What else the fork carries in files upstream owns** (`git diff upstream/main main`, sorted by
+  what the DEVLOG and the tickets say each is for, not read line by line):
+  - *Plumbing for our own features, nothing to offer:* `src/server.ts` +388 −46 (revisions,
+    origin, change records, the sync reconciliation, T-014's refusal of an emptying sync, the
+    `replace` record), `src/types.ts` +91, `mcp-dispatch.ts` +89, `mcp-tools.ts` +74,
+    `canvas-client.ts` +43, the CLI's `changes`, `scene` and `util`, `canvas-state.ts`, and the
+    page's seven lines.
+  - *Possibly upstream's too, each needing its own reproduction there:* the label typography on
+    export (`expand-elements.ts`, T-013 — SPEC-002 reads it as partly caused by our
+    `normalize.ts`); `repairOrderKeys` on `import` and `render` for scenes written before
+    upstream's #117, which may bear on upstream's open #93.
+  - *Upstream's already:* the PNG worker's flush, its open #131.
+- **Next:** the owner's two decisions. Then T-010's re-wrap, T-001 with no tab, PR 4.
+
 ## 2026-10-08 — SPEC-002 landed on `main` (`6f25cb7`), pushed; the first CI run on it is red; fix staged
 - **What, on the owner's instruction** (*"run all the steps"*, given from a Scribe session): S3
   committed on the branch as `8913747`; the staged ledger with the refreshed SPEC-002 and the new

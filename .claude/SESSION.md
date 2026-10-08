@@ -4,6 +4,24 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (b) — Claude Code — SPEC-003 run: T-009 is upstream's too; fix staged on two branches; nothing sent
+- **Done:** SPEC-003, to its note. T-009 reproduces on upstream alone at `96d9c21`. The fix is
+  `resolveArrowBindings` only, +29 −11, with one check in upstream's state script. Arrows without
+  waypoints are stored identically with and without it. Detail and the inventory: DEVLOG
+  2026-10-08 (b); results per test case: SPEC-003 § Verified.
+- **Where, all staged, none committed, none pushed:** (1) the main checkout: the index holds the
+  fix for the red CI run (entry below); the working tree adds SPEC-003's results, this entry,
+  the DEVLOG's and T-009's triage note, **unstaged**, so the two stay separate commits.
+  (2) `C:\Projects\mcp_excalidraw-upstream`, branch `t009-waypoints-upstream`: the patch for
+  upstream. (3) `C:\Projects\mcp_excalidraw-merge`, now on `t009-waypoints-fork`: the same
+  patch on the fork's code.
+- **Open, the owner's:** SPEC-003 rows 4 and 5 — send, keep or drop; and how. Proposal there.
+- **Next:** (1) commit and push the red-run fix; dispatch CI; read it. (2) commit SPEC-003's
+  docs. (3) the two decisions; if "keep", merge `t009-waypoints-fork`; if "send", the push of
+  `t009-waypoints-upstream` and the pull request are each on the owner's word. (4) T-010, T-001,
+  PR 4.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 — Claude Code — SPEC-002 landed on `main` (`6f25cb7`), pushed; first CI run red, fix staged
 - **Supersedes the Next of 2026-10-07 (b):** its steps (1) and (2) are done, on the owner's
   instruction given from a Scribe session. `8913747` (S3) on the branch, `41a3ba7` (ledger,
@@ -156,20 +174,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** (1) Lucas commits and pushes; **read the run**. (2) `workflow_dispatch` the `compat` job
   once before the next `v*` tag. (3) T-001 first — the silent text-size drop. (4) KI-3, PR 4,
   `share` untested since the upstream merge.
-- **Picks up:** any session.
-
-## 2026-09-05 (b) — Claude Code — `npm link` done; the CLI answers from PATH
-- **Corrects the entry below's "Not on this machine":** `npm link` ran from this repo;
-  `excalidraw-canvas status` resolves via the npm global prefix and reports the canvas not running,
-  which is the expected idle answer. Nothing in the tree changed — the link lives in npm's global
-  prefix, not in git. The MCP server is still not configured in Claude Code; the CLI is the
-  skill's documented default when no MCP tools are present.
-- **Committed and pushed by Lucas:** `bed553e`. Its subject reads *Lay the ticket ledger; file the
-  2026-08-21 feedback as T-001–T-005" -- docs/TICKETS.md …* — the suggested command's closing quote
-  and pathspec were swallowed under PowerShell, so nothing limited the commit and the **older staged
-  cpc 1.5.0 → 1.8.0 re-vendor (29 files) rode in** beside this session's five (34 files, +975/−23).
-  Already on `origin/main`. DEVLOG 2026-09-05 (b) explains the commit so history need not be
-  rewritten. **Decided by Lucas the same day: `bed553e` stays as is.** No amend, no force-push.
-- **Uncommitted:** this entry and that DEVLOG entry, staged.
-- **Next:** as below, minus items (1) and (3).
 - **Picks up:** any session.

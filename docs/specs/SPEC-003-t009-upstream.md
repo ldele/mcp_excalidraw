@@ -8,6 +8,11 @@
 > § Upstream (what carrying a private change costs at each merge). This is the *how*.
 > Written from a Scribe session (`pylvir-labs/Writing-App`), which filed T-009; no code in this repo
 > was changed while planning.
+>
+> **Executed 2026-10-08, the same day, on the owner's word** (*"SPEC-003 right after the merge"*).
+> Rows 1 to 3 are resolved; **rows 4 and 5 are the owner's and still open**, each with a proposal.
+> Nothing was sent. The two patches are staged on local branches, not on `main`; § Verified says
+> where. The note is `docs/DEVLOG.md`, 2026-10-08 (b).
 
 ## Goal
 
@@ -62,30 +67,32 @@ smallest fix on upstream's own tree, and measures what the fix costs. **It sends
 
 | # | Question | Status | Resolution + reason | Reopens if |
 |---|----------|--------|--------------------|------------|
-| 1 | Does T-009 reproduce on upstream alone? | open | Closed by test case 1. Expected yes: the function is identical. Until it is run this is a reading of code | upstream changes `resolveArrowBindings` before the run |
-| 2 | Is a straight line what upstream intends for a bound arrow? | open | Read #60, `3e62b83` and the skill's arrow guidance; look for an issue asking for routed arrows. If upstream means it, the patch has to be argued, not just sent | — |
-| 3 | What should the fix do with a caller's points? | open | Proposed: when more than two points are given, keep the interior ones and re-anchor only the first and last to the shapes' edges; with none or two, route as today. To settle: the same rule for `rerouteBoundArrows` when a shape moves, or keep the waypoints and re-anchor one end | a kept waypoint ends up inside the shape it is bound to |
-| 4 | Send it upstream, keep it in the fork, or drop it? | open | **The owner's.** Proposed test: it reproduces upstream (1), upstream does not intend the straight line or accepts the argument (2), and the patch is one function and under about 40 lines with a test. If so, send: a fix kept here is a private change in `server.ts` to carry through every merge | the fork stops tracking upstream |
-| 5 | If sent: an issue first, or a pull request directly; from which branch? | open | **The owner's.** Proposed: one pull request with the reproduction in its description, from a branch cut from `upstream/main` | upstream asks for an issue first |
+| 1 | Does T-009 reproduce on upstream alone? | resolved | **Yes.** In a clean worktree of `upstream/main` at `96d9c21`, built and run on a private port: a bound arrow posted with four points is stored with two, `[[0,0],[412.9,247.8]]` — the fork's values to the last digit | upstream changes `resolveArrowBindings` |
+| 2 | Is a straight line what upstream intends for a bound arrow? | resolved | **It is what upstream documents, and it leaves a gap between two of its own rules.** Its skill says a bound arrow "auto-route[s] to element edges", shows waypoints only on *unbound* arrows, and then rules: "If an arrow would pass through an unrelated shape, add a waypoint to route around it." A caller must choose between an arrow that follows its shapes and one that goes round an obstacle. No upstream issue asks for both (searched 2026-10-08). So this is a small feature that closes that gap, not a bug by upstream's own account, and it has to be argued | upstream documents bound arrows with waypoints |
+| 3 | What should the fix do with a caller's points? | resolved | **As built.** More than two points: the ones between the first and last stay where the caller put them, and each bound end is re-anchored to its shape's edge, facing the waypoint next to it. The same rule holds when a bound shape moves, because it is the same function. An *unbound* end of a routed arrow stays exactly where it was put. None or two points: unchanged, and shown identical on three arrows | a kept waypoint ends up inside the shape it is bound to — not handled, not seen |
+| 4 | Send it upstream, keep it in the fork, or drop it? | open | **The owner's.** Proposal: **keep it in the fork now, and offer it upstream.** For the fork: its own conventions ask for bound arrows routed with waypoints (§7), which the server cannot store, and Scribe carries a second pass to work round it. For upstream: one function, 29 lines added and 11 removed, a check in upstream's own state script, and no change to any arrow that has no waypoints. Against: upstream may answer that bound arrows auto-route by design; then the fork carries 40 lines in a function upstream has edited twice | the fork stops tracking upstream |
+| 5 | If sent: an issue first, or a pull request directly; from which branch? | open | **The owner's.** Proposal: one pull request, its description carrying the reproduction and the gap in row 2, from the local branch `t009-waypoints-upstream`. Pushing that branch to `origin` publishes it, so the push is part of this decision | upstream asks for an issue first |
 
 ## Execution checklist
 
-1. Write the test cases below. Cases 1 to 4 run against upstream's tree; record which fail there.
-2. `git fetch upstream`; record ahead / behind and whether `resolveArrowBindings` changed since
-   `96d9c21`.
-3. Add a clean worktree of `upstream/main` (`git worktree add ../mcp_excalidraw-upstream
+1. ✅ Write the test cases below. Cases 1 to 4 are one check in upstream's state script; on
+   unmodified upstream it fails at its first assertion (case 1).
+2. ✅ `git fetch upstream`; record ahead / behind and whether `resolveArrowBindings` changed since
+   `96d9c21`. Upstream is still at `96d9c21`; the fork is 35 ahead and 0 behind; no change.
+3. ✅ Add a clean worktree of `upstream/main` (`git worktree add ../mcp_excalidraw-upstream
    upstream/main`), `npm ci && npm run build` there, and run its server on a private port. `:3000`
    is not touched.
-4. Run test case 1 there. **If it passes, stop:** upstream does not have the defect, T-009 is the
-   fork's to explain, and question 4 is "drop".
-5. Close questions 2 and 3 from what upstream's history and docs say. Stop and report if upstream
-   plainly intends the straight line.
-6. Write the fix and its test in the upstream worktree. Record the patch size.
-7. Apply the same change to the fork's `main` and run `npm test` (test case 5).
-8. List, without acting on them, the other changes this fork carries in files upstream owns
-   (work item 5).
-9. Write the decision note in `docs/DEVLOG.md`: the evidence for rows 1 to 3 and a proposal for
-   rows 4 and 5. Stage; hand off. **Nothing is sent until the owner says so.**
+4. ✅ Run test case 1 there. It fails, so the work went on.
+5. ✅ Close questions 2 and 3 from what upstream's history and docs say. Upstream documents the
+   straight line; the work went on because the same document asks for waypoints (row 2).
+6. ✅ Write the fix and its test in the upstream worktree. `src/server.ts` +29 −11, the check +78.
+7. ✅ Apply the same change to the fork and run `npm test` (test case 5) — in the spare worktree, on
+   a branch cut from `main`, **not in the main checkout**: `npm test` rebuilds `dist/`, and the
+   command on PATH runs from the main checkout's `dist/`. An undecided change must not reach it.
+8. ✅ List, without acting on them, the other changes this fork carries in files upstream owns
+   (work item 5) — in the DEVLOG note.
+9. ✅ Write the decision note in `docs/DEVLOG.md`: the evidence for rows 1 to 3 and a proposal for
+   rows 4 and 5. Hand off. **Nothing is sent until the owner says so.**
 
 ## Work items
 
@@ -108,6 +115,35 @@ smallest fix on upstream's own tree, and measures what the fix costs. **It sends
 | 4 · update is unchanged | `update` of a bound arrow with four points keeps four, as it does today | same |
 | 5 · the fork's readings do not move | on the fork with the fix: `npm test` passes and `git diff --quiet -- tests/expected` exits 0; `two-screen-flow` still reads its navigation | `tests/wireframe-corpus.test.mjs` (existing) |
 | 6 · the consumer's workaround becomes unnecessary | Scribe's `scripts/open_wireframe.py --load docs/wireframes/library.excalidraw` draws arrow `f-open` with its five points when its second pass (`update`) is skipped | manual, from `pylvir-labs/Writing-App`; recorded in the DEVLOG |
+
+## Verified
+
+2026-10-08, on Windows with Node 24. Every server ran on a private port.
+
+| Case | Result |
+|---|---|
+| 1 · waypoints survive creation | **Fails on unmodified upstream** (`96d9c21`): four points stored as two. **Passes with the fix**, for a batch and for a single create |
+| 2 · the ends are still anchored | **Pass.** Start at 268, 122 and end 8 px off the target's edge; the two waypoints at 380, 122 and 380, 422 as given |
+| 3 · a plain bound arrow routes as before | **Pass, and compared across builds:** rectangle to rectangle, ellipse to diamond, and an arrow bound at one end are stored with the same `x`, `y` and `points` with and without the fix, a shape having been moved first |
+| 4 · update is unchanged | **Pass.** An update with four points keeps four |
+| — · a bound shape moves | **Pass** (added while writing the check): the waypoints stay, and the end follows the shape — `[[268,122],[380,122],[380,422],[606.4,497.5]]` after the target moved down 100 |
+| 5 · the fork's readings do not move | **Pass.** With the same change on the fork's code: `type-check`, `npm test` 66 / 66 plus wire, bind, render and state with the new check; `tests/expected/` untouched |
+| 6 · the consumer's workaround becomes unnecessary | **Pass.** On the fixed fork build, Scribe's Library scene drawn with one `add` keeps its arrows at 5, 4, 3 and 2 points and reads 3 screens, 65 components, 4 flows |
+
+Upstream's own scripts with the fix, in its worktree: MCP wire, local-bind, render and state all
+pass. **Not run:** upstream's Playwright suite; anything on Linux; a tab on a scene with a routed
+bound arrow (what the page does with it on its first sync is not known).
+
+One thing about this machine, not about the fix: upstream's `npm run test:state` timed out twice,
+because it starts a server straight after a build and waits 5 s. The same script run on its own
+passes. The 2026-10-07 entry saw the same and could not explain it either.
+
+**Where the two patches are.** Staged, not committed, not pushed, the same change in both:
+
+- for upstream: branch `t009-waypoints-upstream`, cut from `upstream/main`, in
+  `C:\Projects\mcp_excalidraw-upstream`;
+- for the fork: branch `t009-waypoints-fork`, cut from `main` at `6f25cb7`, in
+  `C:\Projects\mcp_excalidraw-merge` (the worktree SPEC-002 used, moved to this branch).
 
 ## Estimate
 
