@@ -4,6 +4,24 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 — Claude Code — SPEC-002 landed on `main` (`6f25cb7`), pushed; first CI run red, fix staged
+- **Supersedes the Next of 2026-10-07 (b):** its steps (1) and (2) are done, on the owner's
+  instruction given from a Scribe session. `8913747` (S3) on the branch, `41a3ba7` (ledger,
+  SPEC-002 refreshed, SPEC-003 new) on `main`, `6f25cb7` the merge. Pushed. Built and linked: the
+  command on PATH is 1.3.0.
+- **CI is red on `6f25cb7`**, run 37752960857: the docs gate (the ledger's date, rule 12) and the
+  render test on Linux under Node 22 and 24 (upstream's PNG worker cuts off output larger than a
+  pipe buffer). Node 20 and Windows pass. Detail: DEVLOG 2026-10-08.
+- **Staged, not committed, in the main checkout:** upstream's open #131 for the worker, taken as
+  it stands; the ledger with T-011 closed as fixed by the merge; SPEC-002's status; this entry
+  and the DEVLOG's. The fix is not proved on Linux: only a dispatched run can.
+- **Not done:** the worktree `C:\Projects\mcp_excalidraw-merge` is still there, clean. No canvas
+  is running.
+- **Next:** (1) the owner commits and pushes the staged set; dispatch CI by hand and read the run.
+  (2) SPEC-003 — whether the fix for T-009 is worth sending upstream — placed by the owner right
+  after the merge, ahead of T-010's re-wrap, T-001 with no tab and PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-10-07 (b) — Claude Code — merge committed (`b8d3f39`); S3 staged: T-012, T-013, T-014 fixed
 - **Where:** two places. (1) `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`: the
   merge is committed there as `b8d3f39`; S3's code, tests and docs are **staged** on top
@@ -155,20 +173,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Uncommitted:** this entry and that DEVLOG entry, staged.
 - **Next:** as below, minus items (1) and (3).
 - **Picks up:** any session.
-
-## 2026-09-05 — Claude Code — the ledger is laid; five tickets open; the tree still carries an older staged re-vendor
-- **Done:** `docs/TICKETS.md` with T-001–T-005 from the 2026-08-21 feedback note; `AGENTS.md`
-  Reference line; a pointer atop the note. Detail: DEVLOG 2026-09-05. Staged, not committed (rule 1).
-- **Found in the index, not this session's:** a **staged re-vendor of cpc 1.5.0 → 1.8.0** (29 files
-  under `tools/conventions/cpc/`, +755/−22) plus `b6eaa3f fix(justfile)` already committed. Nobody
-  wrote it up; review it separately from this session's three files before committing either.
-- **Not on this machine:** `excalidraw-canvas` is not on PATH (`npm link` never ran here) and no
-  excalidraw MCP server is configured in Claude Code; `dist/bin.js` (2026-08-07) exists, so
-  `node dist/bin.js` works. The `wireframe-first` skill in `claude-skills` (v0.56.0) finds the toolkit
-  by that ladder and files wrong readings here.
-- **Next, in order:** (1) Lucas reviews the three files and the re-vendor, and commits. (2) Answer
-  T-001 first — the documented screen-heading path silently does nothing. (3) `npm link`.
-  (4) Pre-existing: KI-3's attribution measurement, PR 4's geometry lint (ADR-002), `share` untested
-  since the upstream merge.
-- **Picks up:** any session.
-

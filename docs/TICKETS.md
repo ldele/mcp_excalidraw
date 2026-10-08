@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-07 · class: living -->
+<!-- status: active · updated: 2026-10-08 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -48,11 +48,11 @@ run from the global install: `cpc-ticket --root . …`.
 - **Resolution:** DEVLOG 2026-10-07 (S3). strokeColor #1e1e1e and fontFamily 5 added to EDITOR_DEFAULTS; an unsized text element now takes the editor's measured box on a passive sync with no record and origin unchanged (src/server.ts). Seen in a real tab on the merged build: 2 human records before, 0 after. tests/frontend-echo.test.mjs, tests/server-contract.test.mjs.
 
 ## T-011 — A tab that is panned or clicked rewrites an imported scene: every free-standing text moves by half its size and the reading loses half its components
-- **Status:** open · 2026-10-07
+- **Status:** fixed · 2026-10-08
 - **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
 - **Symptom:** After import of a scene this tool exported, the first pan or click in an open tab makes the tab write the scene back with every free-standing text element moved up and left by half its re-measured size (a heading: x 152 to 48.06, y 130 to 117.5, width 520 to 207.87, height 26 to 25). wireframe --score goes from 97 components to 47 and all three screens lose their names. If the tab was panned or clicked before the import, it happens within 5 s with no further interaction, with or without --replace. The same scene drawn with add is not affected: after the same pan and click it still reads 97. The file is untouched, but an export after this overwrites it with the shifted scene. SKILL.md says re-import, edit and export is how a diagram lives in a repo, and that round trips are safe. A likely cause: every free-standing text in an exported scene carries textAlign center, verticalAlign middle and autoResize true, though it was created with none of them, and the moved box is exactly the re-measured text centred on the old top-left corner. Worked around in Scribe by redrawing a saved scene with add instead of importing it (scripts/open_wireframe.py there): redrawn, both scenes read line for line as saved.
 - **Reproduce:** With no tab: excalidraw-canvas import docs/wireframes/findings-beside-text.excalidraw --replace (pylvir-labs/Writing-App at 34eb574; library.excalidraw does the same); excalidraw-canvas wireframe --score gives 97 components. Open one tab, wait 6 s: still 97. Scroll the canvas once and click empty canvas, wait 5 s: wireframe --score gives 47, unnamedScreens 3; excalidraw-canvas get w-title shows the moved box.
-- **Resolution:** —
+- **Resolution:** Fixed by the upstream 2.1.2 merge (6f25cb7; upstream #123 and #124). Re-tested 2026-10-08 on 1.3.0 with this ticket's own steps: findings-beside-text.excalidraw still reads 97 components and its heading stays at 152,130 after one scroll and one click; library.excalidraw imported into the same, already-clicked tab still reads 65 components with 4 flows. Not fixed, and T-007 / T-010's: that click still rewrites the bound arrow by a pixel as an edit by human (476x58 to 475x57), and the reading then lists the flow as an annotation (1 connection becomes 0 connections, 1 annotation).
 
 ## T-010 — changes reports the tab's own label-fitting resize as an edit by human, and the write-back has a trigger: the first pan or click
 - **Status:** triaged · 2026-10-07
