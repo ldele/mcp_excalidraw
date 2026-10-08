@@ -195,3 +195,161 @@ describe('a scene exported before 2.1.1 still works', () => {
     assert.equal(new Set(keys).size, keys.length, 'keys are unique');
   });
 });
+
+// ─── Toolkit hazards met while re-exporting UI-Wizard's dashboard (2026-10-06/07) ───
+
+describe('a label keeps its typography through export and import', () => {
+  // The create path moves a shape's fontSize/fontFamily onto its `label` (a rectangle has no font
+  // of its own). Export then read them off the shape, found nothing, and wrote every label as
+  // family 1 at 16 px: a wireframe set in Helvetica came back from its own file in Virgil.
+  test('a label that sets its font, size and colour exports them and re-imports them', async () => {
+    const { importScene, buildSceneFile } = await import(dist('core', 'scene-io.js'));
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await api('/api/elements/batch', {
+      method: 'POST',
+      ...json({ elements: [
+        { id: 'save', type: 'rectangle', x: 0, y: 0, width: 120, height: 40, strokeColor: '#d7d5cc',
+          label: { text: 'Save', fontFamily: 2, fontSize: 13, strokeColor: '#1a1a1a' } },
+        // the shorthand: typography passed beside `text` on the shape
+        { id: 'cancel', type: 'rectangle', x: 140, y: 0, width: 120, height: 40, text: 'Cancel', fontFamily: 'helvetica', fontSize: 13 }
+      ] })
+    });
+
+    const { scene } = await buildSceneFile();
+    const exported = id => scene.elements.find(e => e.type === 'text' && e.containerId === id);
+    assert.equal(exported('save').fontFamily, 2);
+    assert.equal(exported('save').fontSize, 13);
+    assert.equal(exported('save').strokeColor, '#1a1a1a', 'the label colour, not the border colour');
+    assert.equal(exported('cancel').fontFamily, 2);
+    assert.equal(exported('cancel').fontSize, 13);
+    assert.equal(exported('cancel').textAlign, 'center');
+
+    await importScene({ data: JSON.stringify(scene), mode: 'replace' });
+    const { elements } = await api('/api/elements');
+    const stored = id => elements.find(e => e.type === 'text' && e.containerId === id);
+    assert.equal(stored('save').fontFamily, 2);
+    assert.equal(stored('save').fontSize, 13);
+    assert.equal(stored('cancel').fontFamily, 2);
+
+    // and a second trip through the file changes nothing
+    const again = (await buildSceneFile()).scene.elements.find(e => e.type === 'text' && e.containerId === 'save');
+    assert.equal(again.fontFamily, 2);
+    assert.equal(again.fontSize, 13);
+    assert.equal(again.strokeColor, '#1a1a1a');
+  });
+
+  // What an unset font renders as on the canvas is Excalifont (5). The change log treats unset and
+  // 5 as the same thing, so the file has to as well, or a scene nobody restyled exports in Virgil.
+  test('text and labels with no font export in the editor default', async () => {
+    const { buildSceneFile } = await import(dist('core', 'scene-io.js'));
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await api('/api/elements/batch', {
+      method: 'POST',
+      ...json({ elements: [
+        { id: 'title', type: 'text', x: 0, y: 0, text: 'Settings', fontSize: 24 },
+        { id: 'ok', type: 'rectangle', x: 0, y: 60, width: 120, height: 40, text: 'OK' }
+      ] })
+    });
+    const { scene } = await buildSceneFile();
+    assert.equal(scene.elements.find(e => e.id === 'title').fontFamily, 5);
+    assert.equal(scene.elements.find(e => e.containerId === 'ok').fontFamily, 5);
+  });
+});
+
+describe('a sync cannot empty the canvas by accident', () => {
+  // POST /api/elements/sync reads "absent from the payload" as "the person deleted it". A page
+  // that failed to load its scene therefore deleted the scene: on 2026-10-06 one such sync removed
+  // all 98 elements of a drawing. The page no longer sends that sync, but the server is the one
+  // holding the drawing, and an old tab or a script can still send it.
+  const seed = async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await api('/api/elements/batch', {
+      method: 'POST',
+      ...json({ elements: [
+        { id: 'keep-a', type: 'rectangle', x: 0, y: 0, width: 100, height: 40 },
+        { id: 'keep-b', type: 'rectangle', x: 0, y: 60, width: 100, height: 40 }
+      ] })
+    });
+    return (await api('/api/changes?since=0')).rev;
+  };
+  const sync = body => fetch(`${baseUrl}/api/elements/sync`, { method: 'POST', ...json(body) });
+
+  test('an empty sync against a drawing is refused and deletes nothing', async () => {
+    const since = await seed();
+    const response = await sync({ elements: [], timestamp: new Date().toISOString() });
+    assert.equal(response.status, 409);
+    const body = await response.json();
+    assert.equal(body.success, false);
+    assert.match(body.error, /allowEmpty/);
+
+    const { elements } = await api('/api/elements');
+    assert.deepEqual(elements.map(e => e.id).sort(), ['keep-a', 'keep-b']);
+    const feed = await api(`/api/changes?since=${since}`);
+    assert.equal(feed.records.length, 0, 'a refused sync leaves no record');
+  });
+
+  test('a payload with nothing usable in it is refused the same way', async () => {
+    await seed();
+    const response = await sync({ elements: [null, 'x'] });
+    assert.equal(response.status, 409);
+    assert.equal((await api('/api/elements')).elements.length, 2);
+  });
+
+  test('the same sync with allowEmpty clears the canvas and records who did it', async () => {
+    const since = await seed();
+    const response = await sync({ elements: [], allowEmpty: true });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).removed, 2);
+    assert.equal((await api('/api/elements')).elements.length, 0);
+    const feed = await api(`/api/changes?since=${since}`);
+    assert.deepEqual(feed.records.map(r => `${r.origin} ${r.kind} ${r.id}`).sort(), ['human delete keep-a', 'human delete keep-b']);
+  });
+
+  test('deleting some elements, or syncing nothing to an empty canvas, needs no flag', async () => {
+    await seed();
+    const partial = await sync({ elements: [{ id: 'keep-a', type: 'rectangle', x: 0, y: 0, width: 100, height: 40 }] });
+    assert.equal(partial.status, 200);
+    assert.deepEqual((await api('/api/elements')).elements.map(e => e.id), ['keep-a']);
+
+    await api('/api/elements/clear', { method: 'DELETE' });
+    assert.equal((await sync({ elements: [] })).status, 200);
+  });
+});
+
+describe('the first sync from a tab is not an edit, and is not thrown away either', () => {
+  // The echo guard (tests/frontend-echo.test.mjs) keeps an untouched element `agent`. The server
+  // used to learn a text element's measured box only because that guard had holes: with them
+  // closed, a text element drawn without a size would stay without one, and the reading drops an
+  // element that has no box (T-001).
+  test('unsized text takes the box the editor measured, and stays the agent\'s', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    const authored = [
+      { id: 'big', type: 'rectangle', x: 0, y: 0, width: 600, height: 400, backgroundColor: '#ffe3e3', fillStyle: 'solid' },
+      { id: 'title', type: 'text', x: 20, y: 20, text: 'Agent drew this', fontSize: 28 },
+      { id: 'sized', type: 'text', x: 20, y: 80, width: 400, height: 34, text: 'Hinted', fontSize: 26 }
+    ];
+    await api('/api/elements/batch', { method: 'POST', ...json({ elements: authored }) });
+    const { rev: since } = await api('/api/changes?since=0');
+
+    // what the page sends back after rendering, nothing touched
+    const filled = { fillStyle: 'solid', strokeStyle: 'solid', strokeWidth: 2, roughness: 1, opacity: 100, strokeColor: '#1e1e1e' };
+    const echoed = [
+      { ...authored[0], ...filled },
+      { ...authored[1], ...filled, backgroundColor: 'transparent', textAlign: 'left', fontFamily: 5, width: 205.94, height: 35 },
+      { ...authored[2], ...filled, backgroundColor: 'transparent', textAlign: 'left', fontFamily: 5, width: 88.2, height: 32.5 }
+    ];
+    const result = await api('/api/elements/sync', { method: 'POST', ...json({ elements: echoed }) });
+    assert.equal(result.updated, 0);
+
+    const feed = await api(`/api/changes?since=${since}`);
+    assert.deepEqual(feed.records, [], 'opening a tab is not feedback');
+
+    const { elements } = await api('/api/elements');
+    const stored = id => elements.find(e => e.id === id);
+    assert.equal(stored('title').width, 205.94);
+    assert.equal(stored('title').height, 35);
+    assert.equal(stored('title').origin, 'agent');
+    assert.equal(stored('big').origin, 'agent');
+    assert.equal(stored('sized').width, 400, 'a box the author gave is the author\'s');
+  });
+});

@@ -168,7 +168,7 @@ Notes:
 | `DELETE` | `/api/elements/clear` | Clear all elements |
 | `GET` | `/api/elements/search?type=...` | Search with filters (exact string match + bbox) |
 | `POST` | `/api/elements/batch` | Batch create |
-| `POST` | `/api/elements/sync` | Frontend scene sync — reconciles per element and records human edits |
+| `POST` | `/api/elements/sync` | Frontend scene sync — reconciles per element and records human edits. An empty scene against a non-empty canvas is refused (409) unless the body carries `"allowEmpty": true` |
 | `POST` | `/api/elements/from-mermaid` | Mermaid conversion via frontend |
 
 ### Changes (review loop)

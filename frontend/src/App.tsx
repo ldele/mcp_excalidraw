@@ -787,7 +787,13 @@ function App(): JSX.Element {
         },
         body: JSON.stringify({
           elements: backendElements,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          // The server refuses a sync that would empty a drawing unless told it
+          // is meant. Deleted elements stay in the scene as tombstones, so a
+          // tab that holds some is one where a person deleted what was there;
+          // a tab that never loaded its scene holds none.
+          allowEmpty: backendElements.length === 0 &&
+            api.getSceneElementsIncludingDeleted().some(el => el.isDeleted)
         })
       })
 

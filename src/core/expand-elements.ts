@@ -1,4 +1,4 @@
-import { ServerElement, normalizeFontFamily } from '../types.js';
+import { ServerElement, normalizeFontFamily, DEFAULT_FONT_FAMILY, DEFAULT_STROKE_COLOR } from '../types.js';
 
 // Expand the server's agent-friendly element format into real Excalidraw
 // elements: strip server metadata, add Excalidraw defaults, generate bound
@@ -135,7 +135,7 @@ export function expandElementsForExport(
       ...(width !== undefined ? { width } : {}),
       ...(height !== undefined ? { height } : {}),
       angle: rest.angle ?? 0,
-      strokeColor: rest.strokeColor ?? '#1e1e1e',
+      strokeColor: rest.strokeColor ?? DEFAULT_STROKE_COLOR,
       backgroundColor: rest.backgroundColor ?? 'transparent',
       fillStyle: rest.fillStyle ?? 'solid',
       strokeWidth: rest.strokeWidth ?? 2,
@@ -188,7 +188,7 @@ export function expandElementsForExport(
         base.width = base.width || Math.ceil(longestLine * base.fontSize * 0.6);
         base.height = base.height || Math.ceil(lines.length * base.fontSize * 1.25);
       }
-      base.fontFamily = normalizeFontFamily(rest.fontFamily) ?? 1;
+      base.fontFamily = normalizeFontFamily(rest.fontFamily) ?? DEFAULT_FONT_FAMILY;
       // Excalidraw's own defaults for free text, which the live canvas uses:
       // 'center' would centre the text on its estimated box once reopened.
       base.textAlign = rest.textAlign ?? 'left';
@@ -273,7 +273,7 @@ export function expandElementsForExport(
         width: textW,
         height: textH,
         angle: 0,
-        strokeColor: isArrow ? '#1e1e1e' : base.strokeColor,
+        strokeColor: label?.strokeColor ?? (isArrow ? DEFAULT_STROKE_COLOR : base.strokeColor),
         backgroundColor: 'transparent',
         fillStyle: 'solid',
         strokeWidth: 1,
@@ -293,10 +293,14 @@ export function expandElementsForExport(
         locked: false,
         text: labelText,
         originalText: labelText,
-        fontSize: isArrow ? 14 : (rest.fontSize ?? 16),
-        fontFamily: normalizeFontFamily(rest.fontFamily) ?? 1,
-        textAlign: 'center',
-        verticalAlign: 'middle',
+        // Typography lives on the label: the create path moves fontSize and
+        // fontFamily off the shape (LABEL_STYLE_KEYS), so reading them from
+        // the shape alone exported every label in one font at one size (T-013).
+        // The shape's own keys are still read for scenes stored before that move.
+        fontSize: label?.fontSize ?? rest.fontSize ?? (isArrow ? 14 : 16),
+        fontFamily: normalizeFontFamily(label?.fontFamily ?? rest.fontFamily) ?? DEFAULT_FONT_FAMILY,
+        textAlign: label?.textAlign ?? 'center',
+        verticalAlign: label?.verticalAlign ?? 'middle',
         autoResize: true,
         lineHeight: 1.25,
         containerId: base.id
