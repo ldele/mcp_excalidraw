@@ -272,6 +272,9 @@ button "Continue" [submit] → screen "Dashboard" [s2]
 - Leave arrow labels off unless the trigger is non-obvious (`"on error"`,
   `"if signed in"`); ≤ 12 characters when used.
 - Route around intervening screens with waypoints rather than straight through them.
+  A bound arrow keeps the points between its ends where you put them, in the `add` that
+  creates it and when an agent moves a shape it is bound to; only its two ends are
+  re-anchored to their shapes' edges.
 
 ---
 

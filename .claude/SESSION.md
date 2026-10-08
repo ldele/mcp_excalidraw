@@ -4,6 +4,25 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (c) — Claude Code — T-009 fixed on `main`; the offer to upstream decided, not sent
+- **Supersedes the Next of (b):** its steps (1) to (3) are done, on the owner's *"yes to all
+  four"*. (1) and (2) are `cfa2eae` and `265f7a9`, pushed, **CI green** (run 37756642052, five
+  jobs). (3) is this commit: the fix for T-009 on `main`, T-009 closed, SPEC-003 rows 4 and 5
+  resolved. Detail: DEVLOG 2026-10-08 (c).
+- **Not done — step (4), the pull request to upstream.** The patch is local commit `527500b` on
+  `t009-waypoints-upstream` in `C:\Projects\mcp_excalidraw-upstream`; its text is `PR_BODY.md`
+  beside it. The session's permission check refused the push of that branch. The owner runs, one
+  after the other, `git -C C:\Projects\mcp_excalidraw-upstream push origin t009-waypoints-upstream`
+  and `gh pr create --repo yctimlin/mcp_excalidraw --base main --head
+  ldele:t009-waypoints-upstream --title "fix: keep waypoints on bound arrows" --body-file
+  C:\Projects\mcp_excalidraw-upstream\PR_BODY.md` — or grants the session both.
+- **Next:** (1) read the CI run dispatched on this commit: the new check's first run on Linux.
+  (2) once the pull request exists, its link in `FORK.md`, SPEC-003 row 5 and here. (3) remove
+  the worktree `C:\Projects\mcp_excalidraw-merge` and the branch `t009-waypoints-fork`; keep
+  `C:\Projects\mcp_excalidraw-upstream` while the pull request is pending. (4) T-010, T-001,
+  PR 4. Unread: the 22 advisories from `npm ci`.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (b) — Claude Code — SPEC-003 run: T-009 is upstream's too; fix staged on two branches; nothing sent
 - **Done:** SPEC-003, to its note. T-009 reproduces on upstream alone at `96d9c21`. The fix is
   `resolveArrowBindings` only, +29 −11, with one check in upstream's state script. Arrows without
@@ -163,15 +182,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Uncommitted, staged:** DEVLOG, this entry.
 - **Next:** (1) Lucas commits; on the next push, check that a run appears by itself. (2) T-001
   first — the silent text-size drop. (3) KI-3, PR 4, `share` untested since the upstream merge.
-- **Picks up:** any session.
-
-## 2026-09-06 — Claude Code — CI is two jobs per push; the Node range waits for a tag
-- **Done:** `ci.yml` rewritten (6 jobs per push → 2, plus a keypoint matrix), NORTH_STAR date
-  bumped, strict docs gate green, the exact CI commands run green locally (corpus 43/43). Detail:
-  DEVLOG 2026-09-06.
-- **Uncommitted, staged:** `ci.yml`, `.claude/NORTH_STAR.md`, DEVLOG, this entry — on top of the
-  still-uncommitted (b) entries.
-- **Next:** (1) Lucas commits and pushes; **read the run**. (2) `workflow_dispatch` the `compat` job
-  once before the next `v*` tag. (3) T-001 first — the silent text-size drop. (4) KI-3, PR 4,
-  `share` untested since the upstream merge.
 - **Picks up:** any session.

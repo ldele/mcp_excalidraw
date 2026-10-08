@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-07 · class: living -->
+<!-- status: active · updated: 2026-10-08 · class: living -->
 
 # ROADMAP
 
@@ -168,3 +168,15 @@ our change log. After a merge, read every path that touches the element store, c
 a test now covers this one. **A fix upstream makes for its own files does not reach files it
 already wrote:** our scenes exported before 2.1.1 still carried the bad keys, and only `import` →
 `export` repaired them until `repairOrderKeys` did it on read.
+
+**A base fix to offer upstream, decided 2026-10-08** — the first one. T-009: a bound arrow lost
+the waypoints it was created with, in a function upstream wrote (`resolveArrowBindings`). It
+reproduces on upstream alone, so the fix is kept here and is to be offered there as one small pull
+request (SPEC-003; the owner's decision). Not sent yet: DEVLOG 2026-10-08 (c).
+
+Why offer it at all: a change we carry inside a function upstream edits is a conflict waiting at
+the next merge, and a patch upstream takes removes it. The bar this one met, proposed as the bar
+for the next (the session's wording — the owner decided this case, not a rule): it reproduces on a
+clean checkout of upstream; the patch touches nothing of our own layer; and it comes with a check
+in upstream's own test scripts. A fix that does not meet it stays a fork change and is named in
+`FORK.md` § Keeping current with upstream, so the next merge knows where to look.

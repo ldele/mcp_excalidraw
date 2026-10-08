@@ -206,6 +206,10 @@ The intermediate waypoint `[50, -40]` lifts the arrow upward. `roundness: {type:
 
 **Rule:** If an arrow would pass through an unrelated shape, add a waypoint to route around it.
 
+This holds for bound arrows too: give `points` together with `startElementId` / `endElementId`, and
+the points between the first and the last stay where you put them (offsets from the arrow's `x`,
+`y`, as on any arrow). Only the two ends are re-anchored to their shapes' edges.
+
 ---
 
 ## Workflow: Iterative Refinement

@@ -10,9 +10,10 @@
 > was changed while planning.
 >
 > **Executed 2026-10-08, the same day, on the owner's word** (*"SPEC-003 right after the merge"*).
-> Rows 1 to 3 are resolved; **rows 4 and 5 are the owner's and still open**, each with a proposal.
-> Nothing was sent. The two patches are staged on local branches, not on `main`; § Verified says
-> where. The note is `docs/DEVLOG.md`, 2026-10-08 (b).
+> Rows 1 to 3 were resolved by the run (`docs/DEVLOG.md`, 2026-10-08 (b)). **Rows 4 and 5 were
+> decided by the owner the same day: keep the fix in the fork, and offer it upstream as one pull
+> request.** The fix is on `main`. **The pull request has not been sent**; § Verified says where
+> the patch waits and why (`docs/DEVLOG.md`, 2026-10-08 (c)).
 
 ## Goal
 
@@ -70,8 +71,8 @@ smallest fix on upstream's own tree, and measures what the fix costs. **It sends
 | 1 | Does T-009 reproduce on upstream alone? | resolved | **Yes.** In a clean worktree of `upstream/main` at `96d9c21`, built and run on a private port: a bound arrow posted with four points is stored with two, `[[0,0],[412.9,247.8]]` — the fork's values to the last digit | upstream changes `resolveArrowBindings` |
 | 2 | Is a straight line what upstream intends for a bound arrow? | resolved | **It is what upstream documents, and it leaves a gap between two of its own rules.** Its skill says a bound arrow "auto-route[s] to element edges", shows waypoints only on *unbound* arrows, and then rules: "If an arrow would pass through an unrelated shape, add a waypoint to route around it." A caller must choose between an arrow that follows its shapes and one that goes round an obstacle. No upstream issue asks for both (searched 2026-10-08). So this is a small feature that closes that gap, not a bug by upstream's own account, and it has to be argued | upstream documents bound arrows with waypoints |
 | 3 | What should the fix do with a caller's points? | resolved | **As built.** More than two points: the ones between the first and last stay where the caller put them, and each bound end is re-anchored to its shape's edge, facing the waypoint next to it. The same rule holds when a bound shape moves, because it is the same function. An *unbound* end of a routed arrow stays exactly where it was put. None or two points: unchanged, and shown identical on three arrows | a kept waypoint ends up inside the shape it is bound to — not handled, not seen |
-| 4 | Send it upstream, keep it in the fork, or drop it? | open | **The owner's.** Proposal: **keep it in the fork now, and offer it upstream.** For the fork: its own conventions ask for bound arrows routed with waypoints (§7), which the server cannot store, and Scribe carries a second pass to work round it. For upstream: one function, 29 lines added and 11 removed, a check in upstream's own state script, and no change to any arrow that has no waypoints. Against: upstream may answer that bound arrows auto-route by design; then the fork carries 40 lines in a function upstream has edited twice | the fork stops tracking upstream |
-| 5 | If sent: an issue first, or a pull request directly; from which branch? | open | **The owner's.** Proposal: one pull request, its description carrying the reproduction and the gap in row 2, from the local branch `t009-waypoints-upstream`. Pushing that branch to `origin` publishes it, so the push is part of this decision | upstream asks for an issue first |
+| 4 | Send it upstream, keep it in the fork, or drop it? | resolved | **Keep it in the fork, and offer it upstream** (owner, 2026-10-08, *"yes to all four"*, answering the proposal as put). On `main` since that day. The reasons, as proposed. For the fork: its own conventions ask for bound arrows routed with waypoints (§7), which the server cannot store, and Scribe carries a second pass to work round it. For upstream: one function, 29 lines added and 11 removed, a check in upstream's own state script, and no change to any arrow that has no waypoints. Against: upstream may answer that bound arrows auto-route by design; then the fork carries 40 lines in a function upstream has edited twice | the fork stops tracking upstream |
+| 5 | If sent: an issue first, or a pull request directly; from which branch? | resolved | **One pull request, no issue first** (owner, 2026-10-08), its description carrying the reproduction and the gap in row 2, from the branch `t009-waypoints-upstream`. **Not sent yet:** pushing that branch to `origin` publishes it, and the push and the pull request are each on the owner's word or by the owner's hand | upstream asks for an issue first |
 
 ## Execution checklist
 
@@ -138,12 +139,17 @@ One thing about this machine, not about the fix: upstream's `npm run test:state`
 because it starts a server straight after a build and waits 5 s. The same script run on its own
 passes. The 2026-10-07 entry saw the same and could not explain it either.
 
-**Where the two patches are.** Staged, not committed, not pushed, the same change in both:
+**Where the two patches are**, the same change in both (as of 2026-10-08 (c)):
 
-- for upstream: branch `t009-waypoints-upstream`, cut from `upstream/main`, in
-  `C:\Projects\mcp_excalidraw-upstream`;
-- for the fork: branch `t009-waypoints-fork`, cut from `main` at `6f25cb7`, in
-  `C:\Projects\mcp_excalidraw-merge` (the worktree SPEC-002 used, moved to this branch).
+- for the fork: **on `main`.** Re-run after rebasing from `6f25cb7` onto `265f7a9`: `type-check`
+  clean, `npm test` 66 / 66 plus wire, bind, render and state with the new check,
+  `tests/expected/` untouched. The branch it came from, `t009-waypoints-fork` in
+  `C:\Projects\mcp_excalidraw-merge`, is merged and can go.
+- for upstream: **one local commit, not pushed** — `527500b`, *fix: keep waypoints on bound
+  arrows*, on branch `t009-waypoints-upstream`, cut from `upstream/main` at `96d9c21`, in
+  `C:\Projects\mcp_excalidraw-upstream`. The pull request's text is `PR_BODY.md` in that
+  worktree, untracked. The session that made the commit was refused the push of a new branch to
+  a public repository by its own permission check, and did not route round it.
 
 ## Estimate
 

@@ -8,6 +8,41 @@ below; never edit or summarize a past entry.
 
 Older entries: none archived yet.
 
+## 2026-10-08 (c) — T-009 fixed in the fork; the offer to upstream is decided and not yet sent
+- **Decided** (owner, 2026-10-08, *"yes to all four"*, answering the four questions of the
+  hand-off): the red-run fix and SPEC-003's results committed and pushed — `cfa2eae`, `265f7a9`;
+  the fix for T-009 kept in the fork; and offered upstream as one small pull request. SPEC-003
+  rows 4 and 5 are resolved with that.
+- **CI on `265f7a9` is green**, run 37756642052, all five jobs. That is the proof entry
+  2026-10-08 said was missing: the PNG-worker flush fixes the render test on Linux under Node 22
+  and 24.
+- **The fix, on `main`:** the change of entry (b), unchanged, moved from `6f25cb7` onto `265f7a9`.
+  `resolveArrowBindings` in `src/server.ts`, +29 −11; the check *bound arrows keep the waypoints
+  they were given* in `scripts/check-state-integrity.mjs`, +78. Re-run after the move, on Windows
+  with Node 24: `type-check` clean; `npm test` 66 / 66 plus wire, bind, render and state;
+  `tests/expected/` untouched.
+- **What a drawing agent gains:** an arrow bound at both ends can be routed in the `add` that
+  creates it, and stays routed when an agent moves one of its shapes. The skill's arrow section
+  and conventions §7 say so now. The second pass in Scribe's `scripts/open_wireframe.py`
+  (`update` with the same points) is no longer needed; it does no harm, and removing it is that
+  repository's change.
+- **T-009 closed** as fixed.
+- **Upstream: not sent.** The patch is one local commit, `527500b` *fix: keep waypoints on bound
+  arrows*, on `t009-waypoints-upstream` in `C:\Projects\mcp_excalidraw-upstream`, cut from
+  `upstream/main` at `96d9c21`. The pull request's text is `PR_BODY.md` beside it, untracked.
+  The session was refused the push of that branch by its own permission check — a new branch on
+  a public repository — and did not route round it. The push and the pull request are the
+  owner's to run, or to grant.
+- **The policy this sets** is in `docs/ROADMAP.md` § Upstream; `FORK.md` § Keeping current with
+  upstream names the function, since a merge may now conflict there.
+- **Not proved:** the new check on Linux — the run dispatched after this push is its first there.
+  Still not run: upstream's Playwright suite. Still not looked at: what a browser tab does with a
+  routed bound arrow on its first sync, or when a *person* drags a bound shape.
+- **Left standing:** the worktree `C:\Projects\mcp_excalidraw-merge` and its branch
+  `t009-waypoints-fork`, merged and removable; the worktree `C:\Projects\mcp_excalidraw-upstream`,
+  needed while the pull request is pending. The 22 advisories `npm ci` reported on the merged
+  tree are still unread.
+
 ## 2026-10-08 (b) — SPEC-003: T-009 is upstream's as well; the fix is one function; the decision is the owner's
 - **The question** (owner, 2026-10-08): with the fork level with upstream, is the fix for T-009 —
   a bound arrow's waypoints dropped when it is created — worth sending upstream?
