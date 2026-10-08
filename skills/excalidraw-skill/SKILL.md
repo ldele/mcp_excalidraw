@@ -267,10 +267,12 @@ the same canvas as a UI:
   contains it, so a card inside a screen inside nothing comes out as a tree. Screens
   are named after their own heading, or their header bar's text.
 - **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`,
-  `card`, `checkbox`, `radio`, `avatar`, `list-item`, `divider`, `chart`, `table`,
-  `image`, `text`.
+  `card`, `checkbox`, `radio`, `avatar`, `icon`, `list-item`, `divider`, `chart`, `table`,
+  `image`, `text`. The reader has three more of its own: `screen` and `panel` for a frame and
+  a structural region, and `shape` when nothing else fits.
 - **Declared roles** — put `"role": "chart"` (or any role above) on a shape and the
-  reader takes your word for it, reported without the `?`. Do this for dashboard
+  reader takes your word for it, reported without the `?`. A glyph needs it: with no label,
+  a small square reads as `checkbox?` and a small circle as `radio?` until it says `icon`. Do this for dashboard
   content: inference can read a label that says what a thing *is* ("Revenue chart",
   "12 rows of orders"), but a real dashboard labels a plot with what it *shows*
   ("PSI per feature · 0.25 line · drift region"), which no general word list can
