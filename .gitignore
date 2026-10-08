@@ -26,9 +26,16 @@ public/dist/
 # (ADR-001, docs/specs/SPEC-001-fixture-corpus.md). Carved out by PR 2, as the
 # note that used to live here asked for.
 !tests/fixtures/*.excalidraw
+# ...and the one scene kept as it was exported before the order-key repair
+# (SPEC-002 work item 9): tests/server-contract.test.mjs imports and renders it.
+!tests/legacy/*.excalidraw
 
 .DS_Store
 
 # .claude/ and docs/ are COMMITTED: they carry the handoff baton, the canonical
 # context and the roadmap, which exist precisely so another session can read
 # them. Machine-local files are ignored by .claude/.gitignore instead.
+
+# Browser regression artifacts
+test-results/
+playwright-report/

@@ -4,7 +4,7 @@ name: CI
 # On every push and PR: ONE Node job that builds and validates the product — and the product here is
 # a wireframe reading, not code, so the gate that matters is the fixture corpus (ADR-001: known
 # drawings in, expected readings out) — plus ONE ten-second docs job running the vendored cpc gates.
-# The Node-range matrix (engines >= 18) runs only on a `v*` tag or a manual dispatch: it verifies the
+# The Node-range matrix (engines >= 20) runs only on a `v*` tag or a manual dispatch: it verifies the
 # floor, it does not find wireframe regressions, and it used to be six jobs per push.
 #
 # Cost note (CONVENTIONS §13, ADR-041): this repo is public, so minutes are unmetered; the shape is
@@ -36,20 +36,31 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           # One version per push: the corpus needs `node --test` with a glob (Node >= 21), and 22 is
-          # the lowest LTS that has it. The engines floor (18) is checked by `compat` at a keypoint.
+          # the lowest LTS that has it. The engines floor (20) is checked by `compat` at a keypoint.
           node-version: "22"
           cache: npm
       - run: npm ci
       - name: Type check
         run: npm run type-check
-      - name: Build (frontend + server)
+      - name: Type check (frontend)
+        run: npm run type-check:frontend
+      - name: Build (frontend + server + headless renderer)
         run: npm run build
       - name: Build artifacts present
-        run: test -f dist/index.js && test -f dist/server.js && test -f dist/bin.js && test -d dist/frontend
+        run: test -f dist/index.js && test -f dist/server.js && test -f dist/bin.js && test -d dist/frontend && test -f dist/render/excalidraw-node.mjs
       - name: Wireframe fixture corpus (the product's own gate — ADR-001 / SPEC-001)
         run: npm run test:corpus
       - name: Local-bind guard (the canvas binds IPv4 loopback only)
         run: npm run test:bind
+      # Upstream's own node-side checks, taken with the 2.1.2 merge (SPEC-002). Its Playwright suite
+      # (`npm run test:canvas`) is deliberately NOT here: run it locally before a merge until a run
+      # shows it is stable on this fork (SPEC-002 question 4).
+      - name: MCP stdio wire test (includes the fork's three tools)
+        run: npm run test:mcp
+      - name: Headless renderer
+        run: npm run test:render
+      - name: Canvas state integrity
+        run: npm run test:state
 
   docs:
     name: cpc docs + integrity gates
@@ -77,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18", "20", "22", "24"]
+        node: ["20", "22", "24"]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -88,5 +99,5 @@ jobs:
       - run: npm run type-check
       - run: npm run build
       - name: Wireframe fixture corpus (Node >= 22 only — `node --test` glob)
-        if: matrix.node != '18' && matrix.node != '20'
+        if: matrix.node != '20'
         run: npm run test:corpus

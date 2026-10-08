@@ -4,6 +4,79 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-08-07 (close 3) — Claude Code — Lucas + agent
+- **Done: the upstream merge** (`1c5925b`), the first since the fork, at 14 commits of divergence —
+  clean, no conflicts. **Rule 2's open deferral is now closed.**
+- **It was not hygiene — it fixed a live bug.** Reproduced *before* merging: our schema lacked
+  `containerId`, and zod strips unknown keys, so `import` turned 10 bound text children into **0**.
+  Every label detached, and the reading changed silently — `input? "Project name"` became `card?`,
+  23 components/5 inferred became 33/7, with `--score` reporting `fallbacks: 0` throughout.
+  `snapshot restore` had the same defect. Both documented recovery paths were corrupting drawings.
+  After the merge the same file round-trips **35/10 in → 35/10 out** and the reading is identical to
+  the original.
+- **Unlocked:** `.passthrough()` means `customData` is finally possible — what **KI-5** and Phase 3
+  were waiting on. Needs an ADR (moving `role` into `customData` changes the element contract).
+- **Not tested: `share`.** It publishes the scene to excalidraw.com, and `share-url.ts` is the file
+  upstream rewrote most heavily — so it is both the most-changed path and the one needing a
+  deliberate choice to upload. Smoke-test before relying on it.
+- **Uncommitted:** the doc updates for this merge are **staged, not committed** — rule 1. The merge
+  commit itself is in (`1c5925b`); `main` is **ahead of `origin/main` by 3, unpushed**.
+- **Also fixed at close:** `AGENTS.md`'s State line still read 2026-07-31 and claimed the markup leg
+  "has never been exercised by a human" — wrong for a week, in the first file every agent reads.
+  Nothing enforces that line; it is judgment, so it goes stale silently.
+- **Next:** **PR 1 is still the open item** — three attempts on 2026-08-07, never measured. Then
+  PR 4 to ADR-002 (calibrate tolerances against the corpus first), and a `customData` ADR.
+- **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
+
+### Requested for next session: a documentation review (Lucas, 2026-08-07)
+
+Concrete targets, strongest first — the docs grew a lot in one day (3 DEVLOG entries, 3 KIs, an ADR,
+3 baton entries) and none of it has been read back critically.
+
+1. **Rotation is switched off and nothing will ever say so.** `devlog_max_entries` and
+   `session_max_entries` are both `0` (= disabled) in the cpc defaults, so `docs_check` stays silent
+   while the files grow: `docs/DEVLOG.md` is at **8 entries / 223 lines**, `.claude/SESSION.md` at
+   **7 / 163**, and `AGENTS.md` tells agents to read only the **newest 3** of each. Either set the
+   caps and rotate to `docs/archive/` as ADR-023 describes, or decide unbounded growth is fine and
+   say so — right now it is neither, just unexamined.
+2. **`.claude/KNOWN_ISSUES.md` (7 entries).** KI-1 is "done for our own docs" and KI-2 is
+   explicitly "descoped", yet both still sit as full entries while the Resolved index at the bottom
+   holds nothing but its commented-out template line. The file documents its own process for this
+   and it has never been used.
+3. **Entry length.** Today's DEVLOG entries are long. They are append-only so this is not about
+   editing them — it is about agreeing the right level for the next ones.
+4. **`docs/ROADMAP.md`** gained a PR 4 section and rewritten measures 3 and 4; worth one read for
+   coherence rather than accretion.
+5. **ADR-002's two ⚠ Confidence items** are the gate on PR 4 starting — every numeric tolerance is
+   currently a guess, and the error/advisory split is asserted rather than demonstrated.
+
+## 2026-08-07 (close 2) — Claude Code — Lucas + agent
+- **Correction:** the entry below says PR 1 needs "one sitting". Two further attempts were made the
+  same day and **both failed**, for new reasons each time. PR 1's number is *still* untaken.
+- **Attempt 2** died on **KI-7**: two browser tabs open at once, each POSTing its whole scene, deleted
+  each other's elements — 386 adds against 385 deletes — and silently destroyed a complete round of
+  human markup (a note, an ellipse, four scribbles). Unrecoverable; change records carry no geometry.
+  Caused by my own instructions ("open the canvas", then later "open or reload"). Guarded now:
+  `changes`/`watch` warn on stderr and in-band when `websocket_clients > 1`, in `watch` *before* the
+  wait. The protocol fix is still open (KI-7).
+- **Attempt 3** never got drawn — the tab was closed and the canvas went quiet.
+- **Also fixed: a regression I introduced this morning.** Suppressing the browser echo meant the
+  first sync produced no delta, which skips the branch that drops a shape's `label` once Excalidraw
+  has expanded it into a bound text child. Every client load then re-expanded it: 10 shapes × 4 tab
+  loads = 40 stray text elements. `boundChildSupersedesLabel` now applies on the no-delta path.
+  Verified across two reloads: 0 duplicates, 0 stale labels, rev unchanged at 25.
+- **Uncommitted:** the guard, the label fix, KI-7, this baton and the DEVLOG entry are **staged for
+  review, not committed** — rule 1. (Commit `3c60710`, the morning's echo fix, is already in and is
+  what the label regression came from.)
+- **Rule 2 — read this before touching the collision zone.** This work **edited `src/server.ts`**.
+  Upstream's two commits were re-checked (still no conflicts) and the merge was **deliberately
+  deferred**, so a bug fix and a five-file upstream merge would not be reviewed together. That
+  deferral is the decision rule 2 requires. The merge is still owed and Lucas asked for it explicitly.
+- **Next, in order:** (1) the upstream merge, as its own reviewed step; (2) **PR 1** — one sitting
+  with a person, everything blocking it is now fixed; (3) PR 4 to ADR-002, calibrating tolerances
+  against the corpus first.
+- **Picks up:** any agent with a terminal; PR 1 needs Lucas at a browser tab — **exactly one tab**.
+
 ## 2026-08-07 (close) — Claude Code — Lucas + agent
 - **Correction to the entry below:** it says the fix was staged and uncommitted. Lucas reviewed and
   committed it as `3c60710` (9 files). `main` is **ahead of `origin/main` by 1 and unpushed**.

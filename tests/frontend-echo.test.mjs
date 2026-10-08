@@ -69,6 +69,38 @@ describe('the frontend echo is not an edit', () => {
     };
     assert.equal(diff(authored, echoed), null);
   });
+
+  // The two payloads below were observed on 2026-10-07 against the merged 2.1.2 page: one tab
+  // opened on a two-element scene, nothing touched, and both elements came back `human`
+  // (`strokeColor: null -> "#1e1e1e"`, `fontFamily: null -> 5`). The editor paints an element
+  // with no stroke colour in #1e1e1e and sets unstyled text in Excalifont (5).
+  test('a shape drawn without a stroke colour survives first render unchanged', () => {
+    const authored = {
+      id: 'big', type: 'rectangle', x: 0, y: 0, width: 600, height: 400,
+      backgroundColor: '#ffe3e3', fillStyle: 'solid'
+    };
+    assert.equal(diff(authored, { ...authored, ...RENDER_DEFAULTS, strokeColor: '#1e1e1e' }), null);
+  });
+
+  test('text drawn without a font or a colour survives first render unchanged', () => {
+    const authored = { id: 'title', type: 'text', x: 20, y: 20, text: 'Agent drew this', fontSize: 28 };
+    const echoed = {
+      ...authored, ...RENDER_DEFAULTS,
+      width: 205.94, height: 35, strokeColor: '#1e1e1e', fontFamily: 5,
+      backgroundColor: 'transparent', textAlign: 'left'
+    };
+    assert.equal(diff(authored, echoed), null);
+  });
+
+  // The guard must not swallow the edits it sits beside.
+  test('a person recolouring a stroke or changing a font is still reported', () => {
+    const shape = { id: 'big', type: 'rectangle', x: 0, y: 0, width: 600, height: 400 };
+    assert.equal(diff(shape, { ...shape, strokeColor: '#e03131' }).after.strokeColor, '#e03131');
+    assert.equal(diff({ ...shape, strokeColor: '#1e1e1e' }, { ...shape, strokeColor: '#e03131' }).after.strokeColor, '#e03131');
+
+    const text = { id: 'title', type: 'text', x: 20, y: 20, text: 'Agent drew this', fontSize: 28 };
+    assert.equal(diff(text, { ...text, fontFamily: 2 }).after.fontFamily, 2);
+  });
 });
 
 // Suppressing the echo removed the only path that dropped a superseded `label`,

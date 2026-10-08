@@ -17,7 +17,7 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 |---------|-------------|
 | `start` | Start the canvas server (detached); prints URL + pid |
 | `stop` | Stop the canvas server (identity-checked via `/health` — never signals foreign services) |
-| `status` | Health, element count, connected browser tabs |
+| `status` | Health, element count, renderers (`node` headless + browser tabs) |
 
 ### Elements
 
@@ -36,7 +36,8 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 |---------|-------------|
 | `describe` | AI-readable scene summary (ids, positions, labels, connections) — plain text |
 | `wireframe [--json] [--score]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations — plain text. `--score` emits only the pre-flight counts as JSON (`fallbacks`, `inferred`, `unnamedScreens`, `orphans`); `--json` carries them under `score` |
-| `screenshot` | PNG/SVG capture; `--out f.png`, `--format png\|svg`, `--no-background`; PNG without `--out` → temp file path in JSON, SVG without `--out` → raw SVG (**browser tab required**) |
+| `screenshot` | Headless PNG/SVG render of the canvas (no browser tab); `--out f.png\|f.svg`, `--format png\|svg`, `--scale 1-4`, `--dark`, `--padding N`, `--no-background`, `--ids a,b`, `--frame <id>`, `--no-embed-fonts`, `--renderer browser` (use an open tab instead); PNG without `--out` → temp file path in JSON, SVG without `--out` → raw SVG |
+| `render [file\|-]` | Render a `.excalidraw` / `.excalidraw.md` file to PNG/SVG offline — no canvas server; same flags as `screenshot` |
 | `export [--out f.excalidraw] [--format json\|obsidian]` | Scene as .excalidraw JSON (stdout without `--out`); a `.md` out path writes Obsidian's .excalidraw.md format |
 | `import [file\|-] [--replace]` | Import .excalidraw JSON or Obsidian .excalidraw.md (merge by default) |
 | `mermaid [file\|-]` | Render Mermaid onto the canvas (**browser tab required**) |
@@ -102,7 +103,7 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 |------|-------------|-----------------|
 | `describe_scene` | AI-readable scene description (types, positions, labels, connections, bounding box) — best for diagrams | (none) |
 | `describe_wireframe` | Read the canvas as a UI: screens, containment tree, inferred component roles (`?` = low confidence), reading order, navigation flows, live annotations | (none) |
-| `get_canvas_screenshot` | Returns PNG image of canvas for visual verification | (optional) `background` |
+| `get_canvas_screenshot` | Returns a PNG of the canvas for visual verification (headless, no browser needed) | (optional) `background`, `dark`, `scale` (1-4), `padding`, `elementIds`, `frameId`, `renderer` ("auto"\|"node"\|"browser") |
 | `get_resource` | Get scene/library/theme/elements | `resource` |
 | `get_canvas_changes` | What changed since you last looked, incl. human edits; attributes markup to the element it refers to | (optional) `since` |
 | `wait_for_changes` | Block until a human edits the canvas, then return the same report | (optional) `since`, `timeoutSeconds`, `settleSeconds` |
@@ -113,7 +114,7 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 |------|-------------|-----------------|
 | `export_scene` | Export to .excalidraw JSON (a `.md` filePath → Obsidian .excalidraw.md) | (optional) `filePath` |
 | `import_scene` | Import from .excalidraw JSON or Obsidian .excalidraw.md | `mode` ("replace"\|"merge"), `filePath` or `data` |
-| `export_to_image` | Export to PNG/SVG (needs browser) | `format` ("png"\|"svg"), (optional) `filePath`, `background` |
+| `export_to_image` | Export to PNG/SVG (headless, no browser needed; SVG embeds fonts) | `format` ("png"\|"svg"), (optional) `filePath`, `background`, `dark`, `scale` (1-4), `padding`, `elementIds`, `frameId`, `renderer` ("auto"\|"node"\|"browser") |
 | `export_to_excalidraw_url` | Upload & get shareable excalidraw.com URL | (none) |
 
 ### State Management
@@ -167,7 +168,7 @@ Notes:
 | `DELETE` | `/api/elements/clear` | Clear all elements |
 | `GET` | `/api/elements/search?type=...` | Search with filters (exact string match + bbox) |
 | `POST` | `/api/elements/batch` | Batch create |
-| `POST` | `/api/elements/sync` | Frontend scene sync — reconciles per element and records human edits |
+| `POST` | `/api/elements/sync` | Frontend scene sync — reconciles per element and records human edits. An empty scene against a non-empty canvas is refused (409) unless the body carries `"allowEmpty": true` |
 | `POST` | `/api/elements/from-mermaid` | Mermaid conversion via frontend |
 
 ### Changes (review loop)
@@ -184,7 +185,7 @@ Each record is `{rev, kind: add|update|delete, id, origin: agent|human, at, elem
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/export/image` | Request image export (needs frontend) |
+| `POST` | `/api/export/image` | Render PNG/SVG headless: `{format, background?, renderer?: "auto"\|"node"\|"browser", dark?, scale?, padding?, elementIds?, frameId?, embedFonts?}` → `{data, renderer, width, height, warnings?}` |
 | `POST` | `/api/export/image/result` | Frontend posts export result back |
 
 ### Viewport
@@ -206,7 +207,7 @@ Each record is `{rev, kind: add|update|delete, id, origin: agent|human, at, elem
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/health` | Health check (`websocket_clients` = open browser tabs) |
+| `GET` | `/health` | Health check (`websocket_clients` = open browser tabs, `renderers` = `{node, browser}`) |
 | `GET` | `/api/sync/status` | Memory/WebSocket stats |
 
 ## Design Guide (quick version)

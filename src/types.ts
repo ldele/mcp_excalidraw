@@ -106,7 +106,7 @@ export interface ExcalidrawBinding {
   fixedPoint?: readonly [number, number] | null;
 }
 
-export type ExcalidrawElementType = 'rectangle' | 'ellipse' | 'diamond' | 'arrow' | 'text' | 'line' | 'freedraw' | 'image';
+export type ExcalidrawElementType = 'rectangle' | 'ellipse' | 'diamond' | 'arrow' | 'text' | 'line' | 'freedraw' | 'image' | 'frame';
 
 // Excalidraw element types
 export const EXCALIDRAW_ELEMENT_TYPES: Record<string, ExcalidrawElementType> = {
@@ -117,7 +117,8 @@ export const EXCALIDRAW_ELEMENT_TYPES: Record<string, ExcalidrawElementType> = {
   TEXT: 'text',
   FREEDRAW: 'freedraw',
   LINE: 'line',
-  IMAGE: 'image'
+  IMAGE: 'image',
+  FRAME: 'frame'
 } as const;
 
 // Who last wrote an element. `agent` = MCP/CLI/REST write, `human` = a person
@@ -298,11 +299,29 @@ export interface CanvasClearedMessage extends WebSocketMessage {
 }
 
 // Image export types
+export type ImageRenderer = 'auto' | 'node' | 'browser';
+
+// Options accepted by POST /api/export/image, the CLI `screenshot` command and
+// the MCP export/screenshot tools. `auto` renders headless in the server
+// (node); `browser` uses an open canvas tab (Excalidraw's own rendering).
+export interface ExportImageOptions {
+  format: 'png' | 'svg';
+  background?: boolean;
+  renderer?: ImageRenderer;
+  dark?: boolean;
+  scale?: number;
+  padding?: number;
+  elementIds?: string[];
+  frameId?: string;
+  embedFonts?: boolean;
+}
+
 export interface ExportImageRequestMessage extends WebSocketMessage {
   type: 'export_image_request';
   requestId: string;
   format: 'png' | 'svg';
   background?: boolean;
+  options?: Omit<ExportImageOptions, 'format' | 'renderer'>;
 }
 
 // Viewport control types
@@ -399,6 +418,14 @@ export function validateElement(element: Partial<ServerElement>): element is Ser
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
+
+// What the editor shows for an element that leaves these unset: text in
+// Excalifont, strokes in near-black. One definition for the three places that
+// must agree on it — the echo guard (core/changes.ts), export
+// (core/expand-elements.ts) and, with its own copy of the font id, the headless
+// renderer (core/render/fonts.ts).
+export const DEFAULT_FONT_FAMILY = 5;
+export const DEFAULT_STROKE_COLOR = '#1e1e1e';
 
 // Normalize fontFamily from string names to numeric values that Excalidraw expects
 // Excalidraw uses: 1 = Virgil (handwritten), 2 = Helvetica (sans-serif), 3 = Cascadia (monospace)

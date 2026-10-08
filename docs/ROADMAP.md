@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-09-07 · class: living -->
+<!-- status: active · updated: 2026-10-07 · class: living -->
 
 # ROADMAP
 
@@ -51,10 +51,11 @@ Three measures, because "it looked right" has already proved too weak a bar once
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
 | 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — ADR-002 accepted 2026-08-07, not started | `docs/decisions/ADR-002-geometry-lint.md` |
 
-**Before PR 4 (agreed 2026-09-07):** T-001 in `docs/TICKETS.md` — a text element created without a
-size silently drops out of the reading — then the pending upstream merge (§ Upstream) as its own
-reviewed step. Both sit ahead of the lint: one is a reported defect in the reading, the other only
-grows with every commit we add.
+**Before PR 4:** the upstream merge is done (2026-10-07, § Upstream — taken ahead of T-001, the
+2026-09-07 order reversed by Lucas). Still ahead of the lint: the three defects the merge left that
+are ours — bound-label typography on export, the sync that deletes what a payload omits, the
+first-sync echo on `strokeColor` / `fontFamily` (DEVLOG 2026-10-07) — and T-001 in
+`docs/TICKETS.md`, a text element created without a size silently dropping out of the reading.
 
 ## PR 4 — the geometry lint
 
@@ -154,9 +155,16 @@ wireframe read as; DEVLOG 2026-08-07).
 The lesson for next time: merge cost grows with every commit we add to `server.ts`, so check at
 session start as rule 2 says and take base fixes promptly rather than accumulating a deferral.
 
-**Pending since 2026-09-07** — upstream is four commits ahead (2.0.0: the MCP SDK v2 split packages,
-`src/index.ts` cut into `core/mcp-server.ts`, `mcp-tools.ts`, `mcp-dispatch.ts` and
-`canvas-state.ts`; Node floor 20). Nothing in it touches the reading path or `server.ts`, so it
-fixes nothing live for us; the whole cost is porting our three MCP tools into the split files.
-Decision: after T-001, as its own reviewed step. Conflict map, port plan and the one trap: DEVLOG
-2026-09-07 (c).
+**Merged 2026-10-07** — upstream 2.1.2 at `96d9c21`, 25 commits, fifteen conflicting files
+(SPEC-002; DEVLOG 2026-10-07). Deferred on 2026-09-07 at four commits because nothing in them was
+live for us; taken a month later because three things had become so — our exported order keys were
+invalid, a page that failed to load could wipe the canvas, and rendering needed a browser tab — and
+upstream had fixed all three. The corpus read every fixture exactly as before.
+
+Two lessons. **The deferral cost little this time and still was not free:** the conflicts stayed
+small because upstream kept out of `wireframe.ts` and `changes.ts`, but the one real defect came
+from a file git merged *without* a conflict — upstream's new `replace` path cleared the store past
+our change log. After a merge, read every path that touches the element store, conflicted or not;
+a test now covers this one. **A fix upstream makes for its own files does not reach files it
+already wrote:** our scenes exported before 2.1.1 still carried the bad keys, and only `import` →
+`export` repaired them until `repairOrderKeys` did it on read.
