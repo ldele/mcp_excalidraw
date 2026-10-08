@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-07 · class: living -->
+<!-- status: active · updated: 2026-10-08 · class: living -->
 
 # SPEC-002 — take upstream 2.1.2
 
@@ -8,6 +8,12 @@
 > the first four commits (`docs/DEVLOG.md` 2026-09-07 (c)), which still holds for `src/index.ts`.
 > Planned from UI-Wizard on 2026-10-07 (`C:\Projects\UI-Wizard\plans\SIDE-ISSUES.md`, session S2);
 > no code in this repo was changed while planning.
+>
+> **Refreshed 2026-10-08: executed, and not on `main` yet.** The merge is committed as `b8d3f39` on
+> `merge/upstream-2.1.2`, in the worktree `C:\Projects\mcp_excalidraw-merge`. A second pass (S3:
+> T-012, T-013, T-014) is staged on top of it there, uncommitted. `main` is at `497e9cd`. What
+> each step and test case came to is marked below; **§ What is left** is the owner's part. The
+> detail is that branch's `docs/DEVLOG.md`, entries 2026-10-07 and 2026-10-07 (b).
 
 ## Goal
 
@@ -36,10 +42,10 @@ What upstream's code does about the four defects, read from `upstream/main` (not
 | Defect seen 2026-09-24 | Upstream | After this merge |
 |---|---|---|
 | Exported `index` keys `a0 … a10 …` are invalid (trailing 0) and mis-sorted; the canvas page throws `invalid order key` and loads nothing | `orderKey(i)` over the final array order (`src/core/expand-elements.ts:39-44, 313`, #117) | fixed for new exports; **old files still carry bad keys** — test case 3 decides whether import must repair them |
-| A page that failed to load auto-syncs its empty scene and the server deletes everything | `canSyncScene()` gates sync, export and Mermaid import (`frontend/src/App.tsx:171, 727, 822`, #110) | page side fixed; the server's absent-means-deleted rule is **ours** (`src/server.ts`, the sync reconciliation) and stays — SPEC-003 territory |
+| A page that failed to load auto-syncs its empty scene and the server deletes everything | `canSyncScene()` gates sync, export and Mermaid import (`frontend/src/App.tsx:171, 727, 822`, #110) | page side fixed; the server's absent-means-deleted rule is **ours** (`src/server.ts`, the sync reconciliation) — **closed since as T-014** (S3, staged): a sync that would empty a non-empty canvas is refused with 409 unless it carries `allowEmpty: true`. SPEC-003 is now a different subject |
 | Free text loads centred on its left edge; fixed widths replaced | scenes load through `restoreElements()`, fonts preloaded first (`App.tsx:196, 223, 290`, #123, #124) | fixed |
 | `screenshot` needs an open browser tab | headless render inside the server (`src/core/render/`, `src/cli/commands/render.ts`, #114, #127) | fixed |
-| Bound labels export as `fontFamily: 1` at 16 px | unchanged (`expand-elements.ts:157, 263`) — and caused partly by our `normalize.ts` | **not fixed**; out of scope here |
+| Bound labels export as `fontFamily: 1` at 16 px | unchanged (`expand-elements.ts:157, 263`) — and caused partly by our `normalize.ts` | not fixed by the merge — **closed since as T-013** (S3, staged): export reads the label's own font, size and colour |
 
 ## Hard constraints
 
@@ -60,8 +66,10 @@ What upstream's code does about the four defects, read from `upstream/main` (not
   `prepareElementUpdate(id, updates, existing?.type)`; ours takes the whole element so a restyle
   merges into the existing label. Pass `existing ?? undefined`; do not revert the signature.
 - **KI-8.** A push to this fork starts no workflow run. Dispatch CI by hand and read the run.
-- **`docs/TICKETS.md` has uncommitted entries (T-006, T-007).** The owner commits them before the
-  branch is cut; do not hand-edit the ledger around them — `cpc-ticket --root .` opens and closes.
+- **`docs/TICKETS.md`: do not hand-edit the ledger — `cpc-ticket --root .` opens and closes.**
+  When this was written it had uncommitted entries (T-006, T-007). Those are committed and pushed
+  (`497e9cd`, with T-008 to T-011). As of 2026-10-08 the main checkout has T-012 to T-014 and two
+  notes **staged** in it, and the branch does not touch the file.
 
 ## Open questions
 
@@ -79,22 +87,24 @@ What upstream's code does about the four defects, read from `upstream/main` (not
 
 ## Execution checklist
 
-1. Write the test cases below — the new ones fail or do not exist yet on `main`; record which.
+1. ✅ Write the test cases below — the new ones fail or do not exist yet on `main`; record which.
 2. ~~Owner closes open questions 1, 3, 4, 5~~ — closed 2026-10-07. The pending `docs/TICKETS.md`
    entries (T-006, T-007) are still the owner's to commit; upstream does not touch that file, so
    they ride along uncommitted and must not be staged with the merge.
-3. Cut `merge/upstream-2.1.2` from `main` **in a separate worktree** (`git worktree add`), then
+3. ✅ Cut `merge/upstream-2.1.2` from `main` **in a separate worktree** (`git worktree add`), then
    `git merge upstream/main --no-commit` there. The canvas server the owner is drawing on runs from
    the main checkout's `dist/`; a build in place would swap its frontend under an open tab. Run the
    branch's own server on another port for the tests.
-4. **Spike, one hour, timeboxed:** resolve `src/index.ts` and `src/server.ts` only; run
+4. ✅ **Spike, one hour, timeboxed:** resolve `src/index.ts` and `src/server.ts` only; run
    `npm run type-check` and `npm run test:corpus`. Success is that both *run*. If the hour ends with
    a tree that does not compile, stop, write down why in `## gaps`, and reopen question 2.
-5. Resolve the rest in the order of the work items.
-6. Run every test case. A corpus diff stops the merge until it is explained.
-7. `npm run build && npm link`; run the cross-repo check (test case 7) from UI-Wizard.
-8. Update the docs listed at the end; stage; hand off for review. After the owner pushes, dispatch
-   CI by hand (KI-8) and put the run id in the baton.
+5. ✅ Resolve the rest in the order of the work items. Item 9 was needed (`repairOrderKeys`).
+6. ✅ Run every test case — all but the second half of case 6, which needs a person (§ Verified).
+7. ⏳ `npm run build && npm link`; run the cross-repo check (test case 7) from UI-Wizard. Built and
+   tested in the worktree on private ports. The build and `npm link` in the **main checkout** wait
+   for the merge to `main` and for the canvas on `:3000` to be stopped.
+8. ⏳ Update the docs listed at the end; stage; hand off for review — done on the branch. After the
+   owner pushes, dispatch CI by hand (KI-8) and put the run id in the baton — not yet.
 
 ## Work items
 
@@ -122,6 +132,51 @@ What upstream's code does about the four defects, read from `upstream/main` (not
 | 6 · attribution holds | an agent `add`, then a page load, then `changes`: no record with `origin: human` (T-001's second defect — a measurement coming back through sync as a human "resized"); then one human drag: exactly one human record | manual, recorded in the DEVLOG — needs a browser |
 | 7 · headless render | with zero browser clients, `excalidraw-canvas screenshot --out x.png` on the dashboard scene writes a PNG over 50 kB in which a label set to `fontFamily: 2` is not drawn in the hand-drawn face | `scripts/check-render.mjs` (upstream's) plus the manual look |
 
+## Verified
+
+On the branch, 2026-10-07. `npm test` there runs five scripts: the `node:test` suite, MCP wire,
+local-bind, render and state.
+
+| Case | Result |
+|---|---|
+| 1 · corpus unchanged | **Pass.** `node:test` 56 / 56 at the merge (43 before it, 13 new) and 66 / 66 with S3; `tests/expected/` untouched both times |
+| 2 · export order keys | **Pass.** `tests/order-keys.test.mjs`; `isValidOrderKey` agrees with `fractional-indexing` on 4 000-odd candidates |
+| 3 · an old scene still loads | **Pass, after work item 9.** `render` on the legacy file threw `invalid order key: a80`; `repairOrderKeys` now runs on `import` and `render`. UI-Wizard's dashboard (98 elements) imports to the reading that repo committed and re-exports with valid keys |
+| 4 · empty page cannot wipe | **Pass.** Upstream's Playwright suite, 19 / 19 with the system Chrome, covers the forced case; in headless Chrome a click and a zoom leave 98 elements. S3 then closed the server side too (T-014) |
+| 5 · our MCP tools survive the split | **Pass.** MCP wire 6 / 6; the three tools answer over stdio |
+| 6 · attribution holds | **First half: failed at the merge, fixed in S3 (T-012)** — a tab's first sync reported `strokeColor` and `fontFamily` as edits by human, on `main` as well; 2 human records before, 0 after. **Second half not verified:** one human drag = exactly one human record needs a person |
+| 7 · headless render | **Pass** for the render: the dashboard as a 198 kB PNG with no server and no tab. The look at a label's face is not recorded in the DEVLOG |
+
+One defect was found by reading what git merged silently: upstream's atomic `replace` cleared the
+store without a change record. It now records each delete first.
+
+## What is left
+
+In this order. Steps 1 to 5 are the owner's (rule 1), from that branch's baton, 2026-10-07 (b).
+
+1. Review and commit S3 in the worktree (`git diff --cached` in `C:\Projects\mcp_excalidraw-merge`).
+2. Commit what is staged in the main checkout — `docs/TICKETS.md`, and since 2026-10-08 this file
+   and SPEC-003 — **before** merging: `git merge` refuses a dirty index.
+3. `main` takes `merge/upstream-2.1.2`.
+4. **With no canvas running**, `npm ci && npm run build && npm link` in the main checkout. The
+   canvas the baton names (pid 39264, on `:3000`) is gone: `excalidraw-canvas status` said
+   `running: false` on 2026-10-08. Check again before building.
+5. Push; dispatch CI by hand (KI-8); `git worktree remove ../mcp_excalidraw-merge`. Upstream had
+   not moved by 2026-10-08: `git ls-remote upstream` still gives `96d9c21`.
+6. **Re-test T-011 on the merged build**, with its own Reproduce line. It was filed against 1.2.0
+   after this spec was written and is the "free text loads centred on its left edge" row above,
+   which upstream's #123 and #124 are read as fixing. Nobody has run it on the merged code. Close
+   it or note it with `cpc-ticket`.
+7. Then, by the owner's word of 2026-10-08, **SPEC-003**: whether T-009 is worth sending upstream.
+   The baton's own order after the merge is T-010's re-wrap, T-001 with no tab, then PR 4; where
+   SPEC-003 sits among those three is not decided.
+
+Tickets filed after this spec, and what the merge did for each: **T-008** (a label in the short
+form takes the border colour) not re-tested on the merged build — T-013 changed what *export*
+writes for a label that has a colour of its own, and a short-form label has none; **T-009** (waypoints dropped when a bound arrow is created) untouched, the function
+is identical upstream — SPEC-003; **T-010** seen again on the merged build and not fixed (DEVLOG
+2026-10-07 (b)); **T-011** see step 6.
+
 ## Estimate
 
 - **estimate:** L / 6–8 h  <!-- planner judgment, not a measurement: the spike 1 h, the MCP port 2 h,
@@ -132,7 +187,7 @@ What upstream's code does about the four defects, read from `upstream/main` (not
 
 - Bound-label typography on export (`expand-elements.ts:157, 263`, `normalize.ts`) and the server's
   absent-means-deleted sync (KI-7's mechanism) — file both with `cpc-ticket` and take them as the
-  next spec.
+  next spec. *Done since, without a spec: T-013 and T-014, fixed in S3 and staged on the branch.*
 - Fixing T-001. This merge only records, in test case 6 and the ticket, what #107 and #117 changed
   about it.
 - PR 4, KI-3, T-002 – T-007.
