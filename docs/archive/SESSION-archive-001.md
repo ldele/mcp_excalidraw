@@ -4,6 +4,34 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-10-07 — Claude Code — upstream 2.1.2 merged on a branch (SPEC-002); staged in a worktree, not committed
+- **Where:** `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`, a `git worktree` of this
+  repo — the merge is **in progress and staged** there (`git diff --cached`). The main checkout is
+  untouched at `cf3617d` (SPEC-002, committed on Lucas's instruction, not pushed) with his
+  uncommitted `docs/TICKETS.md` (T-006, T-007). The canvas on `:3000` was running someone's drawing
+  from the main checkout's `dist/` throughout and was never touched.
+- **Done:** 25 upstream commits (`96d9c21`) merged, 15 conflicts resolved; our three MCP tools ported
+  into the split files; one silent-merge defect fixed (a `replace` now records its deletes);
+  `repairOrderKeys` so scenes exported before 2.1.1 import and render; 13 new tests. Version 1.3.0,
+  Node ≥ 20. Detail, per file: DEVLOG 2026-10-07.
+- **Verified:** `type-check` ×2, `npm run build`, `npm test` (56 / 56 `node:test`, MCP wire 6 / 6,
+  bind, render, state), `tests/expected/` untouched, upstream's Playwright suite 19 / 19 with the
+  system Chrome, the legacy dashboard loading in the merged page with the server left at 98.
+  `integrity_check --strict` green. **`docs_check --strict` fails on one warning that is not this
+  branch's:** `docs/TICKETS.md` was committed 2026-09-26 with `updated: 2026-09-22` (rule 12) — the
+  uncommitted edit in the main checkout carries the fix, so CI's docs job is red until that lands.
+- **Not verified:** one human drag = one human record (SPEC-002 case 6, second half) — needs a
+  person. Two early runs of the new server test did not reach the server right after a build;
+  not reproduced in six later runs.
+- **Next:** (1) Lucas commits `docs/TICKETS.md` on `main`, then reviews the staged merge in the
+  worktree and commits it (`git commit` there completes the merge). (2) `main` ← the branch
+  (fast-forward), then `npm ci && npm run build && npm link` in the main checkout **with no canvas
+  running**, push, dispatch CI by hand (KI-8), `git worktree remove ../mcp_excalidraw-merge`.
+  (3) File with `cpc-ticket`: bound-label typography on export; the sync deleting what a payload
+  omits (KI-7); `EDITOR_DEFAULTS` lacking `strokeColor` / `fontFamily`. Add T-001's re-test line
+  (unchanged by the merge). (4) Those three, then T-001, then PR 4.
+- **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
+
 ## 2026-09-07 (e) — Claude Code — (d) committed and pushed; CI green on `2948946` by dispatch
 - **Corrects (d):** its staged set is committed as `2948946` and pushed. Run 34124916242
   (`workflow_dispatch`): six jobs green, the Node 18–24 matrix included. The push itself made no

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
+import http from 'node:http';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { WebSocket } from 'ws';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, '..');
@@ -281,6 +283,97 @@ async function checkArrowsFollowAfterSync() {
   );
 }
 
+// Fork (T-015): the canvas answers its own page and local tools. A request that names another
+// site as its Origin, or another machine as its Host, is refused, on HTTP and on the socket.
+async function checkForeignOriginsAreRefused() {
+  await request('/api/elements/clear', { method: 'DELETE' });
+  await request('/api/elements', {
+    method: 'POST',
+    ...json({ id: 'kept', type: 'rectangle', x: 0, y: 0, width: 10, height: 10 }),
+  });
+  // fetch cannot set Host, and a browser's Origin is the point, so these go out as raw HTTP.
+  const raw = (method, path, headers = {}, body) => new Promise((resolve, reject) => {
+    const payload = body === undefined ? undefined : JSON.stringify(body);
+    const req = http.request({
+      host: '127.0.0.1', port, method, path,
+      headers: {
+        ...(payload ? { 'content-type': 'application/json', 'content-length': Buffer.byteLength(payload) } : {}),
+        ...headers,
+      },
+    }, res => {
+      res.resume();
+      res.on('end', () => resolve({
+        status: res.statusCode,
+        allowOrigin: res.headers['access-control-allow-origin'] ?? null,
+      }));
+    });
+    req.on('error', reject);
+    if (payload) req.write(payload);
+    req.end();
+  });
+  const socket = headers => new Promise(resolve => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`, { headers });
+    ws.on('open', () => { ws.close(); resolve('open'); });
+    ws.on('unexpected-response', (_req, res) => { res.resume(); resolve(`HTTP ${res.statusCode}`); });
+    ws.on('error', error => resolve(`error: ${error.message}`));
+  });
+  const own = `http://127.0.0.1:${port}`;
+  const listed = 'http://allowed.test:5173';
+  const shape = { type: 'rectangle', x: 0, y: 0, width: 10, height: 10 };
+
+  // What the tools and the canvas page send is answered.
+  for (const [who, headers] of [
+    ['a tool, which sends no Origin', {}],
+    ['the canvas page', { origin: own }],
+    ['the canvas page reached as localhost', { origin: `http://localhost:${port}`, host: `localhost:${port}` }],
+    ['an origin the owner listed', { origin: listed }],
+  ]) {
+    const read = await raw('GET', '/api/elements', headers);
+    assert(read.status === 200, `${who} could not read the canvas: HTTP ${read.status}`);
+    const write = await raw('POST', '/api/elements', headers, shape);
+    assert(write.status === 200, `${who} could not draw on the canvas: HTTP ${write.status}`);
+  }
+  const answer = await raw('GET', '/api/elements', { origin: listed });
+  assert(answer.allowOrigin === listed, `a listed origin was sent allow-origin ${JSON.stringify(answer.allowOrigin)}`);
+  const before = (await request('/api/elements')).body.elements.length;
+
+  // Another site's page is not, whatever it asks for.
+  for (const [who, headers] of [
+    ['another website', { origin: 'https://attacker.example' }],
+    ['another port on this machine', { origin: 'http://127.0.0.1:1' }],
+    ['a file opened from disk', { origin: 'null' }],
+    ['a localhost page, sent to 127.0.0.1', { origin: `http://localhost:${port}` }],
+    ['a name that is not this machine', { host: `attacker.example:${port}` }],
+  ]) {
+    for (const [method, path, body] of [
+      ['GET', '/api/elements'],
+      ['POST', '/api/elements', shape],
+      ['DELETE', '/api/elements/clear'],
+      ['OPTIONS', '/api/elements/clear'],
+    ]) {
+      const result = await raw(method, path, headers, body);
+      assert(result.status === 403, `${who}: ${method} ${path} was answered HTTP ${result.status}, not 403`);
+      assert(
+        result.allowOrigin === null,
+        `${who}: ${method} ${path} was sent allow-origin ${JSON.stringify(result.allowOrigin)}`,
+      );
+    }
+  }
+  const after = (await request('/api/elements')).body.elements.length;
+  assert(after === before, `refused requests changed the canvas: ${before} elements before, ${after} after`);
+
+  // The socket hands the whole scene to whoever connects.
+  assert(await socket({}) === 'open', 'a tool could not open the socket');
+  assert(await socket({ origin: own }) === 'open', 'the canvas page could not open the socket');
+  for (const [who, headers] of [
+    ['another website', { origin: 'https://attacker.example' }],
+    ['a name that is not this machine', { host: `attacker.example:${port}` }],
+  ]) {
+    const result = await socket(headers);
+    assert(result === 'HTTP 403', `${who} was not refused on the socket: ${result}`);
+  }
+}
+
 function runCli(args) {
   return new Promise(resolve => {
     const cli = spawn(process.execPath, [join(repoRoot, 'dist', 'bin.js'), ...args], {
@@ -391,7 +484,11 @@ async function checkMcpTypedFilters(callTool) {
 
 const child = spawn(process.execPath, [serverPath], {
   cwd: repoRoot,
-  env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', LOG_LEVEL: 'error' },
+  // CANVAS_ALLOWED_ORIGINS: one listed origin, for the T-015 check.
+  env: {
+    ...process.env, PORT: String(port), HOST: '127.0.0.1', LOG_LEVEL: 'error',
+    CANVAS_ALLOWED_ORIGINS: 'http://allowed.test:5173',
+  },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';
@@ -410,6 +507,7 @@ try {
     ['saved snapshots are immutable', checkSnapshotsAreImmutable],
     ['bound arrows keep the waypoints they were given', checkBoundArrowsKeepWaypoints],
     ['bound arrows follow a shape an agent moves after a tab has synced', checkArrowsFollowAfterSync],
+    ['requests from another site are refused', checkForeignOriginsAreRefused],
     ['CLI snapshot restore is atomic and keeps frames', checkCliSnapshotRestore],
     ['MCP snapshot restore is atomic and keeps frames', () => checkMcpSnapshotRestore(callExcalidrawTool)],
   ];
