@@ -130,6 +130,14 @@ carries the eight patch updates of `npm audit fix`. Together they take `npm audi
 upstream's, then run `npm install @excalidraw/mermaid-to-excalidraw@^2.2.2` and `npm audit fix`,
 and read `npm audit` again.
 
+Since 2026-10-08 the server answers its own page and local tools only (T-015). The rule lives in
+a file of ours, `src/core/origin-guard.ts`; in upstream's `src/server.ts` it is three touches:
+an import, `verifyClient` on the WebSocket server, and the guard put in front of `cors()`, which
+no longer answers every origin. A third check of ours in `scripts/check-state-integrity.mjs`,
+*requests from another site are refused*, fails if a merge brings the open `cors()` back.
+Upstream's open pull request #74 rewrites the same two lines with a token and an allow-list of
+its own; if upstream merges it, read both before choosing.
+
 ## Specs
 
 - **Node ≥ 20** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`

@@ -224,6 +224,8 @@ excalidraw-canvas install-skill --print-source  # inspect bundled source path
 ```
 
 > **Security note:** The canvas server binds `127.0.0.1` only by default. If you expose it on a network interface (`HOST=0.0.0.0`), put network-level access controls in front — the API has no built-in authentication.
+>
+> In this fork the server answers its own page and local tools only: a request whose `Origin` is another site's page, or whose `Host` is not a name for this machine, gets HTTP 403, on the API and on the WebSocket. Programs that are not browsers send no `Origin` and are not affected, so this is not authentication: any local program can still call the API.
 
 ## Agent Skill
 
@@ -298,6 +300,7 @@ The MCP server runs over stdio. Since v1.1 the simplest config is `npx` — no c
 | `EXCALIDRAW_EXPORT_DIR` | Base directory MCP file exports may write to | current working dir |
 | `EXCALIDRAW_RENDER_MAX_DIM` | Largest side of a headless PNG, in pixels | `8192` |
 | `PORT` / `HOST` | Canvas server bind address | `3000` / `127.0.0.1` |
+| `CANVAS_ALLOWED_ORIGINS` | Other page origins allowed to call the canvas, comma-separated (for example `http://localhost:5173` for `npm run dev`) | (unset: the canvas's own page only) |
 | `LOG_LEVEL` | Log verbosity (`error`, `warn`, `info`, `debug`) | `info` |
 | `LOG_FILE_PATH` | Log file location | `~/Library/Logs/excalidraw-mcp.log` (macOS), `$XDG_STATE_HOME/excalidraw-mcp/excalidraw.log` (Linux), `%LOCALAPPDATA%\Excalidraw-MCP\excalidraw.log` (Windows) |
 
@@ -615,6 +618,7 @@ Yes — that's the recommended path for coding agents: `excalidraw-canvas instal
 - **CLI exit code 4** (browser required): only `mermaid` and `screenshot --renderer browser` need an open tab — open `http://127.0.0.1:3000` in a browser and retry, or drop `--renderer browser` to render headless.
 - **Headless PNG shows boxes instead of CJK/emoji text**: the bundled fonts cover Latin scripts; for other scripts resvg falls back to the machine's fonts (a warning is printed). Install a CJK font on the machine running the canvas server.
 - **Canvas not updating**: confirm `EXPRESS_SERVER_URL` points at the running canvas server (`status` shows the URL in use).
+- **HTTP 403, "this canvas answers its own page and local tools only"**: a page on another origin called the canvas — another port, a file opened from disk, or the Vite dev server. List that origin in `CANVAS_ALLOWED_ORIGINS` and restart the canvas.
 - **Canvas page shows plain fonts offline**: the page loads Excalidraw's hand-drawn fonts from the esm.sh CDN, so without internet access it falls back to system fonts. Headless screenshots and `render` use the bundled fonts and are unaffected.
 - **Something else looks wrong**: the server log has the details; its location is in [Environment Variables](#environment-variables) (`LOG_FILE_PATH`).
 

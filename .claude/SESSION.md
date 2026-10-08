@@ -4,6 +4,25 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-08 (i) — Claude Code — T-015's guard built; STAGED ON A BRANCH in the spare worktree, not on main
+- **Where:** branch `t015-origin-guard`, cut from `main` at `438ef80`, in
+  `C:\Projects\mcp_excalidraw-merge`. Everything staged (`git diff --cached` there), nothing
+  committed. The main checkout is untouched: a canvas was running from it.
+- **What:** `src/core/origin-guard.ts` (new, ours), +5 −2 in `src/server.ts`, one check in the
+  state script, README and `FORK.md`, T-015 closed. A request from another site's page, or
+  addressed to another host, gets 403 on the API and on the socket. DEVLOG 2026-10-08 (i).
+- **Verified there:** `npm test` 79 / 79 plus scripts (state 9); Playwright 19 / 19; the tab
+  probe; five seeded defects caught; in Chrome 154 all four page origins of the ticket blocked.
+- **Not verified:** Linux; `npm run dev` with `CANVAS_ALLOWED_ORIGINS=http://localhost:5173`.
+- **Next:** (1) the owner reviews and commits on the branch, then `main` takes it; push; dispatch
+  CI by hand (KI-8). (2) **With no canvas running:** `npm ci && npm run build` in the main
+  checkout — owed since entry (h), and needed again once the guard is on `main`. (3) T-001 with
+  no tab, then PR 4. The pull request to upstream stays held.
+- **Mind:** the spare worktree also holds three untracked probes and two Playwright configs
+  (`tests/probe/`, `playwright.*.config.mjs`). They are not part of the change; do not `git add
+  -A` there.
+- **Picks up:** any session with a terminal.
+
 ## 2026-10-08 (h) — Claude Code — advisories 22 → 14 by two dependency fixes; MAIN CHECKOUT NOT REINSTALLED; T-015 filed
 - **Mind this first.** `package.json` and `package-lock.json` changed, and the main checkout was
   **not** reinstalled: a canvas was running from it (pid 91356, 98 elements, one tab — entry
@@ -171,32 +190,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   **no canvas running**, `npm ci && npm run build && npm link` in the main checkout; push;
   dispatch CI by hand (KI-8); `git worktree remove ../mcp_excalidraw-merge`. (3) T-010 (compare
   `originalText`, not the wrapped `text`), then T-001 with no tab, then PR 4.
-- **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.
-
-## 2026-10-07 — Claude Code — upstream 2.1.2 merged on a branch (SPEC-002); staged in a worktree, not committed
-- **Where:** `C:\Projects\mcp_excalidraw-merge`, branch `merge/upstream-2.1.2`, a `git worktree` of this
-  repo — the merge is **in progress and staged** there (`git diff --cached`). The main checkout is
-  untouched at `cf3617d` (SPEC-002, committed on Lucas's instruction, not pushed) with his
-  uncommitted `docs/TICKETS.md` (T-006, T-007). The canvas on `:3000` was running someone's drawing
-  from the main checkout's `dist/` throughout and was never touched.
-- **Done:** 25 upstream commits (`96d9c21`) merged, 15 conflicts resolved; our three MCP tools ported
-  into the split files; one silent-merge defect fixed (a `replace` now records its deletes);
-  `repairOrderKeys` so scenes exported before 2.1.1 import and render; 13 new tests. Version 1.3.0,
-  Node ≥ 20. Detail, per file: DEVLOG 2026-10-07.
-- **Verified:** `type-check` ×2, `npm run build`, `npm test` (56 / 56 `node:test`, MCP wire 6 / 6,
-  bind, render, state), `tests/expected/` untouched, upstream's Playwright suite 19 / 19 with the
-  system Chrome, the legacy dashboard loading in the merged page with the server left at 98.
-  `integrity_check --strict` green. **`docs_check --strict` fails on one warning that is not this
-  branch's:** `docs/TICKETS.md` was committed 2026-09-26 with `updated: 2026-09-22` (rule 12) — the
-  uncommitted edit in the main checkout carries the fix, so CI's docs job is red until that lands.
-- **Not verified:** one human drag = one human record (SPEC-002 case 6, second half) — needs a
-  person. Two early runs of the new server test did not reach the server right after a build;
-  not reproduced in six later runs.
-- **Next:** (1) Lucas commits `docs/TICKETS.md` on `main`, then reviews the staged merge in the
-  worktree and commits it (`git commit` there completes the merge). (2) `main` ← the branch
-  (fast-forward), then `npm ci && npm run build && npm link` in the main checkout **with no canvas
-  running**, push, dispatch CI by hand (KI-8), `git worktree remove ../mcp_excalidraw-merge`.
-  (3) File with `cpc-ticket`: bound-label typography on export; the sync deleting what a payload
-  omits (KI-7); `EDITOR_DEFAULTS` lacking `strokeColor` / `fontFamily`. Add T-001's re-test line
-  (unchanged by the merge). (4) Those three, then T-001, then PR 4.
 - **Picks up:** any session with a terminal; (2) needs the owner to stop the canvas first.

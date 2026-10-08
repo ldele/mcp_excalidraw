@@ -47,6 +47,7 @@ import {
   CanonicalElement
 } from './core/changes.js';
 import { renderScene, RenderError, MAX_SCALE } from './core/render/index.js';
+import { originGuard, corsOptions, verifySocketClient } from './core/origin-guard.js';
 
 // Load environment variables
 dotenv.config();
@@ -56,10 +57,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = createServer(app);
-const wss = new WebSocketServer({ server });
+// Fork (T-015): the socket and every route answer this canvas's own page and local tools only.
+const wss = new WebSocketServer({ server, verifyClient: verifySocketClient });
 
 // Middleware
-app.use(cors());
+app.use(originGuard);
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 
 // Serve static files from the build directory
