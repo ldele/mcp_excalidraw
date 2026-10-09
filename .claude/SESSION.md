@@ -4,6 +4,26 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-09 — Claude Code — the spare worktree and three merged branches are gone; the probes moved
+- **Corrects every earlier line that names `C:\Projects\mcp_excalidraw-merge`** — the "Standing,
+  local only" of entries (h) and (j) of 2026-10-08, the Where of entry (i), and the older ones.
+  That worktree no longer exists. It was removed on 2026-10-08, on the owner's word, with the
+  local branches
+  `merge/upstream-2.1.2`, `t009-waypoints-fork` and `t015-origin-guard`: all three merged into
+  `main`, deleted with `git branch -d`, none of them ever on GitHub.
+- **The probes were kept, not lost.** The three scripts and two Playwright configs that sat
+  untracked there are in `C:\Projects\mcp_excalidraw-upstream\tests\probe-fork\`, with a
+  `README.txt` that says what each one answers and how to run it. Where the DEVLOG, the entries
+  (e) to (j) of 2026-10-08, or T-015's Reproduce line say `mcp_excalidraw-merge\tests\probe`,
+  read that folder.
+- **What is left locally:** `main`, and `t009-waypoints-upstream` in
+  `C:\Projects\mcp_excalidraw-upstream`, which holds the held upstream patch (`527500b`), its
+  `PR_BODY.md`, the upstream tab probe and now `tests/probe-fork/`. All of that is untracked or
+  unpushed, so removing that worktree loses it.
+- **Next:** unchanged from entry (k) of 2026-10-08: T-001 with no tab, then PR 4. The pull
+  request to upstream stays held.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (k) — Claude Code — T-016 fixed: the skill names `icon`, and a test holds its role lists to the code
 - **Done, from a UI-Wizard session on the owner's word:** the skill's two role lists name `icon`,
   the conventions say to declare it on every glyph, and `tests/role-docs.test.mjs` fails when a
@@ -161,22 +181,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   the worktree `C:\Projects\mcp_excalidraw-merge` and the branch `t009-waypoints-fork`; keep
   `C:\Projects\mcp_excalidraw-upstream` while the pull request is pending. (4) T-010, T-001,
   PR 4. Unread: the 22 advisories from `npm ci`.
-- **Picks up:** any session with a terminal. No canvas is running.
-
-## 2026-10-08 (b) — Claude Code — SPEC-003 run: T-009 is upstream's too; fix staged on two branches; nothing sent
-- **Done:** SPEC-003, to its note. T-009 reproduces on upstream alone at `96d9c21`. The fix is
-  `resolveArrowBindings` only, +29 −11, with one check in upstream's state script. Arrows without
-  waypoints are stored identically with and without it. Detail and the inventory: DEVLOG
-  2026-10-08 (b); results per test case: SPEC-003 § Verified.
-- **Where, all staged, none committed, none pushed:** (1) the main checkout: the index holds the
-  fix for the red CI run (entry below); the working tree adds SPEC-003's results, this entry,
-  the DEVLOG's and T-009's triage note, **unstaged**, so the two stay separate commits.
-  (2) `C:\Projects\mcp_excalidraw-upstream`, branch `t009-waypoints-upstream`: the patch for
-  upstream. (3) `C:\Projects\mcp_excalidraw-merge`, now on `t009-waypoints-fork`: the same
-  patch on the fork's code.
-- **Open, the owner's:** SPEC-003 rows 4 and 5 — send, keep or drop; and how. Proposal there.
-- **Next:** (1) commit and push the red-run fix; dispatch CI; read it. (2) commit SPEC-003's
-  docs. (3) the two decisions; if "keep", merge `t009-waypoints-fork`; if "send", the push of
-  `t009-waypoints-upstream` and the pull request are each on the owner's word. (4) T-010, T-001,
-  PR 4.
 - **Picks up:** any session with a terminal. No canvas is running.
