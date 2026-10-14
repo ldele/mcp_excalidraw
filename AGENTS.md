@@ -68,6 +68,7 @@ when a command needs one and there is none. Screenshots and image export render 
 | When | Use |
 |------|-----|
 | Drawing or reading any UI on the canvas | `skills/excalidraw-skill/SKILL.md` + `skills/excalidraw-skill/references/wireframe-conventions.md` |
+| Starting a new React app beside the canvas (a viewer, a demo, a client of the CLI) | `[[ts-react-scaffold]]`: the Vite + React + TypeScript stack `frontend/` uses; screens drawn first, then checked in a browser |
 | Recording a decision (frames vs rectangles, codegen or not) | `[[architecture-decision]]` |
 | Planning the next wireframe increment | `[[iterative-planning]]` → `docs/ROADMAP.md` |
 | A recurring wireframe misread or flaky round-trip | `[[known-issues]]` |
