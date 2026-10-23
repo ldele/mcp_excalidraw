@@ -48,6 +48,7 @@ import {
 } from './core/changes.js';
 import { renderScene, RenderError, MAX_SCALE } from './core/render/index.js';
 import { originGuard, corsOptions, verifySocketClient } from './core/origin-guard.js';
+import { openSceneStore, flushScene, saveSceneAfterWrites, canvasIdentity, sceneFile } from './core/scene-store.js';
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +65,8 @@ const wss = new WebSocketServer({ server, verifyClient: verifySocketClient });
 app.use(originGuard);
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
+// Fork (T-023): a request that can change the scene schedules a save to disk.
+app.use(saveSceneAfterWrites);
 
 // Serve static files from the build directory
 const staticDir = path.join(__dirname, '../dist');
@@ -80,7 +83,8 @@ const clients = new Set<WebSocket>();
 
 // Broadcast to all connected clients
 function broadcast(message: WebSocketMessage): void {
-  const data = JSON.stringify(message);
+  // Fork (T-023): the revision rides on every message, so an open page knows how far it has seen.
+  const data = JSON.stringify({ ...message, rev: changeLog.revision });
   clients.forEach(client => {
     try {
       if (client.readyState === WebSocket.OPEN) {
@@ -235,6 +239,8 @@ wss.on('connection', (ws: WebSocket) => {
   files.forEach((f, id) => { filesObj[id] = f; });
   const initialMessage: InitialElementsMessage & { files?: Record<string, ExcalidrawFile> } = {
     type: 'initial_elements',
+    // Fork (T-023): which process and drawing this is, so a page can tell a restart.
+    ...canvasIdentity(),
     elements: Array.from(elements.values()),
     ...(files.size > 0 ? { files: filesObj } : {})
   };
@@ -416,7 +422,9 @@ app.get('/api/elements', (req: Request, res: Response) => {
     res.json({
       success: true,
       elements: elementsArray,
-      count: elementsArray.length
+      count: elementsArray.length,
+      // Fork (T-023): the page's HTTP load needs the same identity as initial_elements.
+      ...canvasIdentity()
     });
   } catch (error) {
     logger.error('Error fetching elements:', error);
@@ -1725,6 +1733,10 @@ app.get('/health', (req: Request, res: Response) => {
     websocket_clients: clients.size,
     // Current canvas revision — the cursor for GET /api/changes
     rev: changeLog.revision,
+    // Fork (T-023): this process, the drawing it holds, and the file it is saved to (null: memory only)
+    instanceId: canvasIdentity().instanceId,
+    sceneId: canvasIdentity().sceneId,
+    sceneFile: sceneFile(),
     // Image renderers available right now: headless (always, in-process) and
     // the number of browser tabs that can render on request
     renderers: { node: true, browser: clients.size },
@@ -1822,6 +1834,14 @@ async function startServer(): Promise<void> {
     }
   }
 
+  // Fork (T-023): the drawing saved for this port is back before the first request.
+  const restored = openSceneStore(PORT);
+  if (restored.restored) {
+    logger.info(`Restored ${restored.elements} elements (rev ${restored.rev}) from ${restored.file}`);
+  } else if (restored.file) {
+    logger.info(`Scene is saved to ${restored.file}`);
+  }
+
   // Only the process that actually wrote the pidfile may remove it —
   // a concurrent-start loser exiting on EADDRINUSE must not delete the
   // winner's pidfile.
@@ -1840,6 +1860,7 @@ async function startServer(): Promise<void> {
 
   const shutdown = (signal: NodeJS.Signals): void => {
     logger.info(`Received ${signal}, shutting down canvas server`);
+    flushScene();
     if (ownsPidFile) removePidFile(PORT);
     server.close(() => process.exit(0));
     // Force-exit if open sockets keep the server from closing promptly
@@ -1848,6 +1869,7 @@ async function startServer(): Promise<void> {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('exit', () => {
+    flushScene();
     if (ownsPidFile) removePidFile(PORT);
   });
 }

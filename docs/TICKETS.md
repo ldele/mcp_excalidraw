@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-09 · class: living -->
+<!-- status: active · updated: 2026-10-23 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -25,6 +25,13 @@ run from the global install: `cpc-ticket --root . …`.
      - **Symptom:** one line: what was seen, and where
      - **Reproduce:** the command, or the file and line
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
+
+## T-023 — A restarted canvas comes back empty, and a tab still open on it replaces its drawing with the empty scene
+- **Status:** fixed · 2026-10-23
+- **From:** drawing-app session, excalidraw-canvas (1.3.0) · 2026-10-23
+- **Symptom:** A wireframe drawn on excalidraw-canvas --url http://127.0.0.1:3010 start was exported at rev 357, then the owner marked it up in one tab. Overnight the PC restarted and the server process died; it holds the scene in memory only (src/types.ts elements, files, snapshots, changeLog), so the markup was gone from the server. excalidraw-canvas --url http://127.0.0.1:3010 changes --since 357 auto-started a new, empty server at rev 0. On every socket open (frontend/src/App.tsx, socket.onopen) the page calls loadExistingElements() and applies the server scene, and the server sends initial_elements on connect, so a tab that outlives a restart replaces its own drawing with the empty one; it reconnects every 3 s after an unclean close. The page's copy was the only one left. T-014 covers the opposite direction (an empty sync deleting the server scene); nothing covers this one.
+- **Reproduce:** excalidraw-canvas --url http://127.0.0.1:PORT start; add a few elements; open the page on PORT and wait for it to load; kill the server process (not stop: a crash or reboot sends no signal), then run excalidraw-canvas --url http://127.0.0.1:PORT start again. The server reports 0 elements and the tab, once it reconnects, shows an empty canvas. Ask: keep the scene on disk per port and load it on start; and when a reconnecting tab finds a restarted server that is empty or behind it, keep the tab's scene and send it to the server instead.
+- **Resolution:** DEVLOG 2026-10-23. The server saves its scene, files, snapshots and change log per port (src/core/scene-store.ts; EXCALIDRAW_NO_PERSIST=1 opts out, EXCALIDRAW_SCENE_DIR moves it) and loads it on start. A tab that reconnects to a restarted process keeps its scene, merges in what only the server holds and sends the union back (adoptServerScene, mergeAfterRestart). tests/server-contract.test.mjs and tests/browser/server-restart.spec.mjs.
 
 ## T-019 — The first test run after an install or a build does not start: the server is not ready within the wait
 - **Status:** open · 2026-10-09

@@ -488,6 +488,8 @@ const child = spawn(process.execPath, [serverPath], {
   env: {
     ...process.env, PORT: String(port), HOST: '127.0.0.1', LOG_LEVEL: 'error',
     CANVAS_ALLOWED_ORIGINS: 'http://allowed.test:5173',
+    // T-023: a test canvas keeps its scene in memory; a saved one would carry over between runs
+    EXCALIDRAW_NO_PERSIST: '1',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
 });

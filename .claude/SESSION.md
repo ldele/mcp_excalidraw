@@ -4,6 +4,28 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-10-23 — Claude Code — T-023 fixed: the scene is saved per port, a tab outlives a restart; STAGED, not committed
+- **Done, from a drawing-app session on the owner's word ("fix it in the toolkit"):** T-023 filed
+  and fixed. The server saves its scene to `scene-<port>.json` beside the pidfile and loads it on
+  start (`src/core/scene-store.ts`, new); a tab that reconnects to a restarted process merges and
+  sends its scene back (`frontend/src/App.tsx`, `frontend/src/utils/scene.ts`). Docs: README,
+  `FORK.md`, the skill and cheatsheet (synced), KI-7. DEVLOG 2026-10-23.
+- **Where:** the main checkout, `main` at `060139c`, staged (`git diff --cached`). In
+  `docs/TICKETS.md` only T-023 is staged: T-020 to T-022, another session's (2026-10-21), stay
+  unstaged in the working tree for their own commit.
+- **Verified:** `npm test` 88 / 88 plus scripts; Playwright 22 / 22 with the system Chrome; seeded
+  defects caught; a live kill-and-restart round on 3021. `dist/` is built, so `excalidraw-canvas`
+  on PATH carries the fix.
+- **Upstream moved** (7 commits, its own opt-in store among them, 12 conflicts in a dry merge);
+  not merged. What to decide at the next merge is in `FORK.md`.
+- **Mind:** port 3010 waits on the owner, who is exporting a tab still open on it from before
+  this build; do not start a canvas there until they say so. Port 3000 belongs to a
+  pharma-dq-validator session. The house skill `wireframe-first` (claude-skills) still said "the
+  canvas is memory"; its edit is staged in that repository, not here.
+- **Next:** the owner reviews and commits; push; dispatch CI by hand (KI-8). Then T-001 with no
+  tab, then PR 4. The pull request to upstream stays held.
+- **Picks up:** any session with a terminal.
+
 ## 2026-10-09 — Claude Code — the spare worktree and three merged branches are gone; the probes moved
 - **Corrects every earlier line that names `C:\Projects\mcp_excalidraw-merge`** — the "Standing,
   local only" of entries (h) and (j) of 2026-10-08, the Where of entry (i), and the older ones.
@@ -164,21 +186,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   (4) unread: the 22 advisories from `npm ci`.
 - **Picks up:** any session with a terminal. No canvas is running.
 
-## 2026-10-08 (c) — Claude Code — T-009 fixed on `main`; the offer to upstream decided, not sent
-- **Supersedes the Next of (b):** its steps (1) to (3) are done, on the owner's *"yes to all
-  four"*. (1) and (2) are `cfa2eae` and `265f7a9`, pushed, **CI green** (run 37756642052, five
-  jobs). (3) is this commit: the fix for T-009 on `main`, T-009 closed, SPEC-003 rows 4 and 5
-  resolved. Detail: DEVLOG 2026-10-08 (c).
-- **Not done — step (4), the pull request to upstream.** The patch is local commit `527500b` on
-  `t009-waypoints-upstream` in `C:\Projects\mcp_excalidraw-upstream`; its text is `PR_BODY.md`
-  beside it. The session's permission check refused the push of that branch. The owner runs, one
-  after the other, `git -C C:\Projects\mcp_excalidraw-upstream push origin t009-waypoints-upstream`
-  and `gh pr create --repo yctimlin/mcp_excalidraw --base main --head
-  ldele:t009-waypoints-upstream --title "fix: keep waypoints on bound arrows" --body-file
-  C:\Projects\mcp_excalidraw-upstream\PR_BODY.md` — or grants the session both.
-- **Next:** (1) read the CI run dispatched on this commit: the new check's first run on Linux.
-  (2) once the pull request exists, its link in `FORK.md`, SPEC-003 row 5 and here. (3) remove
-  the worktree `C:\Projects\mcp_excalidraw-merge` and the branch `t009-waypoints-fork`; keep
-  `C:\Projects\mcp_excalidraw-upstream` while the pull request is pending. (4) T-010, T-001,
-  PR 4. Unread: the 22 advisories from `npm ci`.
-- **Picks up:** any session with a terminal. No canvas is running.

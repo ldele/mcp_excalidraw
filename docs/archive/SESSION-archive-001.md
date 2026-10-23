@@ -4,6 +4,25 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-10-08 (c) — Claude Code — T-009 fixed on `main`; the offer to upstream decided, not sent
+- **Supersedes the Next of (b):** its steps (1) to (3) are done, on the owner's *"yes to all
+  four"*. (1) and (2) are `cfa2eae` and `265f7a9`, pushed, **CI green** (run 37756642052, five
+  jobs). (3) is this commit: the fix for T-009 on `main`, T-009 closed, SPEC-003 rows 4 and 5
+  resolved. Detail: DEVLOG 2026-10-08 (c).
+- **Not done — step (4), the pull request to upstream.** The patch is local commit `527500b` on
+  `t009-waypoints-upstream` in `C:\Projects\mcp_excalidraw-upstream`; its text is `PR_BODY.md`
+  beside it. The session's permission check refused the push of that branch. The owner runs, one
+  after the other, `git -C C:\Projects\mcp_excalidraw-upstream push origin t009-waypoints-upstream`
+  and `gh pr create --repo yctimlin/mcp_excalidraw --base main --head
+  ldele:t009-waypoints-upstream --title "fix: keep waypoints on bound arrows" --body-file
+  C:\Projects\mcp_excalidraw-upstream\PR_BODY.md` — or grants the session both.
+- **Next:** (1) read the CI run dispatched on this commit: the new check's first run on Linux.
+  (2) once the pull request exists, its link in `FORK.md`, SPEC-003 row 5 and here. (3) remove
+  the worktree `C:\Projects\mcp_excalidraw-merge` and the branch `t009-waypoints-fork`; keep
+  `C:\Projects\mcp_excalidraw-upstream` while the pull request is pending. (4) T-010, T-001,
+  PR 4. Unread: the 22 advisories from `npm ci`.
+- **Picks up:** any session with a terminal. No canvas is running.
+
 ## 2026-10-08 (b) — Claude Code — SPEC-003 run: T-009 is upstream's too; fix staged on two branches; nothing sent
 - **Done:** SPEC-003, to its note. T-009 reproduces on upstream alone at `96d9c21`. The fix is
   `resolveArrowBindings` only, +29 −11, with one check in upstream's state script. Arrows without

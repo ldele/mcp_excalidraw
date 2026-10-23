@@ -437,6 +437,8 @@ export interface HealthStatus {
   pid?: number;
   // v2.1+: which image renderers this server can use right now
   renderers?: { node: boolean; browser: number };
+  // Fork (T-023): the file the scene is saved to, or null when it is kept in memory only
+  sceneFile?: string | null;
 }
 
 export async function getHealth(timeoutMs = 2000): Promise<HealthStatus> {

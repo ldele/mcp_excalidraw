@@ -299,6 +299,8 @@ The MCP server runs over stdio. Since v1.1 the simplest config is `npx` — no c
 | `EXCALIDRAW_NO_AUTOSTART` | Set `1` to disable canvas auto-start | (unset) |
 | `EXCALIDRAW_EXPORT_DIR` | Base directory MCP file exports may write to | current working dir |
 | `EXCALIDRAW_RENDER_MAX_DIM` | Largest side of a headless PNG, in pixels | `8192` |
+| `EXCALIDRAW_NO_PERSIST` | Fork: set `1` to keep the scene in memory only, so a restart starts empty | (unset: saved per port) |
+| `EXCALIDRAW_SCENE_DIR` | Fork: directory of the saved scenes, one `scene-<port>.json` per port | the pidfile's: `%LOCALAPPDATA%\Excalidraw-Canvas` (Windows), `~/Library/Application Support/excalidraw-canvas` (macOS), `$XDG_STATE_HOME/excalidraw-canvas` (Linux) |
 | `PORT` / `HOST` | Canvas server bind address | `3000` / `127.0.0.1` |
 | `CANVAS_ALLOWED_ORIGINS` | Other page origins allowed to call the canvas, comma-separated (for example `http://localhost:5173` for `npm run dev`) | (unset: the canvas's own page only) |
 | `LOG_LEVEL` | Log verbosity (`error`, `warn`, `info`, `debug`) | `info` |
@@ -443,7 +445,7 @@ Config location: `~/.gemini/antigravity/mcp_config.json`
 
 ### Notes
 
-- **In-memory storage**: The canvas server stores elements in memory. Restarting the server clears all elements — use `export` / `snapshot` for persistence.
+- **Saved scene (fork)**: the canvas server saves its scene to disk, one file per port, and reads it back on start, so a restart or a reboot keeps the drawing. `EXCALIDRAW_NO_PERSIST=1` keeps it in memory only. Commit drawings with `export`: the saved scene sits outside the repo and the next drawing on that port replaces it.
 
 ## MCP Tools (29 Total)
 
@@ -598,7 +600,7 @@ No. Screenshots and PNG/SVG exports render headless inside the canvas server (se
 
 ### Are my diagrams persistent?
 
-The canvas is in-memory by design (restart = blank canvas). Persist by exporting `.excalidraw` files into your repo (`export --out docs/architecture.excalidraw`) or with named `snapshot`s while working. Re-`import` a file to keep refining it later.
+In this fork, across restarts: the canvas server saves its scene, image files, snapshots and change log for its port (see `EXCALIDRAW_SCENE_DIR` and `EXCALIDRAW_NO_PERSIST` in [Environment Variables](#environment-variables)), and a tab that outlives a restart gives the server back whatever it lacks. A diagram belongs in your repo as an exported `.excalidraw` file (`export --out docs/architecture.excalidraw`); re-`import` it to keep refining it later.
 
 ### Are excalidraw.com share links private?
 
@@ -624,7 +626,7 @@ Yes — that's the recommended path for coding agents: `excalidraw-canvas instal
 
 ## Known Issues / TODO
 
-- [ ] **Persistent storage**: Elements are stored in-memory — restarting the server clears everything. Use `export` / snapshots as a workaround.
+- [x] **Persistent storage** (fork, T-023): the scene is saved per port and read back on start; `EXCALIDRAW_NO_PERSIST=1` turns it off.
 - [ ] **Mermaid conversion requires a browser**: `mermaid` / `create_from_mermaid` lay out the diagram in the frontend. Image export and screenshots are headless since v2.1.
 - [ ] **Canvas page fonts come from a CDN**: serving them from the canvas server would make the page work fully offline.
 

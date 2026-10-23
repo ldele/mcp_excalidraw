@@ -5,6 +5,7 @@
 - Canvas base URL: `EXPRESS_SERVER_URL` (default `http://127.0.0.1:3000`); CLI also accepts `--url <canvasUrl>`
 - Canvas health: `GET /health` or `excalidraw-canvas status`
 - Auto-start: any canvas-touching CLI command starts the server if it's down (opt out with `EXCALIDRAW_NO_AUTOSTART=1`)
+- Saved scene: one file per port, `scene-<port>.json` beside the pidfile (`%LOCALAPPDATA%\Excalidraw-Canvas` on Windows, `~/Library/Application Support/excalidraw-canvas` on macOS, `$XDG_STATE_HOME/excalidraw-canvas` on Linux), read back on start. `EXCALIDRAW_SCENE_DIR` moves it; `EXCALIDRAW_NO_PERSIST=1` keeps the scene in memory only
 
 ## CLI Reference
 
@@ -15,9 +16,9 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 
 | Command | Description |
 |---------|-------------|
-| `start` | Start the canvas server (detached); prints URL + pid |
+| `start` | Start the canvas server (detached); prints URL, pid, the elements it came back with and its scene file |
 | `stop` | Stop the canvas server (identity-checked via `/health` — never signals foreign services) |
-| `status` | Health, element count, renderers (`node` headless + browser tabs) |
+| `status` | Health, element count, renderers (`node` headless + browser tabs), scene file (`null`: memory only) |
 
 ### Elements
 

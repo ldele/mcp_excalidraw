@@ -11,7 +11,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
-import { readFileSync, statSync, rmSync } from 'node:fs';
+import { readFileSync, statSync, rmSync, mkdtempSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -30,26 +30,32 @@ const json = value => ({ headers: { 'content-type': 'application/json' }, body: 
 const api = async (path, init) => (await fetch(`${baseUrl}${path}`, init)).json();
 
 let server;
-let output = '';
 
-before(async () => {
-  server = spawn(process.execPath, [join(__dirname, '..', 'dist', 'server.js')], {
-    env: { ...process.env, PORT: String(port), HOST: '127.0.0.1' },
+// Boots dist/server.js on `atPort` and resolves once /health answers. The scene stays in memory
+// unless `env` says otherwise (T-023): a saved one would carry over from the last run.
+async function bootCanvas(atPort, env = {}) {
+  const child = spawn(process.execPath, [join(__dirname, '..', 'dist', 'server.js')], {
+    env: { ...process.env, PORT: String(atPort), HOST: '127.0.0.1', EXCALIDRAW_NO_PERSIST: '1', ...env },
     stdio: ['ignore', 'pipe', 'pipe']
   });
-  server.stdout.on('data', d => { output += d; });
-  server.stderr.on('data', d => { output += d; });
+  let output = '';
+  child.stdout.on('data', d => { output += d; });
+  child.stderr.on('data', d => { output += d; });
+  const url = `http://127.0.0.1:${atPort}`;
   const deadline = Date.now() + 20000;
   while (Date.now() < deadline) {
-    if (server.exitCode !== null) {
+    if (child.exitCode !== null) {
       await new Promise(r => setTimeout(r, 200)); // let the pipes drain so the reason is in `output`
-      throw new Error(`canvas server exited early (code ${server.exitCode}) on port ${port}:\n${output}`);
+      throw new Error(`canvas server exited early (code ${child.exitCode}) on port ${atPort}:\n${output}`);
     }
-    try { if ((await fetch(`${baseUrl}/health`)).ok) return; } catch { /* still starting */ }
+    try { if ((await fetch(`${url}/health`)).ok) return child; } catch { /* still starting */ }
     await new Promise(r => setTimeout(r, 100));
   }
-  throw new Error(`canvas server did not answer on ${baseUrl}:\n${output}`);
-});
+  child.kill();
+  throw new Error(`canvas server did not answer on ${url}:\n${output}`);
+}
+
+before(async () => { server = await bootCanvas(port); });
 
 after(() => { server?.kill(); });
 
@@ -413,5 +419,122 @@ describe("a tab's first click leaves the agent's scene the agent's (T-010, T-007
     assert.equal(reading.flows.length, 1, 'still a flow, not an annotation');
     assert.equal(reading.markup.length, 0);
     assert.match(JSON.stringify(reading.screens), /"label":"Dismiss"/, 'the label reads unwrapped');
+  });
+});
+
+// T-023: a canvas killed outright (a crash, a reboot) came back empty, and the tab still open on it
+// then loaded that empty scene over its own drawing. The scene is now saved per port and read back
+// on start. `kill('SIGKILL')` leaves the server no chance to save on its way out, as a reboot does.
+describe('a canvas that restarts comes back with its drawing (T-023)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'canvas-scene-'));
+  const at = 36000 + Math.floor(Math.random() * 1000);
+  const persist = { EXCALIDRAW_NO_PERSIST: '0', EXCALIDRAW_SCENE_DIR: dir };
+  const PIXEL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
+  const call = atPort => async (path, init) => (await fetch(`http://127.0.0.1:${atPort}${path}`, init)).json();
+  const crash = child => new Promise(resolve => { child.once('exit', resolve); child.kill('SIGKILL'); });
+  const rectangle = id => ({ method: 'POST', ...json({ id, type: 'rectangle', x: 0, y: 0, width: 40, height: 40 }) });
+  // The save lands a moment after the writes stop: wait until the file holds this revision.
+  const saved = async (file, rev) => {
+    const deadline = Date.now() + 5000;
+    while (Date.now() < deadline) {
+      try { if (JSON.parse(readFileSync(file, 'utf-8')).revision === rev) return; } catch { /* not written yet */ }
+      await new Promise(r => setTimeout(r, 50));
+    }
+    throw new Error(`${file} never reached rev ${rev}`);
+  };
+
+  after(() => rmSync(dir, { recursive: true, force: true }));
+
+  test('elements, image files, snapshots and the change feed survive a kill', async () => {
+    const canvas = call(at);
+    let child = await bootCanvas(at, persist);
+    let before;
+    try {
+      await canvas('/api/elements', { method: 'POST', ...json({ id: 'card', type: 'rectangle', x: 0, y: 0, width: 160, height: 80, role: 'card', label: { text: 'Card' } }) });
+      await canvas('/api/files', { method: 'POST', ...json({ files: [{ id: 'pixel', mimeType: 'image/png', created: 1, dataURL: PIXEL }] }) });
+      await canvas('/api/elements', { method: 'POST', ...json({ id: 'photo', type: 'image', x: 200, y: 0, width: 30, height: 30, fileId: 'pixel' }) });
+      await canvas('/api/snapshots', { method: 'POST', ...json({ name: 'before-markup' }) });
+      // A person's note, sent the way a tab sends it.
+      const { elements: drawn } = await canvas('/api/elements');
+      const note = { id: 'note', type: 'text', x: 0, y: 120, width: 120, height: 25, text: 'Make it wider', originalText: 'Make it wider' };
+      await canvas('/api/elements/sync', { method: 'POST', ...json({ elements: [...drawn, note] }) });
+
+      const read = async () => ({
+        health: await canvas('/health'),
+        elements: (await canvas('/api/elements')).elements,
+        files: (await canvas('/api/files')).files,
+        snapshots: (await canvas('/api/snapshots')).snapshots,
+        changes: await canvas('/api/changes?since=0')
+      });
+      before = await read();
+      assert.ok(before.health.sceneFile.startsWith(dir), 'saved where EXCALIDRAW_SCENE_DIR says');
+      await saved(before.health.sceneFile, before.health.rev);
+      await crash(child);
+
+      child = await bootCanvas(at, persist);
+      const restored = await read();
+      assert.deepEqual(restored.elements, before.elements, 'every element, with its role, origin and rev');
+      assert.equal(restored.elements.find(e => e.id === 'card').role, 'card');
+      assert.deepEqual(restored.files, before.files);
+      assert.deepEqual(restored.snapshots, before.snapshots);
+      assert.deepEqual(restored.changes, before.changes, '`changes --since N` answers as it did');
+      assert.ok(restored.changes.records.some(r => r.id === 'note' && r.origin === 'human'), 'the markup is still in the feed');
+      assert.equal(restored.health.sceneId, before.health.sceneId, 'the same drawing');
+      assert.notEqual(restored.health.instanceId, before.health.instanceId, 'in a new process');
+
+      await canvas('/api/elements', rectangle('later'));
+      assert.equal((await canvas('/health')).rev, before.health.rev + 1, 'the revision goes on from where it was');
+    } finally {
+      child.kill();
+    }
+
+    // One file per port: a canvas on another port does not start from this drawing.
+    const other = await bootCanvas(at + 1, persist);
+    try {
+      const health = await call(at + 1)('/health');
+      assert.equal(health.elements_count, 0);
+      assert.notEqual(health.sceneFile, before.health.sceneFile);
+    } finally {
+      other.kill();
+    }
+  });
+
+  test('EXCALIDRAW_NO_PERSIST=1 keeps the scene in memory only, as before', async () => {
+    const memoryDir = mkdtempSync(join(tmpdir(), 'canvas-memory-'));
+    const env = { EXCALIDRAW_NO_PERSIST: '1', EXCALIDRAW_SCENE_DIR: memoryDir };
+    const canvas = call(at + 2);
+    let child = await bootCanvas(at + 2, env);
+    try {
+      await canvas('/api/elements', rectangle('kept-in-memory'));
+      assert.equal((await canvas('/health')).sceneFile, null);
+      await new Promise(r => setTimeout(r, 600)); // longer than a save waits
+      assert.deepEqual(readdirSync(memoryDir), [], 'nothing written');
+      await crash(child);
+      child = await bootCanvas(at + 2, env);
+      assert.equal((await canvas('/health')).elements_count, 0);
+    } finally {
+      child.kill();
+      rmSync(memoryDir, { recursive: true, force: true });
+    }
+  });
+
+  test('a scene file it cannot read is moved aside, never written over', async () => {
+    const file = join(dir, `scene-${at + 3}.json`);
+    const broken = '{"format":"excalidraw-canvas-scene","version":1,"elements":[{"id":"cut-off';
+    writeFileSync(file, broken);
+    const canvas = call(at + 3);
+    const child = await bootCanvas(at + 3, persist);
+    try {
+      assert.equal((await canvas('/health')).elements_count, 0, 'starts empty');
+      const aside = readdirSync(dir).filter(name => name.startsWith(`scene-${at + 3}.unreadable-`));
+      assert.equal(aside.length, 1, 'kept beside, under another name');
+      assert.equal(readFileSync(join(dir, aside[0]), 'utf-8'), broken);
+      await canvas('/api/elements', rectangle('fresh'));
+      await saved(file, (await canvas('/health')).rev);
+      assert.equal(readFileSync(join(dir, aside[0]), 'utf-8'), broken, 'the new save did not touch it');
+      assert.ok(existsSync(file));
+    } finally {
+      child.kill();
+    }
   });
 });

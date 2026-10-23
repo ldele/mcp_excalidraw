@@ -13,11 +13,15 @@ export async function start(argv: string[]): Promise<void> {
   if (!result.spawned) {
     note(`Canvas server already running at ${result.url}`);
   }
+  // Fork (T-023): a server comes back with the scene saved on its port, so say what it holds.
+  const health = await getHealth().catch(() => null);
   printJson({
     running: true,
     url: result.url,
     spawned: result.spawned,
-    pid: readPidFile(canvasPort()) ?? undefined
+    pid: readPidFile(canvasPort()) ?? undefined,
+    elements: health?.elements_count,
+    sceneFile: health?.sceneFile
   });
 }
 
@@ -66,6 +70,8 @@ export async function status(argv: string[]): Promise<void> {
     browserClients: health.websocket_clients,
     // Older servers predate the headless renderer and only report tabs
     renderers: health.renderers ?? { node: false, browser: health.websocket_clients },
+    // Fork (T-023): absent from servers older than the scene file
+    sceneFile: health.sceneFile,
     ...sync
   });
 }

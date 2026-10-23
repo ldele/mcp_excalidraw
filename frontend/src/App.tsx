@@ -14,9 +14,9 @@ import type {
   LibraryPersistenceAdapter
 } from '@excalidraw/excalidraw/data/library'
 import { convertMermaidToExcalidraw, DEFAULT_MERMAID_CONFIG } from './utils/mermaidConverter'
-import { cleanElementForExcalidraw, prepareServerScene, assertScenePreserved } from './utils/scene'
+import { cleanElementForExcalidraw, prepareServerScene, assertScenePreserved, mergeAfterRestart } from './utils/scene'
 import { preloadCanvasFonts } from './utils/fonts'
-import type { ServerElement } from './utils/scene'
+import type { ServerElement, CanvasIdentity } from './utils/scene'
 import type { MermaidConfig } from '@excalidraw/mermaid-to-excalidraw'
 
 const LIBRARY_STORAGE_KEY = 'excalidraw-canvas-library'
@@ -24,7 +24,7 @@ const LIBRARY_STORAGE_KEY = 'excalidraw-canvas-library'
 /**
  * Persists the user's library in this browser.
  *
- * The scene is in-memory by design, but the library is not scene data — it is a
+ * The scene belongs to the canvas server, but the library is not scene data — it is a
  * user asset: shapes they added themselves, or a pack they installed from
  * libraries.excalidraw.com. Without an adapter the library panel resets to empty
  * on every reload, which makes it useless, and `useHandleLibrary` below needs one
@@ -84,6 +84,10 @@ interface WebSocketMessage {
   zoom?: number;
   offsetX?: number;
   offsetY?: number;
+  // Fork (T-023): `rev` rides on every message; the identity on initial_elements
+  rev?: number;
+  instanceId?: string;
+  sceneId?: string;
 }
 
 interface ApiResponse {
@@ -94,6 +98,10 @@ interface ApiResponse {
   count?: number;
   error?: string;
   message?: string;
+  // Fork (T-023): GET /api/elements says which server and drawing; a sync says the revision
+  rev?: number;
+  instanceId?: string;
+  sceneId?: string;
 }
 
 type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
@@ -212,6 +220,54 @@ function App(): JSX.Element {
     setSceneLoadStatus('ready')
   }
 
+  // Fork (T-023): the server process, drawing and revision this tab's scene came
+  // from, and whether they describe the server the socket reaches now (they do not
+  // between a drop and the first scene of the next connection).
+  const serverIdentityRef = useRef<CanvasIdentity | null>(null)
+  const identityCurrentRef = useRef<boolean>(false)
+
+  const noteServerRev = (rev: unknown): void => {
+    if (identityCurrentRef.current && serverIdentityRef.current && typeof rev === 'number') {
+      serverIdentityRef.current.rev = rev
+    }
+  }
+
+  // Every full scene from the server comes through here. A tab that outlived its
+  // server (a crash, a reboot, a stop and start) holds a drawing the new process may
+  // have lost: all of it when it came back empty, the last moments when it came back
+  // from disk. Loading the server's scene would wipe the tab's copy, then the only
+  // one (T-023). So after a restart the tab keeps its scene, takes in what only the
+  // server holds, and sends the union back. A sync deletes whatever it leaves out
+  // (T-014, KI-7), which is why nothing the server holds is left out of the union.
+  const adoptServerScene = async (
+    incoming: readonly ServerElement[],
+    identity: Partial<CanvasIdentity>,
+    generation: number,
+    files?: Record<string, unknown>
+  ): Promise<void> => {
+    const api = excalidrawAPIRef.current
+    if (!api || generation !== sceneGenerationRef.current) return
+    const known = serverIdentityRef.current
+    const restarted = known !== null && typeof identity.instanceId === 'string' &&
+      identity.instanceId !== known.instanceId
+    // The files the old process held are not this one's: upload whatever it lacks
+    if (restarted) serverFileIdsRef.current.clear()
+    const held = api.getSceneElementsIncludingDeleted()
+    const keepTab = restarted && held.some(el => !el.isDeleted)
+    const scene = keepTab && known
+      ? mergeAfterRestart(held, incoming, { sameScene: identity.sceneId === known.sceneId, seenRev: known.rev })
+      : incoming.map(cleanElementForExcalidraw)
+    applyServerScene(scene, generation, files)
+    serverIdentityRef.current = typeof identity.instanceId === 'string' && typeof identity.sceneId === 'string'
+      ? { instanceId: identity.instanceId, sceneId: identity.sceneId, rev: typeof identity.rev === 'number' ? identity.rev : 0 }
+      : null
+    identityCurrentRef.current = true
+    if (keepTab) {
+      console.warn(`The canvas server restarted under this tab; sending the tab's ${scene.length} elements back to it`)
+      await syncToBackend()
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (autoSyncTimerRef.current) {
@@ -289,7 +345,7 @@ function App(): JSX.Element {
       }
       await preloadCanvasFonts()
       if (generation !== sceneGenerationRef.current) return
-      applyServerScene(result.elements.map(cleanElementForExcalidraw), generation, filesResult.files)
+      await adoptServerScene(result.elements, result, generation, filesResult.files)
     } catch (error) {
       failSceneLoad(error, generation)
     }
@@ -314,7 +370,10 @@ function App(): JSX.Element {
     socket.onopen = () => {
       if (websocketRef.current !== socket) return
       setIsConnected(true)
-      void loadExistingElements()
+      // A tab that already holds a server's scene takes the next one from this
+      // connection's initial_elements alone: a full load racing it could see the
+      // restart, merge and send twice (T-023).
+      if (!serverIdentityRef.current) void loadExistingElements()
     }
 
     socket.onmessage = (event: MessageEvent) => {
@@ -330,6 +389,7 @@ function App(): JSX.Element {
     socket.onclose = (event: CloseEvent) => {
       if (websocketRef.current !== socket) return
       setIsConnected(false)
+      identityCurrentRef.current = false
       pauseSceneSync()
 
       // Reconnect after 3 seconds if not a clean close
@@ -351,6 +411,7 @@ function App(): JSX.Element {
     if (!excalidrawAPI) {
       return
     }
+    if (data.type !== 'initial_elements') noteServerRev(data.rev)
 
     if (SCENE_MUTATIONS.has(data.type) && sceneLoadStatusRef.current !== 'ready') {
       // An incremental event cannot prove that a failed or pending full load
@@ -395,7 +456,7 @@ function App(): JSX.Element {
             // Measure the first scene with the real fonts, not a fallback
             await preloadCanvasFonts()
             if (generation !== sceneGenerationRef.current) return
-            applyServerScene(data.elements.map(cleanElementForExcalidraw), generation, (data as any).files)
+            await adoptServerScene(data.elements, data, generation, (data as any).files)
           }
           break
 
@@ -799,6 +860,7 @@ function App(): JSX.Element {
 
       if (response.ok) {
         const result: ApiResponse = await response.json()
+        noteServerRev(result.rev)
         setLastSyncTime(new Date())
         console.log(`Sync successful: ${result.count} elements synced`)
 

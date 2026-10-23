@@ -22,7 +22,8 @@ const PORT = 51999;
 const BASE = `http://127.0.0.1:${PORT}`;
 
 const server = spawn(process.execPath, ['dist/server.js'], {
-  env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1', LOG_LEVEL: 'error' },
+  // T-023: EXCALIDRAW_NO_PERSIST — a saved scene on this fixed port would carry over between runs
+  env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1', LOG_LEVEL: 'error', EXCALIDRAW_NO_PERSIST: '1' },
   stdio: ['ignore', 'ignore', 'inherit']
 });
 const cleanup = () => { try { server.kill('SIGTERM'); } catch {} };

@@ -19,7 +19,8 @@ export default defineConfig({
   },
   webServer: {
     command: 'node dist/server.js',
-    env: { HOST: '127.0.0.1', PORT: String(port), LOG_LEVEL: 'error' },
+    // T-023: in memory, or every run would start from the scene the last one left on this port
+    env: { HOST: '127.0.0.1', PORT: String(port), LOG_LEVEL: 'error', EXCALIDRAW_NO_PERSIST: '1' },
     url: `${baseURL}/health`,
     reuseExistingServer: false,
     timeout: 15000,

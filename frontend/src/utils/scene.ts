@@ -434,3 +434,39 @@ export const prepareServerScene = (
   assertScenePreserved(elements, restored)
   return restored
 }
+
+// Fork (T-023): which server process, drawing and revision a tab's scene came from.
+export interface CanvasIdentity {
+  instanceId: string
+  sceneId: string
+  rev: number
+}
+
+/**
+ * The scene a tab sends back to a server that restarted under it: what the tab
+ * holds, plus what only the server holds. On an id both hold the tab's copy wins,
+ * unless the server changed it after the tab last heard from it — knowable only
+ * when the server came back with the same drawing (`sameScene`), since revisions
+ * count within one drawing. An element the tab deleted stays deleted on the same
+ * terms. Deleted elements of `held` are tombstones, kept by Excalidraw.
+ */
+export const mergeAfterRestart = (
+  held: readonly Partial<ExcalidrawElement>[],
+  server: readonly ServerElement[],
+  opts: { sameScene: boolean; seenRev: number }
+): Partial<ExcalidrawElement>[] => {
+  const serverById = new Map(server.map(el => [el.id, el]))
+  const heldIds = new Set(held.map(el => el.id))
+  const changedSince = (el: ServerElement | undefined): el is ServerElement =>
+    !!el && opts.sameScene && typeof el.rev === 'number' && el.rev > opts.seenRev
+  const merged: Partial<ExcalidrawElement>[] = []
+  for (const element of held) {
+    const theirs = serverById.get(element.id!)
+    if (changedSince(theirs)) merged.push(cleanElementForExcalidraw(theirs))
+    else if (!element.isDeleted) merged.push(element)
+  }
+  for (const element of server) {
+    if (!heldIds.has(element.id)) merged.push(cleanElementForExcalidraw(element))
+  }
+  return merged
+}

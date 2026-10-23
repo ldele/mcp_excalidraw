@@ -138,6 +138,19 @@ no longer answers every origin. A third check of ours in `scripts/check-state-in
 Upstream's open pull request #74 rewrites the same two lines with a token and an allow-list of
 its own; if upstream merges it, read both before choosing.
 
+Since 2026-10-23 the scene is saved to disk per port and read back on start, and a tab that
+outlives a restart gives the server back what it lacks (T-023). The store is a file of ours,
+`src/core/scene-store.ts`; in upstream's `src/server.ts` it is seven touches: an import, a
+middleware after `express.json`, the revision on every broadcast, the identity on
+`initial_elements`, `GET /api/elements` and `/health`, the load before `listen`, and a flush on
+shutdown. The page side is `adoptServerScene` in `frontend/src/App.tsx` and `mergeAfterRestart`
+in `frontend/src/utils/scene.ts`. **Upstream has its own store since 2026-10-09** (`95b0248`,
+#130, with #133 and #140): opt-in through `EXCALIDRAW_DATA_DIR`, one directory under a lock for
+every port, a checkpoint written before each mutation is acknowledged, and no change log or page
+side. It was not merged for this fix. At the next merge, decide whether ours gives way to it
+(keeping a per-port default, the change log and the page side on top) or stays; both at once
+would save the scene twice.
+
 ## Specs
 
 - **Node ≥ 20** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`
@@ -148,8 +161,10 @@ its own; if upstream merges it, read both before choosing.
   The CLI auto-starts the canvas server. Screenshots and image export render headless
   (`src/core/render/`); `render <file>` needs no server at all. Mermaid conversion,
   viewport control and human markup need an open browser tab, and exit code 4 says so
-- **State is in memory** in the Express server, with named snapshots. Nothing
-  persists across a restart except what you `export`
+- **State lives in the Express server**, with named snapshots, and is saved to disk per port
+  (`scene-<port>.json` beside the pidfile; `EXCALIDRAW_NO_PERSIST=1` keeps it in memory
+  only), so a restart keeps the drawing. A drawing's home is still the `.excalidraw` file
+  you `export`
 - **The skill** (`skills/excalidraw-skill/`) is the source of truth and is copied
   to `.agents/skills/` by `npm run sync:skills`. Both the sync script and
   `install-skill` copy recursively, so new reference files need no registration

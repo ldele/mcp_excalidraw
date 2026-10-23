@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-09-07 · class: living -->
+<!-- status: active · updated: 2026-10-23 · class: living -->
 
 # KNOWN ISSUES
 
@@ -100,6 +100,10 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Workaround:** keep exactly one tab open. Since 2026-08-07 `changes` and `watch` warn loudly —
   on stderr and in-band in the report — when `/health` shows `websocket_clients > 1`, so the
   condition is visible before someone spends a round drawing into it. That is a guard, not a fix.
+- **Across a server restart (T-023, 2026-10-23):** each tab that reconnects to a restarted server
+  sends back, once, its own scene merged with the server's, so nothing either holds is dropped
+  by that send. With two tabs open, the later one's copy wins on the elements both hold, and the
+  loop above resumes with the next sync. One tab is still the rule.
 - **Real fix:** not attempted. The server has to stop inferring deletion from absence in a single
   client's snapshot — a per-client baseline, or a scene sequence number carried on the sync. That is
   a protocol change in `src/server.ts` (collision zone, rule 2) and wants an ADR of its own.

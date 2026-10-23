@@ -15,6 +15,10 @@ Three interfaces drive the same live canvas. Pick the first one that applies:
    excalidraw-canvas <command>
    ```
    Any canvas-touching command **auto-starts the canvas server** on `http://127.0.0.1:3000`.
+   **A canvas comes back with the scene saved for its port**: a crash, a reboot or `stop`
+   then `start` keeps the drawing and its change log. So a canvas you start may already
+   hold someone's drawing — `describe` before you draw, and `clear --yes` only for a new
+   one. `status` names the file; `EXCALIDRAW_NO_PERSIST=1` keeps the scene in memory only.
 
    > **Do not use `npx mcp-excalidraw-server`.** That name on npm belongs to the
    > upstream project this is forked from, and upstream has no `wireframe` or
@@ -154,7 +158,7 @@ If you find any issue: **stop, fix it, re-screenshot, then continue.** Say "I se
 ### Steps (CLI shown; MCP tools are 1:1 — see cheatsheet)
 
 1. Plan your coordinate grid — map out tiers and x-positions before writing JSON. (MCP mode: call `read_diagram_guide` for colors/sizing; the same guidance lives in `references/cheatsheet.md`.)
-2. Optional fresh start: `excalidraw-canvas clear --yes`
+2. Fresh start: `excalidraw-canvas clear --yes`. The canvas reopens on the last scene saved for its port, so clear it for a new diagram — after `describe`, if it might be someone's drawing in progress.
 3. Create shapes and arrows in one call. Custom `id` fields (e.g. `"id": "auth-svc"`) make later updates easy:
    ```bash
    excalidraw-canvas add - <<'EOF'
@@ -388,8 +392,9 @@ than one is connected, on stderr and in the report; `watch` warns *before* it
 waits. **Never ignore that warning and let someone start drawing.** Tell them to
 close the extras, then confirm with `/health` that `websocket_clients` is 1.
 Be careful not to cause it yourself: asking the user to "open the canvas" a second
-time after a server restart is how it usually happens — say *reload the tab you
-already have*.
+time after a server restart is how it usually happens. The tab they have reconnects
+by itself and gives a restarted server back whatever it lacks (T-023) — say *wait
+for "Connected" in the tab you already have*.
 
 ### Reading the report
 
@@ -431,7 +436,9 @@ already have*.
 - A person retyping a shape's label is reported as a change to **the shape**
   (`text "Continue" → "Log in"`), not as a separate text element.
 - If a report says the log is truncated or the cursor is ahead of the canvas (the
-  server restarted), fall back to `describe` for the full current state.
+  server restarted without its saved scene: `EXCALIDRAW_NO_PERSIST=1`, or the file was
+  lost), fall back to `describe` for the full current state. A server that came back
+  with its scene keeps the change log, so the cursor still holds.
 
 ## Workflow: Refine an Existing Diagram
 
@@ -458,7 +465,7 @@ Requires an open browser tab (conversion runs in the frontend; exit code 4 tells
 - Offline: `render diagram.excalidraw --out diagram.png` renders a saved file without the canvas server (CI-friendly, same flags as `screenshot`)
 - Share link: `share` — encrypts the scene and returns a shareable excalidraw.com URL
 
-This is how diagrams live in a repo: commit the `.excalidraw` file, and re-`import` + edit + `export` it when the architecture changes.
+This is how diagrams live in a repo: commit the `.excalidraw` file, and re-`import` + edit + `export` it when the architecture changes. The scene the canvas saves for its port is a safety net between exports, not a home for the drawing: it sits outside the repo, one per port, and the next drawing on that port replaces it.
 
 ### Obsidian vaults: use `.excalidraw.md`
 

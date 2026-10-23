@@ -20,6 +20,8 @@ function spawnCanvas(host) {
     ...process.env,
     PORT: String(port),
     LOG_LEVEL: 'error',
+    // T-023: a test canvas keeps its scene in memory; a saved one would carry over between runs
+    EXCALIDRAW_NO_PERSIST: '1',
   };
   if (host) {
     env.HOST = host;
