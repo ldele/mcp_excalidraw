@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-23 · class: living -->
+<!-- status: active · updated: 2026-10-29 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -25,6 +25,20 @@ run from the global install: `cpc-ticket --root . …`.
      - **Symptom:** one line: what was seen, and where
      - **Reproduce:** the command, or the file and line
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
+
+## T-025 — Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it
+- **Status:** open · 2026-10-29
+- **From:** drawing-app session (1.3.0) · 2026-10-29
+- **Symptom:** apply with delete of 26 labelled rectangles (ids s1-key-hi and others) removed the rectangles but left all 19 bound labels (ids <shape>-label, containerId pointing at the deleted shape) drawn where the shapes were, overlapping the new pills. wireframe --score was unchanged (79 components, orphans 0), so only the screenshot showed them; deleting the 19 label ids by hand cleaned it.
+- **Reproduce:** excalidraw-canvas add a rectangle with text; excalidraw-canvas apply '{"delete":["<id>"]}'; export: a text element with containerId <id> remains and screenshot still draws it.
+- **Resolution:** —
+
+## T-024 — A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows
+- **Status:** open · 2026-10-29
+- **From:** drawing-app session (1.3.0) · 2026-10-29
+- **Symptom:** Three arrows created with elbowed: true, startElementId and endElementId (and points, later restored with update) were bound and wireframe listed 3 flows. When the owner's tab connected, changes reported each as 're-bound: s1-start -> s2 => nothing — by human' (rev 89 -> 94); get f-start then shows startBinding null and endBinding null, and wireframe prints no Navigation section. The score stays clean (it does not count flows), so only the reading shows it. The same arrows recreated without elbowed kept their bindings through the tab's sync (0 human changes, 3 flows).
+- **Reproduce:** excalidraw-canvas add two rectangles and an arrow {elbowed: true, startElementId, endElementId, points with waypoints}; wireframe lists the flow; open the canvas in one tab; changes reports the re-bound edits by human and wireframe has no flow.
+- **Resolution:** —
 
 ## T-023 — A restarted canvas comes back empty, and a tab still open on it replaces its drawing with the empty scene
 - **Status:** fixed · 2026-10-23
