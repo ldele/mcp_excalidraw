@@ -55,6 +55,15 @@ only by `workflow_dispatch`; a push makes no run (KI-8).
    `npm run test:corpus` reads five stored drawings back and diffs them against known-good
    readings. Green tests are the floor, not the ceiling: draw the new thing too (ADR-001,
    `docs/specs/SPEC-001-fixture-corpus.md`).
+5. **cpc is never made public.** The cpc tooling vendored in `tools/conventions/` (the gates,
+   `run.py`, `cpc.just`, the templates) is proprietary: `tools/conventions/cpc/LICENSE` grants no
+   licence. This repository is public on GitHub. So `tools/conventions/` is never committed,
+   pushed, packed, attached to a pull request or an issue, or copied anywhere another person can
+   read it. A fresh clone or worktree gets it back by a re-vendor from a cpc tag (cpc's own
+   RELEASE.md, *Re-vendoring a project from a tag*). Its gates run locally, never in CI,
+   since a CI checkout has no copy. **Enforced:** `.gitignore` keeps it out of `git add`. Nothing
+   stops `git add -f`, so before staging check that `git diff --cached --stat` names no path under
+   `tools/conventions/`. The owner's ruling, 2026-11-16.
 
 ## Familiarity map
 - fork / upstream merge policy: **high** — the owner decides when to take upstream changes.

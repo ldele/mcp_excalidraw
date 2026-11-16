@@ -3,7 +3,9 @@ name: CI
 # Minimal, in the cpc §13 shape (tier by trigger; cancel superseded runs; heavy work at a keypoint).
 # On every push and PR: ONE Node job that builds and validates the product — and the product here is
 # a wireframe reading, not code, so the gate that matters is the fixture corpus (ADR-001: known
-# drawings in, expected readings out) — plus ONE ten-second docs job running the vendored cpc gates.
+# drawings in, expected readings out). The cpc docs gates do not run here: cpc is proprietary and
+# never committed (.claude/CONTEXT.md, rule 5), so a CI checkout has no copy of them. They run
+# locally before handoff (AGENTS.md).
 # The Node-range matrix (engines >= 20) runs only on a `v*` tag or a manual dispatch: it verifies the
 # floor, it does not find wireframe regressions, and it used to be six jobs per push.
 #
@@ -61,22 +63,6 @@ jobs:
         run: npm run test:render
       - name: Canvas state integrity
         run: npm run test:state
-
-  docs:
-    name: cpc docs + integrity gates
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      # fetch-depth: 0 is required: rule 12 compares a living doc's `updated:` header against the
-      # date of the last commit that touched it, and a shallow clone has no such date.
-      - uses: actions/checkout@v7
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-python@v7
-        with: { python-version: "3.12" }
-      # The gates are VENDORED at tools/conventions/cpc/ (cpc ADR-015); stdlib only, nothing fetched.
-      # Same two commands as `just lint` — CI calls them directly, never `just` (cpc ADR-011).
-      - run: PYTHONPATH=tools/conventions python -m cpc.docs_check --root . --strict
-      - run: PYTHONPATH=tools/conventions python -m cpc.integrity_check --root . --strict
 
   compat:
     name: Node ${{ matrix.node }} (keypoint only)

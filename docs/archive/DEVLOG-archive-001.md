@@ -4,6 +4,14 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-10-14 — `ts-react-scaffold` joins the skills in play
+- **What** (owner, 2026-10-14, from a claude-skills session): `AGENTS.md`'s `## Skills in play` gains a
+  row for starting a new React app beside the canvas, pointing at `[[ts-react-scaffold]]`.
+- **Why:** the claude-skills listing had dropped that skill's description as the least used, and
+  the owner chose to keep it and link it to the two projects that run React. claude-skills 0.66.0
+  names this project in the skill, with its Playwright browser checks as the example to follow.
+- **Rejected:** a row for work on `frontend/` itself; the skill scaffolds new apps only.
+
 ## 2026-10-08 (k) — T-016 fixed: the skill names `icon`, and a test holds its role lists to the code
 - **What** (owner, 2026-10-08, from a UI-Wizard session: *"fix T-016 in the fork"*): the skill's
   two lists of declarable roles named 16 of the 17 an author can declare. `icon` was in

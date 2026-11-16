@@ -4,6 +4,17 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-16 (b) — Claude Code — cpc untracked and gitignored, rule 5; STAGED
+- **Done:** `tools/conventions/` is out of git and gitignored, CI's cpc job is removed, and the
+  owner's rule is `.claude/CONTEXT.md` rule 5 (DEVLOG 2026-11-16 (b)). Entry (a) was committed as
+  `cf11f24`.
+- **Where:** `main`, staged, not committed; nothing pushed.
+- **Mind:** a fresh clone or worktree has no gates until it re-vendors from a cpc tag. Never
+  `git add -f` under `tools/conventions/`.
+- **Next:** unchanged from entry (a). The cpc-wide default is being worked on in its own session,
+  in the cpc repository.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 — Claude Code — cpc 1.23.0, upstream 2.2.0 measured, docs cut, tickets triaged; STAGED
 - **Done:** the cpc re-vendor and its follow-ups, the README and FORK.md cut, and the triage of 17
   open tickets, each ranked (DEVLOG 2026-11-16).
@@ -35,23 +46,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** the owner reviews and commits; push; dispatch CI by hand (KI-8). Then T-001 with no
   tab, then PR 4. The pull request to upstream stays held.
 - **Picks up:** any session with a terminal.
-
-## 2026-10-09 — Claude Code — the spare worktree and three merged branches are gone; the probes moved
-- **Corrects every earlier line that names `C:\Projects\mcp_excalidraw-merge`** — the "Standing,
-  local only" of entries (h) and (j) of 2026-10-08, the Where of entry (i), and the older ones.
-  That worktree no longer exists. It was removed on 2026-10-08, on the owner's word, with the
-  local branches
-  `merge/upstream-2.1.2`, `t009-waypoints-fork` and `t015-origin-guard`: all three merged into
-  `main`, deleted with `git branch -d`, none of them ever on GitHub.
-- **The probes were kept, not lost.** The three scripts and two Playwright configs that sat
-  untracked there are in `C:\Projects\mcp_excalidraw-upstream\tests\probe-fork\`, with a
-  `README.txt` that says what each one answers and how to run it. Where the DEVLOG, the entries
-  (e) to (j) of 2026-10-08, or T-015's Reproduce line say `mcp_excalidraw-merge\tests\probe`,
-  read that folder.
-- **What is left locally:** `main`, and `t009-waypoints-upstream` in
-  `C:\Projects\mcp_excalidraw-upstream`, which holds the held upstream patch (`527500b`), its
-  `PR_BODY.md`, the upstream tab probe and now `tests/probe-fork/`. All of that is untracked or
-  unpushed, so removing that worktree loses it.
-- **Next:** unchanged from entry (k) of 2026-10-08: T-001 with no tab, then PR 4. The pull
-  request to upstream stays held.
-- **Picks up:** any session with a terminal. No canvas is running.

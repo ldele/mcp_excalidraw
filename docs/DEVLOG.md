@@ -10,6 +10,19 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (b) — cpc is never made public: `tools/conventions/` untracked and gitignored
+- **Why:** the owner ruled that the cpc tooling must never be made public. `gh` reports this repo
+  as public, and `tools/conventions/cpc/LICENSE` grants no licence. The owner chose to keep the
+  repo public and stop tracking cpc over making the repo private.
+- **What:** `tools/conventions/` is in `.gitignore` and out of the index (`git rm -r --cached`);
+  the files stay on disk, so the gates run as before here. CI's `docs` job, which ran the vendored
+  gates from the checkout, is removed: a CI clone has no copy. The rule is `.claude/CONTEXT.md`
+  rule 5, with a digest line in `AGENTS.md`; the justfile says the copy is local.
+- **Rejected:** fetching cpc in CI. It would need a token for a private repository, for two
+  ten-second checks.
+- **Opens:** making this cpc's default for every project, in its own session in the cpc
+  repository.
+
 ## 2026-11-16 — cpc 1.8.0 → 1.23.0; upstream 2.2.0 measured, not merged; README cut; tickets triaged
 - **cpc:** re-vendored cpc 1.8.0 -> 1.23.0 (`tools/conventions/cpc/`, 67 modules) from a worktree
   of `v1.23.0`, no `--profile`. Then, per its release notes: known issues moved to
@@ -89,14 +102,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Left open:** a reconnect to the same process still loads the server's scene, so an edit made
   in the 1.2 s before a socket drop, never synced, is lost (no restart involved; outside T-023).
 - **Mind:** ports 3000 and 3010 were not touched. No canvas was running during the build.
-
-## 2026-10-14 — `ts-react-scaffold` joins the skills in play
-- **What** (owner, 2026-10-14, from a claude-skills session): `AGENTS.md`'s `## Skills in play` gains a
-  row for starting a new React app beside the canvas, pointing at `[[ts-react-scaffold]]`.
-- **Why:** the claude-skills listing had dropped that skill's description as the least used, and
-  the owner chose to keep it and link it to the two projects that run React. claude-skills 0.66.0
-  names this project in the skill, with its Playwright browser checks as the example to follow.
-- **Rejected:** a row for work on `frontend/` itself; the skill scaffolds new apps only.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

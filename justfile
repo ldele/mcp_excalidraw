@@ -12,7 +12,8 @@
 # Its absence breaks nothing. The lint/check recipes drive the cpc gates that `cpc-init`
 # VENDORED into tools/conventions/cpc/ (ADR-015). The gates import each other as a package
 # (`from cpc._config import ...`), so they are run as a MODULE with tools/conventions on the
-# path — needing only a Python 3.11+ interpreter, nothing fetched from a remote.
+# path — needing only a Python 3.11+ interpreter, nothing fetched from a remote. That copy is
+# gitignored and local to each checkout (.claude/CONTEXT.md, rule 5): a fresh clone re-vendors first.
 
 # WINDOWS: `just` shells out to `sh` on every platform, and Windows has no `sh` unless something
 # put one on PATH — so without the line below every recipe here fails from PowerShell and cmd with

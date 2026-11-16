@@ -19,6 +19,11 @@ public/dist/
 # `npm run sync:skills` replaces this wholesale, so it is never committed.
 .agents/
 
+# The vendored cpc (gates, launcher, templates) is proprietary and this repository is
+# public, so it is never committed (.claude/CONTEXT.md, rule 5). A clone gets it back
+# by a re-vendor from a cpc tag.
+tools/conventions/
+
 # Scratch drawings stay out of the repo...
 *.excalidraw
 # ...except the fixture corpus, which is the whole point of committing drawings:
