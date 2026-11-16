@@ -4,6 +4,16 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-16 (e) — Claude Code — T-027 and T-028 framed as ADR-003 to ADR-005; STAGED
+- **Done:** three proposed ADRs in `docs/decisions/`, with pointers from both tickets and CONTEXT
+  (DEVLOG 2026-11-16 (e)). Entry (d) was committed as `bd24f30` and pushed. No code changed.
+- **Where:** `main`, staged, not committed.
+- **Owner's calls:** one option in each of ADR-003, ADR-004 and ADR-005, and the 2.2.0 merge.
+- **Next:** build what the ADRs decide; options that change the reading need rule 4's round trip.
+  Then PR 4.
+- **Picks up:** any session with a terminal. ADR-003's option 2 needs a browser tab to check how
+  a frame's name looks when zoomed out.
+
 ## 2026-11-16 (d) — Claude Code — T-026 and T-001 fixed; STAGED
 - **Done:** a tab's first sync no longer marks shapes drawn with a font key as a person's, and
   text added without a size is read with an estimated box. Both tickets are closed (DEVLOG
@@ -23,15 +33,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   both fixes.
 - **Mind:** the delete route in `src/server.ts` is one more touch for the 2.2.0 merge (`FORK.md`).
 - **Next:** the owner's call on 2.2.0; T-026 and T-001; then PR 4.
-- **Picks up:** any session with a terminal.
-
-## 2026-11-16 (b) — Claude Code — cpc untracked and gitignored, rule 5; STAGED
-- **Done:** `tools/conventions/` is out of git and gitignored, CI's cpc job is removed, and the
-  owner's rule is `.claude/CONTEXT.md` rule 5 (DEVLOG 2026-11-16 (b)). Entry (a) was committed as
-  `cf11f24`.
-- **Where:** `main`, staged, not committed; nothing pushed.
-- **Mind:** a fresh clone or worktree has no gates until it re-vendors from a cpc tag. Never
-  `git add -f` under `tools/conventions/`.
-- **Next:** unchanged from entry (a). The cpc-wide default is being worked on in its own session,
-  in the cpc repository.
 - **Picks up:** any session with a terminal.

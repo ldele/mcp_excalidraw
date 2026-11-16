@@ -4,6 +4,19 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (b) — cpc is never made public: `tools/conventions/` untracked and gitignored
+- **Why:** the owner ruled that the cpc tooling must never be made public. `gh` reports this repo
+  as public, and `tools/conventions/cpc/LICENSE` grants no licence. The owner chose to keep the
+  repo public and stop tracking cpc over making the repo private.
+- **What:** `tools/conventions/` is in `.gitignore` and out of the index (`git rm -r --cached`);
+  the files stay on disk, so the gates run as before here. CI's `docs` job, which ran the vendored
+  gates from the checkout, is removed: a CI clone has no copy. The rule is `.claude/CONTEXT.md`
+  rule 5, with a digest line in `AGENTS.md`; the justfile says the copy is local.
+- **Rejected:** fetching cpc in CI. It would need a token for a private repository, for two
+  ten-second checks.
+- **Opens:** making this cpc's default for every project, in its own session in the cpc
+  repository.
+
 ## 2026-11-16 — cpc 1.8.0 → 1.23.0; upstream 2.2.0 measured, not merged; README cut; tickets triaged
 - **cpc:** re-vendored cpc 1.8.0 -> 1.23.0 (`tools/conventions/cpc/`, 67 modules) from a worktree
   of `v1.23.0`, no `--profile`. Then, per its release notes: known issues moved to

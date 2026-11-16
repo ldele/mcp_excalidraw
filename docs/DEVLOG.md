@@ -10,6 +10,17 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (e) — T-027 and T-028 framed as three proposed ADRs; nothing built
+- **What:** both tickets are design questions, so each was framed as decisions for the owner.
+  ADR-003 covers how a screen shows its id. ADR-004 covers what a person's mark asks for. ADR-005
+  covers approving a screen and ending a round. Each has four options with their costs, and none
+  is marked recommended (cpc ADR-069). Both tickets carry a note pointing at their ADRs.
+- **Found while framing T-028:** in dnd_crawler_rust's scene each screen's heading already starts
+  with its number, at 22 px. Fitted to a 1,920 × 1,080 window (about 16 %), it is about 4 px tall,
+  so the ask is about reading ids from an overview, not about adding them. Not checked: how the
+  editor sizes a frame's name when zoomed out, which matters for ADR-003's option 2.
+- **Opens:** CONTEXT's open question on frames is now ADR-003's option 2.
+
 ## 2026-11-16 (d) — T-026 and T-001 fixed: a tab's first sync leaves shapes the agent's; unsized text is read
 - **T-026:** reproduced with the built-in browser as the tab, on a private canvas (BlackBox's WF-07
   is not on this machine). After the first click, unlabelled shapes drawn with `fontFamily`,
@@ -44,19 +55,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   state. Both type-checks pass, and the corpus reads its five drawings as before. Live on port
   3047: `delete save` removed `save-label`, and a delete-and-create patch kept the new `cancel`.
   The screen was named, with 0 fallbacks and 0 orphans. Not run: the browser suite.
-
-## 2026-11-16 (b) — cpc is never made public: `tools/conventions/` untracked and gitignored
-- **Why:** the owner ruled that the cpc tooling must never be made public. `gh` reports this repo
-  as public, and `tools/conventions/cpc/LICENSE` grants no licence. The owner chose to keep the
-  repo public and stop tracking cpc over making the repo private.
-- **What:** `tools/conventions/` is in `.gitignore` and out of the index (`git rm -r --cached`);
-  the files stay on disk, so the gates run as before here. CI's `docs` job, which ran the vendored
-  gates from the checkout, is removed: a CI clone has no copy. The rule is `.claude/CONTEXT.md`
-  rule 5, with a digest line in `AGENTS.md`; the justfile says the copy is local.
-- **Rejected:** fetching cpc in CI. It would need a token for a private repository, for two
-  ten-second checks.
-- **Opens:** making this cpc's default for every project, in its own session in the cpc
-  repository.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

@@ -4,6 +4,17 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (b) — Claude Code — cpc untracked and gitignored, rule 5; STAGED
+- **Done:** `tools/conventions/` is out of git and gitignored, CI's cpc job is removed, and the
+  owner's rule is `.claude/CONTEXT.md` rule 5 (DEVLOG 2026-11-16 (b)). Entry (a) was committed as
+  `cf11f24`.
+- **Where:** `main`, staged, not committed; nothing pushed.
+- **Mind:** a fresh clone or worktree has no gates until it re-vendors from a cpc tag. Never
+  `git add -f` under `tools/conventions/`.
+- **Next:** unchanged from entry (a). The cpc-wide default is being worked on in its own session,
+  in the cpc repository.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 — Claude Code — cpc 1.23.0, upstream 2.2.0 measured, docs cut, tickets triaged; STAGED
 - **Done:** the cpc re-vendor and its follow-ups, the README and FORK.md cut, and the triage of 17
   open tickets, each ranked (DEVLOG 2026-11-16).

@@ -20,7 +20,8 @@ origins (T-015) and kept the scene across a restart (T-023). PR 1, the human mar
 2026-11-16 the four top-ranked tickets were fixed: T-022 and T-025 (silent loss in `apply` and
 delete), T-026 (a tab's first sync marking agent shapes human) and T-001 (unsized text dropped
 from the reading with no tab). **Next:** the owner's call on 2.2.0; then PR 4 (ADR-002). T-027 and
-T-028, a person's markup convention and visible screen ids, stand between the project and PR 1. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
+T-028, a person's markup convention and visible screen ids, stand between the project and PR 1;
+they are framed as ADR-003 to ADR-005, proposed and waiting on the owner. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
 only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings
@@ -81,5 +82,6 @@ only by `workflow_dispatch`; a push makes no run (KI-8).
   the 2026-08-07 merge, so unknown props survive the schema and the mechanism finally exists — this
   is what KI-5 and Phase 3 were blocked on. Still a decision (an ADR), not a given.
 - Whether Excalidraw's own **frames** should replace the "screen = plain rectangle" convention.
+  It is option 2 of ADR-003 (visible screen ids, T-028), proposed 2026-11-16.
 - Whether the wireframe layer should ever emit code, or stop at the reading and leave generation to
   the calling agent. Currently the latter, deliberately — see `docs/ROADMAP.md`.
