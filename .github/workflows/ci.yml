@@ -63,6 +63,14 @@ jobs:
         run: npm run test:render
       - name: Canvas state integrity
         run: npm run test:state
+      # Upstream's 2.2.0 checks (SPEC-004): its opt-in durable store, the share target, and the
+      # MCP file tools' path containment (#148).
+      - name: Durable canvas state (upstream's opt-in store)
+        run: npm run test:durable
+      - name: Share URL
+        run: npm run test:share
+      - name: File path containment (#148)
+        run: npm run test:paths
 
   compat:
     name: Node ${{ matrix.node }} (keypoint only)

@@ -5,6 +5,8 @@ import {
   CaptureUpdateAction,
   exportToBlob,
   exportToSvg,
+  elementsOverlappingBBox,
+  hashElementsVersion,
   useHandleLibrary
 } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
@@ -51,6 +53,23 @@ const libraryAdapter: LibraryPersistenceAdapter = {
   }
 }
 
+/**
+ * Takes an element link (`?element=<id>`) out of the URL before Excalidraw mounts.
+ *
+ * Excalidraw resolves the link once, while it mounts. Here the scene comes from
+ * the server after that, so the lookup always runs on an empty scene and shows
+ * "Linked object wasn't found". The link is resolved after the first scene loads.
+ */
+const takeElementLink = (): string | null => {
+  const url = new URL(window.location.href)
+  if (!url.searchParams.has('element')) return null
+  const link = url.href
+  url.searchParams.delete('element')
+  window.history.replaceState(window.history.state, '', url)
+  return link
+}
+let pendingElementLink = typeof window === 'undefined' ? null : takeElementLink()
+
 // Type definitions
 type ExcalidrawAPIRefValue = ExcalidrawImperativeAPI;
 
@@ -61,6 +80,7 @@ interface ExportImageOptions {
   padding?: number;
   elementIds?: string[];
   frameId?: string;
+  embedScene?: boolean;
 }
 
 interface WebSocketMessage {
@@ -110,6 +130,8 @@ const AUTO_SYNC_DEBOUNCE_MS = 1200;
 const SCENE_MUTATIONS = new Set([
   'element_created', 'element_updated', 'element_deleted', 'elements_batch_created'
 ]);
+// Excalidraw hides its theme toggle once the theme prop is set.
+const UI_OPTIONS = { canvasActions: { toggleTheme: true } };
 
 function App(): JSX.Element {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPIRefValue | null>(null)
@@ -147,8 +169,13 @@ function App(): JSX.Element {
   const syncInFlightRef = useRef<boolean>(false)
   const suppressAutoSyncCountRef = useRef<number>(0)
   const userInteractedRef = useRef<boolean>(false)
+  // Version hash of the scene the server holds. Excalidraw calls onChange on
+  // every re-render, including the one each sync causes, so autosync only
+  // runs when the scene differs from this.
+  const serverSceneHashRef = useRef<number | null>(null)
   // Image files the server already holds, so each sync uploads only new ones
   const serverFileIdsRef = useRef<Set<string>>(new Set())
+  const lastReportedSelectionRef = useRef<string>('')
   const rememberServerFiles = (files: unknown): void => {
     const list = Array.isArray(files) ? files : Object.values((files as Record<string, unknown>) || {})
     for (const file of list as { id?: unknown }[]) {
@@ -212,12 +239,20 @@ function App(): JSX.Element {
       }
       applySceneUpdateWithoutAutoSync(api, { elements: prepared, captureUpdate: CaptureUpdateAction.NEVER })
       assertScenePreserved(prepared, api.getSceneElements())
+      serverSceneHashRef.current = hashElementsVersion(api.getSceneElements())
     } catch (error) {
       applySceneUpdateWithoutAutoSync(api, { elements: previous, captureUpdate: CaptureUpdateAction.NEVER })
       throw error
     }
     sceneLoadStatusRef.current = 'ready'
     setSceneLoadStatus('ready')
+    if (pendingElementLink) {
+      const link = pendingElementLink
+      pendingElementLink = null
+      // Put the link back so the address bar still shows it
+      window.history.replaceState(window.history.state, '', link)
+      api.scrollToContent(link, { animate: false })
+    }
   }
 
   // Fork (T-023): the server process, drawing and revision this tab's scene came
@@ -529,6 +564,8 @@ function App(): JSX.Element {
               // Same option surface as the headless renderer (renderer:'node'),
               // so `--renderer browser` accepts identical flags.
               const opts = data.options ?? {}
+              const embedScene = opts.embedScene === true
+              if (embedScene && data.format !== 'png') throw new Error('embedScene is only supported for PNG exports')
               const allElements = excalidrawAPI.getSceneElements()
               const wanted = opts.elementIds ? new Set(opts.elementIds) : null
               const elements = wanted
@@ -538,10 +575,20 @@ function App(): JSX.Element {
                 ? (allElements.find(el => el.id === opts.frameId && (el.type === 'frame' || el.type === 'magicframe')) as any) ?? null
                 : null
               if (opts.frameId && !exportingFrame) throw new Error(`Unknown frame id: ${opts.frameId}`)
+              let exportElements = embedScene && exportingFrame
+                ? elementsOverlappingBBox({ elements, bounds: exportingFrame, type: 'overlap' })
+                  .filter((el: ExcalidrawElement) => !el.frameId || el.frameId === exportingFrame.id)
+                : elements
+              if (embedScene) {
+                const exportedIds = new Set(exportElements.map((el: ExcalidrawElement) => el.id))
+                exportElements = exportElements.map((el: ExcalidrawElement) =>
+                  el.frameId && !exportedIds.has(el.frameId) ? { ...el, frameId: null } : el)
+              }
               const appState = excalidrawAPI.getAppState()
               const exportAppState = {
                 ...appState,
                 exportBackground: data.background !== false,
+                exportEmbedScene: embedScene,
                 ...(opts.dark !== undefined ? { exportWithDarkMode: opts.dark } : {}),
                 exportScale: opts.scale ?? 1
               }
@@ -567,7 +614,7 @@ function App(): JSX.Element {
                 })
               } else {
                 const blob = await exportToBlob({
-                  elements,
+                  elements: exportElements,
                   appState: exportAppState,
                   files,
                   mimeType: 'image/png',
@@ -812,6 +859,7 @@ function App(): JSX.Element {
     try {
       // 1. Get current elements
       const currentElements = api.getSceneElements()
+      const syncedHash = hashElementsVersion(currentElements)
       console.log(`Syncing ${currentElements.length} elements to backend`)
 
       // Filter out deleted elements
@@ -861,6 +909,7 @@ function App(): JSX.Element {
       if (response.ok) {
         const result: ApiResponse = await response.json()
         noteServerRev(result.rev)
+        serverSceneHashRef.current = syncedHash
         setLastSyncTime(new Date())
         console.log(`Sync successful: ${result.count} elements synced`)
 
@@ -894,6 +943,9 @@ function App(): JSX.Element {
       return
     }
     if (suppressAutoSyncCountRef.current > 0) {
+      return
+    }
+    if (hashElementsVersion(excalidrawAPI.getSceneElements()) === serverSceneHashRef.current) {
       return
     }
     if (autoSyncTimerRef.current) {
@@ -990,6 +1042,10 @@ function App(): JSX.Element {
           style={{ width: '100%', height: '100%' }}
         >
           <Excalidraw
+            // Controlled: Excalidraw resets to light when an action result
+            // omits the theme and no theme prop is set (e.g. copy element link).
+            theme={theme}
+            UIOptions={UI_OPTIONS}
             viewModeEnabled={sceneLoadStatus !== 'ready'}
             excalidrawAPI={(api: ExcalidrawAPIRefValue) => setExcalidrawAPI(api)}
             onChange={(_elements, appState) => {
@@ -999,6 +1055,25 @@ function App(): JSX.Element {
                   window.localStorage?.setItem('excalidraw-canvas-theme', appState.theme)
                 } catch (error) {
                   console.warn('Failed to save theme to localStorage:', error)
+                }
+              }
+              if (appState?.selectedElementIds && websocketRef.current?.readyState === WebSocket.OPEN) {
+                const selectedIds = Object.keys(appState.selectedElementIds)
+                  .filter((id) => appState.selectedElementIds[id])
+                  .sort()
+                const serialized = selectedIds.join(',')
+                if (serialized !== lastReportedSelectionRef.current) {
+                  lastReportedSelectionRef.current = serialized
+                  try {
+                    websocketRef.current.send(
+                      JSON.stringify({
+                        type: 'selection_updated',
+                        selectedElementIds: selectedIds
+                      })
+                    )
+                  } catch (error) {
+                    console.warn('Failed to report selection update:', error)
+                  }
                 }
               }
               scheduleAutoSync()

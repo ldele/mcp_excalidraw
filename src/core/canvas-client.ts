@@ -187,6 +187,11 @@ export async function clearCanvas(): Promise<ApiResponse> {
   return requestJson<ApiResponse>('/api/elements/clear', { method: 'DELETE' });
 }
 
+export async function getCanvasSelection(): Promise<string[]> {
+  const data = await requestJson<{ success: boolean; selectedElementIds: string[] }>('/api/selection');
+  return data.selectedElementIds || [];
+}
+
 export async function getFiles(): Promise<Record<string, any>> {
   const data = await requestJson<{ files?: Record<string, any> }>('/api/files');
   return data.files || {};
@@ -434,6 +439,7 @@ export interface HealthStatus {
   websocket_clients: number;
   // Current canvas revision — the cursor for the change feed (v1.2+)
   rev?: number;
+  durable_state_enabled?: boolean;
   // Identity fields (v1.1+); `stop` requires both before signaling anything
   service?: string;
   pid?: number;
@@ -449,6 +455,19 @@ export async function getHealth(timeoutMs = 2000): Promise<HealthStatus> {
     throw new Error(`Health check failed: ${response.status}`);
   }
   return await response.json() as HealthStatus;
+}
+
+export async function isDurableCanvasStateEnabled(): Promise<boolean> {
+  if (!ENABLE_CANVAS_SYNC) return false;
+  try {
+    const health = await getHealth();
+    return health.service === CANVAS_SERVICE_NAME && health.durable_state_enabled === true;
+  } catch {
+    // Preserve the existing import failure path when the canvas is unavailable.
+    // The subsequent element request will perform the normal identity check and
+    // report that the batch was rejected rather than changing import semantics.
+    return false;
+  }
 }
 
 export async function getSyncStatus(): Promise<Record<string, unknown>> {

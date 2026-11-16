@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger.js';
 import { pidFilePath } from './pidfile.js';
+import { durableStateEnabled } from './canvas-persistence.js';
 import {
   elements,
   files,
@@ -30,6 +31,10 @@ import {
 //
 // EXCALIDRAW_NO_PERSIST=1 keeps the scene in memory only, as before. EXCALIDRAW_SCENE_DIR moves
 // the files; the default is the pidfile's directory (src/core/pidfile.ts).
+//
+// EXCALIDRAW_DATA_DIR turns on upstream's own store (src/core/canvas-persistence.ts) and turns
+// this one off, so only one store ever runs (SPEC-004, the owner's choice of 2026-11-16).
+// Upstream's keeps elements, files and snapshots, but no change log and no scene id.
 
 const FORMAT = 'excalidraw-canvas-scene';
 const VERSION = 1;
@@ -76,7 +81,7 @@ let failing = false;
 
 /** Where the scene for `port` is kept, or null when persistence is off. Read on each call. */
 export function sceneFilePath(port: number): string | null {
-  if (process.env.EXCALIDRAW_NO_PERSIST === '1') return null;
+  if (process.env.EXCALIDRAW_NO_PERSIST === '1' || durableStateEnabled()) return null;
   const dir = process.env.EXCALIDRAW_SCENE_DIR || path.dirname(pidFilePath(port));
   return path.join(dir, `scene-${port}.json`);
 }

@@ -50,6 +50,23 @@ import { renderScene, RenderError, MAX_SCALE } from './core/render/index.js';
 import { originGuard, corsOptions, verifySocketClient } from './core/origin-guard.js';
 import { openSceneStore, flushScene, saveSceneAfterWrites, canvasIdentity, sceneFile } from './core/scene-store.js';
 import { boundTextIds } from './core/bound-text.js';
+import {
+  CanvasFileImmutabilityError,
+  CanvasFileReferenceError,
+  CanvasPersistenceError,
+  acquireDurableStateLock,
+  commitCanvasMutation,
+  durableStatePath,
+  loadDurableState,
+  releaseDurableStateLock,
+} from './core/canvas-persistence.js';
+
+function mutationErrorStatus(error: unknown, fallback: number): number {
+  if (error instanceof CanvasPersistenceError) return 500;
+  if (error instanceof CanvasFileImmutabilityError ||
+      error instanceof CanvasFileReferenceError) return 409;
+  return fallback;
+}
 
 // Load environment variables
 dotenv.config();
@@ -81,6 +98,28 @@ app.use('/assets/fonts', express.static(
 
 // WebSocket connections
 const clients = new Set<WebSocket>();
+
+// In-memory canvas selection tracked across active tabs.
+// The most recently active tab wins; cleared when its tab closes.
+interface TabSelection {
+  selectedElementIds: string[];
+  updatedAt: number;
+}
+const clientSelections = new Map<WebSocket, TabSelection>();
+
+function getActiveSelection(): string[] {
+  let latestTab: TabSelection | null = null;
+  for (const [ws, sel] of clientSelections.entries()) {
+    if (ws.readyState === WebSocket.OPEN) {
+      if (!latestTab || sel.updatedAt > latestTab.updatedAt) {
+        latestTab = sel;
+      }
+    } else {
+      clientSelections.delete(ws);
+    }
+  }
+  return latestTab ? latestTab.selectedElementIds : [];
+}
 
 // Broadcast to all connected clients
 function broadcast(message: WebSocketMessage): void {
@@ -161,6 +200,37 @@ function track(
   });
 }
 
+// Fork (SPEC-004): every write that records a change goes through here instead of straight to
+// upstream's commitCanvasMutation (src/core/canvas-persistence.ts). With EXCALIDRAW_DATA_DIR set,
+// a mutation that throws or whose checkpoint fails has its elements, files and snapshots put back
+// by upstream; the change log is ours and upstream does not know it, so it is put back here with
+// them, and a refused write leaves no record. When the checkpoint reached the disk and only the
+// directory flush after it failed, upstream keeps the maps as written and fences later writes, so
+// the log is kept too. Without a data directory upstream only runs the mutation, and so does this.
+function commitTracked<T>(mutate: () => T): T {
+  if (!durableStatePath()) return commitCanvasMutation(mutate);
+  const revision = changeLog.revision;
+  const records = changeLog.records.slice();
+  try {
+    return commitCanvasMutation(mutate);
+  } catch (error) {
+    if (!checkpointWasPublished(error)) {
+      changeLog.revision = revision;
+      changeLog.records.splice(0, changeLog.records.length, ...records);
+    }
+    throw error;
+  }
+}
+
+// Upstream does not export the class it wraps a published checkpoint's failure in, so this reads
+// the cause's class name. If upstream renames it, the log is put back in that case too: one
+// record missing until the restart upstream then requires, never a record of a refused write.
+function checkpointWasPublished(error: unknown): boolean {
+  if (!(error instanceof CanvasPersistenceError)) return false;
+  const cause = (error as Error & { cause?: unknown }).cause;
+  return cause instanceof Error && cause.constructor.name === 'CanvasCheckpointPublicationError';
+}
+
 // Canonical form of an element as the store currently sees it.
 function canonicalOf(element: ServerElement, context: Map<string, ServerElement> = elements): CanonicalElement {
   return canonicalizeElement(element, context);
@@ -230,6 +300,67 @@ async function awaitCanvasChanges(since: number, timeoutMs: number, settleMs: nu
   }
 }
 
+function prepareFileWrites(fileList: unknown[]): ExcalidrawFile[] {
+  const durable = Boolean(durableStatePath());
+
+  // Preserve the pre-persistence endpoint exactly when durability is disabled:
+  // valid entries overwrite in request order, omitted metadata uses the same
+  // truthy defaults, and an existing file contributes no implicit defaults.
+  if (!durable) {
+    const prepared: ExcalidrawFile[] = [];
+    for (const value of fileList) {
+      if (value === null || typeof value !== 'object') continue;
+      const candidate = value as Partial<ExcalidrawFile>;
+      if (!candidate.id || !candidate.dataURL) continue;
+      prepared.push({
+        id: candidate.id,
+        dataURL: candidate.dataURL,
+        mimeType: candidate.mimeType || 'image/png',
+        created: candidate.created || Date.now(),
+      });
+    }
+    return prepared;
+  }
+
+  const prepared = new Map<string, ExcalidrawFile>();
+
+  for (const value of fileList) {
+    if (value === null || typeof value !== 'object') continue;
+    const candidate = value as Partial<ExcalidrawFile>;
+    if (typeof candidate.id !== 'string' || candidate.id.length === 0 ||
+        typeof candidate.dataURL !== 'string' || candidate.dataURL.length === 0) {
+      continue;
+    }
+
+    const previous = prepared.get(candidate.id) ?? files.get(candidate.id);
+    const mimeType = typeof candidate.mimeType === 'string' && candidate.mimeType.length > 0
+      ? candidate.mimeType
+      : previous?.mimeType ?? 'image/png';
+
+    if (previous) {
+      if (previous.dataURL !== candidate.dataURL || previous.mimeType !== mimeType) {
+        throw new CanvasFileImmutabilityError(candidate.id);
+      }
+      prepared.set(candidate.id, previous);
+      continue;
+    }
+
+    prepared.set(candidate.id, {
+      id: candidate.id,
+      dataURL: candidate.dataURL,
+      mimeType,
+      // Preserve the original in-memory endpoint's overwrite behavior:
+      // an omitted/zero timestamp is replaced with the current time. Durable
+      // retries of an existing immutable id returned above keep prior metadata.
+      created: typeof candidate.created === 'number' && Number.isFinite(candidate.created) && candidate.created > 0
+        ? candidate.created
+        : Date.now(),
+    });
+  }
+
+  return [...prepared.values()];
+}
+
 // WebSocket connection handling
 wss.on('connection', (ws: WebSocket) => {
   clients.add(ws);
@@ -255,14 +386,30 @@ wss.on('connection', (ws: WebSocket) => {
   };
   ws.send(JSON.stringify(syncMessage));
 
+  ws.on('message', (raw: WebSocket.Data) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+      if (msg && msg.type === 'selection_updated' && Array.isArray(msg.selectedElementIds)) {
+        clientSelections.set(ws, {
+          selectedElementIds: msg.selectedElementIds.filter((id: unknown) => typeof id === 'string'),
+          updatedAt: Date.now()
+        });
+      }
+    } catch {
+      // Ignore malformed client frames
+    }
+  });
+
   ws.on('close', () => {
     clients.delete(ws);
+    clientSelections.delete(ws);
     logger.info('WebSocket connection closed');
   });
 
   ws.on('error', (error) => {
     logger.error('WebSocket error:', error);
     clients.delete(ws);
+    clientSelections.delete(ws);
   });
 });
 
@@ -416,6 +563,16 @@ const UpdateElementSchema = z.object({
 
 // API Routes
 
+// Get current canvas selection
+app.get('/api/selection', (_req: Request, res: Response) => {
+  const selectedElementIds = getActiveSelection();
+  res.json({
+    success: true,
+    selectedElementIds,
+    count: selectedElementIds.length
+  });
+});
+
 // Get all elements
 app.get('/api/elements', (req: Request, res: Response) => {
   try {
@@ -458,8 +615,10 @@ app.post('/api/elements', (req: Request, res: Response) => {
       resolveArrowBindings([element]);
     }
 
-    elements.set(id, element);
-    track('add', element, 'agent');
+    commitTracked(() => {
+      elements.set(id, element);
+      track('add', element, 'agent');
+    });
 
     // Broadcast to all connected clients
     const message: ElementCreatedMessage = {
@@ -474,7 +633,7 @@ app.post('/api/elements', (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error creating element:', error);
-    res.status(400).json({
+    res.status(mutationErrorStatus(error, 400)).json({
       success: false,
       error: (error as Error).message
     });
@@ -537,26 +696,32 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
       }
     }
 
-    elements.set(id, updatedElement);
+    // Moving/resizing a shape must drag its bound arrows along. Keep the
+    // element update and every in-place arrow reroute in one durable mutation.
+    const geometryChanged = ['x', 'y', 'width', 'height']
+      .some(key => Object.prototype.hasOwnProperty.call(body, key));
+    // Fork: the shape's record and each rerouted arrow's are written inside the same mutation.
+    const reroutedArrows = commitTracked(() => {
+      elements.set(id, updatedElement);
+      const delta = diffCanonical(beforeCanonical, canonicalOf(updatedElement));
+      if (delta) track('update', updatedElement, 'agent', delta);
+      const rerouted = geometryChanged && updatedElement.type !== 'arrow' && updatedElement.type !== 'line'
+        ? rerouteBoundArrows(id)
+        : [];
+      for (const { arrow, delta: arrowDelta } of rerouted) {
+        if (arrowDelta) track('update', arrow, 'agent', arrowDelta);
+      }
+      return rerouted.map(({ arrow }) => arrow);
+    });
 
-    const delta = diffCanonical(beforeCanonical, canonicalOf(updatedElement));
-    if (delta) track('update', updatedElement, 'agent', delta);
-
-    // Broadcast to all connected clients
+    // Publish only after the complete mutation has been checkpointed.
     const message: ElementUpdatedMessage = {
       type: 'element_updated',
       element: updatedElement
     };
     broadcast(message);
-
-    // Moving/resizing a shape must drag its bound arrows along
-    const geometryChanged = ['x', 'y', 'width', 'height']
-      .some(key => Object.prototype.hasOwnProperty.call(body, key));
-    if (geometryChanged && updatedElement.type !== 'arrow' && updatedElement.type !== 'line') {
-      for (const { arrow, delta: arrowDelta } of rerouteBoundArrows(id)) {
-        if (arrowDelta) track('update', arrow, 'agent', arrowDelta);
-        broadcast({ type: 'element_updated', element: arrow } as ElementUpdatedMessage);
-      }
+    for (const arrow of reroutedArrows) {
+      broadcast({ type: 'element_updated', element: arrow } as ElementUpdatedMessage);
     }
 
     res.json({
@@ -565,7 +730,7 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error updating element:', error);
-    res.status(400).json({
+    res.status(mutationErrorStatus(error, 400)).json({
       success: false,
       error: (error as Error).message
     });
@@ -576,11 +741,13 @@ app.put('/api/elements/:id', (req: Request, res: Response) => {
 app.delete('/api/elements/clear', (req: Request, res: Response) => {
   try {
     const count = elements.size;
-    // Recorded before the wipe so the change log can still name what went.
-    for (const element of elements.values()) {
-      track('delete', element, 'agent');
-    }
-    elements.clear();
+    commitTracked(() => {
+      // Recorded before the wipe so the change log can still name what went.
+      for (const element of elements.values()) {
+        track('delete', element, 'agent');
+      }
+      elements.clear();
+    });
 
     broadcast({
       type: 'canvas_cleared',
@@ -596,7 +763,7 @@ app.delete('/api/elements/clear', (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error clearing canvas:', error);
-    res.status(500).json({
+    res.status(mutationErrorStatus(error, 500)).json({
       success: false,
       error: (error as Error).message
     });
@@ -625,11 +792,15 @@ app.delete('/api/elements/:id', (req: Request, res: Response) => {
 
     // Fork (T-025): the element's bound labels go with it, each recorded and broadcast.
     const deleted = [id, ...boundTextIds(elements, id)];
-    for (const doomedId of deleted) {
-      track('delete', elements.get(doomedId)!, 'agent');
-      elements.delete(doomedId);
+    commitTracked(() => {
+      for (const doomedId of deleted) {
+        track('delete', elements.get(doomedId)!, 'agent');
+        elements.delete(doomedId);
+      }
+    });
 
-      // Broadcast to all connected clients
+    // Publish only after the deletions have been checkpointed.
+    for (const doomedId of deleted) {
       const message: ElementDeletedMessage = {
         type: 'element_deleted',
         elementId: doomedId
@@ -644,7 +815,7 @@ app.delete('/api/elements/:id', (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error deleting element:', error);
-    res.status(500).json({
+    res.status(mutationErrorStatus(error, 500)).json({
       success: false,
       error: (error as Error).message
     });
@@ -930,28 +1101,33 @@ app.post('/api/elements/batch', (req: Request, res: Response) => {
     // not resolve bindings against elements that are about to be discarded.
     resolveArrowBindings(createdElements, !replace);
 
-    if (replace) {
-      const count = elements.size;
-      // Recorded before the wipe, as DELETE /api/elements/clear does, so the
-      // change log can still name what went: `import --replace` and
-      // `snapshot restore` arrive here, and a replace the review loop cannot
-      // see reads as a scene of additions with nothing removed.
-      for (const element of elements.values()) {
-        track('delete', element, 'agent');
+    const replacedCount = replace ? elements.size : 0;
+    commitTracked(() => {
+      if (replace) {
+        // Recorded before the wipe, as DELETE /api/elements/clear does, so the
+        // change log can still name what went: `import --replace` and
+        // `snapshot restore` arrive here, and a replace the review loop cannot
+        // see reads as a scene of additions with nothing removed.
+        for (const element of elements.values()) {
+          track('delete', element, 'agent');
+        }
+        elements.clear();
       }
-      elements.clear();
+      // Store all elements after binding resolution
+      createdElements.forEach(el => elements.set(el.id, el));
+      // Tracked only once the whole batch is stored, so a shape's bound label
+      // is already resolvable when its change record is written.
+      createdElements.forEach(el => track('add', el, 'agent'));
+    });
+
+    // Publish only after clear + replacement have reached one checkpoint.
+    if (replace) {
       broadcast({
         type: 'canvas_cleared',
         timestamp: new Date().toISOString()
       });
-      logger.info(`Canvas replaced: ${count} existing elements removed`);
+      logger.info(`Canvas replaced: ${replacedCount} existing elements removed`);
     }
-
-    // Store all elements after binding resolution
-    createdElements.forEach(el => elements.set(el.id, el));
-    // Tracked only once the whole batch is stored, so a shape's bound label
-    // is already resolvable when its change record is written.
-    createdElements.forEach(el => track('add', el, 'agent'));
 
     // Broadcast to all connected clients
     const message: BatchCreatedMessage = {
@@ -967,7 +1143,7 @@ app.post('/api/elements/batch', (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error batch creating elements:', error);
-    res.status(400).json({
+    res.status(mutationErrorStatus(error, 400)).json({
       success: false,
       error: (error as Error).message
     });
@@ -1088,104 +1264,118 @@ app.post('/api/elements/sync', (req: Request, res: Response) => {
     let updated = 0;
     let removed = 0;
 
-    // 1. Elements the human deleted in the browser.
-    for (const [id, existing] of previous) {
-      if (incoming.has(id)) continue;
-      track('delete', existing, 'human');
-      elements.delete(id);
-      if (isChangeTracked(existing)) removed++;
-    }
+    // Fork (SPEC-004): the whole reconciliation is one mutation, upstream's checkpoint included,
+    // and its records go back with the store if that checkpoint is refused.
+    commitTracked(() => {
+      // 1. Elements the human deleted in the browser.
+      for (const [id, existing] of previous) {
+        if (incoming.has(id)) continue;
+        track('delete', existing, 'human');
+        elements.delete(id);
+        if (isChangeTracked(existing)) removed++;
+      }
 
-    // 2. Elements added or edited.
-    for (const [id, raw] of incoming) {
-      const existing = previous.get(id);
+      // 2. Elements added or edited.
+      for (const [id, raw] of incoming) {
+        const existing = previous.get(id);
 
-      if (!existing) {
+        if (!existing) {
+          const element: ServerElement = {
+            ...raw,
+            id,
+            createdAt: syncedAt,
+            updatedAt: syncedAt,
+            syncedAt,
+            source: 'frontend_sync',
+            syncTimestamp: timestamp,
+            version: 1
+          };
+          elements.set(id, element);
+          track('add', element, 'human');
+          if (isChangeTracked(element)) added++;
+          continue;
+        }
+
+        const delta = diffCanonical(
+          canonicalizeElement(existing, previous, previousLabels),
+          canonicalizeElement(raw as ServerElement, incomingContext, incomingLabels)
+        );
+
+        // The editor grows a shape that is too small for its label, by itself,
+        // the first time it lays the label out. Nobody resized it (T-010).
+        const fitted = delta !== null
+          && Object.keys(delta.after).every(field => field === 'width' || field === 'height')
+          && grewToFitLabel(existing, raw as ServerElement, incomingBoundText.get(id));
+
+        if (!delta || fitted) {
+          // Untouched: keep the stored element (and its rev/origin/createdAt)
+          // so an agent's authorship is not overwritten by a passive echo.
+          existing.syncedAt = syncedAt;
+          // The fitted size is what is on the canvas now, so it is what the
+          // reading and the next export must see: taken without a record.
+          if (fitted) {
+            existing.width = (raw as ServerElement).width;
+            existing.height = (raw as ServerElement).height;
+          }
+          // The merge path below drops a superseded `label`, but a passive echo
+          // never reaches it — and since the echo stopped producing a delta
+          // (changes.ts EDITOR_DEFAULTS), that is now the common case. Left here,
+          // the stale label is re-expanded into a fresh bound text child on every
+          // client load, duplicating the label without bound.
+          if (boundChildSupersedesLabel(!!(raw as any).label, id, incomingLabels)) {
+            delete (existing as any).label;
+          }
+          // The editor lists the label it expanded among its shape's bound
+          // elements. Taking that reference is not an edit either, and without it
+          // the stored shape does not name its own label: an export then writes a
+          // label its shape does not list, which only a loader's repair puts back
+          // (upstream 2.2.0's embedded-PNG test, SPEC-004).
+          const boundLabel = incomingBoundText.get(id);
+          const listed = Array.isArray(existing.boundElements) ? existing.boundElements : [];
+          if (boundLabel && !listed.some(binding => binding?.id === boundLabel.id)) {
+            existing.boundElements = [...listed, { type: 'text', id: boundLabel.id }];
+          }
+          // Text stored without a box has never been measured, and the editor
+          // has just measured it. Taking that box is not an edit: no record, and
+          // origin and rev stay. Without it the element has no extent, and the
+          // reading drops what has no extent (T-001). A box the author supplied
+          // is left as authored.
+          if (existing.type === 'text' && !(existing.width && existing.height)) {
+            const { width, height } = raw as { width?: unknown; height?: unknown };
+            if (typeof width === 'number' && width > 0 && typeof height === 'number' && height > 0) {
+              existing.width = width;
+              existing.height = height;
+            }
+          }
+          continue;
+        }
+
+        // Merge rather than replace: fields the frontend does not echo back
+        // (the agent-format `start`/`end` arrow refs that rerouteBoundArrows
+        // relies on) must survive a human's edit elsewhere in the scene.
         const element: ServerElement = {
+          ...existing,
           ...raw,
           id,
-          createdAt: syncedAt,
+          createdAt: existing.createdAt ?? syncedAt,
           updatedAt: syncedAt,
           syncedAt,
           source: 'frontend_sync',
           syncTimestamp: timestamp,
-          version: 1
+          version: (existing.version || 0) + 1
         };
+
+        // The frontend is authoritative for content. Once Excalidraw has
+        // expanded a shape's agent-format `label` into a bound text child,
+        // keeping the original `label` would leave two competing sources of
+        // truth — and every later sync would re-report the same edit.
+        if (!(raw as any).label) delete (element as any).label;
+
         elements.set(id, element);
-        track('add', element, 'human');
-        if (isChangeTracked(element)) added++;
-        continue;
+        track('update', element, 'human', delta);
+        if (isChangeTracked(element)) updated++;
       }
-
-      const delta = diffCanonical(
-        canonicalizeElement(existing, previous, previousLabels),
-        canonicalizeElement(raw as ServerElement, incomingContext, incomingLabels)
-      );
-
-      // The editor grows a shape that is too small for its label, by itself,
-      // the first time it lays the label out. Nobody resized it (T-010).
-      const fitted = delta !== null
-        && Object.keys(delta.after).every(field => field === 'width' || field === 'height')
-        && grewToFitLabel(existing, raw as ServerElement, incomingBoundText.get(id));
-
-      if (!delta || fitted) {
-        // Untouched: keep the stored element (and its rev/origin/createdAt)
-        // so an agent's authorship is not overwritten by a passive echo.
-        existing.syncedAt = syncedAt;
-        // The fitted size is what is on the canvas now, so it is what the
-        // reading and the next export must see: taken without a record.
-        if (fitted) {
-          existing.width = (raw as ServerElement).width;
-          existing.height = (raw as ServerElement).height;
-        }
-        // The merge path below drops a superseded `label`, but a passive echo
-        // never reaches it — and since the echo stopped producing a delta
-        // (changes.ts EDITOR_DEFAULTS), that is now the common case. Left here,
-        // the stale label is re-expanded into a fresh bound text child on every
-        // client load, duplicating the label without bound.
-        if (boundChildSupersedesLabel(!!(raw as any).label, id, incomingLabels)) {
-          delete (existing as any).label;
-        }
-        // Text stored without a box has never been measured, and the editor
-        // has just measured it. Taking that box is not an edit: no record, and
-        // origin and rev stay. Without it the element has no extent, and the
-        // reading drops what has no extent (T-001). A box the author supplied
-        // is left as authored.
-        if (existing.type === 'text' && !(existing.width && existing.height)) {
-          const { width, height } = raw as { width?: unknown; height?: unknown };
-          if (typeof width === 'number' && width > 0 && typeof height === 'number' && height > 0) {
-            existing.width = width;
-            existing.height = height;
-          }
-        }
-        continue;
-      }
-
-      // Merge rather than replace: fields the frontend does not echo back
-      // (the agent-format `start`/`end` arrow refs that rerouteBoundArrows
-      // relies on) must survive a human's edit elsewhere in the scene.
-      const element: ServerElement = {
-        ...existing,
-        ...raw,
-        id,
-        createdAt: existing.createdAt ?? syncedAt,
-        updatedAt: syncedAt,
-        syncedAt,
-        source: 'frontend_sync',
-        syncTimestamp: timestamp,
-        version: (existing.version || 0) + 1
-      };
-
-      // The frontend is authoritative for content. Once Excalidraw has
-      // expanded a shape's agent-format `label` into a bound text child,
-      // keeping the original `label` would leave two competing sources of
-      // truth — and every later sync would re-report the same edit.
-      if (!(raw as any).label) delete (element as any).label;
-
-      elements.set(id, element);
-      track('update', element, 'human', delta);
-      if (isChangeTracked(element)) updated++;
-    }
+    });
 
     logger.info(
       `Sync reconciled: ${added} added, ${updated} updated, ${removed} removed ` +
@@ -1288,26 +1478,46 @@ app.get('/api/files', (_req: Request, res: Response) => {
 
 // POST add/update files (batch)
 app.post('/api/files', (req: Request, res: Response) => {
-  const body = req.body;
-  const fileList: ExcalidrawFile[] = Array.isArray(body) ? body : (body?.files || []);
-  for (const f of fileList) {
-    if (f.id && f.dataURL) {
-      files.set(f.id, { id: f.id, dataURL: f.dataURL, mimeType: f.mimeType || 'image/png', created: f.created || Date.now() });
-    }
+  try {
+    const body = req.body;
+    // Keep the existing endpoint's accepted wrapper/array shapes and count
+    // behavior. Durable mode adds publication guarantees without redefining
+    // the memory-only request contract.
+    const fileList = (Array.isArray(body) ? body : (body?.files || [])) as unknown[];
+    const preparedFiles = prepareFileWrites(fileList);
+
+    commitCanvasMutation(() => {
+      preparedFiles.forEach(file => files.set(file.id, file));
+    });
+    // Broadcast only after every referenced blob and the checkpoint are durable.
+    broadcast({ type: 'files_added', files: fileList });
+    res.json({ success: true, count: fileList.length });
+  } catch (error) {
+    logger.error('Error storing canvas files:', error);
+    if (!durableStatePath()) throw error;
+    res.status(mutationErrorStatus(error, 400)).json({
+      success: false,
+      error: (error as Error).message
+    });
   }
-  // Broadcast files to connected clients
-  broadcast({ type: 'files_added', files: fileList });
-  res.json({ success: true, count: fileList.length });
 });
 
 // DELETE a file
 app.delete('/api/files/:id', (req: Request, res: Response) => {
-  const id = req.params.id as string;
-  if (files.delete(id)) {
+  try {
+    const id = req.params.id as string;
+    if (!files.has(id)) {
+      return res.status(404).json({ success: false, error: `File with ID ${id} not found` });
+    }
+    commitCanvasMutation(() => files.delete(id));
     broadcast({ type: 'file_deleted', fileId: id });
     res.json({ success: true });
-  } else {
-    res.status(404).json({ success: false, error: `File with ID ${id} not found` });
+  } catch (error) {
+    logger.error('Error deleting canvas file:', error);
+    res.status(mutationErrorStatus(error, 500)).json({
+      success: false,
+      error: (error as Error).message
+    });
   }
 });
 
@@ -1330,6 +1540,7 @@ const exportImageSchema = z.object({
   padding: z.number().min(0).optional(),
   elementIds: z.array(z.string()).min(1).optional(),
   frameId: z.string().optional(),
+  embedScene: z.boolean().default(false),
   embedFonts: z.boolean().optional()
 });
 type ExportImageBody = z.infer<typeof exportImageSchema>;
@@ -1395,6 +1606,9 @@ app.post('/api/export/image', async (req: Request, res: Response) => {
     });
   }
   const options = parsed.data;
+  if (options.embedScene && options.format !== 'png') {
+    return res.status(400).json({ success: false, error: 'embedScene is only supported for PNG exports' });
+  }
   const renderer = options.renderer ?? 'auto';
 
   const respondBrowser = async () => {
@@ -1652,7 +1866,7 @@ app.post('/api/snapshots', (req: Request, res: Response) => {
       createdAt: new Date().toISOString()
     };
 
-    snapshots.set(name, snapshot);
+    commitCanvasMutation(() => snapshots.set(name, snapshot));
     logger.info(`Snapshot saved: "${name}" with ${snapshot.elements.length} elements`);
 
     res.json({
@@ -1663,7 +1877,7 @@ app.post('/api/snapshots', (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error saving snapshot:', error);
-    res.status(500).json({
+    res.status(mutationErrorStatus(error, 500)).json({
       success: false,
       error: (error as Error).message
     });
@@ -1746,6 +1960,7 @@ app.get('/health', (req: Request, res: Response) => {
     // Image renderers available right now: headless (always, in-process) and
     // the number of browser tabs that can render on request
     renderers: { node: true, browser: clients.size },
+    ...(durableStatePath() ? { durable_state_enabled: true } : {}),
     // Identity for `stop`: it must only ever signal a process that both
     // identifies as this service AND self-reports its pid — never a pid
     // from a stale pidfile or an unrelated app squatting on the port.
@@ -1759,6 +1974,7 @@ app.get('/api/sync/status', (req: Request, res: Response) => {
   res.json({
     success: true,
     elementCount: elements.size,
+    ...(durableStatePath() ? { durableStateEnabled: true } : {}),
     timestamp: new Date().toISOString(),
     memoryUsage: {
       heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024), // MB
@@ -1815,6 +2031,14 @@ async function findExistingLoopbackListener(port: number): Promise<string | null
   return null;
 }
 
+function releaseDurableStateLockSafely(): void {
+  try {
+    releaseDurableStateLock();
+  } catch (error) {
+    logger.error('Failed to release canvas data-directory lock:', error);
+  }
+}
+
 server.on('error', (error: NodeJS.ErrnoException) => {
   if (error.code === 'EADDRINUSE') {
     const address = (error as NodeJS.ErrnoException & { address?: string }).address || HOST;
@@ -1824,10 +2048,30 @@ server.on('error', (error: NodeJS.ErrnoException) => {
   } else {
     logger.error('Failed to start canvas server:', error);
   }
+  releaseDurableStateLockSafely();
   process.exit(1);
 });
 
 async function startServer(): Promise<void> {
+  acquireDurableStateLock();
+  let durableState: ReturnType<typeof loadDurableState>;
+  try {
+    durableState = loadDurableState();
+  } catch (error) {
+    releaseDurableStateLockSafely();
+    throw error;
+  }
+
+  if (durableState.loaded) {
+    logger.info('Loaded durable canvas state', {
+      elements: durableState.elements,
+      files: durableState.files,
+      snapshots: durableState.snapshots
+    });
+  } else if (durableState.enabled) {
+    logger.info('Durable canvas state enabled; starting without an existing checkpoint');
+  }
+
   if (LOOPBACK_GUARD_HOSTS.has(HOST)) {
     const existingHost = await findExistingLoopbackListener(PORT);
     if (existingHost) {
@@ -1836,21 +2080,27 @@ async function startServer(): Promise<void> {
         `${formatHostForUrl(existingHost)}:${PORT} is already listening. ` +
         'This prevents duplicate IPv4/IPv6 canvas servers from splitting state.'
       );
+      releaseDurableStateLockSafely();
       process.exit(1);
     }
   }
 
-  // Fork (T-023): the drawing saved for this port is back before the first request.
+  // Fork (T-023): the drawing saved for this port is back before the first request. With
+  // EXCALIDRAW_DATA_DIR set, upstream's store above holds the scene and ours stays off
+  // (SPEC-004): one store at a time, so a scene is never saved twice.
   const restored = openSceneStore(PORT);
   if (restored.restored) {
     logger.info(`Restored ${restored.elements} elements (rev ${restored.rev}) from ${restored.file}`);
   } else if (restored.file) {
     logger.info(`Scene is saved to ${restored.file}`);
+  } else if (durableState.enabled) {
+    logger.info('EXCALIDRAW_DATA_DIR is set: the scene is kept there, and the change log does not survive a restart');
   }
 
   // Only the process that actually wrote the pidfile may remove it —
   // a concurrent-start loser exiting on EADDRINUSE must not delete the
-  // winner's pidfile.
+  // winner's pidfile. The data-directory lock independently protects
+  // durable-state ownership.
   let ownsPidFile = false;
 
   server.listen(PORT, HOST, () => {
@@ -1868,15 +2118,22 @@ async function startServer(): Promise<void> {
     logger.info(`Received ${signal}, shutting down canvas server`);
     flushScene();
     if (ownsPidFile) removePidFile(PORT);
-    server.close(() => process.exit(0));
-    // Force-exit if open sockets keep the server from closing promptly
-    setTimeout(() => process.exit(0), 2000).unref();
+    server.close(() => {
+      releaseDurableStateLockSafely();
+      process.exit(0);
+    });
+    // Force-exit if open sockets keep the server from closing promptly.
+    setTimeout(() => {
+      releaseDurableStateLockSafely();
+      process.exit(0);
+    }, 2000).unref();
   };
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('exit', () => {
     flushScene();
     if (ownsPidFile) removePidFile(PORT);
+    releaseDurableStateLockSafely();
   });
 }
 
@@ -1884,7 +2141,11 @@ async function startServer(): Promise<void> {
 // (`node dist/server.js`, `npm run canvas`, or spawned by the CLI/MCP
 // auto-start). Importing this module must never start the server.
 if (isMainModule(import.meta.url)) {
-  void startServer();
+  void startServer().catch(error => {
+    logger.error('Failed to start canvas server:', error);
+    releaseDurableStateLockSafely();
+    process.exit(1);
+  });
 }
 
 export { startServer };

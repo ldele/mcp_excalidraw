@@ -15,13 +15,14 @@ component roles, reading order, navigation flows — plus a review loop where a 
 up and the agent reads the markup attributed to the component it refers to. What the fork adds and
 why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 
-**State (2026-11-16):** two upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
-SPEC-002); upstream is now at 2.2.0, 14 commits ahead and **not merged** (`FORK.md` § Upstream
-2.2.0). The two-way markup leg has run with a human and works, but the attribution accuracy it
+**State (2026-11-16):** three upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
+SPEC-002; 2026-11-16, upstream 2.2.0, SPEC-004). The 2.2.0 merge is **staged on
+`merge/upstream-2.2.0`** in the worktree `C:\Projects\mcp_excalidraw-merge`, waiting on the
+owner's review (`FORK.md` § Upstream 2.2.0). The two-way markup leg has run with a human and works, but the attribution accuracy it
 exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 12 tickets are open in
 `docs/TICKETS.md`, each ranked in its 2026-11-16 triage note; T-001, T-022, T-024, T-025 and T-026
-were fixed the same day, and ADR-003 to ADR-005 (T-027, T-028) were decided. **Next: merge
-upstream 2.2.0; then build ADR-003 to ADR-005; then PR 4.** Detail:
+were fixed the same day, and ADR-003 to ADR-005 (T-027, T-028) were decided. **Next: the owner
+lands the 2.2.0 branch; then build ADR-003 to ADR-005; then PR 4.** Detail:
 `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.

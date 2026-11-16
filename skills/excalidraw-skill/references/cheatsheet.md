@@ -5,7 +5,10 @@
 - Canvas base URL: `EXPRESS_SERVER_URL` (default `http://127.0.0.1:3000`); CLI also accepts `--url <canvasUrl>`
 - Canvas health: `GET /health` or `excalidraw-canvas status`
 - Auto-start: any canvas-touching CLI command starts the server if it's down (opt out with `EXCALIDRAW_NO_AUTOSTART=1`)
-- Saved scene: one file per port, `scene-<port>.json` beside the pidfile (`%LOCALAPPDATA%\Excalidraw-Canvas` on Windows, `~/Library/Application Support/excalidraw-canvas` on macOS, `$XDG_STATE_HOME/excalidraw-canvas` on Linux), read back on start. `EXCALIDRAW_SCENE_DIR` moves it; `EXCALIDRAW_NO_PERSIST=1` keeps the scene in memory only
+- Saved scene: one file per port, `scene-<port>.json` beside the pidfile (`%LOCALAPPDATA%Excalidraw-Canvas` on Windows, `~/Library/Application Support/excalidraw-canvas` on macOS, `$XDG_STATE_HOME/excalidraw-canvas` on Linux), read back on start, change log included. `EXCALIDRAW_SCENE_DIR` moves it; `EXCALIDRAW_NO_PERSIST=1` keeps the scene in memory only
+- `EXCALIDRAW_DATA_DIR` switches to upstream's store instead: one locked directory for every port, keeping elements, image files and named snapshots but **not the change log** across a restart. It turns the per-port file off, so only one store runs. Selection is never persisted.
+- Sharing: `EXCALIDRAW_SHARE_UPLOAD_URL` and `EXCALIDRAW_SHARE_BASE_URL` select a self-hosted backend/app; defaults use excalidraw.com.
+- PNG rasterizer timeout: `EXCALIDRAW_PNG_WORKER_TIMEOUT_MS` (default `120000` milliseconds).
 
 ## CLI Reference
 
@@ -35,14 +38,15 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 
 | Command | Description |
 |---------|-------------|
+| `selection` | Current `selectedElementIds` and `count`; last selection change among connected tabs wins |
 | `describe` | AI-readable scene summary (ids, positions, labels, connections) — plain text |
 | `wireframe [--json] [--score]` | Read the canvas as a UI: screens, nesting, component roles, reading order, navigation flows, annotations — plain text. `--score` emits only the pre-flight counts as JSON (`fallbacks`, `inferred`, `unnamedScreens`, `orphans`); `--json` carries them under `score` |
-| `screenshot` | Headless PNG/SVG render of the canvas (no browser tab); `--out f.png\|f.svg`, `--format png\|svg`, `--scale 1-4`, `--dark`, `--padding N`, `--no-background`, `--ids a,b`, `--frame <id>`, `--no-embed-fonts`, `--renderer browser` (use an open tab instead); PNG without `--out` → temp file path in JSON, SVG without `--out` → raw SVG |
-| `render [file\|-]` | Render a `.excalidraw` / `.excalidraw.md` file to PNG/SVG offline — no canvas server; same flags as `screenshot` |
+| `screenshot` | Headless PNG/SVG render of the canvas (no browser tab); `--out f.png|f.svg`, `--format png|svg`, `--scale 1-4`, `--dark`, `--padding N`, `--no-background`, `--ids a,b`, `--frame <id>`, `--no-embed-fonts`, `--embed-scene` (PNG only, opt-in), `--renderer browser` (use an open tab instead); PNG without `--out` → temp file path in JSON, SVG without `--out` → raw SVG |
+| `render [file|-]` | Render a `.excalidraw` / `.excalidraw.md` / embedded-scene PNG file to PNG/SVG offline — no canvas server; same flags as `screenshot` |
 | `export [--out f.excalidraw] [--format json\|obsidian]` | Scene as .excalidraw JSON (stdout without `--out`); a `.md` out path writes Obsidian's .excalidraw.md format |
-| `import [file\|-] [--replace]` | Import .excalidraw JSON or Obsidian .excalidraw.md (merge by default) |
+| `import [file\|-] [--replace]` | Import .excalidraw JSON, Obsidian .excalidraw.md, or PNG with an embedded scene (merge by default; binary stdin supported) |
 | `mermaid [file\|-]` | Render Mermaid onto the canvas (**browser tab required**) |
-| `share` | Encrypted upload → shareable excalidraw.com URL |
+| `share` | Encrypted upload → shareable URL (excalidraw.com or a configured self-hosted target) |
 | `clear --yes` | Wipe the canvas |
 | `snapshot save\|list\|restore [name]` | Named canvas snapshots |
 
@@ -73,7 +77,7 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 | `install-skill --dir <skills-root>` | Install this skill into an agent-chosen project/global skills root (replaces any existing copy) |
 | `help [command]`, `--version` | Usage and version |
 
-## MCP Tools (29 total)
+## MCP Tools (30 total)
 
 ### Element CRUD
 
@@ -102,9 +106,10 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 
 | Tool | Description | Required params |
 |------|-------------|-----------------|
+| `get_selection` | Current selected element IDs and count; last selection change among connected tabs wins, in memory only | (none) |
 | `describe_scene` | AI-readable scene description (types, positions, labels, connections, bounding box) — best for diagrams | (none) |
 | `describe_wireframe` | Read the canvas as a UI: screens, containment tree, inferred component roles (`?` = low confidence), reading order, navigation flows, live annotations | (none) |
-| `get_canvas_screenshot` | Returns a PNG of the canvas for visual verification (headless, no browser needed) | (optional) `background`, `dark`, `scale` (1-4), `padding`, `elementIds`, `frameId`, `renderer` ("auto"\|"node"\|"browser") |
+| `get_canvas_screenshot` | Returns a PNG of the canvas for visual verification (headless, no browser needed) | (optional) `background`, `dark`, `scale` (1-4), `padding`, `elementIds`, `frameId`, `embedScene` (PNG only, default false), `renderer` ("auto"|"node"|"browser") |
 | `get_resource` | Get scene/library/theme/elements | `resource` |
 | `get_canvas_changes` | What changed since you last looked, incl. human edits; attributes markup to the element it refers to | (optional) `since` |
 | `wait_for_changes` | Block until a human edits the canvas, then return the same report | (optional) `since`, `timeoutSeconds`, `settleSeconds` |
@@ -114,9 +119,9 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 | Tool | Description | Required params |
 |------|-------------|-----------------|
 | `export_scene` | Export to .excalidraw JSON (a `.md` filePath → Obsidian .excalidraw.md) | (optional) `filePath` |
-| `import_scene` | Import from .excalidraw JSON or Obsidian .excalidraw.md | `mode` ("replace"\|"merge"), `filePath` or `data` |
-| `export_to_image` | Export to PNG/SVG (headless, no browser needed; SVG embeds fonts) | `format` ("png"\|"svg"), (optional) `filePath`, `background`, `dark`, `scale` (1-4), `padding`, `elementIds`, `frameId`, `renderer` ("auto"\|"node"\|"browser") |
-| `export_to_excalidraw_url` | Upload & get shareable excalidraw.com URL | (none) |
+| `import_scene` | Import from .excalidraw JSON, Obsidian .excalidraw.md or embedded-scene PNG | `mode` ("replace"\|"merge"), `filePath` or `data` |
+| `export_to_image` | Export to PNG/SVG (headless, no browser needed; SVG embeds fonts) | `format` ("png"\|"svg"), (optional) `filePath`, `background`, `dark`, `scale` (1-4), `padding`, `elementIds`, `frameId`, `embedScene` (PNG only, default false), `renderer` ("auto"\|"node"\|"browser") |
+| `export_to_excalidraw_url` | Upload & get shareable URL (default excalidraw.com; configurable) | (none) |
 
 ### State Management
 
@@ -145,6 +150,9 @@ Pass that back as `--since N` to see only what is newer. `--timeout` caps at 240
 | `create_from_mermaid` | Mermaid diagram to Excalidraw | `mermaidDiagram` |
 
 Notes:
+
+- **MCP file paths**: must stay inside `EXCALIDRAW_EXPORT_DIR` after resolving symlinks; broken symlinks are refused. Scene export: `.excalidraw`, `.json`, `.md`; import: the same plus `.png`; image export: `.png` / `.svg` matching format. CLI file I/O is unaffected.
+- **Snapshots**: in memory by default; survive restarts only with `EXCALIDRAW_DATA_DIR`.
 - **CLI + MCP**: Set `text` on shapes to label them (auto-converts to `label.text`). Use `startElementId`/`endElementId` on arrows.
 - **Label typography**: `fontSize` / `fontFamily` / `textAlign` / `verticalAlign` passed next to `text` follow the text into the label. To colour the label text, pass the label object explicitly — `"label": {"text": "Save", "strokeColor": "#d03b3b"}` — because a shape's own `strokeColor` paints its border, not its caption.
 - **Wireframe role**: `"role": "chart"` (or `table`, `button`, `card`, …) declares what a shape is; `wireframe` reports a declared role verbatim, without the `?`. Worth setting on every plot and table placeholder — their labels describe what they show, which inference can't read as "this is a chart".
@@ -161,6 +169,7 @@ Notes:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| `GET` | `/api/selection` | Current selection: `{success, selectedElementIds, count}` |
 | `GET` | `/api/elements` | List all elements |
 | `GET` | `/api/elements/:id` | Get element by ID |
 | `POST` | `/api/elements` | Create element |
@@ -186,7 +195,7 @@ Each record is `{rev, kind: add|update|delete, id, origin: agent|human, at, elem
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/export/image` | Render PNG/SVG headless: `{format, background?, renderer?: "auto"\|"node"\|"browser", dark?, scale?, padding?, elementIds?, frameId?, embedFonts?}` → `{data, renderer, width, height, warnings?}` |
+| `POST` | `/api/export/image` | Render PNG/SVG headless: `{format, background?, renderer?: "auto"\|"node"\|"browser", dark?, scale?, padding?, elementIds?, frameId?, embedFonts?, embedScene?}` → `{data, renderer, width, height, warnings?}`; `embedScene` makes PNG editable (default false) |
 | `POST` | `/api/export/image/result` | Frontend posts export result back |
 
 ### Viewport

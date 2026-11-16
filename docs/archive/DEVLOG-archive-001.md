@@ -4,6 +4,17 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (e) — T-027 and T-028 framed as three proposed ADRs; nothing built
+- **What:** both tickets are design questions, so each was framed as decisions for the owner.
+  ADR-003 covers how a screen shows its id. ADR-004 covers what a person's mark asks for. ADR-005
+  covers approving a screen and ending a round. Each has four options with their costs, and none
+  is marked recommended (cpc ADR-069). Both tickets carry a note pointing at their ADRs.
+- **Found while framing T-028:** in dnd_crawler_rust's scene each screen's heading already starts
+  with its number, at 22 px. Fitted to a 1,920 × 1,080 window (about 16 %), it is about 4 px tall,
+  so the ask is about reading ids from an overview, not about adding them. Not checked: how the
+  editor sizes a frame's name when zoomed out, which matters for ADR-003's option 2.
+- **Opens:** CONTEXT's open question on frames is now ADR-003's option 2.
+
 ## 2026-11-16 (d) — T-026 and T-001 fixed: a tab's first sync leaves shapes the agent's; unsized text is read
 - **T-026:** reproduced with the built-in browser as the tab, on a private canvas (BlackBox's WF-07
   is not on this machine). After the first click, unlabelled shapes drawn with `fontFamily`,

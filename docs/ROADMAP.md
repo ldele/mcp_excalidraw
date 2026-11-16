@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-08 · class: living -->
+<!-- status: active · updated: 2026-11-16 · class: living -->
 
 # ROADMAP
 
@@ -170,6 +170,22 @@ our change log. After a merge, read every path that touches the element store, c
 a test now covers this one. **A fix upstream makes for its own files does not reach files it
 already wrote:** our scenes exported before 2.1.1 still carried the bad keys, and only `import` →
 `export` repaired them until `repairOrderKeys` did it on read.
+
+**Merged 2026-11-16** — upstream 2.2.0 at `81720ac`, 14 commits, fourteen conflicting files
+(SPEC-004; DEVLOG 2026-11-16 (h)). Taken six weeks after 2.1.2, and before building ADR-003 to
+ADR-005, because two things in it were live for us: a security fix to the MCP file tools (#148),
+and the end of an autosync loop a single click started (#142). The corpus read every fixture as
+before.
+
+The lesson. **A wrapper that restores state on failure only restores the state it knows about.**
+Upstream wrapped every store write in a commit that puts the store back when its checkpoint fails;
+our change log lives beside the store, so a refused write would have left a record of a change that
+never happened. No conflict marked it: the conflicts showed where our calls sat, not what upstream's
+commit puts back, and it surfaced from reading that function before rebuilding inside it. The
+second finding is the other side of the same coin: **upstream's new tests check things
+ours never did.** One caught a gap as old as our per-element sync: after a tab's sync, a
+labelled shape did not name its label. The third is smaller: upstream's tests run on Linux, and one of its
+checks cannot pass on Windows, its own copy included.
 
 **A base fix considered for upstream, 2026-10-08** — the first one. T-009: a bound arrow lost
 the waypoints it was created with, in a function upstream wrote (`resolveArrowBindings`). It

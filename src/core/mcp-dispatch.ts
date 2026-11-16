@@ -18,6 +18,7 @@ import {
   getElements,
   searchElements,
   clearCanvas,
+  getCanvasSelection,
   exportImage,
   setViewport,
   saveSnapshot,
@@ -29,7 +30,7 @@ import {
   ChangePayload,
   ApiResponse
 } from './canvas-client.js';
-import { sanitizeFilePath, prepareElement, prepareElementUpdate } from './normalize.js';
+import { sanitizeFilePath, SCENE_FILE_EXTENSIONS, prepareElement, prepareElementUpdate } from './normalize.js';
 import {
   alignElements,
   distributeElements,
@@ -77,7 +78,8 @@ const imageRenderParams = {
   scale: z.number().min(1).max(4).optional(),
   padding: z.number().min(0).optional(),
   elementIds: z.array(z.string()).min(1).optional(),
-  frameId: z.string().optional()
+  frameId: z.string().optional(),
+  embedScene: z.boolean().default(false)
 };
 
 // Points schema: accept both {x, y} objects and [x, y] tuples
@@ -497,6 +499,19 @@ export async function callExcalidrawTool(
         };
       }
 
+      case 'get_selection': {
+        const selectedElementIds = await getCanvasSelection();
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              selectedElementIds,
+              count: selectedElementIds.length
+            }, null, 2)
+          }]
+        };
+      }
+
       case 'clear_canvas': {
         logger.info('Clearing canvas via MCP');
 
@@ -519,7 +534,7 @@ export async function callExcalidrawTool(
         const { scene, elementCount } = await buildSceneFile();
 
         if (params.filePath) {
-          const safePath = sanitizeFilePath(params.filePath);
+          const safePath = sanitizeFilePath(params.filePath, SCENE_FILE_EXTENSIONS);
           const asObsidianMd = params.filePath.endsWith('.md');
           const output = asObsidianMd
             ? wrapSceneAsObsidianMd(scene)
@@ -564,6 +579,9 @@ export async function callExcalidrawTool(
           filePath: z.string().optional(),
           ...imageRenderParams
         }).parse(args);
+        if (params.embedScene && params.format !== 'png') {
+          throw new Error('embedScene is only supported for PNG exports');
+        }
 
         logger.info('Exporting to image via MCP', { format: params.format, renderer: params.renderer ?? 'auto' });
 
@@ -575,7 +593,7 @@ export async function callExcalidrawTool(
         ].join(', ');
 
         if (filePath) {
-          const safeImagePath = sanitizeFilePath(filePath);
+          const safeImagePath = sanitizeFilePath(filePath, [`.${params.format}`]);
           if (params.format === 'svg') {
             fs.writeFileSync(safeImagePath, result.data, 'utf-8');
           } else {
@@ -760,7 +778,7 @@ export async function callExcalidrawTool(
         return {
           content: [{
             type: 'text',
-            text: `Diagram exported to excalidraw.com!\n\nShareable URL: ${shareUrl}\n\nAnyone with this link can view and edit the diagram.`
+            text: `Diagram exported to ${new URL(shareUrl).host}!\n\nShareable URL: ${shareUrl}\n\nAnyone with this link can view and edit the diagram.`
           }]
         };
       }

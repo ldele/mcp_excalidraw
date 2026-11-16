@@ -35,6 +35,11 @@ tools/conventions/
 # (SPEC-002 work item 9): tests/server-contract.test.mjs imports and renders it.
 !tests/legacy/*.excalidraw
 
+# Upstream's opt-in durable store (EXCALIDRAW_DATA_DIR), if pointed inside the repo
+canvas-state-v1.json
+canvas-state.lock
+.excalidraw-state/
+
 .DS_Store
 
 # .claude/ and docs/ are COMMITTED: they carry the handoff baton, the canonical

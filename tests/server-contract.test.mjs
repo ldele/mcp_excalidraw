@@ -358,6 +358,28 @@ describe('the first sync from a tab is not an edit, and is not thrown away eithe
     assert.equal(stored('big').origin, 'agent');
     assert.equal(stored('sized').width, 400, 'a box the author gave is the author\'s');
   });
+
+  test('a label the tab expanded is listed on its shape, and the shape stays the agent\'s', async () => {
+    // The agent's shorthand `label` becomes a bound text the editor creates. Its shape keeps
+    // nothing that names it unless the sync takes the editor's reference (SPEC-004).
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await api('/api/elements', { method: 'POST', ...json({ id: 'card', type: 'rectangle', x: 0, y: 0, width: 200, height: 80, label: { text: 'Card' } }) });
+    const { rev: since } = await api('/api/changes?since=0');
+
+    const filled = { fillStyle: 'solid', strokeStyle: 'solid', strokeWidth: 2, roughness: 1, opacity: 100, strokeColor: '#1e1e1e' };
+    const echoed = [
+      { id: 'card', type: 'rectangle', x: 0, y: 0, width: 200, height: 80, ...filled, backgroundColor: 'transparent', boundElements: [{ type: 'text', id: 'card-text' }] },
+      { id: 'card-text', type: 'text', x: 75, y: 27.5, width: 50, height: 25, ...filled, backgroundColor: 'transparent', text: 'Card', originalText: 'Card', fontSize: 20, fontFamily: 5, textAlign: 'center', verticalAlign: 'middle', containerId: 'card' }
+    ];
+    await api('/api/elements/sync', { method: 'POST', ...json({ elements: echoed }) });
+
+    const feed = await api(`/api/changes?since=${since}`);
+    assert.deepEqual(feed.records, [], 'opening a tab is not feedback');
+    const card = (await api('/api/elements')).elements.find(e => e.id === 'card');
+    assert.deepEqual(card.boundElements, [{ type: 'text', id: 'card-text' }]);
+    assert.equal(card.origin, 'agent');
+    assert.equal(card.label, undefined, 'the shorthand gave way to the bound text');
+  });
 });
 
 describe("a tab's first click leaves the agent's scene the agent's (T-010, T-007)", () => {
@@ -533,6 +555,76 @@ describe('a canvas that restarts comes back with its drawing (T-023)', () => {
       await saved(file, (await canvas('/health')).rev);
       assert.equal(readFileSync(join(dir, aside[0]), 'utf-8'), broken, 'the new save did not touch it');
       assert.ok(existsSync(file));
+    } finally {
+      child.kill();
+    }
+  });
+});
+
+describe("upstream's store and ours never both run (SPEC-004)", () => {
+  // Upstream 2.2.0 brought a store of its own, opt-in through EXCALIDRAW_DATA_DIR. The owner kept
+  // ours as the default and upstream's as the opt-in (2026-11-16): setting the variable turns ours
+  // off, so a scene is never saved twice, and a write upstream's checkpoint refuses must leave no
+  // record in the change log, which upstream does not know about.
+  const at = 37000 + Math.floor(Math.random() * 1000);
+  const call = atPort => async (path, init) => (await fetch(`http://127.0.0.1:${atPort}${path}`, init)).json();
+  const rectangle = id => ({ method: 'POST', ...json({ id, type: 'rectangle', x: 0, y: 0, width: 40, height: 40 }) });
+  const dirs = [];
+  const scratch = prefix => { const d = mkdtempSync(join(tmpdir(), prefix)); dirs.push(d); return d; };
+  after(() => { for (const d of dirs) rmSync(d, { recursive: true, force: true }); });
+
+  test('with EXCALIDRAW_DATA_DIR set, upstream keeps the scene and the per-port file is never written', async () => {
+    const sceneDir = scratch('canvas-scene-');
+    const dataDir = scratch('canvas-data-');
+    const canvas = call(at);
+    const child = await bootCanvas(at, { EXCALIDRAW_NO_PERSIST: '0', EXCALIDRAW_SCENE_DIR: sceneDir, EXCALIDRAW_DATA_DIR: dataDir });
+    try {
+      const health = await canvas('/health');
+      assert.equal(health.sceneFile, null, 'ours is off');
+      assert.equal(health.durable_state_enabled, true, "upstream's is on");
+      await canvas('/api/elements', rectangle('durable'));
+      await new Promise(r => setTimeout(r, 600)); // longer than our save waits
+      assert.deepEqual(readdirSync(sceneDir), [], 'no scene-<port>.json');
+      assert.ok(existsSync(join(dataDir, 'canvas-state-v1.json')), 'upstream checkpointed the write');
+    } finally {
+      child.kill();
+    }
+
+    // And the other way round: without the variable, ours saves and upstream's is off.
+    const ours = await bootCanvas(at + 1, { EXCALIDRAW_NO_PERSIST: '0', EXCALIDRAW_SCENE_DIR: sceneDir });
+    try {
+      const health = await call(at + 1)('/health');
+      assert.ok(health.sceneFile?.startsWith(sceneDir), 'ours is on');
+      assert.equal('durable_state_enabled' in health, false, "upstream's is off");
+    } finally {
+      ours.kill();
+    }
+  });
+
+  test('a write the checkpoint refuses leaves no change record', async () => {
+    // In upstream's mode an image's file has to be uploaded before the element that uses it; an
+    // element that comes first is refused and upstream puts the store back as it was.
+    const canvas = call(at + 2);
+    const child = await bootCanvas(at + 2, { EXCALIDRAW_DATA_DIR: scratch('canvas-data-') });
+    const orphan = { id: 'orphan', type: 'image', x: 0, y: 0, width: 30, height: 30, fileId: 'never-uploaded' };
+    try {
+      await canvas('/api/elements', rectangle('kept'));
+      const { rev } = await canvas('/api/changes?since=0');
+
+      const created = await fetch(`http://127.0.0.1:${at + 2}/api/elements`, { method: 'POST', ...json(orphan) });
+      assert.equal(created.status, 409, 'refused by the checkpoint');
+      // The same element arriving from a tab goes through the whole sync reconciliation.
+      const { elements: drawn } = await canvas('/api/elements');
+      const synced = await fetch(`http://127.0.0.1:${at + 2}/api/elements/sync`, { method: 'POST', ...json({ elements: [...drawn, orphan] }) });
+      assert.equal(synced.ok, false, 'a sync that carries it is refused too');
+
+      const feed = await canvas(`/api/changes?since=${rev}`);
+      assert.equal(feed.rev, rev, 'no revision was spent');
+      assert.deepEqual(feed.records, [], 'no record of either refused write');
+      assert.deepEqual((await canvas('/api/elements')).elements.map(e => e.id), ['kept']);
+
+      await canvas('/api/elements', rectangle('after'));
+      assert.equal((await canvas('/health')).rev, rev + 1, 'the next write is recorded as usual');
     } finally {
       child.kill();
     }

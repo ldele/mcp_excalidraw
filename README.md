@@ -18,7 +18,7 @@ One canvas, three ways to drive it:
 
 - **Agent skill + CLI**, recommended for coding agents: `excalidraw-canvas <command>`, JSON in and
   out, and the canvas starts itself.
-- **MCP server**: 29 tools over stdio. It speaks MCP `2026-07-28` and still accepts clients that
+- **MCP server**: 30 tools over stdio. It speaks MCP `2026-07-28` and still accepts clients that
   open with `initialize`.
 - **REST API**: plain HTTP on the canvas server.
 
@@ -26,7 +26,7 @@ There are two processes. The **canvas server** serves the Excalidraw page, the R
 WebSocket sync, on `http://127.0.0.1:3000` by default. The CLI or the MCP server in front of it
 starts it when nothing is listening; set `EXCALIDRAW_NO_AUTOSTART=1` to opt out. Everything runs
 locally with no API key. Outbound traffic is the page loading Excalidraw's fonts from the esm.sh
-CDN, and the optional `share` upload to excalidraw.com.
+CDN, and the optional `share` upload to excalidraw.com or a self-hosted instance.
 
 ## Wireframes and the review loop
 
@@ -113,17 +113,18 @@ comes from `EXPRESS_SERVER_URL` or `--url`. `status` only reports; explicit `sta
 | `get <id>` / `delete <id...>` | Read / remove elements; a shape's bound label goes with it |
 | `update <id> --set '{...}'` | Update an element |
 | `query` | `--type`, `--bbox x0,y0,x1,y1`, `--filter k=v` (typed, nested keys), `--filter-json '{...}'` |
+| `selection` | What is selected in the tab that changed its selection last: `selectedElementIds`, `count` |
 | `describe` | Scene summary for an agent (plain text) |
 | `wireframe [--json] [--score]` | Read the canvas as a UI |
 | `changes [--since <rev>]` | What changed and who changed it (`--json` for raw records) |
 | `watch [--timeout 60]` | Block until someone edits the canvas (`--since`, `--settle`, `--json`) |
-| `screenshot` | Render headless: `--out f.png\|f.svg`, `--format`, `--scale 1-4`, `--dark`, `--padding N`, `--no-background`, `--ids a,b`, `--frame <id>`, `--no-embed-fonts`; `--renderer browser` uses an open tab |
-| `render [file\|-]` | Render a `.excalidraw` / `.excalidraw.md` file offline, no canvas server; same flags |
-| `export [--out f] [--format json\|obsidian]` / `import [file\|-] [--replace]` | Scene files; a `.md` path is Obsidian's `.excalidraw.md` format |
+| `screenshot` | Render headless: `--out f.png\|f.svg`, `--format`, `--scale 1-4`, `--dark`, `--padding N`, `--no-background`, `--ids a,b`, `--frame <id>`, `--no-embed-fonts`, `--embed-scene` (a PNG that `import` can read back); `--renderer browser` uses an open tab |
+| `render [file\|-]` | Render a `.excalidraw` / `.excalidraw.md` file, or a PNG with a scene in it, offline, no canvas server; same flags |
+| `export [--out f] [--format json\|obsidian]` / `import [file\|-] [--replace]` | Scene files; a `.md` path is Obsidian's `.excalidraw.md` format; `import` also reads a PNG with a scene in it |
 | `mermaid [file\|-]` | Mermaid → canvas (browser tab required) |
 | `snapshot save\|list\|restore <name>` | Named snapshots |
 | `arrange align\|distribute\|group\|ungroup\|lock\|unlock\|duplicate` | Layout (`--ids a,b,c`, `--to left\|horizontal\|...`) |
-| `share` | Encrypted upload → excalidraw.com link |
+| `share` | Encrypted upload → a link on excalidraw.com, or on your own instance (`EXCALIDRAW_SHARE_*`) |
 | `clear --yes` | Wipe the canvas |
 | `install-skill [--dir <skills-root>]` | Install the agent skill |
 
@@ -169,27 +170,35 @@ For a JSON config (Claude Desktop, Cursor and others):
 
 Never `npx -y mcp-excalidraw-server`, the config upstream documents: it runs upstream's package.
 
+The canvas URL is not an MCP endpoint. The client launches the stdio process, and that process
+reaches the canvas at `EXPRESS_SERVER_URL`. For a canvas on another machine, keep it on loopback
+there and tunnel to it (`ssh -N -L 13000:127.0.0.1:3000 host`), then set `EXPRESS_SERVER_URL` to
+`http://127.0.0.1:13000` and `EXCALIDRAW_NO_AUTOSTART=1`.
+
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `EXPRESS_SERVER_URL` | URL of the canvas server | `http://127.0.0.1:3000` |
 | `ENABLE_CANVAS_SYNC` | Real-time canvas sync | `true` |
 | `EXCALIDRAW_NO_AUTOSTART` | `1` disables canvas auto-start | (unset) |
-| `EXCALIDRAW_EXPORT_DIR` | Base directory MCP file exports may write to | current working dir |
+| `EXCALIDRAW_EXPORT_DIR` | The directory MCP file tools may read and write, symlinks resolved; `.excalidraw`, `.json`, `.md`, `.png` and `.svg` files only | current working dir |
 | `EXCALIDRAW_RENDER_MAX_DIM` | Largest side of a headless PNG, in pixels | `8192` |
+| `EXCALIDRAW_PNG_WORKER_TIMEOUT_MS` | Timeout of the PNG rasterizer, in milliseconds | `120000` |
 | `EXCALIDRAW_NO_PERSIST` | `1` keeps the scene in memory only, so a restart starts empty | (unset: saved per port) |
 | `EXCALIDRAW_SCENE_DIR` | Directory of the saved scenes, one `scene-<port>.json` per port | the pidfile's: `%LOCALAPPDATA%\Excalidraw-Canvas` (Windows), `~/Library/Application Support/excalidraw-canvas` (macOS), `$XDG_STATE_HOME/excalidraw-canvas` (Linux) |
+| `EXCALIDRAW_DATA_DIR` | Upstream's store instead of ours (see [Persistence](#persistence)) | (unset) |
+| `EXCALIDRAW_SHARE_UPLOAD_URL` / `EXCALIDRAW_SHARE_BASE_URL` | Where `share` uploads, and the Excalidraw app its links open in | excalidraw.com |
 | `PORT` / `HOST` | Canvas server bind address | `3000` / `127.0.0.1` |
 | `CANVAS_ALLOWED_ORIGINS` | Other page origins allowed to call the canvas, comma-separated (for example `http://localhost:5173` for `npm run dev`) | (unset: the canvas's own page only) |
 | `LOG_LEVEL` | `error`, `warn`, `info`, `debug` | `info` |
 | `LOG_FILE_PATH` | Log file | `~/Library/Logs/excalidraw-mcp.log` (macOS), `$XDG_STATE_HOME/excalidraw-mcp/excalidraw.log` (Linux), `%LOCALAPPDATA%\Excalidraw-MCP\excalidraw.log` (Windows) |
 
-### MCP tools (29)
+### MCP tools (30)
 
 | Category | Tools |
 |---|---|
 | **Element CRUD** | `create_element`, `get_element`, `update_element`, `delete_element`, `query_elements`, `batch_create_elements`, `duplicate_elements` |
 | **Layout** | `align_elements`, `distribute_elements`, `group_elements`, `ungroup_elements`, `lock_elements`, `unlock_elements` |
-| **Scene awareness** | `describe_scene`, `describe_wireframe`, `get_canvas_screenshot` |
+| **Scene awareness** | `describe_scene`, `describe_wireframe`, `get_canvas_screenshot`, `get_selection` |
 | **Review loop** | `get_canvas_changes`, `wait_for_changes` |
 | **File I/O** | `export_scene`, `import_scene`, `export_to_image`, `export_to_excalidraw_url`, `create_from_mermaid` |
 | **State** | `clear_canvas`, `snapshot_scene`, `restore_snapshot` |
@@ -206,6 +215,12 @@ server back what it lacks. The saved scene sits outside the repo, and the next d
 replaces it: a diagram's home is an exported `.excalidraw` file, which you `import` again to keep
 working on it.
 
+`EXCALIDRAW_DATA_DIR` switches to upstream's store instead, and turns ours off, so only one runs.
+It keeps elements, image files and snapshots in one locked directory for every port and saves each
+change before acknowledging it, but it does not keep the change log: after a restart, `changes`
+starts again from revision 0. In that mode an image's file must be uploaded before the element
+that uses it.
+
 `share` encrypts the scene locally with AES-GCM before uploading. The key is in the URL fragment,
 which excalidraw.com never receives; anyone holding the full link can view the diagram.
 
@@ -218,6 +233,9 @@ npm run test:mcp      # MCP stdio wire protocol, both protocol eras
 npm run test:bind     # loopback bind, duplicate-start refusal
 npm run test:render   # headless renderer, export order keys
 npm run test:state    # import, snapshot restore, sync validation, the fork's state checks
+npm run test:durable  # upstream's opt-in store (EXCALIDRAW_DATA_DIR)
+npm run test:share    # the share target
+npm run test:paths    # MCP file tools stay inside EXCALIDRAW_EXPORT_DIR
 npm run type-check && npm run type-check:frontend
 ```
 
