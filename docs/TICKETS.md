@@ -50,14 +50,6 @@ created.
 - **Note:** 2026-11-16 — 2026-11-16: framed as two decisions, both proposed. docs/decisions/ADR-004-markup-intent.md covers what a mark asks for: a legend for today's gestures, intent by colour, intent by a first word, or free markup. docs/decisions/ADR-005-sign-off-and-end-of-round.md covers approving a screen and ending a round: an approval box per screen, a Done button in the page, a word in a note, or the quiet period and chat. Waiting on the owner's choices.
 - **Resolution:** —
 
-## T-024 — A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows
-- **Status:** triaged · 2026-11-16
-- **From:** drawing-app session (1.3.0) · 2026-10-29
-- **Symptom:** Three arrows created with elbowed: true, startElementId and endElementId (and points, later restored with update) were bound and wireframe listed 3 flows. When the owner's tab connected, changes reported each as 're-bound: s1-start -> s2 => nothing — by human' (rev 89 -> 94); get f-start then shows startBinding null and endBinding null, and wireframe prints no Navigation section. The score stays clean (it does not count flows), so only the reading shows it. The same arrows recreated without elbowed kept their bindings through the tab's sync (0 human changes, 3 flows).
-- **Reproduce:** excalidraw-canvas add two rectangles and an arrow {elbowed: true, startElementId, endElementId, points with waypoints}; wireframe lists the flow; open the canvas in one tab; changes reports the re-bound edits by human and wireframe has no flow.
-- **Note:** 2026-11-16 — Rank 3. Not reproduced today. Lead: the server stores an elbowed arrow's bindings with fixedPoint null (src/core/expand-elements.ts:211-220), and Excalidraw 0.18 binds an elbowed arrow by fixedPoint, so the tab likely unbinds it on load and syncs it back, which the change log records as a person's edit. Next: the ticket's steps on 1.3.0 and on upstream 2.2.0 (expand-elements.ts is upstream's), then either compute fixedPoint from the bound shape or refuse elbowed with bindings at the API. The reading's loss (no Navigation) is what makes it worth doing.
-- **Resolution:** —
-
 ## T-021 — A tall sibling merges a stacked checkbox column into one row, so each checkbox loses its label
 - **Status:** triaged · 2026-11-16
 - **From:** pharma-dq-validator session driving the CLI (1.3.0) · 2026-10-21

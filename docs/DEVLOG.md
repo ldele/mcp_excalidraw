@@ -10,6 +10,27 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (f) — T-024 fixed: an elbowed arrow keeps its bindings through export, import and a tab
+- **Cause, found with a real tab:** creating, updating or live-drawing an elbowed arrow kept its
+  bindings. Export did not. It writes an arrow bound by `start`/`end` refs with
+  `fixedPoint: null`, and Excalidraw 0.18.1's restore drops such a binding on an elbowed arrow
+  (`repairBinding`, read in its source). So an export made with no tab, imported again, lost its
+  elbowed flows on the tab's first click: "re-bound: s1-go → s2 ⇒ nothing, by human", one flow
+  gone, read as an annotation. A plain arrow binds without a fixed point and kept its flow.
+  Upstream 2.2.0's export writes the same null.
+- **Fix:** `fillElbowFixedPoints` (new `src/core/elbow-binding.ts`) gives each such binding the
+  fixed point its end implies, computed as Excalidraw's own
+  `calculateFixedPointForElbowArrowBinding` does. It runs in the export and in the page just
+  before `restoreElements`, so files written before the fix load bound too. The exported values
+  equal those a real tab computed for the same arrow.
+- **Rule 2:** `src/server.ts`, `src/index.ts` and `normalize.ts` were not touched. Two calls went
+  into upstream's `expand-elements.ts` and `scene.ts`, listed in `FORK.md`.
+- **Verified:** `tests/elbow-binding.test.mjs`, two of three red before the fix (one replays the
+  tab's restore through the renderer's bundle). `npm test` gave 97 of 97 plus wire, bind, render
+  and state, and the corpus is unchanged. Playwright gave 22 of 22 with the system Chrome, through
+  a scratch config, since the bundled shell is not installed. Live on port 3050: the pre-fix
+  export, imported, kept both flows through a tab, and a fresh export re-exports byte-identical.
+
 ## 2026-11-16 (e) — T-027 and T-028 framed as three proposed ADRs; nothing built
 - **What:** both tickets are design questions, so each was framed as decisions for the owner.
   ADR-003 covers how a screen shows its id. ADR-004 covers what a person's mark asks for. ADR-005
@@ -37,24 +58,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   bind, render and state; the corpus is unchanged; both type-checks pass. Not run: the browser
   suite. Seen in passing: one click gave 10 syncs, which looks like the autosync loop upstream's
   #142 stops.
-
-## 2026-11-16 (c) — T-022 and T-025 fixed: `apply` can replace what it deletes, and a delete takes the label
-- **T-022:** `apply` ran create, update, then delete, so a patch that deletes and re-creates an id
-  deleted the new element. It now runs delete, create, update (`src/cli/commands/elements.ts`).
-- **T-025:** `DELETE /api/elements/:id` left a shape's bound label drawn, and the reading, which
-  skips bound text, never saw it. The route now deletes the labels too and returns every id it
-  removed (`boundTextIds`, new `src/core/bound-text.ts`; one call in `src/server.ts`). The CLI
-  skips an id the server already removed, so naming a label after its shape is not an error. The
-  change feed reports one delete, the shape's, since a bound label is reported as its shape's
-  (`isChangeTracked`). The reading now reads a label whose shape is gone as text (`wireframe.ts`).
-- **Rule 2:** upstream 2.2.0 is still unmerged, with 14 commits and no change since this morning.
-  Editing the delete route defers that merge, on the owner's "start T-022 and T-025". It adds one
-  call to a hunk the dry merge already conflicts in.
-- **Verified:** four tests in `tests/server-contract.test.mjs`; three failed on the unfixed
-  build, and the fourth guards the 404 case. `npm test` gave 92 of 92 plus wire, bind, render and
-  state. Both type-checks pass, and the corpus reads its five drawings as before. Live on port
-  3047: `delete save` removed `save-label`, and a delete-and-create patch kept the new `cancel`.
-  The screen was named, with 0 fallbacks and 0 orphans. Not run: the browser suite.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

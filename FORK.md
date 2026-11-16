@@ -71,6 +71,7 @@ undoes it:
 | `src/server.ts`, ahead of `cors()` and on `verifyClient` | the origin guard, from `src/core/origin-guard.ts` (T-015) | state check *requests from another site are refused* |
 | `src/server.ts`, seven touches | the scene store, from `src/core/scene-store.ts`, loaded before `listen`, flushed on shutdown (T-023) | `tests/browser/server-restart.spec.mjs` |
 | `src/server.ts`, `DELETE /api/elements/:id` | takes the element's bound labels with it, from `src/core/bound-text.ts`, and returns every id it removed (T-025); upstream 2.2.0's route still leaves them | `tests/server-contract.test.mjs` |
+| `src/core/expand-elements.ts` (export) and `prepareServerScene` in `frontend/src/utils/scene.ts` | give an elbowed arrow's bindings the fixed point Excalidraw requires, from `src/core/elbow-binding.ts` (T-024); upstream 2.2.0's export still writes `fixedPoint: null` | `tests/elbow-binding.test.mjs` |
 | `src/cli/commands/elements.ts`, `apply` and `delete` | `apply` deletes before it creates, so a patch can replace an id it deletes (T-022); both skip a label the server already removed | `tests/server-contract.test.mjs` |
 | `frontend/src/App.tsx`, `frontend/src/utils/scene.ts` | `allowEmpty` in the sync body; `adoptServerScene` / `mergeAfterRestart` for a tab that outlives a restart | `tests/browser/server-restart.spec.mjs`; the `seed` helper of `scene-reload.spec.mjs` sends `allowEmpty` |
 | `scripts/check-state-integrity.mjs` | upstream's file, carrying the three checks above | — |

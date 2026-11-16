@@ -1,5 +1,6 @@
 import { convertToExcalidrawElements, restoreElements } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
+import { fillElbowFixedPoints } from '../../../src/core/elbow-binding'
 
 export interface ServerElement {
   id: string;
@@ -426,8 +427,10 @@ export const prepareServerScene = (
       })
     : ordered
 
+  // Fork (T-024): restoreElements drops an elbowed arrow's binding that has no fixed point, which
+  // is what an older export or an agent's arrow carries; give it the one its end implies first.
   const restored = restoreElements(
-    recenterBoundShapeTextElements(reflowed) as ExcalidrawElement[],
+    fillElbowFixedPoints(recenterBoundShapeTextElements(reflowed)) as ExcalidrawElement[],
     null,
     { repairBindings: true, refreshDimensions: opts.refreshDimensions ?? false }
   )

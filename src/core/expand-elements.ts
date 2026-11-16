@@ -1,4 +1,5 @@
 import { ServerElement, normalizeFontFamily, DEFAULT_FONT_FAMILY, DEFAULT_STROKE_COLOR } from '../types.js';
+import { fillElbowFixedPoints } from './elbow-binding.js';
 
 // Expand the server's agent-friendly element format into real Excalidraw
 // elements: strip server metadata, add Excalidraw defaults, generate bound
@@ -350,5 +351,7 @@ export function expandElementsForExport(
   // fall out of order.
   cleanedExportElements.forEach((el, i) => { el.index = orderKey(i); });
 
-  return deterministic ? canonicalizeKeys(cleanedExportElements) : cleanedExportElements;
+  // Fork (T-024): an elbowed arrow's binding needs a fixed point, or Excalidraw unbinds it on load.
+  const exported = fillElbowFixedPoints(cleanedExportElements);
+  return deterministic ? canonicalizeKeys(exported) : exported;
 }

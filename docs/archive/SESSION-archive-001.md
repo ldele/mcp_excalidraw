@@ -4,6 +4,15 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (c) — Claude Code — T-022 and T-025 fixed; STAGED
+- **Done:** `apply` deletes before it creates, and a delete takes a shape's bound label with it.
+  Both tickets are closed (DEVLOG 2026-11-16 (c)). Entry (b) was committed as `e5c58ef` and pushed.
+- **Where:** `main`, staged, not committed. `dist/` is rebuilt, so `excalidraw-canvas` on PATH has
+  both fixes.
+- **Mind:** the delete route in `src/server.ts` is one more touch for the 2.2.0 merge (`FORK.md`).
+- **Next:** the owner's call on 2.2.0; T-026 and T-001; then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 (b) — Claude Code — cpc untracked and gitignored, rule 5; STAGED
 - **Done:** `tools/conventions/` is out of git and gitignored, CI's cpc job is removed, and the
   owner's rule is `.claude/CONTEXT.md` rule 5 (DEVLOG 2026-11-16 (b)). Entry (a) was committed as

@@ -17,11 +17,12 @@ lack (`FORK.md` § Upstream 2.2.0). Since the last merge the fork fixed what tha
 (T-012 to T-014), the tab's echo edits (T-007, T-010), kept waypoints (T-009), refused other
 origins (T-015) and kept the scene across a restart (T-023). PR 1, the human markup round, ran on
 2026-08-07 and **still has not taken the attribution measurement it exists for** (KI-3). On
-2026-11-16 the four top-ranked tickets were fixed: T-022 and T-025 (silent loss in `apply` and
-delete), T-026 (a tab's first sync marking agent shapes human) and T-001 (unsized text dropped
-from the reading with no tab). **Next:** the owner's call on 2.2.0; then PR 4 (ADR-002). T-027 and
-T-028, a person's markup convention and visible screen ids, stand between the project and PR 1;
-they are framed as ADR-003 to ADR-005, proposed and waiting on the owner. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
+2026-11-16 the five top-ranked tickets were fixed: T-022 and T-025 (silent loss in `apply` and
+delete), T-026 (a tab's first sync marking agent shapes human), T-001 (unsized text dropped from
+the reading with no tab) and T-024 (elbowed arrows unbound by an export). **Next:** the owner's
+call on 2.2.0; then PR 4 (ADR-002). T-027 and T-028, a person's markup convention and visible
+screen ids, stand between the project and PR 1; they are framed as ADR-003 to ADR-005, proposed
+and waiting on the owner. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
 only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

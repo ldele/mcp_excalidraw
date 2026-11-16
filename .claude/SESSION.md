@@ -4,6 +4,17 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-16 (f) — Claude Code — T-024 fixed; STAGED
+- **Done:** elbowed arrows keep their bindings through export, import and a tab (DEVLOG 2026-11-16
+  (f)). T-024 is closed. Entry (e) was committed as `9c15c1f` and pushed.
+- **Where:** `main`, staged, not committed. `dist/` and `dist/frontend` are rebuilt. No canvas is
+  left running; the probes used port 3050.
+- **Mind:** Playwright's bundled headless shell is not installed here. Run the browser suite
+  against the system Chrome with a config that sets `use.channel` to `chrome`; `PW_CHANNEL` is not
+  read.
+- **Next:** the owner's calls on the 2.2.0 merge and ADR-003 to ADR-005; then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 (e) — Claude Code — T-027 and T-028 framed as ADR-003 to ADR-005; STAGED
 - **Done:** three proposed ADRs in `docs/decisions/`, with pointers from both tickets and CONTEXT
   (DEVLOG 2026-11-16 (e)). Entry (d) was committed as `bd24f30` and pushed. No code changed.
@@ -24,13 +35,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `tools/conventions/` out of every commit, and force-pushed it. The hashes named in older entries
   and the DEVLOG no longer exist; find those commits by their message.
 - **Next:** the owner's call on 2.2.0; then PR 4.
-- **Picks up:** any session with a terminal.
-
-## 2026-11-16 (c) — Claude Code — T-022 and T-025 fixed; STAGED
-- **Done:** `apply` deletes before it creates, and a delete takes a shape's bound label with it.
-  Both tickets are closed (DEVLOG 2026-11-16 (c)). Entry (b) was committed as `e5c58ef` and pushed.
-- **Where:** `main`, staged, not committed. `dist/` is rebuilt, so `excalidraw-canvas` on PATH has
-  both fixes.
-- **Mind:** the delete route in `src/server.ts` is one more touch for the 2.2.0 merge (`FORK.md`).
-- **Next:** the owner's call on 2.2.0; T-026 and T-001; then PR 4.
 - **Picks up:** any session with a terminal.

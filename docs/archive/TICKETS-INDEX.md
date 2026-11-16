@@ -10,6 +10,7 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 |---|---|---|---|---|
 | T-026 | fixed | 2026-11-16 | A tab connecting re-marks agent shapes as human, and the reading then reorders a row and reads an icon as markup | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-025 | fixed | 2026-11-16 | Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-024 | fixed | 2026-11-16 | A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-023 | fixed | 2026-10-23 | A restarted canvas comes back empty, and a tab still open on it replaces its drawing with the empty scene | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-022 | fixed | 2026-11-16 | apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-020 | fixed | 2026-11-16 | Update cpc from 1.8.0 to 1.18.1 at the start of the next session | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

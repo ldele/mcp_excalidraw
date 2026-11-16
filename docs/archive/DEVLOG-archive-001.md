@@ -4,6 +4,24 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (c) — T-022 and T-025 fixed: `apply` can replace what it deletes, and a delete takes the label
+- **T-022:** `apply` ran create, update, then delete, so a patch that deletes and re-creates an id
+  deleted the new element. It now runs delete, create, update (`src/cli/commands/elements.ts`).
+- **T-025:** `DELETE /api/elements/:id` left a shape's bound label drawn, and the reading, which
+  skips bound text, never saw it. The route now deletes the labels too and returns every id it
+  removed (`boundTextIds`, new `src/core/bound-text.ts`; one call in `src/server.ts`). The CLI
+  skips an id the server already removed, so naming a label after its shape is not an error. The
+  change feed reports one delete, the shape's, since a bound label is reported as its shape's
+  (`isChangeTracked`). The reading now reads a label whose shape is gone as text (`wireframe.ts`).
+- **Rule 2:** upstream 2.2.0 is still unmerged, with 14 commits and no change since this morning.
+  Editing the delete route defers that merge, on the owner's "start T-022 and T-025". It adds one
+  call to a hunk the dry merge already conflicts in.
+- **Verified:** four tests in `tests/server-contract.test.mjs`; three failed on the unfixed
+  build, and the fourth guards the 404 case. `npm test` gave 92 of 92 plus wire, bind, render and
+  state. Both type-checks pass, and the corpus reads its five drawings as before. Live on port
+  3047: `delete save` removed `save-label`, and a delete-and-create patch kept the new `cancel`.
+  The screen was named, with 0 fallbacks and 0 orphans. Not run: the browser suite.
+
 ## 2026-11-16 (b) — cpc is never made public: `tools/conventions/` untracked and gitignored
 - **Why:** the owner ruled that the cpc tooling must never be made public. `gh` reports this repo
   as public, and `tools/conventions/cpc/LICENSE` grants no licence. The owner chose to keep the
