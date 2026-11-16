@@ -22,9 +22,8 @@ and works, but the attribution accuracy it
 exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 11 tickets are open in
 `docs/TICKETS.md`, each ranked in its 2026-11-16 triage note; T-001, T-022, T-024, T-025 and T-026
 were fixed the same day, and ADR-003 to ADR-005 (T-027, T-028) were decided. ADR-003 (screens as
-named frames, T-028) is built and staged on branch `adr-003-frame-screens` (SPEC-005). **Next:
-the owner reviews that branch; then build ADR-004 and ADR-005; then PR 4.** Detail:
-`.claude/CONTEXT.md`.
+named frames, T-028) is on `main` as `6414461`, pushed (SPEC-005). **Next: build ADR-004 and
+ADR-005; then PR 4.** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 

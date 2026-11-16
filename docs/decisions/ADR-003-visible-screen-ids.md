@@ -87,6 +87,14 @@ To be built with the change: a fixture drawn with frames, whose stored reading n
 from its frame (`tests/wireframe-corpus.test.mjs`), seen red before the reading reads frame
 names. Rule 4's round trip applies.
 
+**Built 2026-11-16** (SPEC-005, on `main` as `6414461`): `tests/fixtures/frame-screens.excalidraw`,
+with its hand-written claims in `tests/expected/frame-screens.json`, read by
+`tests/wireframe-corpus.test.mjs`. It failed before the reading read frame names: S01 and S03
+unnamed, S02 named by its heading. `tests/fixtures/frame-edges.excalidraw` and
+`tests/frame-screens.test.mjs` pin the edges. Unlike what the Consequences below expect of option 2,
+the build touched one upstream file: `prepareServerScene` in `frontend/src/utils/scene.ts` now
+keeps an agent's arrow bound to a frame through a tab's load (SPEC-005 § Findings, `FORK.md`).
+
 ## Consequences
 
 - **Option 2** settles CONTEXT's frames question, and gives ADR-004's legend a natural home as a

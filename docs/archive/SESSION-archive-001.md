@@ -4,6 +4,18 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (h) — Claude Code — upstream 2.2.0 merged on a branch; STAGED
+- **Done:** SPEC-004. Upstream 2.2.0 merged; ours stays the default store, `EXCALIDRAW_DATA_DIR`
+  switches to upstream's (owner's call). Four findings, one sync fix (DEVLOG 2026-11-16 (h)).
+  Entry (g) was committed as `09cd3e2` and pushed.
+- **Where:** branch `merge/upstream-2.2.0`, worktree `C:\Projects\mcp_excalidraw-merge`, merge in
+  progress, everything staged, nothing committed. The main checkout is untouched. No canvas left
+  running; probes used 3061 and 51917.
+- **Next:** the owner reviews `git diff --cached` there and commits the merge; `main` takes the
+  branch; `npm ci && npm run build` in the main checkout with no canvas running; push, then
+  dispatch CI (KI-8). Then build ADR-003 to ADR-005.
+- **Picks up:** any session with a terminal; the ADR builds need a browser tab.
+
 ## 2026-11-16 (g) — Claude Code — ADR-003 to ADR-005 accepted; 2.2.0 merge decided; STAGED
 - **Done:** the owner decided ADR-003 (frames), ADR-004 (colour intent) and ADR-005 (approval
   boxes), and decided to merge upstream 2.2.0 next. Recorded in the ADRs, the tickets, CONTEXT,

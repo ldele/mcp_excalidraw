@@ -6,6 +6,11 @@
 > and a browser** (the round trip of rule 4 needs a real tab). The *why* is
 > `docs/decisions/ADR-003-visible-screen-ids.md` (accepted 2026-11-16) and T-028; this SPEC is the
 > *how* and does not reopen the choice. Written 2026-11-16 by the session the owner gave the build to.
+>
+> **Landed 2026-11-16.** Committed on `adr-003-frame-screens` as `6414461` on the owner's yes,
+> fast-forwarded onto `main` and pushed; CI run 43952866891 dispatched on it. The worktree and the
+> branch are removed. Every test case below ran; § Verified gives each result. Work item 8 and
+> test case 15 were added during the work.
 
 ## Reader and what changes
 - **Reader:** the session building ADR-003, then the owner reviewing the staged branch; after it,

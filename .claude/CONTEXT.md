@@ -23,9 +23,10 @@ delete), T-026 (a tab's first sync marking agent shapes human), T-001 (unsized t
 the reading with no tab) and T-024 (elbowed arrows unbound by an export). The same day the owner
 decided T-027 and T-028, which stand between the project and PR 1. ADR-003: screens become named
 frames. ADR-004: a mark's intent is its colour. ADR-005: each screen gets an approval box.
-ADR-003 is built and staged on branch `adr-003-frame-screens` (SPEC-005, T-028): a top-level
-frame is a screen named by its name, and the page now keeps an agent's arrow bound to a frame.
-**Next:** the owner reviews ADR-003's branch; then build ADR-004 and ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
+ADR-003 is on `main` as `6414461`, pushed (SPEC-005, T-028): a top-level frame is a screen named
+by its name, and the page now keeps an agent's arrow bound to a frame. CI run 43952866891 was
+dispatched on it; the main checkout is not yet rebuilt (baton (k)).
+**Next:** build ADR-004 and ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings
@@ -85,9 +86,5 @@ frame is a screen named by its name, and the page now keeps an agent's arrow bou
 - Whether `customData` should now carry the declared `role`. Upstream's `.passthrough()` landed in
   the 2026-08-07 merge, so unknown props survive the schema and the mechanism finally exists — this
   is what KI-5 and Phase 3 were blocked on. Still a decision (an ADR), not a given.
-- Whether Excalidraw's own **frames** should replace the "screen = plain rectangle" convention.
-  Decided on 2026-11-16: yes, for new screens (ADR-003); rectangle screens keep reading as now.
-  Built the same day (SPEC-005); the conventions draw a screen as a frame. Kept here until the
-  build lands on `main`.
 - Whether the wireframe layer should ever emit code, or stop at the reading and leave generation to
   the calling agent. Currently the latter, deliberately — see `docs/ROADMAP.md`.
