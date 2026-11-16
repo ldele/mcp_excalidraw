@@ -10,6 +10,8 @@ export interface ApiResponse {
   message?: string;
   error?: string;
   count?: number;
+  // DELETE /api/elements/:id: every id it removed, the element's bound labels included (T-025)
+  deleted?: string[];
 }
 
 export interface SyncResponse {

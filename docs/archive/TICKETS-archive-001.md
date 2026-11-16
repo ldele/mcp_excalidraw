@@ -4,6 +4,22 @@
 
 Closed tickets, moved here from `docs/TICKETS.md` when they were closed, **verbatim** per cpc ADR-071, and listed in `TICKETS-INDEX.md`. Newest on top. Append-only; never edited.
 
+## T-025 — Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it
+- **Status:** fixed · 2026-11-16
+- **From:** drawing-app session (1.3.0) · 2026-10-29
+- **Symptom:** apply with delete of 26 labelled rectangles (ids s1-key-hi and others) removed the rectangles but left all 19 bound labels (ids <shape>-label, containerId pointing at the deleted shape) drawn where the shapes were, overlapping the new pills. wireframe --score was unchanged (79 components, orphans 0), so only the screenshot showed them; deleting the 19 label ids by hand cleaned it.
+- **Reproduce:** excalidraw-canvas add a rectangle with text; excalidraw-canvas apply '{"delete":["<id>"]}'; export: a text element with containerId <id> remains and screenshot still draws it.
+- **Note:** 2026-11-16 — Rank 1, with T-022: it loses work silently. Confirmed in code: DELETE /api/elements/:id (src/server.ts:606) removes the element only, so a bound text whose containerId names it stays drawn, and the reading counts no orphan label. Upstream 2.2.0's route is the same (it wraps the delete in commitCanvasMutation and still leaves the label), so the fix is upstream's to share. Fix: delete a container's bound text with it, and have the reading flag a text whose containerId names no element. src/server.ts is the collision zone (rule 2): build it after the owner's call on the 2.2.0 merge. Small.
+- **Resolution:** DEVLOG 2026-11-16 (c). DELETE /api/elements/:id takes the element's bound labels with it and returns every id it removed (boundTextIds in src/core/bound-text.ts, one call in src/server.ts); this covers CLI delete, apply and MCP delete_element. The CLI skips a label already removed, so naming it too is not an error. The reading now reads a label whose shape is gone as text, so wireframe --score counts it. Upstream 2.2.0 has the same defect. Tests in tests/server-contract.test.mjs, two of them red before the fix.
+
+## T-022 — apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently
+- **Status:** fixed · 2026-11-16
+- **From:** pharma-dq-validator session driving the CLI (1.3.0) · 2026-10-21
+- **Symptom:** A patch with delete [d-c0-state … d-c3-review_status] (44 table cells) and create holding new cells under the same 44 ids, plus 44 more, ended with only the 44 new-only cells on the canvas: the re-created ones were created, then deleted. The command reported success and wireframe --score stayed clean (components unchanged at 115, where 159 were expected), so only a count by hand showed it. src/cli/commands/elements.ts applies create (l.50), then update (l.55), then delete (l.69); neither SKILL.md nor the cheatsheet states that order.
+- **Reproduce:** excalidraw-canvas add --one '{"id":"a","type":"rectangle","x":0,"y":0,"width":80,"height":40}'; printf '%s' '{"delete":["a"],"create":[{"id":"a","type":"rectangle","x":0,"y":100,"width":80,"height":40}]}' | excalidraw-canvas apply; excalidraw-canvas get a (not found). Ask: run delete before create, or refuse a patch whose create and delete share an id, and say the order in the cheatsheet.
+- **Note:** 2026-11-16 — Rank 1, with T-025: it loses work silently. Confirmed in code: apply runs create (src/cli/commands/elements.ts:50), then update, then delete (l.68-71), so a patch that deletes and re-creates the same ids ends with them deleted. The CLI is upstream's file but outside rule 2's collision zone. Fix: delete first, or refuse a patch whose create and delete share an id; say the order in the cheatsheet (README states it since 2026-11-16). Small, with a test in tests/.
+- **Resolution:** DEVLOG 2026-11-16 (c). apply now runs delete, then create, then update (src/cli/commands/elements.ts), so a patch that deletes ids and re-creates them keeps the new elements; the cheatsheet, SKILL.md and README say the order and that apply is not atomic. Test: a patch that deletes ids and creates them again keeps the new elements, in tests/server-contract.test.mjs, red before the fix. Live on a private port: the re-created element kept its new position and label.
+
 ## T-020 — Update cpc from 1.8.0 to 1.18.1 at the start of the next session
 - **Status:** fixed · 2026-11-16
 - **From:** cpc session, Code (unknown) · 2026-10-12

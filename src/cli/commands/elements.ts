@@ -46,6 +46,10 @@ export async function apply(argv: string[]): Promise<void> {
 
   await ensureCanvasRunning();
 
+  // Delete first (T-022): a patch that deletes ids and re-creates them is a replace, and running
+  // create first made the delete remove the new elements, silently.
+  const deleted = await deleteAll(patch.delete || []);
+
   let created: ServerElement[] = [];
   if (patch.create?.length) {
     created = await batchCreateElementsStrict(patch.create.map(el => prepareElement(el)));
@@ -63,12 +67,6 @@ export async function apply(argv: string[]): Promise<void> {
       byId.set(id, element);
       updated.push(element);
     }
-  }
-
-  const deleted: string[] = [];
-  for (const id of patch.delete || []) {
-    await deleteElementStrict(id);
-    deleted.push(id);
   }
 
   printJson({
@@ -131,10 +129,21 @@ export async function del(argv: string[]): Promise<void> {
   if (positionals.length === 0) throw new CliUsageError('Usage: delete <id> [<id> ...]');
 
   await ensureCanvasRunning();
-  for (const id of positionals) {
-    await deleteElementStrict(id);
+  const deleted = await deleteAll(positionals);
+  printJson({ success: true, deleted, count: deleted.length });
+}
+
+// Deletes each id in turn. The server removes a shape's bound label with it (T-025) and says so,
+// so a label named later in the same list is already gone: skip it rather than fail on its 404.
+// Returns every id removed, labels included.
+async function deleteAll(ids: string[]): Promise<string[]> {
+  const deleted: string[] = [];
+  for (const id of ids) {
+    if (deleted.includes(id)) continue;
+    const response = await deleteElementStrict(id);
+    deleted.push(...(response.deleted?.length ? response.deleted : [id]));
   }
-  printJson({ success: true, deleted: positionals, count: positionals.length });
+  return deleted;
 }
 
 export async function get(argv: string[]): Promise<void> {

@@ -56,28 +56,12 @@ created.
 - **Note:** 2026-11-16 — Rank 2, with T-001. The review loop's claim, who made a change, is wrong again, and a declared component leaves the reading. Not reproduced today: WF-07 is in BlackBox. Lead, not checked: changes.ts says text styling changed when fontFamily or textAlign differs (src/core/changes.ts:601). An unlabelled shape stored with a font key that the editor drops would give exactly 22 such records, and T-012's EDITOR_DEFAULTS covers values the editor fills in, not keys it removes. The rest follows from origin human: collectMarkup takes a human rectangle near a component as markup ([s2-close]), and the reordered KPI row may be the same shapes changing row. First step: the reproduce line, then get on one of the 22 before and after the tab.
 - **Resolution:** —
 
-## T-025 — Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it
-- **Status:** triaged · 2026-11-16
-- **From:** drawing-app session (1.3.0) · 2026-10-29
-- **Symptom:** apply with delete of 26 labelled rectangles (ids s1-key-hi and others) removed the rectangles but left all 19 bound labels (ids <shape>-label, containerId pointing at the deleted shape) drawn where the shapes were, overlapping the new pills. wireframe --score was unchanged (79 components, orphans 0), so only the screenshot showed them; deleting the 19 label ids by hand cleaned it.
-- **Reproduce:** excalidraw-canvas add a rectangle with text; excalidraw-canvas apply '{"delete":["<id>"]}'; export: a text element with containerId <id> remains and screenshot still draws it.
-- **Note:** 2026-11-16 — Rank 1, with T-022: it loses work silently. Confirmed in code: DELETE /api/elements/:id (src/server.ts:606) removes the element only, so a bound text whose containerId names it stays drawn, and the reading counts no orphan label. Upstream 2.2.0's route is the same (it wraps the delete in commitCanvasMutation and still leaves the label), so the fix is upstream's to share. Fix: delete a container's bound text with it, and have the reading flag a text whose containerId names no element. src/server.ts is the collision zone (rule 2): build it after the owner's call on the 2.2.0 merge. Small.
-- **Resolution:** —
-
 ## T-024 — A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows
 - **Status:** triaged · 2026-11-16
 - **From:** drawing-app session (1.3.0) · 2026-10-29
 - **Symptom:** Three arrows created with elbowed: true, startElementId and endElementId (and points, later restored with update) were bound and wireframe listed 3 flows. When the owner's tab connected, changes reported each as 're-bound: s1-start -> s2 => nothing — by human' (rev 89 -> 94); get f-start then shows startBinding null and endBinding null, and wireframe prints no Navigation section. The score stays clean (it does not count flows), so only the reading shows it. The same arrows recreated without elbowed kept their bindings through the tab's sync (0 human changes, 3 flows).
 - **Reproduce:** excalidraw-canvas add two rectangles and an arrow {elbowed: true, startElementId, endElementId, points with waypoints}; wireframe lists the flow; open the canvas in one tab; changes reports the re-bound edits by human and wireframe has no flow.
 - **Note:** 2026-11-16 — Rank 3. Not reproduced today. Lead: the server stores an elbowed arrow's bindings with fixedPoint null (src/core/expand-elements.ts:211-220), and Excalidraw 0.18 binds an elbowed arrow by fixedPoint, so the tab likely unbinds it on load and syncs it back, which the change log records as a person's edit. Next: the ticket's steps on 1.3.0 and on upstream 2.2.0 (expand-elements.ts is upstream's), then either compute fixedPoint from the bound shape or refuse elbowed with bindings at the API. The reading's loss (no Navigation) is what makes it worth doing.
-- **Resolution:** —
-
-## T-022 — apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently
-- **Status:** triaged · 2026-11-16
-- **From:** pharma-dq-validator session driving the CLI (1.3.0) · 2026-10-21
-- **Symptom:** A patch with delete [d-c0-state … d-c3-review_status] (44 table cells) and create holding new cells under the same 44 ids, plus 44 more, ended with only the 44 new-only cells on the canvas: the re-created ones were created, then deleted. The command reported success and wireframe --score stayed clean (components unchanged at 115, where 159 were expected), so only a count by hand showed it. src/cli/commands/elements.ts applies create (l.50), then update (l.55), then delete (l.69); neither SKILL.md nor the cheatsheet states that order.
-- **Reproduce:** excalidraw-canvas add --one '{"id":"a","type":"rectangle","x":0,"y":0,"width":80,"height":40}'; printf '%s' '{"delete":["a"],"create":[{"id":"a","type":"rectangle","x":0,"y":100,"width":80,"height":40}]}' | excalidraw-canvas apply; excalidraw-canvas get a (not found). Ask: run delete before create, or refuse a patch whose create and delete share an id, and say the order in the cheatsheet.
-- **Note:** 2026-11-16 — Rank 1, with T-025: it loses work silently. Confirmed in code: apply runs create (src/cli/commands/elements.ts:50), then update, then delete (l.68-71), so a patch that deletes and re-creates the same ids ends with them deleted. The CLI is upstream's file but outside rule 2's collision zone. Fix: delete first, or refuse a patch whose create and delete share an id; say the order in the cheatsheet (README states it since 2026-11-16). Small, with a test in tests/.
 - **Resolution:** —
 
 ## T-021 — A tall sibling merges a stacked checkbox column into one row, so each checkbox loses its label

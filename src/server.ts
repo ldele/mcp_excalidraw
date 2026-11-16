@@ -49,6 +49,7 @@ import {
 import { renderScene, RenderError, MAX_SCALE } from './core/render/index.js';
 import { originGuard, corsOptions, verifySocketClient } from './core/origin-guard.js';
 import { openSceneStore, flushScene, saveSceneAfterWrites, canvasIdentity, sceneFile } from './core/scene-store.js';
+import { boundTextIds } from './core/bound-text.js';
 
 // Load environment variables
 dotenv.config();
@@ -622,19 +623,24 @@ app.delete('/api/elements/:id', (req: Request, res: Response) => {
       });
     }
 
-    track('delete', doomed, 'agent');
-    elements.delete(id);
+    // Fork (T-025): the element's bound labels go with it, each recorded and broadcast.
+    const deleted = [id, ...boundTextIds(elements, id)];
+    for (const doomedId of deleted) {
+      track('delete', elements.get(doomedId)!, 'agent');
+      elements.delete(doomedId);
 
-    // Broadcast to all connected clients
-    const message: ElementDeletedMessage = {
-      type: 'element_deleted',
-      elementId: id!
-    };
-    broadcast(message);
+      // Broadcast to all connected clients
+      const message: ElementDeletedMessage = {
+        type: 'element_deleted',
+        elementId: doomedId
+      };
+      broadcast(message);
+    }
 
     res.json({
       success: true,
-      message: `Element ${id} deleted successfully`
+      message: `Element ${id} deleted successfully`,
+      deleted
     });
   } catch (error) {
     logger.error('Error deleting element:', error);

@@ -536,10 +536,11 @@ export function readWireframe(allElements: ServerElement[]): WireframeModel {
   const connectorIds = new Set(connectors.map(el => el.id));
 
   // Components: everything that is neither markup, nor a connector, nor a
-  // bound label (its text belongs to the shape it labels).
+  // bound label (its text belongs to the shape it labels). A label whose shape
+  // is gone is still drawn, so it reads as the text it is (T-025).
   const componentElements = allElements.filter(el => {
     if (markupIds.has(el.id) || connectorIds.has(el.id)) return false;
-    if (el.type === 'text' && el.containerId) return false;
+    if (el.type === 'text' && el.containerId && context.has(el.containerId)) return false;
     if (el.type === 'freedraw') return false;
     const box = boxOf(el);
     return box.w > 0 || box.h > 0;

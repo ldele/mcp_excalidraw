@@ -25,11 +25,11 @@ JSON results on stdout — except `describe` (plain text) and raw-content output
 | Command | Description |
 |---------|-------------|
 | `add [file\|-]` | Batch create from a JSON array (file, `-`, or piped stdin); `--one '{...}'` for a single element |
-| `apply [file\|-]` | Multi-op patch `{"create":[...],"update":[{"id":"a","set":{...}}],"delete":["id",...]}` in one call |
+| `apply [file\|-]` | Multi-op patch `{"create":[...],"update":[{"id":"a","set":{...}}],"delete":["id",...]}` in one call, run delete, then create, then update, so deleting and re-creating an id replaces it. Not atomic: an op that fails leaves the ones before it done |
 | `get <id>` | Get one element |
 | `query` | `--type rectangle` `--bbox x0,y0,x1,y1` `--filter locked=true` (typed; nested keys like `label.text=API` work) `--filter-json '{...}'` |
 | `update <id> --set '{...}'` | Update one element |
-| `delete <id> [...]` | Delete elements |
+| `delete <id> [...]` | Delete elements; a shape's bound label goes with it, and naming the label too is not an error |
 
 ### Scene
 

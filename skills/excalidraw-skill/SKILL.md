@@ -38,9 +38,9 @@ Results are JSON on stdout — except `describe` (plain text) and raw-content ou
 |------|---------|
 | Start / stop / inspect server | `start`, `stop`, `status` |
 | Create elements (batch) | `add elements.json` or `echo '[...]' \| add` or `add --one '{...}'` |
-| Multi-op patch in one call | `apply patch.json` — `{"create":[...],"update":[{"id":"a","set":{...}}],"delete":[...]}` |
+| Multi-op patch in one call | `apply patch.json` — `{"create":[...],"update":[{"id":"a","set":{...}}],"delete":[...]}`, run delete → create → update |
 | Read one / query many | `get <id>`, `query [--type t] [--bbox x0,y0,x1,y1] [--filter k=v] [--filter-json '{...}']` |
-| Update / delete | `update <id> --set '{...}'`, `delete <id> [...]` |
+| Update / delete | `update <id> --set '{...}'`, `delete <id> [...]` (a shape's label goes with it) |
 | Understand the scene | `describe` (plain-text summary: ids, positions, labels, connections) |
 | Read a UI wireframe | `wireframe` — screens, nesting, component roles, reading order, navigation, annotations |
 | See the scene | `screenshot [--out f.png]` (PNG without `--out` → temp file path in JSON; SVG without `--out` → raw SVG) |

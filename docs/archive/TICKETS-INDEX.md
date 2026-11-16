@@ -8,7 +8,9 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 
 | Ticket | Status | Closed | Title | Archive |
 |---|---|---|---|---|
+| T-025 | fixed | 2026-11-16 | Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-023 | fixed | 2026-10-23 | A restarted canvas comes back empty, and a tab still open on it replaces its drawing with the empty scene | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-022 | fixed | 2026-11-16 | apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-020 | fixed | 2026-11-16 | Update cpc from 1.8.0 to 1.18.1 at the start of the next session | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-016 | fixed | 2026-10-08 | The conventions' list of valid roles leaves out icon, which the toolkit accepts and a small glyph needs | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-015 | fixed | 2026-10-08 | Any origin can read, change and wipe a running canvas; a write through sync is logged as a person's | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

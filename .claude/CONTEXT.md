@@ -18,8 +18,9 @@ lack (`FORK.md` § Upstream 2.2.0). Since the last merge the fork fixed what tha
 origins (T-015) and kept the scene across a restart (T-023). PR 1, the human markup round, ran on
 2026-08-07 and **still has not taken the attribution measurement it exists for** (KI-3). T-001, a
 text element created without a size dropping out of the reading when no tab is open, still
-stands, and T-026 says a tab's first sync marks agent shapes human again. **Next:** the owner's
-call on 2.2.0; T-022 and T-025 (both lose work silently); T-026 and T-001; then PR 4 (ADR-002).
+stands, and T-026 says a tab's first sync marks agent shapes human again. T-022 and T-025, which
+lost work silently, were fixed on 2026-11-16. **Next:** the owner's call on 2.2.0; T-026 and T-001;
+then PR 4 (ADR-002).
 T-027 and T-028, a person's markup convention and visible screen ids, stand between the project
 and PR 1. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
 only by `workflow_dispatch`; a push makes no run (KI-8).

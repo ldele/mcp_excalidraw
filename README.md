@@ -109,8 +109,8 @@ comes from `EXPRESS_SERVER_URL` or `--url`. `status` only reports; explicit `sta
 |---------|-------------|
 | `start` / `stop` / `status` | Manage the canvas server (`stop` checks the live server's identity through `/health` first) |
 | `add [file\|-]` | Batch-create elements from a JSON array; `--one '{...}'` for one |
-| `apply [file\|-]` | Multi-op patch: `{"create":[...],"update":[{"id":"a","set":{...}}],"delete":["id"]}`, applied create, then update, then delete |
-| `get <id>` / `delete <id...>` | Read / remove elements |
+| `apply [file\|-]` | Multi-op patch: `{"create":[...],"update":[{"id":"a","set":{...}}],"delete":["id"]}`, run delete, then create, then update, so a patch can replace an id it deletes |
+| `get <id>` / `delete <id...>` | Read / remove elements; a shape's bound label goes with it |
 | `update <id> --set '{...}'` | Update an element |
 | `query` | `--type`, `--bbox x0,y0,x1,y1`, `--filter k=v` (typed, nested keys), `--filter-json '{...}'` |
 | `describe` | Scene summary for an agent (plain text) |

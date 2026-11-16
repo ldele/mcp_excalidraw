@@ -538,3 +538,62 @@ describe('a canvas that restarts comes back with its drawing (T-023)', () => {
     }
   });
 });
+
+describe('a patch can replace what it deletes, and a delete takes the label with it (T-022, T-025)', () => {
+  const cli = (args, input) => JSON.parse(execFileSync(process.execPath, [join(__dirname, '..', 'dist', 'bin.js'), ...args], {
+    env: { ...process.env, EXPRESS_SERVER_URL: baseUrl, EXCALIDRAW_NO_AUTOSTART: '1' },
+    encoding: 'utf-8',
+    input
+  }));
+  const add = element => api('/api/elements', { method: 'POST', ...json(element) });
+  const box = (id, y = 0) => ({ id, type: 'rectangle', x: 0, y, width: 80, height: 40 });
+  const label = (id, containerId) => ({ id, type: 'text', containerId, x: 10, y: 10, width: 40, height: 20, text: 'Save' });
+
+  // T-022: apply ran create, then update, then delete, so the delete removed the new elements.
+  test('a patch that deletes ids and creates them again keeps the new elements', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await add(box('cell'));
+    const result = cli(['apply', '-'], JSON.stringify({ delete: ['cell'], create: [box('cell', 100), box('cell-2', 200)] }));
+    assert.equal(result.deleted, 1);
+    assert.equal(result.created, 2);
+    const stored = await api('/api/elements/cell');
+    assert.equal(stored.success, true, 'the re-created element is there');
+    assert.equal(stored.element.y, 100, 'and it is the new one');
+  });
+
+  // T-025: the label stayed drawn where its shape had been, and the reading never counted it.
+  test('deleting a shape deletes its bound label, and the feed reports it as the agent\'s', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await add(box('save'));
+    await add(label('save-label', 'save'));
+    await add(label('other-label', 'other'));
+    const { rev: since } = await api('/api/changes?since=0');
+
+    const response = await api('/api/elements/save', { method: 'DELETE' });
+    assert.deepEqual(response.deleted, ['save', 'save-label']);
+    assert.equal((await api('/api/elements/save-label')).success, false, 'the label is gone');
+    assert.equal((await api('/api/elements/other-label')).success, true, 'a label of another shape is not');
+
+    // A bound label is reported as its shape's (isChangeTracked), so one delete covers both.
+    const feed = await api(`/api/changes?since=${since}`);
+    assert.deepEqual(feed.records.map(r => [r.kind, r.id, r.origin]), [['delete', 'save', 'agent']]);
+  });
+
+  test('naming the label after its shape in the same delete is not an error', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await add(box('save'));
+    await add(label('save-label', 'save'));
+    assert.deepEqual(cli(['delete', 'save', 'save-label']).deleted, ['save', 'save-label']);
+    await add(box('save'));
+    await add(label('save-label', 'save'));
+    assert.equal(cli(['apply', '-'], JSON.stringify({ delete: ['save', 'save-label'] })).deleted, 2);
+  });
+
+  test('a label whose shape is gone reads as the text it is', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await add({ ...label('stray', 'gone'), text: 'Stray' });
+    const reading = cli(['wireframe', '--json']);
+    assert.ok(JSON.stringify(reading).includes('"stray"'), 'the reading lists it');
+    assert.equal(cli(['wireframe', '--score']).orphans, 1, 'and the score counts it');
+  });
+});
