@@ -4,6 +4,21 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (g) — ADR-003 to ADR-005 accepted; the 2.2.0 merge decided
+- **Decided by the owner, one at a time:**
+  - ADR-003: screens become native frames, and the reading takes the frame's name.
+  - ADR-004: a mark's intent is its colour, with a legend frame.
+  - ADR-005: each screen gets an approval box; a round still ends with `watch`'s quiet period.
+  - Upstream 2.2.0: merge it next, before those builds.
+  Each ADR records the choice; T-027 and T-028 carry a note.
+- **Checked before ADR-003 was asked:** 25 screens, 13 of them named frames, opened in a real tab
+  fitted to 1,600 × 900 at 10 %. The editor draws a frame's name as a page label at a fixed 14 px
+  (`FRAME_STYLE.nameFontSize`), while the 22 px headings were about 2 px tall. Exports and renders
+  draw the name at 14 px of the drawing, so there it shrinks.
+- **Corrected in ADR-004 before acceptance:** the colour option's cost no longer says the agent's
+  palette must avoid the four colours. Only a person's marks are read for intent.
+- **Nothing built.**
+
 ## 2026-11-16 (f) — T-024 fixed: an elbowed arrow keeps its bindings through export, import and a tab
 - **Cause, found with a real tab:** creating, updating or live-drawing an elbowed arrow kept its
   bindings. Export did not. It writes an arrow bound by `start`/`end` refs with

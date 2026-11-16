@@ -10,6 +10,21 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (l) — README § How it differs from upstream: the differences at a glance
+- **Why:** the owner asked for a document, reachable from the README, that sums up how this
+  project differs from upstream. FORK.md holds the detail, but it is written for whoever merges
+  upstream next.
+- **What:** a table in the README, upstream 2.2.0 against this fork, by what a user would notice:
+  install, reading the canvas, a person's edits, MCP tools, restart, other sites' requests, a
+  tab's sync, `apply`, deleting a labelled shape, arrows, the skill. The README's opening note
+  points to it. FORK.md § Keeping current says to bring it up to date at every merge.
+- **Checked:** each upstream claim against `upstream/main` (`81720ac`). Its sync clears the store
+  and rewrites it; `cors()` answers every origin, and nothing refuses an empty sync; `apply` runs
+  create, update, delete; no waypoints are kept; it has 27 tools; its store needs
+  `EXCALIDRAW_DATA_DIR`.
+- **Before this:** both nested sessions, the 2.2.0 merge and the ADR-003 build, had finished and
+  closed out, on the owner's word that they should first. Their work is on `main` up to `e4e2bb4`.
+
 ## 2026-11-16 (j) — ADR-003 built: screens are native frames, staged (SPEC-005, T-028)
 - **What:** a top-level frame is a screen named by its `name`, held or empty; `frameId` decides
   membership, then geometry, so a scene with no frames reads as before. A rename is a label change
@@ -46,21 +61,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   a click (10 before #142), one per edit; a note and a drag were one human record each, on the
   right element; 0 fallbacks. `npm audit` 16, `main` 19.
 - **Not done:** CI (dispatch after the push, KI-8); the version stays 1.3.0.
-
-## 2026-11-16 (g) — ADR-003 to ADR-005 accepted; the 2.2.0 merge decided
-- **Decided by the owner, one at a time:**
-  - ADR-003: screens become native frames, and the reading takes the frame's name.
-  - ADR-004: a mark's intent is its colour, with a legend frame.
-  - ADR-005: each screen gets an approval box; a round still ends with `watch`'s quiet period.
-  - Upstream 2.2.0: merge it next, before those builds.
-  Each ADR records the choice; T-027 and T-028 carry a note.
-- **Checked before ADR-003 was asked:** 25 screens, 13 of them named frames, opened in a real tab
-  fitted to 1,600 × 900 at 10 %. The editor draws a frame's name as a page label at a fixed 14 px
-  (`FRAME_STYLE.nameFontSize`), while the 22 px headings were about 2 px tall. Exports and renders
-  draw the name at 14 px of the drawing, so there it shrinks.
-- **Corrected in ADR-004 before acceptance:** the colour option's cost no longer says the agent's
-  palette must avoid the four colours. Only a person's marks are read for intent.
-- **Nothing built.**
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

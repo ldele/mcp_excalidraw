@@ -6,8 +6,8 @@
 > **Private fork** of [yctimlin/mcp_excalidraw](https://github.com/yctimlin/mcp_excalidraw),
 > adding semantic wireframe reading and a two-way canvas review loop. It is not
 > published to npm, and `npx mcp-excalidraw-server` fetches **upstream's** package,
-> which has neither feature. **[FORK.md](FORK.md)** says what we added, what we removed,
-> and where we stand against upstream.
+> which has neither feature. [How it differs from upstream](#how-it-differs-from-upstream)
+> sums up the differences; **[FORK.md](FORK.md)** has the detail for whoever merges upstream next.
 
 A live [Excalidraw](https://excalidraw.com) canvas an agent can draw on, look at, refine and save
 into the repo, and that it can read back **as a user interface**: screens, component roles,
@@ -27,6 +27,28 @@ WebSocket sync, on `http://127.0.0.1:3000` by default. The CLI or the MCP server
 starts it when nothing is listening; set `EXCALIDRAW_NO_AUTOSTART=1` to opt out. Everything runs
 locally with no API key. Outbound traffic is the page loading Excalidraw's fonts from the esm.sh
 CDN, and the optional `share` upload to excalidraw.com or a self-hosted instance.
+
+## How it differs from upstream
+
+Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
+
+| | Upstream 2.2.0 | This fork |
+|---|---|---|
+| **Install** | `npx mcp-excalidraw-server` from npm, or a Docker image | Not published: `npm link` from this repository gives `excalidraw-canvas`; no Docker image |
+| **Reading the canvas** | `describe`: a list of shapes | Also `wireframe`: screens, component roles, reading order, flows between screens, a person's annotations. A named frame is a screen |
+| **A person's edits** | No change log | Every change carries a revision and who made it, agent or person. `changes` and `watch` report them, each mark attached to the component it refers to |
+| **MCP tools** | 27 | 30: adds `describe_wireframe`, `get_canvas_changes` and `wait_for_changes` |
+| **After a restart** | The scene is gone, unless `EXCALIDRAW_DATA_DIR` turns on one store shared by every port | Saved per port by default, change log included. `EXCALIDRAW_NO_PERSIST=1` turns it off; `EXCALIDRAW_DATA_DIR` switches to upstream's store |
+| **A request from another site's page** | Answered: CORS is open to every origin | Refused with 403, on the API and on the socket. `CANVAS_ALLOWED_ORIGINS` lists exceptions |
+| **A tab's sync** | Clears the store and rewrites it | Merges element by element. An empty sync against a drawing is refused unless it says `allowEmpty` |
+| **`apply`** | Create, update, then delete: a patch that re-creates an id it deletes loses it | Delete, create, then update |
+| **Deleting a labelled shape** | Its label stays drawn | The label goes with it |
+| **Arrows** | A bound arrow drops its waypoints when created; an elbowed arrow exports unbindable (`fixedPoint: null`); an arrow to a frame comes back unbound from a tab | All three keep what the agent gave them |
+| **The agent skill** | Drawing and diagram guidance | Adds the wireframe conventions (`skills/excalidraw-skill/references/wireframe-conventions.md`) and the review loop |
+
+Everything else is upstream's as it stands: rendering, Mermaid, `share`, snapshots, `selection`,
+PNG scene import and the file tools' path checks. [FORK.md](FORK.md) lists each place this fork
+changes upstream's files and the test that fails if a merge undoes it.
 
 ## Wireframes and the review loop
 

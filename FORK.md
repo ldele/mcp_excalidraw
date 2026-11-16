@@ -83,7 +83,9 @@ merged cleanly in 2.2.0. Where we touch upstream's files, and what fails if a me
 
 At a merge the lock file conflicts: take upstream's, then run
 `npm install -D @excalidraw/mermaid-to-excalidraw@^2.2.2` and `npm audit fix`, and read `npm audit`
-again. `README.md` is ours: keep it and carry any new upstream feature over by hand.
+again. `README.md` is ours: keep it and carry any new upstream feature over by hand. Its
+[How it differs from upstream](README.md#how-it-differs-from-upstream) table is the reader's summary
+of this file: bring its upstream column and version up to date at every merge.
 
 ## Upstream 2.2.0, merged 2026-11-16
 

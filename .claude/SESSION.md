@@ -4,6 +4,16 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-16 (l) — Claude Code — README § How it differs from upstream; STAGED
+- **Done:** a table in the README sums up how the fork differs from upstream 2.2.0, each upstream
+  claim checked against `upstream/main`. FORK.md says to update it at every merge (DEVLOG
+  2026-11-16 (l)). Both nested sessions, the merge and ADR-003, had finished and closed out first.
+- **Where:** `main` at `e4e2bb4`, pushed. This change is staged, not committed.
+- **Open:** this checkout's `dist/` predates ADR-003, so `excalidraw-canvas` on PATH lacks it. A
+  canvas is running on port 3000 (231 elements); rebuild with `npm run build` once it is stopped.
+- **Next:** build ADR-004 and ADR-005; then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 (k) — Claude Code — ADR-003 landed on `main` as `6414461`; CI dispatched
 - **Done:** entry (j)'s work was committed as `6414461` on the owner's yes, fast-forwarded onto
   `main` and pushed. The worktree `C:\Projects\mcp_excalidraw-adr003` and branch
@@ -29,14 +39,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `npm ci && npm run build` in the main checkout with no canvas running; push, dispatch CI (KI-8).
   Then ADR-004 (its legend frame will read as a screen until it is left out) and ADR-005.
 - **Picks up:** any session with a terminal; ADR-004 and ADR-005 need a browser tab.
-
-## 2026-11-16 (i) — Claude Code — upstream 2.2.0 landed on `main`; CI green
-- **Done:** entry (h)'s merge was committed as `c800fa8`, fast-forwarded onto `main` and pushed.
-  CI run 43914224879, dispatched on it, is green: `check` and Node 20, 22 and 24, with the
-  durable check's lock assertions running on Linux. The main checkout is installed and built. The
-  worktree `C:\Projects\mcp_excalidraw-merge` and branch `merge/upstream-2.2.0` are removed.
-- **Mind:** the canvas on :3000 was stopped for the build. Another process started it again from
-  the new code mid-build (pid 46536, not this session); a tab's first sync then added 58 bound
-  labels, with no records.
-- **Next:** build ADR-003 to ADR-005; then PR 4.
-- **Picks up:** any session with a terminal; the ADR builds need a browser tab.
