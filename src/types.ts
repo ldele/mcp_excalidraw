@@ -177,6 +177,8 @@ export interface ServerElement extends Omit<ExcalidrawElementBase, 'id'> {
   fontSize?: number;
   fontFamily?: string | number;
   label?: ElementLabel;
+  // A frame's name, drawn above the frame on the canvas; null shows as "Frame".
+  name?: string | null;
   // Author's declared role for `wireframe`. Overrides inference when set.
   role?: ComponentRole;
   points?: any;

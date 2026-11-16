@@ -39,21 +39,50 @@ Both are fixed by declaring the role (below). Neither is visible in a screenshot
 
 ## 1. Frame and grid
 
-**One screen = one rectangle.** Everything belonging to that screen goes fully
-inside it. Containment is how nesting is computed — a card whose edge pokes 3px
-outside the frame is not a child of that screen, and the whole tree collapses.
+**One screen = one native frame** (ADR-003). Name the frame with the screen's id and
+title, give it that id in lower case, and set `frameId` to it on everything that
+belongs to the screen:
 
-The screen frame is a plain bordered rectangle, no fill, no label:
+```json
+{"id": "s01", "type": "frame", "x": 120, "y": 120, "width": 1160, "height": 1300,
+ "name": "S01 — Sign in"},
+{"id": "s01-email", "type": "rectangle", "x": 152, "y": 184, "width": 536, "height": 48,
+ "label": {"text": "Email address"}, "role": "input", "frameId": "s01"}
+```
+
+The editor draws the name above the frame at a fixed 14 px on screen, whatever the
+zoom, so a person looking at 25 screens zoomed out can still read "S23 — Character"
+and quote it, and `wireframe` reads the screen by the same words:
+
+```
+### Screen 1 "S01 — Sign in"  [s01] frame 1160x1300
+```
+
+The name *is* the screen's name: no heading is needed, and a heading you draw inside
+reads as a `heading` component. Exports and renders draw the name at 14 px of the
+drawing, so it shrinks with the image there.
+
+Inside a frame, containment still builds the tree: a card nests under the frame and
+its contents under the card, by geometry. A member that crosses the frame's edge still
+belongs to the frame (its `frameId` says so), but the editor clips whatever lies
+outside, so keep members fully inside. An element with no `frameId` drawn inside a
+frame reads as part of that screen too, but in the editor it does not move with the
+frame, so set `frameId`. An empty frame reads as an empty screen.
+
+**A rectangle screen still reads**, and every scene drawn before ADR-003 is one: a
+plain bordered rectangle, no fill, no label, with everything fully inside it.
+Containment alone decides membership there — a card whose edge pokes 3px outside the
+rectangle is not a child of that screen, and the whole tree collapses.
 
 ```json
 {"id": "screen", "type": "rectangle", "x": 120, "y": 120, "width": 1160, "height": 1300,
  "strokeColor": "#14130f", "strokeWidth": 2, "backgroundColor": "transparent"}
 ```
 
-Never put `text` on the frame — the bound label centres itself in the middle of the
-screen, on top of the content. Name the screen with a free-standing heading (font
-size ≥ 20) near its top, or a header bar containing one; `wireframe` names screens
-after whichever it finds.
+Never put `text` on a rectangle screen — the bound label centres itself in the middle
+of the screen, on top of the content. Name it with a free-standing heading (font
+size ≥ 20) near its top, or a header bar containing one; `wireframe` names the screen
+after whichever it finds. A frame with no name is named the same way.
 
 ### The measurements that work
 
@@ -81,8 +110,8 @@ Round every coordinate to a multiple of 2 and keep rows on a shared `y`. Ragged
 values by a few pixels make the reading order shuffle, because rows are grouped by
 vertical proximity.
 
-**Z-order is creation order.** A header or footer band flush with the frame edge
-paints over the frame's border along that edge, so the screen outline appears to
+**Z-order is creation order.** On a rectangle screen, a header or footer band flush
+with the edge paints over the rectangle's border along that edge, so the outline appears to
 break where the bands are. Harmless, and containment is unaffected — but if you want
 an unbroken outline, inset the bands by 1px or create the frame last.
 
@@ -148,7 +177,7 @@ reconciled later.
 | 12 | captions, legends | text |
 | 10–11 | micro-labels inside placeholders | text |
 
-Anything ≥ 20 is a `heading`, which is also how screens get named — so don't set body
+Anything ≥ 20 is a `heading`, which is also how a rectangle screen gets named — so don't set body
 copy to 20 to make it readable, and don't shrink a real heading below it.
 
 Use one `fontFamily` for the whole wireframe (`"helvetica"` / `"2"` for a clean UI
@@ -234,8 +263,9 @@ Valid roles: `button`, `input`, `heading`, `header`, `footer`, `sidebar`, `card`
 `text`. An unknown role is rejected by the API.
 
 Three more are in the vocabulary and are the reader's own, so there is nothing to gain by
-declaring them: `screen` and `panel` come from containment (a frame; a region holding half its
-parent or more), and `shape` is the fallback the gate counts, declared or not.
+declaring them: `screen` comes from a native frame, or from containment for a top-level
+rectangle holding others; `panel` from containment (a region holding half its parent or more);
+and `shape` is the fallback the gate counts, declared or not.
 
 **Declare `icon` on every glyph.** A small box with no label is the one thing inference cannot
 tell apart from a control: up to 28 px, a square reads as `checkbox?` and a circle as `radio?`.
@@ -274,7 +304,9 @@ button "Continue" [submit] → screen "Dashboard" [s2]
 ```
 
 - Bind both ends: `"startElementId": "submit", "endElementId": "s2"` — an
-  unbound arrow that merely points near a button is not a flow.
+  unbound arrow that merely points near a button is not a flow. The end can be the
+  target screen's frame itself (`"end": {"id": "s02"}` in the CLI); the tab keeps
+  that binding.
 - Start the arrow at **the control that triggers it**, not at the screen edge. The
   whole value of the report is knowing *what* navigates.
 - Leave arrow labels off unless the trigger is non-obvious (`"on error"`,
@@ -322,9 +354,10 @@ Screenshot checks (see SKILL.md's Quality Checklist), plus these, from `wirefram
 
 1. **Screen count** matches the number of frames you drew. Not `0 screens` — that
    means it read the canvas as a flowchart.
-2. **Every screen is named** — no `screen "(unnamed)"`. Add a heading.
+2. **Every screen is named** — no `screen "(unnamed)"`. Name the frame, or give a
+   rectangle screen a heading.
 3. **No orphans.** Everything you drew appears under a screen. A top-level component
-   is one that fell outside its frame.
+   is one that fell outside its frame, or whose `frameId` names a frame it does not touch.
 4. **No `shape` entries.** `shape` is the fallback role and means the reading gave
    up; declare it.
 5. **Content roles are `chart` / `table` / `image`**, not `input?` or `card`.
@@ -342,45 +375,45 @@ row, 2-up chart cards, footer.
 
 ```json
 [
-  {"id": "s1", "type": "rectangle", "x": 120, "y": 120, "width": 1160, "height": 1000,
-   "strokeColor": "#14130f", "strokeWidth": 2, "backgroundColor": "transparent"},
+  {"id": "s1", "type": "frame", "x": 120, "y": 120, "width": 1160, "height": 1000,
+   "name": "S1 — Drift dashboard"},
 
   {"id": "hdr", "type": "rectangle", "x": 120, "y": 120, "width": 1160, "height": 176,
-   "backgroundColor": "#fbfaf8", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "header"},
+   "backgroundColor": "#fbfaf8", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "header", "frameId": "s1"},
   {"id": "title", "type": "text", "x": 152, "y": 152, "width": 400, "height": 34,
-   "text": "MLflow drift loop", "fontSize": 26, "fontFamily": "2", "strokeColor": "#14130f"},
+   "text": "MLflow drift loop", "fontSize": 26, "fontFamily": "2", "strokeColor": "#14130f", "frameId": "s1"},
   {"id": "lede", "type": "text", "x": 152, "y": 196, "width": 640, "height": 40,
    "text": "A monitoring loop that catches a model going stale.",
-   "fontSize": 13, "fontFamily": "2", "strokeColor": "#55534d"},
+   "fontSize": 13, "fontFamily": "2", "strokeColor": "#55534d", "frameId": "s1"},
 
   {"id": "tab-1", "type": "rectangle", "x": 152, "y": 330, "width": 214, "height": 44,
    "backgroundColor": "#74c0fc", "strokeColor": "#1971c2", "fillStyle": "solid",
-   "role": "button", "text": "Kraków air quality", "fontSize": 13, "fontFamily": "2"},
+   "role": "button", "text": "Kraków air quality", "fontSize": 13, "fontFamily": "2", "frameId": "s1"},
   {"id": "tab-2", "type": "rectangle", "x": 382, "y": 330, "width": 170, "height": 44,
    "backgroundColor": "#dbeafe", "strokeColor": "#4dabf7", "fillStyle": "solid",
-   "role": "button", "text": "Live schedule", "fontSize": 13, "fontFamily": "2"},
+   "role": "button", "text": "Live schedule", "fontSize": 13, "fontFamily": "2", "frameId": "s1"},
 
   {"id": "kpi-1", "type": "rectangle", "x": 152, "y": 430, "width": 262, "height": 96,
-   "backgroundColor": "#ffffff", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "card"},
+   "backgroundColor": "#ffffff", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "card", "frameId": "s1"},
   {"id": "kpi-1-v", "type": "text", "x": 170, "y": 446, "width": 100, "height": 34,
-   "text": "23", "fontSize": 26, "fontFamily": "2", "strokeColor": "#14130f"},
+   "text": "23", "fontSize": 26, "fontFamily": "2", "strokeColor": "#14130f", "frameId": "s1"},
   {"id": "kpi-1-k", "type": "text", "x": 170, "y": 486, "width": 200, "height": 18,
-   "text": "Monitoring runs", "fontSize": 12, "fontFamily": "2", "strokeColor": "#8a867d"},
+   "text": "Monitoring runs", "fontSize": 12, "fontFamily": "2", "strokeColor": "#8a867d", "frameId": "s1"},
 
   {"id": "card-1", "type": "rectangle", "x": 152, "y": 558, "width": 540, "height": 336,
-   "backgroundColor": "#ffffff", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "card"},
+   "backgroundColor": "#ffffff", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "card", "frameId": "s1"},
   {"id": "card-1-h", "type": "text", "x": 170, "y": 576, "width": 300, "height": 26,
-   "text": "Data drift", "fontSize": 20, "fontFamily": "2", "strokeColor": "#14130f"},
+   "text": "Data drift", "fontSize": 20, "fontFamily": "2", "strokeColor": "#14130f", "frameId": "s1"},
   {"id": "card-1-d", "type": "text", "x": 170, "y": 612, "width": 480, "height": 34,
    "text": "Each feature's recent distribution vs. the champion's training window.",
-   "fontSize": 12, "fontFamily": "2", "strokeColor": "#8a867d"},
+   "fontSize": 12, "fontFamily": "2", "strokeColor": "#8a867d", "frameId": "s1"},
   {"id": "plot-1", "type": "rectangle", "x": 170, "y": 676, "width": 504, "height": 200,
    "backgroundColor": "transparent", "strokeColor": "#d7d5cc", "strokeStyle": "dashed",
    "role": "chart", "text": "PSI per feature · 0.25 line · drift region",
-   "fontSize": 11, "fontFamily": "2"},
+   "fontSize": 11, "fontFamily": "2", "frameId": "s1"},
 
   {"id": "ftr", "type": "rectangle", "x": 120, "y": 1000, "width": 1160, "height": 120,
-   "backgroundColor": "#fbfaf8", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "footer"}
+   "backgroundColor": "#fbfaf8", "strokeColor": "#d7d5cc", "fillStyle": "solid", "role": "footer", "frameId": "s1"}
 ]
 ```
 

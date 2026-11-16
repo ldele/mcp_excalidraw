@@ -54,12 +54,16 @@ export function buildBoundLabelIndex(context: Map<string, ServerElement>): Map<s
 }
 
 // The visible text of an element, wherever it happens to live: its own text,
-// the agent-format `label`, or a bound text child pointing back at it.
+// the agent-format `label`, or a bound text child pointing back at it. A frame's
+// is its name, which the editor draws above it at any zoom (ADR-003): renaming a
+// frame is then a label change, and a screen drawn as a frame is named by it.
 export function effectiveLabel(
   el: ServerElement,
   context: Map<string, ServerElement>,
   boundLabels?: Map<string, string>
 ): string | undefined {
+  if (el.type === 'frame' && typeof el.name === 'string' && el.name.trim()) return el.name.trim();
+
   const own = el.type === 'text' ? writtenText(el) : el.label?.text;
   if (typeof own === 'string' && own.trim()) return own.trim();
 

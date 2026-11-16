@@ -10,6 +10,22 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (j) — ADR-003 built: screens are native frames, staged (SPEC-005, T-028)
+- **What:** a top-level frame is a screen named by its `name`, held or empty; `frameId` decides
+  membership, then geometry, so a scene with no frames reads as before. A rename is a label change
+  in `changes`. The skill and conventions draw a screen as a frame.
+- **The owner's calls:** the whole name is the label; the name is enough (an empty frame is an
+  empty screen); `frameId`, then geometry. **Rejected:** splitting the name, a heading in every
+  frame, geometry only (SPEC-005 § Open questions).
+- **Found live, fixed:** an agent's arrow ending on a frame lost its binding in a tab (upstream
+  #110 keeps frames out of the converter), and the reading took the navigation for markup.
+  `prepareServerScene` binds it as the export does (`FORK.md`, SPEC-005 § Findings).
+- **Verified:** both type-checks; `npm test` (corpus 123 / 123); Playwright 32 / 32, system Chrome. Old goldens
+  unchanged; attribution 5 / 6; each new test failed first. Live on 3071 with a real tab: frame
+  names read, 0 fallbacks; a tab note was one human record on `[s02-out]`; a tab rename was one
+  record and the reading took it; navigation intact.
+- **Not done:** ADR-004, ADR-005; `describe_scene` ignores frame names; no rectangle scene migrated.
+
 ## 2026-11-16 (h) — Upstream 2.2.0 merged on a branch, staged (SPEC-004)
 - **What:** all 14 commits to `81720ac`, on `merge/upstream-2.2.0` in the worktree
   `C:\Projects\mcp_excalidraw-merge`. 14 conflicts; the Dockerfiles stay deleted. In
@@ -45,27 +61,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Corrected in ADR-004 before acceptance:** the colour option's cost no longer says the agent's
   palette must avoid the four colours. Only a person's marks are read for intent.
 - **Nothing built.**
-
-## 2026-11-16 (f) — T-024 fixed: an elbowed arrow keeps its bindings through export, import and a tab
-- **Cause, found with a real tab:** creating, updating or live-drawing an elbowed arrow kept its
-  bindings. Export did not. It writes an arrow bound by `start`/`end` refs with
-  `fixedPoint: null`, and Excalidraw 0.18.1's restore drops such a binding on an elbowed arrow
-  (`repairBinding`, read in its source). So an export made with no tab, imported again, lost its
-  elbowed flows on the tab's first click: "re-bound: s1-go → s2 ⇒ nothing, by human", one flow
-  gone, read as an annotation. A plain arrow binds without a fixed point and kept its flow.
-  Upstream 2.2.0's export writes the same null.
-- **Fix:** `fillElbowFixedPoints` (new `src/core/elbow-binding.ts`) gives each such binding the
-  fixed point its end implies, computed as Excalidraw's own
-  `calculateFixedPointForElbowArrowBinding` does. It runs in the export and in the page just
-  before `restoreElements`, so files written before the fix load bound too. The exported values
-  equal those a real tab computed for the same arrow.
-- **Rule 2:** `src/server.ts`, `src/index.ts` and `normalize.ts` were not touched. Two calls went
-  into upstream's `expand-elements.ts` and `scene.ts`, listed in `FORK.md`.
-- **Verified:** `tests/elbow-binding.test.mjs`, two of three red before the fix (one replays the
-  tab's restore through the renderer's bundle). `npm test` gave 97 of 97 plus wire, bind, render
-  and state, and the corpus is unchanged. Playwright gave 22 of 22 with the system Chrome, through
-  a scratch config, since the bundled shell is not installed. Live on port 3050: the pre-fix
-  export, imported, kept both flows through a tab, and a fresh export re-exports byte-identical.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

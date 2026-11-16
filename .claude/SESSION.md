@@ -4,6 +4,20 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-16 (j) — Claude Code — ADR-003 built: screens are native frames; STAGED
+- **Done:** SPEC-005. A top-level frame is a screen named by its name; `frameId` decides
+  membership, then geometry; rectangle screens read as before (the five old goldens unchanged).
+  The owner settled three points first (DEVLOG 2026-11-16 (j)). Found live and fixed in the page:
+  an agent's arrow ending on a frame lost its binding in a tab and turned into markup. T-028
+  closed. The skill and the conventions draw a screen as a frame.
+- **Where:** branch `adr-003-frame-screens`, worktree `C:\Projects\mcp_excalidraw-adr003`, cut
+  from `main` at `98ac576`; everything staged, nothing committed. The main checkout and the owner's
+  canvas on :3000 are untouched. The probe canvas on 3071 was stopped.
+- **Next:** the owner reviews `git diff --cached` there and commits; `main` takes the branch;
+  `npm ci && npm run build` in the main checkout with no canvas running; push, dispatch CI (KI-8).
+  Then ADR-004 (its legend frame will read as a screen until it is left out) and ADR-005.
+- **Picks up:** any session with a terminal; ADR-004 and ADR-005 need a browser tab.
+
 ## 2026-11-16 (i) — Claude Code — upstream 2.2.0 landed on `main`; CI green
 - **Done:** entry (h)'s merge was committed as `c800fa8`, fast-forwarded onto `main` and pushed.
   CI run 43914224879, dispatched on it, is green: `check` and Node 20, 22 and 24, with the
@@ -26,14 +40,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   branch; `npm ci && npm run build` in the main checkout with no canvas running; push, then
   dispatch CI (KI-8). Then build ADR-003 to ADR-005.
 - **Picks up:** any session with a terminal; the ADR builds need a browser tab.
-
-## 2026-11-16 (g) — Claude Code — ADR-003 to ADR-005 accepted; 2.2.0 merge decided; STAGED
-- **Done:** the owner decided ADR-003 (frames), ADR-004 (colour intent) and ADR-005 (approval
-  boxes), and decided to merge upstream 2.2.0 next. Recorded in the ADRs, the tickets, CONTEXT,
-  FORK.md and DEVLOG 2026-11-16 (g). Entry (f) was committed as `d2a1045` and pushed.
-- **Where:** `main`, staged, not committed. Nothing built.
-- **Next:** the 2.2.0 merge as its own piece of work: a spec like SPEC-002, a branch, the store
-  question settled first, and our tracking and sync rebuilt inside `commitCanvasMutation`. Then
-  build ADR-003 to ADR-005, then PR 4.
-- **Picks up:** any session with a terminal; the ADR builds need a browser tab for their round
-  trips.

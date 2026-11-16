@@ -32,8 +32,9 @@ CDN, and the optional `share` upload to excalidraw.com or a self-hosted instance
 
 `wireframe` (MCP `describe_wireframe`) reads the canvas as an interface rather than a list of shapes:
 
-- **Screens and nesting.** Each element nests under the smallest element that contains it, and a
-  screen is named from its own heading or header bar.
+- **Screens and nesting.** Each element nests under the smallest element that contains it. A
+  native frame is a screen named by the frame's name ("S01 — Sign in"), which the editor shows at
+  any zoom; a rectangle screen is named from its own heading or header bar.
 - **Component roles** such as `button`, `input`, `card`, `checkbox`, `chart` and `table` are
   inferred from geometry, fill and wording. An uncertain guess carries a `?`. `"role": "chart"` on
   an element declares the role, and the reading takes it as given.
@@ -132,7 +133,8 @@ comes from `EXPRESS_SERVER_URL` or `--url`. `status` only reports; explicit `sta
 `fontSize`, `fontFamily`, `textAlign` and `verticalAlign` next to `text` style the label. A shape's
 `strokeColor` is its border, so to colour a label pass it whole:
 `"label": {"text": "Save", "strokeColor": "#d03b3b"}`. For a native frame, add a `"type":"frame"`
-element with a `"name"` and set `"frameId"` on its children.
+element with a `"name"` and set `"frameId"` on its children; `wireframe` reads it as a screen
+named by its `name`.
 
 ## Rendering
 

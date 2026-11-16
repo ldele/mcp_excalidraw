@@ -1,0 +1,23 @@
+## Wireframe reading
+4 screens, 14 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "Profile"  [e01] frame 480x360
+  1. heading "Profile"  [e01-h] text 200x30 · 24px
+  2. button "Save"  [e01-save] rectangle 200x44 · fill #74c0fc
+
+### Screen 2 "E02 — Empty"  [e02] frame 480x360
+  (empty)
+
+### Screen 3 "E03 — Clipped"  [e03] frame 480x360
+  1. heading "Clipped and free"  [e03-h] text 260x30 · 24px
+  2. card?  [e03-card] rectangle 416x140 · fill #ffffff
+    2.1. text "Card body"  [e03-card-t] text 200x20 · 14px
+    2.2. input "Search"  [e03-search] rectangle 368x44 · fill #ffffff
+  3. text "Drawn without frameId"  [e03-free] text 240x20 · 14px
+  4. button "Next"  [e03-next] rectangle 200x44 · fill #74c0fc
+
+### Screen 4 "Legacy screen"  [r01] rectangle 480x360
+  1. heading "Legacy screen"  [r01-h] text 240x30 · 24px
+  2. text "Rectangles still read"  [r01-t] text 240x20 · 14px

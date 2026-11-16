@@ -8,6 +8,7 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 
 | Ticket | Status | Closed | Title | Archive |
 |---|---|---|---|---|
+| T-028 | fixed | 2026-11-16 | Screens on a large canvas are hard to tell apart and to name in a message | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-026 | fixed | 2026-11-16 | A tab connecting re-marks agent shapes as human, and the reading then reorders a row and reads an icon as markup | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-025 | fixed | 2026-11-16 | Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-024 | fixed | 2026-11-16 | A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

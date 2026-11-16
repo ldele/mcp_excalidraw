@@ -4,6 +4,27 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (f) — T-024 fixed: an elbowed arrow keeps its bindings through export, import and a tab
+- **Cause, found with a real tab:** creating, updating or live-drawing an elbowed arrow kept its
+  bindings. Export did not. It writes an arrow bound by `start`/`end` refs with
+  `fixedPoint: null`, and Excalidraw 0.18.1's restore drops such a binding on an elbowed arrow
+  (`repairBinding`, read in its source). So an export made with no tab, imported again, lost its
+  elbowed flows on the tab's first click: "re-bound: s1-go → s2 ⇒ nothing, by human", one flow
+  gone, read as an annotation. A plain arrow binds without a fixed point and kept its flow.
+  Upstream 2.2.0's export writes the same null.
+- **Fix:** `fillElbowFixedPoints` (new `src/core/elbow-binding.ts`) gives each such binding the
+  fixed point its end implies, computed as Excalidraw's own
+  `calculateFixedPointForElbowArrowBinding` does. It runs in the export and in the page just
+  before `restoreElements`, so files written before the fix load bound too. The exported values
+  equal those a real tab computed for the same arrow.
+- **Rule 2:** `src/server.ts`, `src/index.ts` and `normalize.ts` were not touched. Two calls went
+  into upstream's `expand-elements.ts` and `scene.ts`, listed in `FORK.md`.
+- **Verified:** `tests/elbow-binding.test.mjs`, two of three red before the fix (one replays the
+  tab's restore through the renderer's bundle). `npm test` gave 97 of 97 plus wire, bind, render
+  and state, and the corpus is unchanged. Playwright gave 22 of 22 with the system Chrome, through
+  a scratch config, since the bundled shell is not installed. Live on port 3050: the pre-fix
+  export, imported, kept both flows through a tab, and a fresh export re-exports byte-identical.
+
 ## 2026-11-16 (e) — T-027 and T-028 framed as three proposed ADRs; nothing built
 - **What:** both tickets are design questions, so each was framed as decisions for the owner.
   ADR-003 covers how a screen shows its id. ADR-004 covers what a person's mark asks for. ADR-005

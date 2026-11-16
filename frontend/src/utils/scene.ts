@@ -353,6 +353,53 @@ export const assertScenePreserved = (
   }
 }
 
+// Fork (ADR-003): frames stay out of the skeleton converter, so it cannot bind an arrow whose
+// `start` or `end` names one. The arrow came back unbound, the tab's first sync reported that as
+// a person's edit, and the reading then took the agent's navigation arrow for markup. Bind it
+// here as the export binds it (src/core/expand-elements.ts), on the frame's side too. A binding
+// the arrow already has is kept as it is.
+const bindArrowsToFrames = (
+  elements: readonly any[],
+  sources: readonly Partial<ExcalidrawElement>[]
+): any[] => {
+  const frameIds = new Set(elements.filter(isFrame).map(el => el.id))
+  const refs = new Map<string, { startBinding?: string; endBinding?: string }>()
+  for (const source of sources as any[]) {
+    if (source.type !== 'arrow') continue
+    const start = source.start?.id
+    const end = source.end?.id
+    if (frameIds.has(start) || frameIds.has(end)) {
+      refs.set(source.id, {
+        ...(frameIds.has(start) ? { startBinding: start } : {}),
+        ...(frameIds.has(end) ? { endBinding: end } : {})
+      })
+    }
+  }
+  if (refs.size === 0) return [...elements]
+
+  const arrowsByFrame = new Map<string, string[]>()
+  const bound = elements.map(element => {
+    const ref = refs.get(element.id)
+    if (!ref || element.type !== 'arrow') return element
+    const next = { ...element }
+    for (const key of ['startBinding', 'endBinding'] as const) {
+      const frameId = ref[key]
+      if (!frameId || next[key]) continue
+      next[key] = { elementId: frameId, focus: 0, gap: 4, fixedPoint: null }
+      arrowsByFrame.set(frameId, [...(arrowsByFrame.get(frameId) || []), element.id])
+    }
+    return next
+  })
+  return bound.map(element => {
+    const arrows = arrowsByFrame.get(element.id)
+    if (!arrows) return element
+    const listed = Array.isArray(element.boundElements) ? element.boundElements : []
+    const missing = arrows.filter(id => !listed.some((b: any) => b?.id === id))
+    return missing.length === 0 ? element
+      : { ...element, boundElements: [...listed, ...missing.map(id => ({ id, type: 'arrow' }))] }
+  })
+}
+
 export const prepareServerScene = (
   elements: readonly Partial<ExcalidrawElement>[],
   opts: {
@@ -408,14 +455,14 @@ export const prepareServerScene = (
 
   // Preserve the original stacking order, including interleaved frames, images
   // and freehand strokes. Newly expanded labels sit beside their container.
-  const ordered = validated.flatMap(element => {
+  const ordered = bindArrowsToFrames(validated.flatMap(element => {
     const next = isFrame(element) ? element
       : isImageElement(element) ? normalizeImageElement(element)
       : isFreedrawElement(element) ? normalizeFreedrawElement(element)
       : convertedById.get(element.id)
     if (!next) throw new Error(`Scene conversion lost element ${element.id}`)
     return [next, ...(generatedText.get(element.id!) || [])]
-  })
+  }), validated)
   // Excalidraw's `refreshTextDimensions` re-wraps `element.text`, not
   // `originalText` — and `text` already carries the line breaks computed for the
   // previous container size, as real newlines. Wrapping an already-wrapped

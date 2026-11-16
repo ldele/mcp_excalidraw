@@ -4,6 +4,17 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (g) — Claude Code — ADR-003 to ADR-005 accepted; 2.2.0 merge decided; STAGED
+- **Done:** the owner decided ADR-003 (frames), ADR-004 (colour intent) and ADR-005 (approval
+  boxes), and decided to merge upstream 2.2.0 next. Recorded in the ADRs, the tickets, CONTEXT,
+  FORK.md and DEVLOG 2026-11-16 (g). Entry (f) was committed as `d2a1045` and pushed.
+- **Where:** `main`, staged, not committed. Nothing built.
+- **Next:** the 2.2.0 merge as its own piece of work: a spec like SPEC-002, a branch, the store
+  question settled first, and our tracking and sync rebuilt inside `commitCanvasMutation`. Then
+  build ADR-003 to ADR-005, then PR 4.
+- **Picks up:** any session with a terminal; the ADR builds need a browser tab for their round
+  trips.
+
 ## 2026-11-16 (f) — Claude Code — T-024 fixed; STAGED
 - **Done:** elbowed arrows keep their bindings through export, import and a tab (DEVLOG 2026-11-16
   (f)). T-024 is closed. Entry (e) was committed as `9c15c1f` and pushed.

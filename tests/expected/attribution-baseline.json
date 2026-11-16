@@ -1,14 +1,15 @@
 {
   "what": "Markup attribution accuracy across the corpus — ROADMAP measure 3, which the roadmap records as 'currently unmeasured'. This is the first measurement.",
   "how": "Every annotation in a *.json expectation carries `intendedTargetId`: the component a person would say the markup refers to. `correct` counts the annotations whose actual binding equals it.",
-  "total": 5,
-  "correct": 4,
-  "measured": "2026-08-01",
+  "total": 6,
+  "correct": 5,
+  "measured": "2026-08-01; re-reviewed 2026-11-16",
   "misses": [
     "annotated/note-2 — binds to the CVC input; a person would say the totals card."
   ],
   "notes": [
     "The test asserts `correct` never falls below this number, and fails if `total` changes — a corpus that grew needs the baseline re-reviewed by hand, not bumped.",
-    "5 annotations is a small sample drawn by an agent imitating a human. The real measurement is ROADMAP PR 1, where a person marks a canvas up and N is whatever they drew. Treat this as a regression guard, not as evidence the loop works."
+    "2026-11-16 (SPEC-005): the corpus grew by one, frame-screens' note 'Move this to a header bar', typed in a real tab 33px under S02's 'Sign out' inside a frame. It binds to s02-out, where a person would say it belongs: 5/6. The five older annotations bind as before.",
+    "6 annotations is a small sample drawn by an agent imitating a human (the newest one through a real tab, still by an agent). The real measurement is ROADMAP PR 1, where a person marks a canvas up and N is whatever they drew. Treat this as a regression guard, not as evidence the loop works."
   ]
 }

@@ -4,6 +4,16 @@
 
 Closed tickets, moved here from `docs/TICKETS.md` when they were closed, **verbatim** per cpc ADR-071, and listed in `TICKETS-INDEX.md`. Newest on top. Append-only; never edited.
 
+## T-028 — Screens on a large canvas are hard to tell apart and to name in a message
+- **Status:** fixed · 2026-11-16
+- **From:** dnd_crawler_rust session (1.3.0) · 2026-11-16
+- **Symptom:** A 25-screen scene (ADR-0057 + S23/S24): a person reviewing by message must find and name a screen; screen ids live only in the reading. Asked for: something on the canvas that identifies each window at a glance (a visible id badge or number per screen frame, matching the reading's [id]) so 'S23, the doll' can be said and found.
+- **Reproduce:** excalidraw-canvas wireframe on the dnd_crawler_rust ADR-0057 scene: ids like [s23] appear in the reading but not on the canvas
+- **Note:** 2026-11-16 — Rank 3, with T-027. A design question tied to an open question in .claude/CONTEXT.md: whether Excalidraw's own frames should replace the plain rectangle a screen is drawn as today (wireframe-conventions line 46). A native frame shows its name on the canvas, which is the badge asked for. The cheaper path is a small id text drawn in each screen's corner, which the reading would then have to leave out of the screen's heading and components. Decide with T-027's ADR or one of its own.
+- **Note:** 2026-11-16 — 2026-11-16: framed as docs/decisions/ADR-003-visible-screen-ids.md, proposed. Four options with their costs: an id badge inside each screen, native frames as screens, an overlay in the canvas page, or the heading as today. Found while framing it: the reporter's scene already starts each screen's heading with its number (22 px), but at a zoom that fits all 25 screens the heading is about 4 px tall. Waiting on the owner's choice.
+- **Note:** 2026-11-16 — 2026-11-16: decided, ADR-003 accepted: screens become native frames named with their id and title, and the reading takes the frame's name as the screen's. Checked first with a real tab at 10 % zoom: the editor draws a frame's name at a fixed 14 px on screen. To be built after the upstream 2.2.0 merge.
+- **Resolution:** DEVLOG 2026-11-16 (j); SPEC-005: screens are native frames named by their name (ADR-003), staged on adr-003-frame-screens
+
 ## T-024 — A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows
 - **Status:** fixed · 2026-11-16
 - **From:** drawing-app session (1.3.0) · 2026-10-29

@@ -1,0 +1,37 @@
+{
+  "fixture": "frame-screens.excalidraw",
+  "what": "Three screens drawn as the conventions say since ADR-003: native frames named 'S01 — Sign in', 'S02 — Dashboard' and 'S03 — Settings', each with the matching element id, every member carrying frameId. S01 and S03 hold no heading; S02 holds a 26px heading of its own, 'Welcome back'. Two bound arrows run from a button to the next frame. Then, in a real tab, a note 'Move this to a header bar' under S02's 'Sign out', and S02 renamed 'S02 — Home'.",
+  "why": "The fixture ADR-003's 'Enforced by' asks for. Each screen must be named by its frame, not by a heading (S02's heading is listed as a component, and does not name the screen); a bound arrow to a frame must be navigation to that screen, after a tab has loaded and synced it; a frame a person renamed is still a screen, named by the new name, not markup; a note inside a frame binds to the component it sits by.",
+  "score": {
+    "screens": 3,
+    "components": 15,
+    "fallbacks": 0,
+    "inferred": 2,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s01", "label": "S01 — Sign in" },
+    { "id": "s02", "label": "S02 — Home" },
+    { "id": "s03", "label": "S03 — Settings" }
+  ],
+  "navigation": [
+    { "from": "s01-go", "toScreen": "s02" },
+    { "from": "s02-settings", "toScreen": "s03" }
+  ],
+  "markup": [
+    {
+      "id": "lhs5KZPoTVDc5XaXUpSSC",
+      "text": "Move this to a header bar",
+      "targetId": "s02-out",
+      "relation": "near",
+      "intendedTargetId": "s02-out"
+    }
+  ],
+  "notes": [
+    "Drawn through the CLI on a canvas on port 3071 with a tab open, 2026-11-16; the note and the rename were made in that tab (by an agent driving the browser pane, so origin 'human' is the tab's, not a person's), then the scene was exported. Before the reading knew frames, the same frames read S01 and S03 unnamed and S02 as 'Welcome back'.",
+    "Before the page bound arrows to frames (SPEC-005, finding 1), the tab's first sync reported flow-1 and flow-2 as edited by a human, end binding dropped, and the reading listed both as markup instead of navigation.",
+    "S02 reads 'drawn by human' because its last edit, the rename, came from the tab; the reading marks any element a person last wrote that way.",
+    "The 2 inferred are s02-card (card?) and s03-dark (checkbox?, with 'Dark mode' folded in)."
+  ]
+}

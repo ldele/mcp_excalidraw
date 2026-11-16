@@ -202,27 +202,82 @@ function area(box: Box): number {
   return Math.max(0, box.w) * Math.max(0, box.h);
 }
 
+// The part of `box` inside `to`, or null when they do not overlap.
+function clip(box: Box, to: Box): Box | null {
+  const x = Math.max(box.x, to.x);
+  const y = Math.max(box.y, to.y);
+  const w = Math.min(box.x + box.w, to.x + to.w) - x;
+  const h = Math.min(box.y + box.h, to.y + to.h) - y;
+  return w > 0 && h > 0 ? { x, y, w, h } : null;
+}
+
+// Where a node sits for nesting: the frame it is a member of, if any, and the
+// box containment is judged by.
+interface Placement {
+  frame?: WireframeNode;
+  box: Box;
+}
+
 // Nest every element under the smallest element that fully contains it.
 // Candidates are ordered by descending area and a parent must be strictly
 // larger than its child, so the relation cannot cycle.
+//
+// Frames (ADR-003, SPEC-005) add three rules. A frame is always a root, since
+// Excalidraw never nests one. A member, an element whose `frameId` names a frame
+// it overlaps, is nested by its box clipped to that frame, because the editor
+// draws nothing of it outside; it goes to the frame itself when nothing tighter
+// holds it, and never to anything outside the frame. A member wholly outside
+// its frame, or whose frame is gone, nests by geometry like any element, as does
+// everything with no `frameId`. A scene with no frames nests exactly as before.
 function buildTree(nodes: WireframeNode[]): WireframeNode[] {
-  const bySize = [...nodes].sort((a, b) => area(b.box) - area(a.box));
+  const frames = new Map(
+    nodes.filter(node => node.element.type === 'frame').map(node => [node.id, node])
+  );
+
+  const placements = new Map<string, Placement>();
+  for (const node of nodes) {
+    const frameId = node.element.frameId;
+    const frame = frameId && frameId !== node.id ? frames.get(frameId) : undefined;
+    const clipped = frame ? clip(node.box, frame.box) : null;
+    placements.set(node.id, frame && clipped ? { frame, box: clipped } : { box: node.box });
+  }
+  const placed = (node: WireframeNode): Placement => placements.get(node.id)!;
+
+  // Whether `candidate` lies within `frame`: the frame itself, one of its
+  // members, or an element with no frame drawn wholly inside it.
+  const withinFrame = (candidate: WireframeNode, frame: WireframeNode): boolean => {
+    if (candidate === frame) return true;
+    const { frame: own } = placed(candidate);
+    if (own) return own === frame;
+    return !frames.has(candidate.id) && contains(frame.box, candidate.box);
+  };
+
+  const bySize = [...nodes].sort((a, b) => area(placed(b).box) - area(placed(a).box));
   const roots: WireframeNode[] = [];
 
   for (let i = 0; i < bySize.length; i++) {
     const node = bySize[i]!;
+    if (frames.has(node.id)) {
+      roots.push(node);
+      continue;
+    }
+
+    const { frame, box } = placed(node);
     let parent: WireframeNode | undefined;
 
     // Everything before `i` is at least as large — scan backwards to meet the
     // tightest container first.
     for (let j = i - 1; j >= 0; j--) {
       const candidate = bySize[j]!;
-      if (area(candidate.box) <= area(node.box)) continue;
-      if (contains(candidate.box, node.box)) {
+      if (frame && !withinFrame(candidate, frame)) continue;
+      const candidateBox = placed(candidate).box;
+      if (area(candidateBox) <= area(box)) continue;
+      if (contains(candidateBox, box)) {
         parent = candidate;
         break;
       }
     }
+    parent ??= frame;
 
     if (parent) parent.children.push(node);
     else roots.push(node);
@@ -310,6 +365,10 @@ function classify(
   // Declared beats inferred, always.
   const declared = declaredRole(el);
   if (declared) return { role: declared, inferred: false };
+
+  // A frame is a screen, held or empty: buildTree keeps every frame a root,
+  // and its name is the screen's (ADR-003).
+  if (el.type === 'frame') return { role: 'screen', inferred: false };
 
   if (el.type === 'image') return { role: 'image', inferred: false };
 

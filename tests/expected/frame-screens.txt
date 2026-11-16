@@ -1,0 +1,31 @@
+## Wireframe reading
+3 screens, 15 components, 2 connections, 1 annotation.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "S01 — Sign in"  [s01] frame 600x600
+  1. input "Email address"  [s01-email] rectangle 536x48 · fill #ffffff
+  2. input "Password"  [s01-password] rectangle 536x48 · fill #ffffff
+  3. button "Continue"  [s01-go] rectangle 536x48 · fill #74c0fc
+  4. text "Forgot your password?"  [s01-forgot] text 240x20 · 14px
+
+### Screen 2 "S02 — Home"  [s02] frame 600x600 · drawn by human
+  1. heading "Welcome back"  [s02-h] text 320x34 · 26px
+  2. card?  [s02-card] rectangle 536x300 · fill #ffffff
+    2.1. heading "This week"  [s02-card-h] text 300x26 · 20px
+    2.2. chart "Sessions per day"  [s02-plot] rectangle 488x220
+  3. button "Settings"  [s02-settings] rectangle 200x44 · fill #ffffff
+  4. button "Sign out"  [s02-out] rectangle 200x44 · fill #ffffff
+
+### Screen 3 "S03 — Settings"  [s03] frame 600x600
+  1. checkbox? "Dark mode"  [s03-dark] rectangle 24x24 · fill #ffffff
+  2. button "Back"  [s03-back] rectangle 200x44 · fill #ffffff
+
+### Navigation (2)
+  button "Continue" [s01-go] → screen "S02 — Home" [s02]   (arrow [flow-1])
+  button "Settings" [s02-settings] → screen "S03 — Settings" [s03]   (arrow [flow-2])
+
+### Annotations on this wireframe (1)
+  Human markup currently on the canvas — treat as change requests.
+  "Move this to a header bar"
+      ↳ annotates button "Sign out" [s02-out] (33px away)

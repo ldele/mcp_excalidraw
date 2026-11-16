@@ -243,8 +243,11 @@ a `role`, and the pre-flight checklist.
 
 The three rules that matter most, if you read nothing else:
 
-1. **One screen = one rectangle, and everything is fully inside it.** Containment is
-   how nesting is computed. No label on the frame — use a free-standing heading.
+1. **One screen = one native frame, named with its id and title, and everything fully
+   inside it.** `{"id": "s01", "type": "frame", "name": "S01 — Sign in", …}`, with
+   `"frameId": "s01"` on each member. The editor shows the name at any zoom, and the
+   reading names the screen by it. A plain rectangle still reads as a screen, named by
+   its heading; never put a label on one.
 2. **Declare `role` on every chart, table, map and image placeholder.** Inference
    cannot recognise a plot labelled with what it *shows* ("PSI per feature · 0.25
    line"), and `shape` is what the next agent will build from.
@@ -269,8 +272,11 @@ what, and which box is a button. `wireframe` (`describe_wireframe` in MCP) reads
 the same canvas as a UI:
 
 - **Screens and nesting** — every element is placed under the smallest element that
-  contains it, so a card inside a screen inside nothing comes out as a tree. Screens
-  are named after their own heading, or their header bar's text.
+  contains it, so a card inside a screen inside nothing comes out as a tree. A native
+  frame is always a screen, even empty, named by the frame's name; an element whose
+  `frameId` names a frame belongs to it even where it crosses the frame's edge. A
+  rectangle screen, and a frame with no name, is named after its own heading, or its
+  header bar's text.
 - **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`,
   `card`, `checkbox`, `radio`, `avatar`, `icon`, `list-item`, `divider`, `chart`, `table`,
   `image`, `text`. The reader has three more of its own: `screen` and `panel` for a frame and
@@ -347,8 +353,9 @@ want read back accurately:
 - **divider** — anything ≤ 6px thin and ≥ 40px long.
 
 So: fill your primary buttons with a real colour, leave inputs white with a border,
-give each screen a heading or a header bar, and put every screen's contents fully
-inside its frame. A wireframe drawn that way reads back cleanly.
+draw each screen as a named frame (or give a rectangle screen a heading or a header
+bar), and put every screen's contents fully inside it. A wireframe drawn that way
+reads back cleanly.
 
 **If it isn't a wireframe**, the report says so — `0 screens` plus a warning when the
 canvas is really a flowchart. Use `describe` for diagrams.
