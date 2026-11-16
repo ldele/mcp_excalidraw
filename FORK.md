@@ -7,93 +7,50 @@ kept for our own use. Not published, not intended for distribution.
 |---|---|
 | Fork point | `505f4c6` |
 | Last upstream merge | 2026-10-07 — upstream **2.1.2** at `96d9c21` (the first was 2026-08-07) |
-| Upstream commits we lack | 0 as of that merge — check with the command under "Keeping current" |
+| Upstream now | **2.2.0** at `81720ac` (2026-11-10): 14 commits we lack, not merged — see [Upstream 2.2.0](#upstream-220-not-merged) |
 | Our version | **1.3.0**, our own line: the package is private and renamed, so it does not borrow upstream's number |
 | Package name | `@ldele/mcp-excalidraw-server`, `"private": true` |
 | Binary | `excalidraw-canvas` |
-| `@excalidraw/excalidraw` | `^0.18.0`, resolving to **0.18.1**, which is current |
+| `@excalidraw/excalidraw` | `^0.18.0`, resolving to **0.18.1**, the latest on npm (2026-11-16) |
 
 ## Do not run `npx mcp-excalidraw-server`
 
-The unscoped name on npm is **upstream's package**, published by yctimlin, and it
-sits at version 1.1.0 — the same number this fork used to carry. Upstream has no
-`wireframe` command, no `changes` command and no `src/core/wireframe.ts`, so
-`npx` fetches a build missing every feature we added, and does it silently.
-
-The skill used to instruct exactly that. It no longer does. Use the local binary:
+The unscoped name on npm is **upstream's package**. It has no `wireframe` or `changes` command, so
+`npx` fetches a build missing every feature below, and does it silently (KI-1). Use the local
+binary; with no arguments it is the MCP stdio server, with a subcommand the CLI:
 
 ```bash
 npm ci && npm run build && npm link   # once
 excalidraw-canvas status
 ```
 
-The package is renamed and marked private so a stray `npm publish` fails loudly
-instead of colliding with someone else's package.
+The package is renamed and marked private so a stray `npm publish` fails loudly.
 
 ## What this fork adds
 
-Two features, both absent upstream:
+- **Semantic wireframe reading** (`src/core/wireframe.ts`): the canvas read as a user interface —
+  screens, nesting, component roles, reading order, navigation flows, live annotations. CLI
+  `wireframe`, MCP `describe_wireframe`.
+- **The two-way review loop** (`src/core/changes.ts`): a revision on every mutation, each change
+  attributed to agent or human, and a person's markup attached to the element it refers to. CLI
+  `changes` / `watch`, MCP `get_canvas_changes` / `wait_for_changes`.
+- **Drawing conventions** (`skills/excalidraw-skill/references/wireframe-conventions.md`): the grid,
+  the palette split role inference relies on, component recipes. A wireframe is finished when
+  `wireframe` reads it back as meant, not when the screenshot looks right.
+- **Fixes and guards in upstream's files**, listed with their checks under
+  [Keeping current](#keeping-current-with-upstream): per-element sync, the empty-sync refusal, kept
+  waypoints (T-009), the origin guard (T-015) and the scene saved per port (T-023).
 
-**Semantic wireframe reading** (`src/core/wireframe.ts`, 799 lines). Reads the
-canvas as a user interface instead of a list of shapes: screens, containment
-nesting, component roles (`button`, `input`, `chart`, `table`, …), reading order,
-navigation flows between screens, and live annotations. Roles are inferred from
-geometry, fill and wording, with `?` marking low confidence, and `"role": "chart"`
-on an element overrides the guess. Surfaces as `excalidraw-canvas wireframe` and
-the `describe_wireframe` MCP tool.
-
-**A two-way review loop** (`src/core/changes.ts`, 712 lines). Every mutation
-bumps a canvas revision and records whether an agent or a human made it. Sticky
-notes, circles, scribbles and arrows a person draws are attributed to the element
-they refer to, so feedback arrives attached to its subject. Surfaces as
-`changes` / `watch` and the `get_canvas_changes` / `wait_for_changes` MCP tools.
-
-**Drawing conventions** (`skills/excalidraw-skill/references/wireframe-conventions.md`,
-366 lines). The other half of the contract: layout grid, the palette split that
-makes role inference work, component geometry recipes, when to declare a role.
-Its premise is that a wireframe is finished when `wireframe` reads it back as
-what you meant, not when the screenshot looks right.
-
-### Full diff against the fork point
-
-```
- src/core/wireframe.ts                      +799   new
- src/core/changes.ts                        +712   new
- skills/.../wireframe-conventions.md        +366   new
- src/cli/commands/changes.ts                 +75   new
- src/server.ts                              +397   sync reconciliation, revisions, wireframe/changes routes
- skills/excalidraw-skill/SKILL.md           +168   wireframe + review-loop workflows
- src/index.ts                               +163   MCP tools for wireframe and changes
- src/core/normalize.ts                       +92   label typography, declared roles
- src/types.ts                                +86   role vocabulary, change records
- src/core/canvas-client.ts                   +44
- src/cli/commands/scene.ts                   +37   wireframe command
- skills/.../cheatsheet.md                    +34
- src/cli/commands/elements.ts                +15
- frontend/src/App.tsx                         +5
- src/cli/run.ts                               +4
-```
-
-The load-bearing server change: `POST /api/elements/sync` now **reconciles per
-element** rather than clearing and rewriting the store. Without that, any hand
-edit made the whole scene look new and human changes were undetectable.
+Since upstream 2.1.2 the whole difference is 79 files, +13,649 −1,727 (docs, `.claude/` and
+`tools/` left out), and two thirds of it is tests: 27 files, +8,709, most of them stored drawings
+and their readings. `src/` is +3,132 −124 over 21 files.
 
 ## What we removed
 
-Upstream ships as a public npm package and Docker image. We do neither, so:
-
-- `demo.gif` (2.8 MB), `canvas_roundtrip.png` — upstream marketing and a stale
-  validation artifact
-- `EXCALIDRAW-MCP-VALIDATION.md` — unreferenced scratch notes
-- `Dockerfile`, `Dockerfile.canvas`, `docker-compose.yml`, `.dockerignore`
-- `.github/workflows/docker.yml` — pushed images to a registry we do not use
-- `.github/workflows/npm-publish.yml` — would publish under a name we do not own
-
-`ci.yml` stays: type-check and build on push is worth keeping.
-
-Deleting `demo.gif` shrinks the working tree, not the history. The 2.8 MB blob is
-still in `.git`, and getting it out would mean rewriting history, which is not
-worth it for a repo this size.
+Upstream ships as a public npm package and Docker image; we do neither. Gone: `demo.gif`,
+`canvas_roundtrip.png`, `EXCALIDRAW-MCP-VALIDATION.md`, `Dockerfile`, `Dockerfile.canvas`,
+`docker-compose.yml`, `.dockerignore`, `.github/workflows/docker.yml` and `npm-publish.yml`.
+`ci.yml` stays. The 2.8 MB `demo.gif` is still in `.git` history (KI-2).
 
 ## Keeping current with upstream
 
@@ -101,70 +58,55 @@ worth it for a repo this size.
 git fetch upstream && git log --oneline HEAD..upstream/main
 ```
 
-Upstream moves in bursts: nothing for weeks, then three releases in three days (2.1.0–2.1.2,
-2026-10-03..05). Two merges so far; what each cost and taught is in `docs/ROADMAP.md` § Upstream.
-Our changes concentrate in `src/core/` (`wireframe.ts`, `changes.ts`, and our tools inside
-`mcp-tools.ts` / `mcp-dispatch.ts`), `src/server.ts` and `frontend/src/utils/scene.ts`, so conflicts
-would land mostly in the latter two. Two smaller touches in upstream's files, both for the sync
-guard (a sync may not empty a non-empty canvas unless it says `allowEmpty`): one field in the sync
-body in `frontend/src/App.tsx`, and the `seed` helper of `tests/browser/scene-reload.spec.mjs`.
+What each merge cost and taught is in `docs/ROADMAP.md` § Upstream. Our own layer is in files
+upstream does not edit (`wireframe.ts`, `changes.ts`, `scene-store.ts`, `origin-guard.ts`), apart
+from our three MCP tools, which sit in upstream's `mcp-tools.ts` and `mcp-dispatch.ts`; both
+merged cleanly in the 2.2.0 dry run. Where we touch upstream's files, and what fails if a merge
+undoes it:
 
-One change sits *inside* a function upstream wrote: `resolveArrowBindings` in `src/server.ts` now
-keeps the waypoints of a bound arrow (T-009, SPEC-003; +29 −11, with a check in
-`scripts/check-state-integrity.mjs`). Upstream has changed that function three times since
-writing it, once within the 25 commits of the last merge, so a conflict there is possible until
-upstream carries the same change. Offering it upstream as one pull request was prepared and then
-held by the owner on 2026-10-08; nothing was sent (`docs/DEVLOG.md`, 2026-10-08 (d)).
+| Where | What | Fails if lost |
+|---|---|---|
+| `src/server.ts`, `POST /api/elements/sync` | reconciles per element instead of clearing and rewriting the store; refuses an empty sync against a non-empty canvas unless `allowEmpty` | state check *bound arrows follow a shape an agent moves after a tab has synced*; `tests/server-contract.test.mjs` |
+| `src/server.ts`, `resolveArrowBindings` | keeps a bound arrow's waypoints (T-009, SPEC-003, +29 −11); offered upstream, held by the owner | state check *bound arrows keep the waypoints they were given* |
+| `src/server.ts`, ahead of `cors()` and on `verifyClient` | the origin guard, from `src/core/origin-guard.ts` (T-015) | state check *requests from another site are refused* |
+| `src/server.ts`, seven touches | the scene store, from `src/core/scene-store.ts`, loaded before `listen`, flushed on shutdown (T-023) | `tests/browser/server-restart.spec.mjs` |
+| `frontend/src/App.tsx`, `frontend/src/utils/scene.ts` | `allowEmpty` in the sync body; `adoptServerScene` / `mergeAfterRestart` for a tab that outlives a restart | `tests/browser/server-restart.spec.mjs`; the `seed` helper of `scene-reload.spec.mjs` sends `allowEmpty` |
+| `scripts/check-state-integrity.mjs` | upstream's file, carrying the three checks above | — |
+| `package.json`, lock file | `@excalidraw/mermaid-to-excalidraw` `^2.2.2` (upstream `^1.1.3`) plus `npm audit fix`: 14 advisories where upstream has 22 | `npm audit` |
 
-`scripts/check-state-integrity.mjs` is upstream's file and carries two checks of ours: the
-waypoint check above, and *bound arrows follow a shape an agent moves after a tab has synced*.
-The second fails on upstream as it is: upstream's sync clears the store and rewrites it, ours
-merges each element into the stored one, and the references the server finds bound arrows by
-survive only the merge. If a later merge takes upstream's sync handler, that check is what says so.
+At a merge the lock file conflicts: take upstream's, then run
+`npm install @excalidraw/mermaid-to-excalidraw@^2.2.2` and `npm audit fix`, and read `npm audit`
+again. `README.md` is ours: keep it and carry any new upstream feature over by hand.
 
-Since 2026-10-08 the dependencies differ from upstream's in one declared line:
-`@excalidraw/mermaid-to-excalidraw` is `^2.2.2` here and `^1.1.3` upstream. The lock file also
-carries the eight patch updates of `npm audit fix`. Together they take `npm audit` from upstream's
-22 flagged packages to 14, none of which can be reached in our use or fixed from here
-(`docs/DEVLOG.md`, 2026-10-08 (h)). At a merge the lock file conflicts, as it did last time: take
-upstream's, then run `npm install @excalidraw/mermaid-to-excalidraw@^2.2.2` and `npm audit fix`,
-and read `npm audit` again.
+## Upstream 2.2.0, not merged
 
-Since 2026-10-08 the server answers its own page and local tools only (T-015). The rule lives in
-a file of ours, `src/core/origin-guard.ts`; in upstream's `src/server.ts` it is three touches:
-an import, `verifyClient` on the WebSocket server, and the guard put in front of `cors()`, which
-no longer answers every origin. A third check of ours in `scripts/check-state-integrity.mjs`,
-*requests from another site are refused*, fails if a merge brings the open `cors()` back.
-Upstream's open pull request #74 rewrites the same two lines with a token and an allow-list of
-its own; if upstream merges it, read both before choosing.
+Fetched 2026-11-16; nothing taken. A dry merge on `main` conflicts in 14 files: 12 content
+conflicts and 2 modify/delete (the Dockerfiles, which #112 edits). `src/server.ts` is the hard one,
+with 11 hunks. Upstream now routes every store write through `commitCanvasMutation` for its
+durable store, so our `track(...)` calls in create, update, delete, clear and batch-replace, and
+the whole per-element sync handler, have to be rebuilt inside it rather than picked by side. The
+other conflicts are one hunk each, apart from `package.json`, the lock file, the README and the
+cheatsheet. They are in `App.tsx` (our `noteServerRev` against #142's sync hash), `canvas-client.ts`,
+`scene-io.ts`, `render.ts`, `ci.yml`, `.gitignore`, the skill (29 tools against 27) and `package.json`.
 
-Since 2026-10-23 the scene is saved to disk per port and read back on start, and a tab that
-outlives a restart gives the server back what it lacks (T-023). The store is a file of ours,
-`src/core/scene-store.ts`; in upstream's `src/server.ts` it is seven touches: an import, a
-middleware after `express.json`, the revision on every broadcast, the identity on
-`initial_elements`, `GET /api/elements` and `/health`, the load before `listen`, and a flush on
-shutdown. The page side is `adoptServerScene` in `frontend/src/App.tsx` and `mergeAfterRestart`
-in `frontend/src/utils/scene.ts`. **Upstream has its own store since 2026-10-09** (`95b0248`,
-#130, with #133 and #140): opt-in through `EXCALIDRAW_DATA_DIR`, one directory under a lock for
-every port, a checkpoint written before each mutation is acknowledged, and no change log or page
-side. It was not merged for this fix. At the next merge, decide whether ours gives way to it
-(keeping a per-port default, the change log and the page side on top) or stays; both at once
-would save the scene twice.
+What it brings:
 
-## Specs
+- **#148: the MCP file tools resolve symlinks and accept only scene and image types.** This is a
+  security fix that we do not have.
+- **#149 `get_selection`**, as an MCP tool and as the CLI command `selection`. It brings our count
+  to 30 tools.
+- **#141, #142 and #143**: `?element=` links resolve after load, the idle autosync loop stops after
+  one click, and the dark theme survives copying.
+- **#132**: Excalidraw scenes embedded in PNG files can be imported.
+- **#138**: a configurable share target.
+- **#112**: `@excalidraw/excalidraw` and the Mermaid converter move to `devDependencies`.
+- **#130, #133 and #140: upstream's own durable store.** It is opt-in through `EXCALIDRAW_DATA_DIR`
+  and uses one directory and one `canvas-state-v1.json` for every port, behind a lock. It writes a
+  checkpoint before each mutation is acknowledged. It keeps elements, image files and snapshots, but
+  no change log and no revision. Ours is on by default, keeps one file per port, and holds the change
+  log and the page side.
 
-- **Node ≥ 20** with TypeScript, ESM (`"type": "module"`), built by `tsc` to `dist/`
-- **Frontend** is React 18 + Vite, wrapping `@excalidraw/excalidraw`, served from
-  `http://127.0.0.1:3000`
-- **Three interfaces over one canvas**: the `excalidraw-canvas` CLI, an MCP
-  server (29 tools, MCP `2026-07-28` with the 2025 handshake still accepted), and a REST API.
-  The CLI auto-starts the canvas server. Screenshots and image export render headless
-  (`src/core/render/`); `render <file>` needs no server at all. Mermaid conversion,
-  viewport control and human markup need an open browser tab, and exit code 4 says so
-- **State lives in the Express server**, with named snapshots, and is saved to disk per port
-  (`scene-<port>.json` beside the pidfile; `EXCALIDRAW_NO_PERSIST=1` keeps it in memory
-  only), so a restart keeps the drawing. A drawing's home is still the `.excalidraw` file
-  you `export`
-- **The skill** (`skills/excalidraw-skill/`) is the source of truth and is copied
-  to `.agents/skills/` by `npm run sync:skills`. Both the sync script and
-  `install-skill` copy recursively, so new reference files need no registration
+To decide at that merge: whether our store gives way to upstream's or stays. If it gives way, we
+keep the per-port default, the change log and the page side on top; running both would save every
+scene twice. Upstream's open pull request #74 (a token and an origin allow-list) is still open, so
+the origin guard has nothing to reconcile with yet.

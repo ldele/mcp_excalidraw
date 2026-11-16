@@ -34,4 +34,4 @@ rigor-check / eval that proved it, and any known issue it surfaced. Empty until 
 - Roadmap: <docs/ROADMAP.md row>
 - ADRs: <docs/decisions/ADR-NNN-*.md>
 - Rigor: <RG-NNN / test path>
-- Known issues: <.claude/KNOWN_ISSUES.md KI-NNN>
+- Known issues: <docs/KNOWN_ISSUES.md KI-NNN>

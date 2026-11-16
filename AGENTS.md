@@ -15,22 +15,29 @@ component roles, reading order, navigation flows — plus a review loop where a 
 up and the agent reads the markup attributed to the component it refers to. What the fork adds and
 why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 
-**State (2026-10-07):** fork stands on its own (renamed, private, inherited branches cut), two
-upstream merges taken (2026-08-07; 2026-10-07 — upstream 2.1.2, SPEC-002). The two-way markup leg
-has run with a human and works, but the attribution accuracy it exists to measure is **still
-untaken** (ROADMAP PR 1, KI-3). Outside feedback is filed as T-001 onward in `docs/TICKETS.md`.
-**Next, in order: what the merge left that is ours (label typography on export, the
-absent-means-deleted sync, the first-sync echo), T-001, then PR 4.** Detail: `.claude/CONTEXT.md`.
+**State (2026-11-16):** two upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
+SPEC-002); upstream is now at 2.2.0, 14 commits ahead and **not merged** (`FORK.md` § Upstream
+2.2.0). The two-way markup leg has run with a human and works, but the attribution accuracy it
+exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 17 tickets are open in
+`docs/TICKETS.md`, each ranked in its 2026-11-16 triage note. **Next: the owner's call on the 2.2.0
+merge; T-022 and T-025, which lose work silently; T-026 and T-001; then PR 4.** Detail:
+`.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
 ## Coordination files (read in this order)
-1. `.claude/SESSION.md` — handoff baton: **newest 3 entries** (who worked last, what's next, which agent picks up). Older entries are rotated to `docs/archive/`.
+1. `.claude/SESSION.md` — handoff baton: **newest 3 entries** (who worked last, what's next, which
+   agent picks up); `python tools/conventions/run.py baton` prints them. Older entries are rotated
+   to `docs/archive/`.
 2. `.claude/CONTEXT.md` — canonical facts, locked settings, current phase.
-3. `docs/DEVLOG.md` — running log, newest first: **newest 3 entries**.
-4. `.claude/KNOWN_ISSUES.md` — open weaknesses / recurring failures.
+3. `.claude/NORTH_STAR.md` — what the project is for.
 
-Reference: `docs/ROADMAP.md` · `docs/architecture.md` · `docs/decisions/` (ADRs) · `docs/specs/` · `docs/TICKETS.md` (issues reported against the fork — `cpc-ticket` opens and closes them; the vendored cpc 1.8.0 predates the verb, so run the global `cpc-ticket --root .` until the next re-vendor).
+Open when the task needs them: `docs/DEVLOG.md` (running log, newest first) ·
+`docs/KNOWN_ISSUES.md` (weaknesses this project found in itself) · `GLOSSARY.md`.
+
+Reference: `docs/ROADMAP.md` · `docs/architecture.md` · `docs/decisions/` (ADRs) · `docs/specs/` ·
+`docs/TICKETS.md` (issues reported against the fork; closed ones are in `docs/archive/TICKETS-INDEX.md`;
+`python tools/conventions/run.py ticket new|triage|close|check` keeps the ledger).
 
 ## Non-negotiables (digest — full text `.claude/CONTEXT.md`)
 1. **Stage, never commit.** Default for every agent: stage the diff and hand it off for the
@@ -61,7 +68,9 @@ when a command needs one and there is none. Screenshots and image export render 
   they are on-call unless this project wired hooks or runs them in CI (ADR-015/ADR-022).
 - Verify loop: `npm run type-check` · `npm run build` · `npm run test:bind`, then a live CLI
   round-trip (`start` → `add` → `wireframe` → `stop`). Docs land with the code.
-- Run `PYTHONPATH=tools/conventions python -m cpc.docs_check --root . --strict` on-call / before handoff (the vendored gate, ADR-015).
+- Before handoff run the vendored gates (cpc 1.23.0, ADR-015):
+  `python tools/conventions/run.py docs_check --root . --strict` and
+  `python tools/conventions/run.py init_check --root .`.
 
 ## Skills in play
 
@@ -84,7 +93,7 @@ when a command needs one and there is none. Screenshots and image export render 
 | Sprint checkpoint / closeout | `cpc-keypoint sprint-close` |
 | Session end / handoff | `cpc-keypoint session-close` |
 
-Vendored form: `PYTHONPATH=tools/conventions python -m cpc.keypoint <name>` (ADR-020).
+Vendored form: `python tools/conventions/run.py keypoint <name>` (ADR-020).
 
 > Rules changed? Edit `.claude/CONTEXT.md` (the canonical text). This file only points.
 > An agent's project settings only point here — never restate rules there.

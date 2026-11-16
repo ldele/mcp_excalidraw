@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-10-07 · class: living -->
+<!-- status: active · updated: 2026-11-16 · class: living -->
 
 # CONTEXT — mcp_excalidraw
 
@@ -9,21 +9,20 @@ server on `http://127.0.0.1:3000`. Package manager: npm.
 interface*, and share with a human who marks it up. The differentiator over upstream is the
 wireframe layer: a drawing is finished when `wireframe` reads it back as what you meant, not when
 the screenshot looks right.
-**Current phase (2026-10-07):** the fork stands on its own — renamed, private, `FORK.md` published,
-inherited branches cut — and has taken two upstream merges (2026-08-07, clean; 2026-10-07, upstream
-2.1.2 at `96d9c21`, fifteen conflicts, SPEC-002). PR 2 and PR 3 landed 2026-08-01 (test harness, five fixtures, `--score`). PR 1 — the human
-markup round — ran on 2026-08-07, exposed and fixed a browser-boundary defect, and **still has not
-taken the attribution measurement it exists for** (KI-3). The first outside consumer reported five
-findings on 2026-08-21, filed as T-001–T-005 in `docs/TICKETS.md`; T-001 — a text element created
-without a size silently drops out of the reading, screen headings included — is a defect in the
-product's own claim, and still stands after the merge. **Level with upstream as of 2026-10-07**
-(MCP SDK v2 with `src/index.ts` split into four core files, headless rendering, valid export order
-keys, a load guard before any sync; Node floor 20; our version line is 1.3.0). The merge was taken
-*before* T-001 — Lucas reversed the 2026-09-07 order because upstream's fixes had become live for
-us. **Next: the three defects the merge left that are ours** — bound-label typography on export,
-the sync that deletes whatever a payload omits (KI-7's mechanism), and the page's first sync
-reading as a human edit where `strokeColor` / `fontFamily` were unset — **then T-001, then PR 4**
-(ADR-002). What the merge found and verified: DEVLOG 2026-10-07. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
+**Current phase (2026-11-16):** the fork stands on its own (renamed, private, `FORK.md`) and has
+taken two upstream merges (2026-08-07, clean; 2026-10-07, upstream 2.1.2 at `96d9c21`, fifteen
+conflicts, SPEC-002). **Upstream 2.2.0 (2026-11-10) is not merged:** a dry merge conflicts in 14
+files, `src/server.ts` the hard one, and it carries a file-path fix for the MCP file tools that we
+lack (`FORK.md` § Upstream 2.2.0). Since the last merge the fork fixed what that merge left
+(T-012 to T-014), the tab's echo edits (T-007, T-010), kept waypoints (T-009), refused other
+origins (T-015) and kept the scene across a restart (T-023). PR 1, the human markup round, ran on
+2026-08-07 and **still has not taken the attribution measurement it exists for** (KI-3). T-001, a
+text element created without a size dropping out of the reading when no tab is open, still
+stands, and T-026 says a tab's first sync marks agent shapes human again. **Next:** the owner's
+call on 2.2.0; T-022 and T-025 (both lose work silently); T-026 and T-001; then PR 4 (ADR-002).
+T-027 and T-028, a person's markup convention and visible screen ids, stand between the project
+and PR 1. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
+only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings
 <!-- change only via an experiment/ADR; list the setting + its locked value + where enforced -->

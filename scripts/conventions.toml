@@ -15,11 +15,11 @@ entry_max_lines        = 600   # docs_check: root entry file (AGENTS.md, else CL
 module_claude_max_lines = 80   # docs_check: each <module>/CLAUDE.md
 uses_max_files         = 12    # sprint_check: resolved `uses` read-set files (globs expanded)
 uses_max_lines         = 2500  # sprint_check: summed line count of resolved `uses` files
-session_max_entries    = 10    # docs_check rule 11b (ADR-018): rotate .claude/SESSION.md past 10 entries
-devlog_max_entries     = 20    # docs_check rule 13b (ADR-023): rotate docs/DEVLOG.md past 20 entries
+session_max_entries    = 3     # docs_check rule 11b (ADR-018): rotate .claude/SESSION.md past 3 entries, the ones AGENTS.md says a session reads (tightened from the laid 10, 2026-11-16)
+devlog_max_entries     = 3     # docs_check rule 13b (ADR-023): rotate docs/DEVLOG.md past 3 entries (tightened from the laid 20, 2026-11-16)
 # Token ceilings alongside the line budgets (cpc.tokens, chars/4 heuristic, ~+/-15% vs a real
 # tokenizer). 0 = disabled (lines-only, unchanged). Calibrate across real sprints before enabling.
-entry_max_tokens       = 0     # docs_check: e.g. 8000 once calibrated
+entry_max_tokens       = 8000  # docs_check: the laid value (cpc ADR-074); entry context ~3,000 tokens on 2026-11-16
 uses_max_tokens        = 0     # sprint_check: e.g. 30000 once calibrated
 
 [uses]
@@ -104,3 +104,13 @@ require_spec_ledger = true
 # [keypoints.sprint-close]
 # run       = ["python -m pytest -q"]
 # checklist = ["Update the metrics dashboard screenshot"]
+
+[tickets]
+# cpc-ticket close moves a closed ticket, word for word, to docs/archive/TICKETS-archive-NNN.md and
+# indexes it in docs/archive/TICKETS-INDEX.md (cpc ADR-071; taken at the 1.23.0 re-vendor).
+archive_on_close = true
+
+[headings]
+# The fork cuts no releases through cpc (private package, no changelog), so no cpc tool reads a
+# `## Releases` section in docs/ROADMAP.md (cpc ADR-082).
+skip = ["roadmap ## Releases"]
