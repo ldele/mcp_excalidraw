@@ -11,10 +11,9 @@ wireframe layer: a drawing is finished when `wireframe` reads it back as what yo
 the screenshot looks right.
 **Current phase (2026-11-16):** the fork stands on its own (renamed, private, `FORK.md`) and has
 taken three upstream merges (2026-08-07, clean; 2026-10-07, upstream 2.1.2, SPEC-002; 2026-11-16,
-upstream 2.2.0 at `81720ac`, fourteen conflicts, SPEC-004). The 2.2.0 merge is **staged on
-`merge/upstream-2.2.0`** in the worktree `C:\Projects\mcp_excalidraw-merge`, waiting on the
-owner's review and commit. It brought upstream's opt-in store: ours stays the default, and
-`EXCALIDRAW_DATA_DIR` switches to upstream's for a process (`FORK.md` § Upstream 2.2.0). Since the
+upstream 2.2.0 at `81720ac`, fourteen conflicts, SPEC-004). The 2.2.0 merge is on `main` as
+`c800fa8`, pushed, with CI green (run 43914224879). It brought upstream's opt-in store: ours
+stays the default, and `EXCALIDRAW_DATA_DIR` switches to upstream's for a process (`FORK.md` § Upstream 2.2.0). Since the
 2.1.2 merge the fork fixed what that merge left
 (T-012 to T-014), the tab's echo edits (T-007, T-010), kept waypoints (T-009), refused other
 origins (T-015) and kept the scene across a restart (T-023). PR 1, the human markup round, ran on
@@ -24,8 +23,7 @@ delete), T-026 (a tab's first sync marking agent shapes human), T-001 (unsized t
 the reading with no tab) and T-024 (elbowed arrows unbound by an export). The same day the owner
 decided T-027 and T-028, which stand between the project and PR 1. ADR-003: screens become named
 frames. ADR-004: a mark's intent is its colour. ADR-005: each screen gets an approval box.
-**Next:** the owner lands the 2.2.0 branch on `main`; then build ADR-003 to ADR-005; then PR 4
-(ADR-002). Each ticket's rank is in its 2026-11-16 note in
+**Next:** build ADR-003 to ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

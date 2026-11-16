@@ -7,9 +7,10 @@
 > `FORK.md` § Upstream 2.2.0 and `docs/ROADMAP.md` § Upstream; the plan this follows is
 > SPEC-002, the 2.1.2 merge. Written 2026-11-16 by the session the owner gave the merge to.
 >
-> **Staged 2026-11-16** on `merge/upstream-2.2.0` in `C:\Projects\mcp_excalidraw-merge`, not
-> committed. Every test case below ran; § Verified gives each result. Work items 12 and 13 were
-> added during the work.
+> **Landed 2026-11-16.** Committed on `merge/upstream-2.2.0` as `c800fa8` on the owner's yes,
+> fast-forwarded onto `main` and pushed; CI run 43914224879 on it is green. The worktree and the
+> branch are removed. Every test case below ran; § Verified gives each result. Work items 12 and
+> 13 were added during the work.
 
 ## Reader and what changes
 - **Reader:** the session doing the merge, then the owner reviewing the staged branch.

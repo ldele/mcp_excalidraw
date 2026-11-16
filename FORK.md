@@ -86,7 +86,8 @@ again. `README.md` is ours: keep it and carry any new upstream feature over by h
 
 ## Upstream 2.2.0, merged 2026-11-16
 
-Taken on `merge/upstream-2.2.0` (SPEC-004), all 14 commits from `96d9c21` to `81720ac`. It conflicted
+Taken on `merge/upstream-2.2.0` (SPEC-004) and landed on `main` as `c800fa8`, all 14 commits
+from `96d9c21` to `81720ac`. It conflicted
 in 14 files: 12 content conflicts and the two Dockerfiles, which #112 edits and we keep deleted.
 `src/server.ts` was the hard one, with 11 hunks, because upstream now routes every store write
 through `commitCanvasMutation` for its durable store. Our change log, the T-025 label cascade and the
