@@ -8,6 +8,7 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 
 | Ticket | Status | Closed | Title | Archive |
 |---|---|---|---|---|
+| T-026 | fixed | 2026-11-16 | A tab connecting re-marks agent shapes as human, and the reading then reorders a row and reads an icon as markup | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-025 | fixed | 2026-11-16 | Deleting a labelled shape leaves its bound label on the canvas, and the reading does not count it | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-023 | fixed | 2026-10-23 | A restarted canvas comes back empty, and a tab still open on it replaces its drawing with the empty scene | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-022 | fixed | 2026-11-16 | apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
@@ -21,3 +22,4 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-010 | fixed | 2026-10-08 | changes reports the tab's own label-fitting resize as an edit by human, and the write-back has a trigger: the first pan or click | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-009 | fixed | 2026-10-08 | A bound arrow's waypoints are dropped when it is created; update keeps them | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-007 | fixed | 2026-10-08 | changes reports the first routing of a bound arrow as an edit by human | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-001 | fixed | 2026-11-16 | A text element without width/height silently disappears from the reading, including the screen heading | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

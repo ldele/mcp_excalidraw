@@ -93,6 +93,19 @@ describe('the frontend echo is not an edit', () => {
   });
 
   // The guard must not swallow the edits it sits beside.
+  // T-026, observed 2026-11-16 with one tab on a private canvas: unlabelled cards and a 26 px icon
+  // the agent drew with a font key came back from the first click as "text styling changed" or
+  // "font size 13 → —", by human. Only text has a font; the editor drops it from anything else.
+  test('a shape drawn with a font key survives first render unchanged (T-026)', () => {
+    const card = {
+      id: 'k0', type: 'rectangle', x: 32, y: 96, width: 262, height: 96,
+      backgroundColor: '#ffffff', strokeColor: '#d7d5cc'
+    };
+    for (const fontKey of [{ fontFamily: 2 }, { textAlign: 'center' }, { fontSize: 13 }]) {
+      assert.equal(diff({ ...card, ...fontKey }, { ...card, ...RENDER_DEFAULTS }), null, JSON.stringify(fontKey));
+    }
+  });
+
   test('a person recolouring a stroke or changing a font is still reported', () => {
     const shape = { id: 'big', type: 'rectangle', x: 0, y: 0, width: 600, height: 400 };
     assert.equal(diff(shape, { ...shape, strokeColor: '#e03131' }).after.strokeColor, '#e03131');

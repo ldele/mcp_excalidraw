@@ -4,6 +4,16 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 — Claude Code — cpc 1.23.0, upstream 2.2.0 measured, docs cut, tickets triaged; STAGED
+- **Done:** the cpc re-vendor and its follow-ups, the README and FORK.md cut, and the triage of 17
+  open tickets, each ranked (DEVLOG 2026-11-16).
+- **Where:** `main`, staged, not committed. `docs/TICKETS.md` also carries T-020 to T-022 and the
+  T-006 note, which another session left unstaged in October.
+- **Owner's calls:** whether to merge upstream 2.2.0 (`FORK.md` § Upstream 2.2.0), and whether to
+  lay cpc's deny rules (cpc ADR-080).
+- **Next:** T-022 and T-025, then T-026 and T-001, then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-10-23 — Claude Code — T-023 fixed: the scene is saved per port, a tab outlives a restart; STAGED, not committed
 - **Done, from a drawing-app session on the owner's word ("fix it in the toolkit"):** T-023 filed
   and fixed. The server saves its scene to `scene-<port>.json` beside the pidfile and loads it on

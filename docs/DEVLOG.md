@@ -10,6 +10,23 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (d) — T-026 and T-001 fixed: a tab's first sync leaves shapes the agent's; unsized text is read
+- **T-026:** reproduced with the built-in browser as the tab, on a private canvas (BlackBox's WF-07
+  is not on this machine). After the first click, unlabelled shapes drawn with `fontFamily`,
+  `textAlign` or `fontSize` came back as "text styling changed, by human", and their origin
+  flipped. Only text has a font, and the editor drops those keys from anything else, so
+  `canonicalizeElement` (`src/core/changes.ts`) now compares them on text only. On the fixed build
+  the same click sent 10 syncs and left 0 records, with every element still the agent's.
+- **T-001:** `boxOf` gives text stored without a size the box export estimates, so with no tab
+  the text is read and a heading names its screen. The entry says `size estimated` (SKILL.md
+  says why). The server still stores no size, so a tab's measurement replaces the estimate.
+  **Rejected:** measuring on the server, which would keep the estimate over the editor's.
+- **Rule 2:** no file of upstream's touched.
+- **Verified:** a test for each, both red before the fix. `npm test` gave 94 of 94 plus wire,
+  bind, render and state; the corpus is unchanged; both type-checks pass. Not run: the browser
+  suite. Seen in passing: one click gave 10 syncs, which looks like the autosync loop upstream's
+  #142 stops.
+
 ## 2026-11-16 (c) — T-022 and T-025 fixed: `apply` can replace what it deletes, and a delete takes the label
 - **T-022:** `apply` ran create, update, then delete, so a patch that deletes and re-creates an id
   deleted the new element. It now runs delete, create, update (`src/cli/commands/elements.ts`).
@@ -40,24 +57,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   ten-second checks.
 - **Opens:** making this cpc's default for every project, in its own session in the cpc
   repository.
-
-## 2026-11-16 — cpc 1.8.0 → 1.23.0; upstream 2.2.0 measured, not merged; README cut; tickets triaged
-- **cpc:** re-vendored cpc 1.8.0 -> 1.23.0 (`tools/conventions/cpc/`, 67 modules) from a worktree
-  of `v1.23.0`, no `--profile`. Then, per its release notes: known issues moved to
-  `docs/KNOWN_ISSUES.md`; the four unedited template copies in `docs/` deleted; `entry_max_tokens`
-  back to its laid 8000; `[tickets] archive_on_close` on; `## Releases` skipped; the baton and this
-  log rotated to three entries. Not done: the deny rules (cpc ADR-080), the owner's call. T-020 closed.
-- **Upstream (rule 2):** 2.2.0 at `81720ac`, 14 commits. A dry merge conflicts in 14 files;
-  `src/server.ts` has 11 hunks, since upstream now wraps every store write in
-  `commitCanvasMutation`. Not merged, and nothing in the collision zone edited. `FORK.md`
-  § Upstream 2.2.0 says what it brings, including #148, a file-path fix we lack, and what to decide.
-- **Docs:** README 652 → 265 lines. Upstream's changelog, comparison table, per-client configs and
-  FAQ are gone, and the configs that said `npx -y mcp-excalidraw-server` (KI-1) now name the local
-  binary. FORK.md 170 → 112, with a table of where we touch upstream's files. The AGENTS.md and
-  CONTEXT.md state lines are brought to today.
-- **Tickets:** three inbox reports admitted (T-026 to T-028); all 17 open tickets triaged with a
-  rank; the 11 closed ones moved to `docs/archive/TICKETS-archive-001.md`.
-- **Not run:** `npm test`, since no code changed.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

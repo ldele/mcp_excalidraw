@@ -18,9 +18,9 @@ why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 **State (2026-11-16):** two upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
 SPEC-002); upstream is now at 2.2.0, 14 commits ahead and **not merged** (`FORK.md` § Upstream
 2.2.0). The two-way markup leg has run with a human and works, but the attribution accuracy it
-exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 15 tickets are open in
-`docs/TICKETS.md`, each ranked in its 2026-11-16 triage note; T-022 and T-025 were fixed the same
-day. **Next: the owner's call on the 2.2.0 merge; T-026 and T-001; then PR 4.** Detail:
+exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 13 tickets are open in
+`docs/TICKETS.md`, each ranked in its 2026-11-16 triage note; T-001, T-022, T-025 and T-026 were
+fixed the same day. **Next: the owner's call on the 2.2.0 merge; then PR 4.** Detail:
 `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.

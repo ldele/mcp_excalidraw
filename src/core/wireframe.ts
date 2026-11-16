@@ -2,6 +2,7 @@ import { ServerElement, COMPONENT_ROLES, ComponentRole } from '../types.js';
 import {
   Box,
   boxOf,
+  isUnsizedText,
   effectiveLabel,
   buildBoundLabelIndex,
   looksLikeAnnotation,
@@ -661,6 +662,8 @@ function nodeSummary(node: WireframeNode): string {
 
   const fontSize = (element as any).fontSize;
   if (element.type === 'text' && typeof fontSize === 'number') details.push(`${fontSize}px`);
+  // No stored size: the box above is boxOf's estimate, not the drawing's (T-001).
+  if (isUnsizedText(element)) details.push('size estimated');
   if (hasVisibleFill(element)) details.push(`fill ${element.backgroundColor}`);
   if (element.locked) details.push('locked');
   if (element.origin === 'human') details.push('drawn by human');

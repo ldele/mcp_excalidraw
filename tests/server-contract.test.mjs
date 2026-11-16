@@ -597,3 +597,35 @@ describe('a patch can replace what it deletes, and a delete takes the label with
     assert.equal(cli(['wireframe', '--score']).orphans, 1, 'and the score counts it');
   });
 });
+
+describe('text added without a size is in the reading when no tab is open (T-001)', () => {
+  const run = args => execFileSync(process.execPath, [join(__dirname, '..', 'dist', 'bin.js'), ...args], {
+    env: { ...process.env, EXPRESS_SERVER_URL: baseUrl, EXCALIDRAW_NO_AUTOSTART: '1' },
+    encoding: 'utf-8'
+  });
+
+  // The documented happy path: a free-standing heading names its screen. With no size the server
+  // stored none, the reading gave the text a 0x0 box and dropped it, and the screen went unnamed.
+  test('an unsized heading names its screen, and the reading says its size is estimated', async () => {
+    await api('/api/elements/clear', { method: 'DELETE' });
+    await api('/api/elements/batch', {
+      method: 'POST',
+      ...json({
+        elements: [
+          { id: 's1', type: 'rectangle', x: 0, y: 0, width: 800, height: 600 },
+          { id: 's1-title', type: 'text', x: 32, y: 24, fontSize: 26, text: 'Library' },
+          { id: 's1-sub', type: 'text', x: 32, y: 70, fontSize: 14, text: '12 documents' }
+        ]
+      })
+    });
+    const stored = await api('/api/elements/s1-title');
+    assert.ok(!stored.element.width, 'the server still stores no size: the estimate is the reading\'s');
+
+    const score = JSON.parse(run(['wireframe', '--score']));
+    assert.equal(score.unnamedScreens, 0);
+    assert.equal(score.components, 3, 'the screen and both texts');
+    const reading = run(['wireframe']);
+    assert.match(reading, /Screen 1 "Library"/);
+    assert.match(reading, /heading "Library" {2}\[s1-title\] text \d+x\d+ · 26px · size estimated/);
+  });
+});

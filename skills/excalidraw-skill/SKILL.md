@@ -291,6 +291,9 @@ the same canvas as a UI:
 - **Reading quality** — a block that appears *only when something is wrong*: how
   many components fell back to `shape`, how many screens could not be named, how
   many fell outside every frame. If you don't see it, the reading is clean.
+- **`size estimated`** after an entry — a text element you added without `width` and
+  `height`. Its box is estimated from its font size and length (as `export` does)
+  until a tab measures it; give text a size when its exact extent matters.
 
 Use it before turning a wireframe into code, before reviewing someone's UI sketch,
 and after a round of markup to re-read the updated design.

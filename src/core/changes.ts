@@ -128,9 +128,12 @@ export function canonicalizeElement(
     opacity: el.opacity ?? null,
     roundness: anyEl.roundness?.type ?? null,
     label: effectiveLabel(el, context, boundLabels) ?? null,
-    fontSize: anyEl.fontSize ?? null,
-    fontFamily: anyEl.fontFamily ?? null,
-    textAlign: anyEl.textAlign ?? null,
+    // Only text has a font. The editor drops these keys from any other element, so a shape the
+    // agent drew with one came back from the first sync as "text styling changed, by human"
+    // (T-026). A label's typography lives on its bound text, not on the shape.
+    fontSize: isText ? (anyEl.fontSize ?? null) : null,
+    fontFamily: isText ? (anyEl.fontFamily ?? null) : null,
+    textAlign: isText ? (anyEl.textAlign ?? null) : null,
     containerId: el.containerId ?? null,
     groupIds: [...(el.groupIds ?? [])].sort(),
     frameId: el.frameId ?? null,
@@ -355,7 +358,27 @@ export function boxOf(el: ServerElement): Box {
     }
     return { x: el.x + minX, y: el.y + minY, w: maxX - minX, h: maxY - minY };
   }
+  if (isUnsizedText(el)) {
+    // T-001: text added with no size is stored with none until a tab measures it, and a 0x0 box
+    // dropped it from the reading, screen headings included. Estimate it as export does
+    // (src/core/expand-elements.ts): ~0.6 x fontSize per character, 1.25 x fontSize per line.
+    const lines = String(el.text ?? (el as any).originalText ?? '').split('\n');
+    const fontSize = typeof (el as any).fontSize === 'number' ? (el as any).fontSize : 20;
+    const longest = Math.max(...lines.map(line => line.length));
+    return {
+      x: el.x,
+      y: el.y,
+      w: el.width || (longest > 0 ? Math.ceil(longest * fontSize * 0.6) : 0),
+      h: el.height || (longest > 0 ? Math.ceil(lines.length * fontSize * 1.25) : 0)
+    };
+  }
   return { x: el.x, y: el.y, w: el.width || 0, h: el.height || 0 };
+}
+
+// A text element with no stored width or height: an agent's `add` without them, before any tab
+// has measured it. Its box is an estimate (boxOf), and the reading says so.
+export function isUnsizedText(el: ServerElement): boolean {
+  return el.type === 'text' && (!el.width || !el.height);
 }
 
 function centerOf(box: Box): { x: number; y: number } {
