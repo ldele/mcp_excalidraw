@@ -10,6 +10,16 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (m) — The upstream-differences table is kept current with every change
+- **Why:** the owner asked that the differences with upstream be updated as the work goes, not
+  only at merges.
+- **What:** FORK.md § Keeping current now says that a change a user would notice updates its row
+  of the README table, or adds one, in the same commit; a merge still updates the upstream column.
+  AGENTS.md's verify loop points to it. The table was checked as current: ADR-003's frames,
+  T-022, T-024, T-025 and the arrow fixes are already in it.
+- **Also:** the two nested sessions, the 2.2.0 merge and the ADR-003 build, were confirmed done
+  and archived on the owner's word. Neither had a worktree, branch or stash left.
+
 ## 2026-11-16 (l) — README § How it differs from upstream: the differences at a glance
 - **Why:** the owner asked for a document, reachable from the README, that sums up how this
   project differs from upstream. FORK.md holds the detail, but it is written for whoever merges
@@ -40,27 +50,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   names read, 0 fallbacks; a tab note was one human record on `[s02-out]`; a tab rename was one
   record and the reading took it; navigation intact.
 - **Not done:** ADR-004, ADR-005; `describe_scene` ignores frame names; no rectangle scene migrated.
-
-## 2026-11-16 (h) — Upstream 2.2.0 merged on a branch, staged (SPEC-004)
-- **What:** all 14 commits to `81720ac`, on `merge/upstream-2.2.0` in the worktree
-  `C:\Projects\mcp_excalidraw-merge`. 14 conflicts; the Dockerfiles stay deleted. In
-  `src/server.ts` our change log, the T-025 cascade and the per-element sync now sit inside
-  upstream's `commitCanvasMutation`. 30 tools with `get_selection`.
-- **Store, the owner's call:** ours stays the default; `EXCALIDRAW_DATA_DIR` switches to upstream's
-  and turns ours off. **Rejected:** ours giving way, which would rewrite T-023's restart path and
-  split the change log from the scene; refusing upstream's, which drops its check.
-- **Found:** (1) upstream's rollback restores only the maps, so a refused write would have kept its
-  change record; `commitTracked` puts the log back. (2) Upstream's new embedded-PNG test showed that
-  after a tab's sync a labelled shape did not list its label; the untouched shape now takes the
-  reference, no record. (3) Upstream's durable check cannot pass on Windows, its own copy included
-  (`kill` is abrupt there); three assertions skip on Windows. (4) Its memory-only checks needed
-  `EXCALIDRAW_NO_PERSIST=1`.
-- **Verified:** both type-checks; `npm test` (corpus 100 / 100, wire, bind, render, state,
-  durable, share, paths) and `check-selection`; Playwright 32 / 32 on the system Chrome. Each
-  new test fails with its fix taken out. Live on port 3061 with a real tab: no sync on load or on
-  a click (10 before #142), one per edit; a note and a drag were one human record each, on the
-  right element; 0 fallbacks. `npm audit` 16, `main` 19.
-- **Not done:** CI (dispatch after the push, KI-8); the version stays 1.3.0.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

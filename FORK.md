@@ -85,7 +85,9 @@ At a merge the lock file conflicts: take upstream's, then run
 `npm install -D @excalidraw/mermaid-to-excalidraw@^2.2.2` and `npm audit fix`, and read `npm audit`
 again. `README.md` is ours: keep it and carry any new upstream feature over by hand. Its
 [How it differs from upstream](README.md#how-it-differs-from-upstream) table is the reader's summary
-of this file: bring its upstream column and version up to date at every merge.
+of this file. Keep it current as the fork changes, not only at merges: a change a user would
+notice (a ticket fix, an ADR built, a default or a tool count changed) updates its row, or adds
+one, in the same commit. At every merge, also bring its upstream column and version up to date.
 
 ## Upstream 2.2.0, merged 2026-11-16
 

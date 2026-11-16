@@ -71,7 +71,9 @@ when a command needs one and there is none. Screenshots and image export render 
   (`cpc-push-guard`, `cpc-coupling-check`, `cpc-test-api-check`) but **none fires by itself** —
   they are on-call unless this project wired hooks or runs them in CI (ADR-015/ADR-022).
 - Verify loop: `npm run type-check` · `npm run build` · `npm run test:bind`, then a live CLI
-  round-trip (`start` → `add` → `wireframe` → `stop`). Docs land with the code.
+  round-trip (`start` → `add` → `wireframe` → `stop`). Docs land with the code, the README's
+  "How it differs from upstream" table included whenever a user would notice the change
+  (`FORK.md` § Keeping current).
 - Before handoff run the vendored gates (cpc 1.23.0, ADR-015; local only, CI has no copy, rule 5):
   `python tools/conventions/run.py docs_check --root . --strict` and
   `python tools/conventions/run.py init_check --root .`.

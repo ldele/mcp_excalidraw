@@ -4,6 +4,27 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (h) — Upstream 2.2.0 merged on a branch, staged (SPEC-004)
+- **What:** all 14 commits to `81720ac`, on `merge/upstream-2.2.0` in the worktree
+  `C:\Projects\mcp_excalidraw-merge`. 14 conflicts; the Dockerfiles stay deleted. In
+  `src/server.ts` our change log, the T-025 cascade and the per-element sync now sit inside
+  upstream's `commitCanvasMutation`. 30 tools with `get_selection`.
+- **Store, the owner's call:** ours stays the default; `EXCALIDRAW_DATA_DIR` switches to upstream's
+  and turns ours off. **Rejected:** ours giving way, which would rewrite T-023's restart path and
+  split the change log from the scene; refusing upstream's, which drops its check.
+- **Found:** (1) upstream's rollback restores only the maps, so a refused write would have kept its
+  change record; `commitTracked` puts the log back. (2) Upstream's new embedded-PNG test showed that
+  after a tab's sync a labelled shape did not list its label; the untouched shape now takes the
+  reference, no record. (3) Upstream's durable check cannot pass on Windows, its own copy included
+  (`kill` is abrupt there); three assertions skip on Windows. (4) Its memory-only checks needed
+  `EXCALIDRAW_NO_PERSIST=1`.
+- **Verified:** both type-checks; `npm test` (corpus 100 / 100, wire, bind, render, state,
+  durable, share, paths) and `check-selection`; Playwright 32 / 32 on the system Chrome. Each
+  new test fails with its fix taken out. Live on port 3061 with a real tab: no sync on load or on
+  a click (10 before #142), one per edit; a note and a drag were one human record each, on the
+  right element; 0 fallbacks. `npm audit` 16, `main` 19.
+- **Not done:** CI (dispatch after the push, KI-8); the version stays 1.3.0.
+
 ## 2026-11-16 (g) — ADR-003 to ADR-005 accepted; the 2.2.0 merge decided
 - **Decided by the owner, one at a time:**
   - ADR-003: screens become native frames, and the reading takes the frame's name.
