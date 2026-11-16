@@ -4,6 +4,17 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (f) — Claude Code — T-024 fixed; STAGED
+- **Done:** elbowed arrows keep their bindings through export, import and a tab (DEVLOG 2026-11-16
+  (f)). T-024 is closed. Entry (e) was committed as `9c15c1f` and pushed.
+- **Where:** `main`, staged, not committed. `dist/` and `dist/frontend` are rebuilt. No canvas is
+  left running; the probes used port 3050.
+- **Mind:** Playwright's bundled headless shell is not installed here. Run the browser suite
+  against the system Chrome with a config that sets `use.channel` to `chrome`; `PW_CHANNEL` is not
+  read.
+- **Next:** the owner's calls on the 2.2.0 merge and ADR-003 to ADR-005; then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 (e) — Claude Code — T-027 and T-028 framed as ADR-003 to ADR-005; STAGED
 - **Done:** three proposed ADRs in `docs/decisions/`, with pointers from both tickets and CONTEXT
   (DEVLOG 2026-11-16 (e)). Entry (d) was committed as `bd24f30` and pushed. No code changed.
