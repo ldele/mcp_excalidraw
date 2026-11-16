@@ -10,6 +10,21 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-16 (g) — ADR-003 to ADR-005 accepted; the 2.2.0 merge decided
+- **Decided by the owner, one at a time:**
+  - ADR-003: screens become native frames, and the reading takes the frame's name.
+  - ADR-004: a mark's intent is its colour, with a legend frame.
+  - ADR-005: each screen gets an approval box; a round still ends with `watch`'s quiet period.
+  - Upstream 2.2.0: merge it next, before those builds.
+  Each ADR records the choice; T-027 and T-028 carry a note.
+- **Checked before ADR-003 was asked:** 25 screens, 13 of them named frames, opened in a real tab
+  fitted to 1,600 × 900 at 10 %. The editor draws a frame's name as a page label at a fixed 14 px
+  (`FRAME_STYLE.nameFontSize`), while the 22 px headings were about 2 px tall. Exports and renders
+  draw the name at 14 px of the drawing, so there it shrinks.
+- **Corrected in ADR-004 before acceptance:** the colour option's cost no longer says the agent's
+  palette must avoid the four colours. Only a person's marks are read for intent.
+- **Nothing built.**
+
 ## 2026-11-16 (f) — T-024 fixed: an elbowed arrow keeps its bindings through export, import and a tab
 - **Cause, found with a real tab:** creating, updating or live-drawing an elbowed arrow kept its
   bindings. Export did not. It writes an arrow bound by `start`/`end` refs with
@@ -41,23 +56,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   so the ask is about reading ids from an overview, not about adding them. Not checked: how the
   editor sizes a frame's name when zoomed out, which matters for ADR-003's option 2.
 - **Opens:** CONTEXT's open question on frames is now ADR-003's option 2.
-
-## 2026-11-16 (d) — T-026 and T-001 fixed: a tab's first sync leaves shapes the agent's; unsized text is read
-- **T-026:** reproduced with the built-in browser as the tab, on a private canvas (BlackBox's WF-07
-  is not on this machine). After the first click, unlabelled shapes drawn with `fontFamily`,
-  `textAlign` or `fontSize` came back as "text styling changed, by human", and their origin
-  flipped. Only text has a font, and the editor drops those keys from anything else, so
-  `canonicalizeElement` (`src/core/changes.ts`) now compares them on text only. On the fixed build
-  the same click sent 10 syncs and left 0 records, with every element still the agent's.
-- **T-001:** `boxOf` gives text stored without a size the box export estimates, so with no tab
-  the text is read and a heading names its screen. The entry says `size estimated` (SKILL.md
-  says why). The server still stores no size, so a tab's measurement replaces the estimate.
-  **Rejected:** measuring on the server, which would keep the estimate over the editor's.
-- **Rule 2:** no file of upstream's touched.
-- **Verified:** a test for each, both red before the fix. `npm test` gave 94 of 94 plus wire,
-  bind, render and state; the corpus is unchanged; both type-checks pass. Not run: the browser
-  suite. Seen in passing: one click gave 10 syncs, which looks like the autosync loop upstream's
-  #142 stops.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

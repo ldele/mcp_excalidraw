@@ -19,11 +19,12 @@ origins (T-015) and kept the scene across a restart (T-023). PR 1, the human mar
 2026-08-07 and **still has not taken the attribution measurement it exists for** (KI-3). On
 2026-11-16 the five top-ranked tickets were fixed: T-022 and T-025 (silent loss in `apply` and
 delete), T-026 (a tab's first sync marking agent shapes human), T-001 (unsized text dropped from
-the reading with no tab) and T-024 (elbowed arrows unbound by an export). **Next:** the owner's
-call on 2.2.0; then PR 4 (ADR-002). T-027 and T-028, a person's markup convention and visible
-screen ids, stand between the project and PR 1; they are framed as ADR-003 to ADR-005, proposed
-and waiting on the owner. Each ticket's rank is in its 2026-11-16 note in `docs/TICKETS.md`. CI on this fork runs
-only by `workflow_dispatch`; a push makes no run (KI-8).
+the reading with no tab) and T-024 (elbowed arrows unbound by an export). The same day the owner
+decided T-027 and T-028, which stand between the project and PR 1. ADR-003: screens become named
+frames. ADR-004: a mark's intent is its colour. ADR-005: each screen gets an approval box.
+**Next:** merge upstream 2.2.0 (decided 2026-11-16, `FORK.md` § Upstream 2.2.0); then build
+ADR-003 to ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
+`docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings
 <!-- change only via an experiment/ADR; list the setting + its locked value + where enforced -->
@@ -83,6 +84,6 @@ only by `workflow_dispatch`; a push makes no run (KI-8).
   the 2026-08-07 merge, so unknown props survive the schema and the mechanism finally exists — this
   is what KI-5 and Phase 3 were blocked on. Still a decision (an ADR), not a given.
 - Whether Excalidraw's own **frames** should replace the "screen = plain rectangle" convention.
-  It is option 2 of ADR-003 (visible screen ids, T-028), proposed 2026-11-16.
+  Decided on 2026-11-16: yes, for new screens (ADR-003); rectangle screens keep reading as now.
 - Whether the wireframe layer should ever emit code, or stop at the reading and leave generation to
   the calling agent. Currently the latter, deliberately — see `docs/ROADMAP.md`.

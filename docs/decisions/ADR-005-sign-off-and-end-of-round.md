@@ -2,14 +2,14 @@
 
 # ADR-005 — How a person approves a screen and ends a round of markup
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-11-16
-- **Deciders:** Lucas (to decide); drafted by Claude Code
+- **Deciders:** Lucas; drafted by Claude Code
 - **In one sentence:** a person can mark a screen as approved, and say that a round of markup is
   over, on the canvas, and the agent reads both.
-- **To decide:** how a person approves a screen and ends a round. The options are an approval box
-  in each screen, a Done button in the canvas page, a word in a note, or the quiet period and chat
-  as today. What each mark asks for is ADR-004; the shared context of the review is there too.
+- **Decided:** an approval box in each screen that a person ticks; the end of a round stays the
+  quiet period of `watch` (option 1). Lucas, 2026-11-16. What each mark asks for is ADR-004; the
+  shared context of the review is there too.
 
 ## In practice — waiting on a review today (T-027)
 
@@ -53,14 +53,19 @@ them in `changes` and `wireframe`.
 
 ## Decision
 
-Not decided. Proposed for the owner on 2026-11-16.
+Option 1: an approval box in each screen. The agent draws a small "Approved" box in each screen's
+corner, and a person ticks it, with a stroke inside it or a fill; ADR-004's colour for "fine" is
+the natural tick. The reading prints the screen as approved, and `changes` reports it. A round
+still ends with the quiet period of `watch`, and the boxes show which screens are done. No file of
+upstream's is touched. Asked alongside: a green mark on the screen itself, which would need the
+attribution rules to let a mark target a screen; it was not chosen. Decided by Lucas on
+2026-11-16, choosing option 1.
 
 ## Enforced by
 
-Nothing yet, since nothing is decided. Option 1 would add a fixture that pins an approved screen
-in the stored reading (`tests/wireframe-corpus.test.mjs`). Option 2 would add a server-contract
-test and a browser test. Option 3 would add a fixture with the two words. Option 4 is judgment,
-not enforceable.
+To be built with the change: a fixture with one ticked and one empty box, whose stored reading
+prints the first screen approved and the second not (`tests/wireframe-corpus.test.mjs`), and
+proves the box is not read as a checkbox of the design. Seen red before the change.
 
 ## Consequences
 

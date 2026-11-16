@@ -2,13 +2,13 @@
 
 # ADR-003 — How a screen shows its id on the canvas
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-11-16
-- **Deciders:** Lucas (to decide); drafted by Claude Code
+- **Deciders:** Lucas; drafted by Claude Code
 - **In one sentence:** each screen of a wireframe carries a name a person can read on the
   zoomed-out canvas and quote in a message, and it matches the id the agent's reading uses.
-- **To decide:** how a screen shows its id on the canvas. The options are an id badge drawn
-  inside it, Excalidraw's own frame name, an overlay in the canvas page, or the heading as today.
+- **Decided:** screens are drawn as native Excalidraw frames, named with the screen's id and
+  title, and the reading takes the frame's name as the screen's (option 2). Lucas, 2026-11-16.
   The other half of the same review, a person's markup convention, is ADR-004 and ADR-005.
 
 ## In practice — dnd_crawler_rust's 25 screens (T-028)
@@ -36,7 +36,11 @@ T-028). After this decision, "S23, the doll" can be said, and found, from the ov
   (`src/core/changes.ts:63`).
 - **The open question.** Whether frames should replace the plain rectangle is an open question in
   `.claude/CONTEXT.md`.
-- **Not checked:** whether the editor draws a frame's name at a fixed size when zoomed out.
+- **How a frame's name is drawn,** checked 2026-11-16 with a real tab: 25 screens, 13 of them
+  frames, fitted to a 1,600 × 900 window at 10 %. The editor draws each frame's name as a page
+  label at a fixed 14 px on screen (`FRAME_STYLE.nameFontSize`, Excalidraw 0.18.1), about 86 px
+  wide for "S01 — Screen 1", whatever the zoom. The 22 px heading inside was about 2 px tall. In
+  exports and renders the name is drawn at 14 px of the drawing, so it shrinks with the image.
 
 ## Options
 
@@ -56,7 +60,7 @@ T-028). After this decision, "S23, the doll" can be said, and found, from the ov
    - **Costs:** the conventions' screen recipe, and the reading rules written for rectangle
      screens. Containment is geometric today, and a frame also clips whatever lies outside it.
      Rectangle scenes (dnd's 25 screens, the five fixtures under `tests/fixtures/`) must keep
-     reading beside frames, or be redrawn. How legible the name is when zoomed out is not checked.
+     reading beside frames, or be redrawn. In exports and renders the name shrinks with the image.
 3. **An overlay in the canvas page.** The page draws each screen's reading id over the canvas,
    always or on hover.
    - **Gives:** no change to any drawing; the ids appear exactly as the reading prints them.
@@ -71,14 +75,17 @@ T-028). After this decision, "S23, the doll" can be said, and found, from the ov
 
 ## Decision
 
-Not decided. Proposed for the owner on 2026-11-16.
+Option 2: native frames. A screen is a frame named with its id and title ("S23 — Character"), and
+the reading takes the frame's name as the screen's name. It is the one option that answers T-028
+in the editor at any zoom, as checked above, without adding an element to every screen, and it
+settles CONTEXT's open question on frames. Rectangle screens keep reading as they do now; no
+scene is migrated by force. Decided by Lucas on 2026-11-16, choosing option 2 from the four.
 
 ## Enforced by
 
-Nothing yet, since nothing is decided. Options 1 and 2 would add a fixture whose stored reading
-pins the badge or the frame name (`tests/wireframe-corpus.test.mjs`), and rule 4's round trip
-applies. Option 3 would need a browser test (`tests/browser/`). Option 4 is judgment, not
-enforceable.
+To be built with the change: a fixture drawn with frames, whose stored reading names each screen
+from its frame (`tests/wireframe-corpus.test.mjs`), seen red before the reading reads frame
+names. Rule 4's round trip applies.
 
 ## Consequences
 

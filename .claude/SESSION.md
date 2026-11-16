@@ -4,6 +4,17 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-16 (g) — Claude Code — ADR-003 to ADR-005 accepted; 2.2.0 merge decided; STAGED
+- **Done:** the owner decided ADR-003 (frames), ADR-004 (colour intent) and ADR-005 (approval
+  boxes), and decided to merge upstream 2.2.0 next. Recorded in the ADRs, the tickets, CONTEXT,
+  FORK.md and DEVLOG 2026-11-16 (g). Entry (f) was committed as `d2a1045` and pushed.
+- **Where:** `main`, staged, not committed. Nothing built.
+- **Next:** the 2.2.0 merge as its own piece of work: a spec like SPEC-002, a branch, the store
+  question settled first, and our tracking and sync rebuilt inside `commitCanvasMutation`. Then
+  build ADR-003 to ADR-005, then PR 4.
+- **Picks up:** any session with a terminal; the ADR builds need a browser tab for their round
+  trips.
+
 ## 2026-11-16 (f) — Claude Code — T-024 fixed; STAGED
 - **Done:** elbowed arrows keep their bindings through export, import and a tab (DEVLOG 2026-11-16
   (f)). T-024 is closed. Entry (e) was committed as `9c15c1f` and pushed.
@@ -24,15 +35,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   Then PR 4.
 - **Picks up:** any session with a terminal. ADR-003's option 2 needs a browser tab to check how
   a frame's name looks when zoomed out.
-
-## 2026-11-16 (d) — Claude Code — T-026 and T-001 fixed; STAGED
-- **Done:** a tab's first sync no longer marks shapes drawn with a font key as a person's, and
-  text added without a size is read with an estimated box. Both tickets are closed (DEVLOG
-  2026-11-16 (d)). Entry (c) was committed and pushed; it is `d9dcbdf` since the rewrite below.
-- **Where:** `main`, staged, not committed. `dist/` is rebuilt. No canvas is left running; probes
-  used ports 3048 and 3049.
-- **Mind:** the cpc session rewrote this repository's history on 2026-11-16 to take
-  `tools/conventions/` out of every commit, and force-pushed it. The hashes named in older entries
-  and the DEVLOG no longer exist; find those commits by their message.
-- **Next:** the owner's call on 2.2.0; then PR 4.
-- **Picks up:** any session with a terminal.

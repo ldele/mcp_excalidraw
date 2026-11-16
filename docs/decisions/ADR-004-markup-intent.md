@@ -2,15 +2,16 @@
 
 # ADR-004 — How a person's mark says what they want done
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-11-16
-- **Deciders:** Lucas (to decide); drafted by Claude Code
+- **Deciders:** Lucas; drafted by Claude Code
 - **In one sentence:** when a person marks up a wireframe, the canvas tells them how to say
   "change this", "remove this", "I have a question" or "this is fine", and the agent reads back
   which one each mark means.
-- **To decide:** how a person's mark carries its intent. The options are a legend that explains
-  today's gestures, intent by colour, intent by a first word, or free markup as today. How a
-  person signs off a screen and ends a round is ADR-005. How a screen shows its id is ADR-003.
+- **Decided:** intent by colour: four stroke colours from the editor's own picker, a legend frame
+  that says which is which, and the intent printed beside each mark (option 2). Lucas,
+  2026-11-16. How a person signs off a screen and ends a round is ADR-005. How a screen shows its
+  id is ADR-003.
 
 ## In practice — the review of dnd_crawler_rust's S23 and S24 (T-027)
 
@@ -48,9 +49,10 @@ asks for.
    `wireframe` print the intent beside each mark.
    - **Gives:** intent the agent can read without guessing, picked with one click in the colour
      picker.
-   - **Costs:** code in `changes.ts` and in the reading's output, tests, and the conventions; the
-     agent's own palette must stay clear of the four; a person who forgets the colours gives no
-     intent; colour alone fails a colour-blind reviewer.
+   - **Costs:** code in `changes.ts` and in the reading's output, tests, and the conventions; a
+     person who forgets the colours gives no intent; colour alone fails a colour-blind reviewer.
+     Only a person's marks (origin `human`) are read for intent, so the agent's own colours are
+     unaffected.
 3. **Intent by a first word.** A note that starts "change", "remove", "?" or "ok" carries that
    intent, printed beside the mark.
    - **Gives:** little code; typed rather than picked; survives any palette.
@@ -61,14 +63,17 @@ asks for.
 
 ## Decision
 
-Not decided. Proposed for the owner on 2026-11-16.
+Option 2: intent by colour. Four stroke colours from the editor's own picker mean change, remove,
+question and fine. A legend frame on the canvas, which the reading leaves out, says which is
+which. `changes` and `wireframe` print the intent beside each mark. A mark in any other colour
+reads as it does today, with no intent. The exact four colours are chosen from the editor's
+palette when this is built. Decided by Lucas on 2026-11-16, choosing option 2 from the four.
 
 ## Enforced by
 
-Nothing yet, since nothing is decided. Options 2 and 3 would pin intent in the annotated fixture's
-stored reading (`tests/fixtures/annotated.excalidraw`, read by `tests/wireframe-corpus.test.mjs`).
-Options 1 and 4 are judgment, not enforceable, apart from a fixture that shows the legend is left
-out of the reading.
+To be built with the change: the annotated fixture's stored reading pins one mark of each
+intent (`tests/fixtures/annotated.excalidraw`, read by `tests/wireframe-corpus.test.mjs`), plus a
+fixture showing the legend frame left out of the reading. Both are seen red before the change.
 
 ## Consequences
 

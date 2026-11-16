@@ -83,7 +83,8 @@ again. `README.md` is ours: keep it and carry any new upstream feature over by h
 
 ## Upstream 2.2.0, not merged
 
-Fetched 2026-11-16; nothing taken. A dry merge on `main` conflicts in 14 files: 12 content
+Fetched 2026-11-16; nothing taken. **The owner decided the same day to merge it next**, before the
+builds of ADR-003 to ADR-005; which store stays is settled at the start of that work. A dry merge on `main` conflicts in 14 files: 12 content
 conflicts and 2 modify/delete (the Dockerfiles, which #112 edits). `src/server.ts` is the hard one,
 with 11 hunks. Upstream now routes every store write through `commitCanvasMutation` for its
 durable store, so our `track(...)` calls in create, update, delete, clear and batch-replace, and

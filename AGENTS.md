@@ -20,8 +20,8 @@ SPEC-002); upstream is now at 2.2.0, 14 commits ahead and **not merged** (`FORK.
 2.2.0). The two-way markup leg has run with a human and works, but the attribution accuracy it
 exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 12 tickets are open in
 `docs/TICKETS.md`, each ranked in its 2026-11-16 triage note; T-001, T-022, T-024, T-025 and T-026
-were fixed the same day. **Next: the owner's calls on the 2.2.0 merge and on ADR-003 to ADR-005 (T-027,
-T-028); then PR 4.** Detail:
+were fixed the same day, and ADR-003 to ADR-005 (T-027, T-028) were decided. **Next: merge
+upstream 2.2.0; then build ADR-003 to ADR-005; then PR 4.** Detail:
 `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.

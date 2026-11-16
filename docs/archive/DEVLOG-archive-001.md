@@ -4,6 +4,23 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (d) — T-026 and T-001 fixed: a tab's first sync leaves shapes the agent's; unsized text is read
+- **T-026:** reproduced with the built-in browser as the tab, on a private canvas (BlackBox's WF-07
+  is not on this machine). After the first click, unlabelled shapes drawn with `fontFamily`,
+  `textAlign` or `fontSize` came back as "text styling changed, by human", and their origin
+  flipped. Only text has a font, and the editor drops those keys from anything else, so
+  `canonicalizeElement` (`src/core/changes.ts`) now compares them on text only. On the fixed build
+  the same click sent 10 syncs and left 0 records, with every element still the agent's.
+- **T-001:** `boxOf` gives text stored without a size the box export estimates, so with no tab
+  the text is read and a heading names its screen. The entry says `size estimated` (SKILL.md
+  says why). The server still stores no size, so a tab's measurement replaces the estimate.
+  **Rejected:** measuring on the server, which would keep the estimate over the editor's.
+- **Rule 2:** no file of upstream's touched.
+- **Verified:** a test for each, both red before the fix. `npm test` gave 94 of 94 plus wire,
+  bind, render and state; the corpus is unchanged; both type-checks pass. Not run: the browser
+  suite. Seen in passing: one click gave 10 syncs, which looks like the autosync loop upstream's
+  #142 stops.
+
 ## 2026-11-16 (c) — T-022 and T-025 fixed: `apply` can replace what it deletes, and a delete takes the label
 - **T-022:** `apply` ran create, update, then delete, so a patch that deletes and re-creates an id
   deleted the new element. It now runs delete, create, update (`src/cli/commands/elements.ts`).

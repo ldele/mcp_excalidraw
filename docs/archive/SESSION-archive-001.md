@@ -4,6 +4,18 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (d) — Claude Code — T-026 and T-001 fixed; STAGED
+- **Done:** a tab's first sync no longer marks shapes drawn with a font key as a person's, and
+  text added without a size is read with an estimated box. Both tickets are closed (DEVLOG
+  2026-11-16 (d)). Entry (c) was committed and pushed; it is `d9dcbdf` since the rewrite below.
+- **Where:** `main`, staged, not committed. `dist/` is rebuilt. No canvas is left running; probes
+  used ports 3048 and 3049.
+- **Mind:** the cpc session rewrote this repository's history on 2026-11-16 to take
+  `tools/conventions/` out of every commit, and force-pushed it. The hashes named in older entries
+  and the DEVLOG no longer exist; find those commits by their message.
+- **Next:** the owner's call on 2.2.0; then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 (c) — Claude Code — T-022 and T-025 fixed; STAGED
 - **Done:** `apply` deletes before it creates, and a delete takes a shape's bound label with it.
   Both tickets are closed (DEVLOG 2026-11-16 (c)). Entry (b) was committed as `e5c58ef` and pushed.
