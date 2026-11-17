@@ -208,8 +208,8 @@ Geometry and colour, chosen so inference lands on the right role without help.
 | Chart card | 540×336 | `#ffffff` / `#d7d5cc` | holds title + desc + placeholder | `card` |
 | Chart placeholder | inset 18, h 200 | transparent / `#d7d5cc` **dashed** | **declare `chart`** | `chart` |
 | Table placeholder | as above | same | **declare `table`** | `table` |
-| Header / footer | full frame width, pinned to edge | `#fbfaf8` / `#d7d5cc` | must span ≥ 90% of the edge | `header` / `footer` |
-| Sidebar | pinned to left edge, full height | `#fbfaf8` / `#d7d5cc` | same span rule | `sidebar` |
+| Header / footer | full frame width, pinned to edge | `#fbfaf8` / `#d7d5cc` | flush with both sides (within 10px) and ≥ 80% of the edge | `header` / `footer` |
+| Sidebar | pinned to left edge, full height | `#fbfaf8` / `#d7d5cc` | flush top and bottom, ≥ 70% of the height | `sidebar` |
 | Divider | h 2, w ≥ 400 | `#d7d5cc` | ≤ 6px thin is the trigger | `divider` |
 | List item | identical boxes stacked, gap ≤ 16 | `#ffffff` / `#d7d5cc` | needs ≥ 3 to read as a set | `list-item` |
 | Avatar | circle 32–48 | `#d7d5cc` | | `avatar` |
@@ -410,6 +410,26 @@ Screenshot checks (see SKILL.md's Quality Checklist), plus these, from `wirefram
 7. **Flows are listed**, one per navigating control.
 8. **`?` marks are on things you genuinely don't mind being guessed.** Any `?` on
    something load-bearing gets a declared role.
+
+**Then lint it** (ADR-002): `wireframe --lint` checks the drawing against these conventions and
+names the cause when the reading is a few pixels from a different one. Each finding has a rule id;
+**errors** change what the reading is, **advisories** are house style. The plain reading prints a
+`### Drawing quality` block whenever there is an error, so you see those without asking.
+
+| Rule | Severity | Fires when |
+|---|---|---|
+| `containment-near-miss` | error | an element overlaps a larger sibling but reaches 2–20px outside it, so it nests beside it, not inside (the footer 4.29px out that became a phantom screen) |
+| `row-split` | error | two boxes side by side overlap vertically by half the shorter one's height or less, so they read as two rows |
+| `bar-short` | error | a band flush to an edge spans ≥ 60% of it but misses the header / footer / sidebar test above |
+| `threshold-edge` | error | an undeclared box is 1px past a threshold: a 29px square, 19px text, a 7px-thin bar |
+| `oversized-annotation` | error | a transparent shape a person drew holds two or more components (KI-6) |
+| `frame-overflow` | advisory | a frame member reaches outside its frame, where the editor hides it |
+| `sibling-overlap` | advisory | siblings overlap by more than a near miss and neither holds the other |
+| `small-text` | advisory | text under 10px |
+
+It reports only; the exit code says nothing. `wireframe --json` carries the same findings under
+`lint`. Off-grid coordinates, frame width and inset are not checked: the corpus showed them to be
+deliberate as often as not (`docs/specs/SPEC-008-geometry-lint.md`).
 
 ---
 

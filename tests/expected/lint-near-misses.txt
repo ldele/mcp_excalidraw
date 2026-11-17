@@ -1,0 +1,36 @@
+## Wireframe reading
+3 screens, 16 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Reading quality
+  ⚠️  1 screen could not be named. A heading of 20px or more near the top of a screen is what names it.
+  3 roles are guesses (marked `?`). Fine on anything you would not mind being guessed wrong.
+
+### Drawing quality
+  ⚠️  [ftr] is 4.29px outside [s1]: it reads beside it, not inside. Move it fully inside.  (containment-near-miss)
+  ⚠️  [s2-b] overlaps [s2-a] by 40% of its height but reads as a new row: give them one y.  (row-split)
+  ⚠️  [s2-hdr] is flush to the top of [s2] but spans 70% of its width: it reads as input, not header. Pin it to both sides.  (bar-short)
+  ⚠️  [s2-tick] is 29px across, just over the 28px a checkbox gets: it reads as icon. Make it 28 or declare a role.  (threshold-edge)
+  ⚠️  [s2-cap] is 19px text, just under the 20px a heading needs: it reads as text. Make it 20 or clearly smaller.  (threshold-edge)
+  ⚠️  [s2-rule] is 7px thin, just over the 6px a divider gets: it reads as input. Make it 6 or declare a role.  (threshold-edge)
+  `wireframe --lint` lists every finding, house style included.
+
+### Screen 1 "Checkout"  [s1] rectangle 600x640
+  1. heading "Checkout"  [s1-title] text 160x34 · 26px
+  2. input "Card number"  [s1-card] rectangle 536x48 · fill #ffffff
+
+### Screen 2  [ftr] rectangle 600x120 · fill #fbfaf8
+  1. text "Terms · Privacy"  [ftr-terms] text 120x18 · 14px
+
+### Screen 3 "Settings"  [s2] rectangle 600x640
+  1. input?  [s2-hdr] rectangle 420x60 · fill #fbfaf8
+  2. heading "Settings"  [s2-title] text 130x34 · 26px
+  3. icon?  [s2-tick] rectangle 29x29 · fill #ffffff
+  4. text "Almost a heading"  [s2-cap] text 183x24 · 19px
+  5. chart "Usage chart"  [s2-a] rectangle 200x100 · fill #ffffff
+  6. table "Billing table"  [s2-b] rectangle 200x100 · fill #ffffff
+  7. card  [s2-c1] rectangle 300x140 · fill #ffffff
+  8. card  [s2-c2] rectangle 300x140 · fill #ffffff
+  9. input?  [s2-rule] rectangle 400x7 · fill #d7d5cc
+  10. text "fine print"  [s2-fine] text 60x10 · 8px

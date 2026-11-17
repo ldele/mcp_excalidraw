@@ -4,6 +4,16 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (m) — The upstream-differences table is kept current with every change
+- **Why:** the owner asked that the differences with upstream be updated as the work goes, not
+  only at merges.
+- **What:** FORK.md § Keeping current now says that a change a user would notice updates its row
+  of the README table, or adds one, in the same commit; a merge still updates the upstream column.
+  AGENTS.md's verify loop points to it. The table was checked as current: ADR-003's frames,
+  T-022, T-024, T-025 and the arrow fixes are already in it.
+- **Also:** the two nested sessions, the 2.2.0 merge and the ADR-003 build, were confirmed done
+  and archived on the owner's word. Neither had a worktree, branch or stash left.
+
 ## 2026-11-16 (l) — README § How it differs from upstream: the differences at a glance
 - **Why:** the owner asked for a document, reachable from the README, that sums up how this
   project differs from upstream. FORK.md holds the detail, but it is written for whoever merges

@@ -304,6 +304,10 @@ the same canvas as a UI:
 - **Reading quality** — a block that appears *only when something is wrong*: how
   many components fell back to `shape`, how many screens could not be named, how
   many fell outside every frame. If you don't see it, the reading is clean.
+- **Drawing quality** — a block that appears *only when the drawing is a few pixels from a
+  different reading*: an element 4px outside the screen it was meant to be in, a header that
+  stops short, a 29px square. Each line names the element and the fix. `wireframe --lint` adds
+  the house-style advisories (ADR-002).
 - **`size estimated`** after an entry — a text element you added without `width` and
   `height`. Its box is estimated from its font size and length (as `export` does)
   until a tab measures it; give text a size when its exact extent matters.

@@ -15,6 +15,7 @@ import { decodeSceneInput } from '../../core/scene-input.js';
 import { wrapSceneAsObsidianMd } from '../../core/obsidian-md.js';
 import { describeScene } from '../../core/describe.js';
 import { readWireframe, formatWireframe, scoreWireframe, WireframeNode } from '../../core/wireframe.js';
+import { formatLint } from '../../core/wireframe-lint.js';
 import { exportToExcalidrawUrl } from '../../core/share-url.js';
 import { EXPRESS_SERVER_URL } from '../../core/config.js';
 import { IMAGE_FLAG_SPEC, imageFormatFromFlags, imageOptionsFromFlags } from '../image-options.js';
@@ -35,7 +36,8 @@ export async function describe(argv: string[]): Promise<void> {
 export async function wireframe(argv: string[]): Promise<void> {
   const { flags } = parseArgs(argv, {
     json: { takesValue: false },
-    score: { takesValue: false }
+    score: { takesValue: false },
+    lint: { takesValue: false }
   });
   await ensureCanvasRunning();
   const elements = await getElements();
@@ -59,8 +61,18 @@ export async function wireframe(argv: string[]): Promise<void> {
       flows: model.flows,
       markup: model.markup,
       componentCount: model.componentCount,
-      score: scoreWireframe(model)
+      score: scoreWireframe(model),
+      // ADR-002: the findings ride in the same payload as the tree they refer to, so a consumer
+      // highlights elements against one snapshot of a canvas someone may still be editing.
+      lint: model.lint
     });
+    return;
+  }
+
+  // Every lint finding, errors first, house style included (ADR-002). Reporting only: the exit
+  // code says nothing about the findings.
+  if (flags.lint) {
+    process.stdout.write(formatLint(model.lint) + '\n');
     return;
   }
 

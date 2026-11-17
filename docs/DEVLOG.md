@@ -10,6 +10,29 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (c) — PR 4 built: the geometry lint (ADR-002, SPEC-008)
+- **Why:** `--score` says whether the reading succeeded; nothing said whether the drawing follows
+  the conventions, and on 2026-08-07 a footer 4.29px outside its frame surfaced only as "1 screen
+  could not be named".
+- **What:** `src/core/wireframe-lint.ts` reads the reader's own model into findings with a stable
+  `ruleId`, `severity`, `elementId`, `message` and `measured` value. Five errors
+  (`containment-near-miss`, `row-split`, `bar-short`, `threshold-edge`, `oversized-annotation`)
+  and three advisories (`frame-overflow`, `sibling-overlap`, `small-text`). The plain reading,
+  and so `describe_wireframe`, shows `### Drawing quality` when there is an error;
+  `wireframe --lint` lists all; `--json` carries `lint`. Reporting only. The reader's thresholds
+  moved to `src/core/reader-rules.ts`, which the lint shares.
+- **Calibration:** every tolerance measured on the corpus first (SPEC-008 § Calibration). Off-grid
+  coordinates, frame width and inset were rejected: the conventions' own 1px inset and the
+  phone-sized fixtures make them fire on drawings that read right. Zero errors on every clean
+  fixture and on UI-Wizard's 98-element dashboard.
+- **Tests:** a new fixture, lint-near-misses, with the 2026-08-07 footer and one case of each
+  other error; 17 unit tests; the corpus now asserts each fixture's lint. 189 / 189.
+- **Also:** conventions § 4 said a header must span 90% of its edge; the reader uses 80% (70% for
+  a sidebar's height), and the conventions now say so. KI-9 logged: a canvas a test boots
+  sometimes dies at boot on Windows (`0xC0000409`), seen twice.
+- **Opens:** a `--check` exit code once the rules have met more real drawings (ADR-002); the
+  browser panel as a view over `lint`.
+
 ## 2026-11-17 (b) — ADR-005 built: an approval box in each screen (SPEC-007)
 - **Why:** T-027's second half. A person who was done with a screen had to say so in chat.
 - **What:** `src/core/approval.ts`: an element whose id ends `-approval` is its screen's approval
@@ -46,16 +69,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   declared `role` for the legend (a new role); a CLI command to draw the legend (a file is
   enough and testable).
 - **Opens:** ADR-005, the approval box, builds on this and adds its line to the legend.
-
-## 2026-11-16 (m) — The upstream-differences table is kept current with every change
-- **Why:** the owner asked that the differences with upstream be updated as the work goes, not
-  only at merges.
-- **What:** FORK.md § Keeping current now says that a change a user would notice updates its row
-  of the README table, or adds one, in the same commit; a merge still updates the upstream column.
-  AGENTS.md's verify loop points to it. The table was checked as current: ADR-003's frames,
-  T-022, T-024, T-025 and the arrow fixes are already in it.
-- **Also:** the two nested sessions, the 2.2.0 merge and the ADR-003 build, were confirmed done
-  and archived on the owner's word. Neither had a worktree, branch or stash left.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

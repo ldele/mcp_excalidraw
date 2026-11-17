@@ -18,6 +18,15 @@
   ],
   "navigation": [],
   "markup": [],
+  "lint": [
+    {
+      "ruleId": "frame-overflow",
+      "severity": "advisory",
+      "elementId": "e03-next",
+      "measured": 40,
+      "why": "Drawn to show a member that pokes out of its frame (SPEC-005 test case 4): it reads inside its screen, and the lint says the editor hides the 40px outside (SPEC-008)."
+    }
+  ],
   "notes": [
     "Drawn through the CLI on a canvas on port 3071 and exported, 2026-11-16. Before the reading knew frames it read: e01 'Profile', e03 'Clipped and free' (its heading, not its name), e02 as `shape` outside every screen, and e03-next outside every screen.",
     "The 1 inferred is e03-card (card?), as any undeclared card reads."

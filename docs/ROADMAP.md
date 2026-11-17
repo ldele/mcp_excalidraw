@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-16 · class: living -->
+<!-- status: active · updated: 2026-11-17 · class: living -->
 
 # ROADMAP
 
@@ -27,7 +27,9 @@ Three measures, because "it looked right" has already proved too weak a bar once
    same day). Worth stating plainly, because it is the measure this whole layer is judged on: four
    sessions in, every attribution figure we have was produced by an agent imitating a person.
 
-4. **Drawing conformance** — not yet measured. `wireframe --score` says whether the *reading*
+4. **Drawing conformance** — measured from 2026-11-17 by `wireframe --lint` (SPEC-008): zero
+   errors on the eleven corpus fixtures that read as intended and on UI-Wizard's real dashboard.
+   Before that, not measured. `wireframe --score` says whether the *reading*
    succeeded; nothing says whether the *drawing* follows the conventions it was drawn against. On
    2026-08-07 a footer 4.29px outside its frame produced "1 screen could not be named" — the symptom,
    two inferential steps from the cause. See PR 4.
@@ -49,7 +51,7 @@ Three measures, because "it looked right" has already proved too weak a bar once
 | 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; attribution number still untaken | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
-| 4  | Geometry lint: check a drawing against the conventions, report the cause | todo — ADR-002 accepted 2026-08-07, not started | `docs/decisions/ADR-002-geometry-lint.md` |
+| 4  | Geometry lint: check a drawing against the conventions, report the cause | built 2026-11-17, staged — `wireframe --lint`, eight rules calibrated on the corpus | `docs/specs/SPEC-008-geometry-lint.md` |
 
 **Before PR 4:** the upstream merge is done (2026-10-07, § Upstream — taken ahead of T-001, the
 2026-09-07 order reversed by Lucas). The three defects the merge left that were ours — bound-label

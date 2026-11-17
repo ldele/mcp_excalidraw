@@ -35,7 +35,7 @@ Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
 | | Upstream 2.2.0 | This fork |
 |---|---|---|
 | **Install** | `npx mcp-excalidraw-server` from npm, or a Docker image | Not published: `npm link` from this repository gives `excalidraw-canvas`; no Docker image |
-| **Reading the canvas** | `describe`: a list of shapes | Also `wireframe`: screens, component roles, reading order, flows between screens, a person's annotations. A named frame is a screen |
+| **Reading the canvas** | `describe`: a list of shapes | Also `wireframe`: screens, component roles, reading order, flows between screens, a person's annotations. A named frame is a screen. `wireframe --lint` checks the drawing against the conventions and names the cause of a misreading |
 | **A person's edits** | No change log | Every change carries a revision and who made it, agent or person. `changes` and `watch` report them, each mark attached to the component it refers to |
 | **Markup** | Whatever a person draws, read by no one | A "How to mark up" legend the agent adds from the skill; a person's mark in red, orange, blue or green reads as change, remove, question or fine, and the reading leaves the legend out. Each screen can carry an "Approved" box a person ticks, and the reading says which screens are approved |
 | **MCP tools** | 27 | 30: adds `describe_wireframe`, `get_canvas_changes` and `wait_for_changes` |
@@ -64,6 +64,9 @@ changes upstream's files and the test that fails if a merge undoes it.
 - **Reading order** is top to bottom, then left to right within a row (`3.`, `3.1.`).
 - **Navigation flows**: an arrow from one screen to another reads as
   `button "Continue" → screen "Dashboard"`.
+- **Drawing quality**: a block that appears only when the drawing is a few pixels from a different
+  reading, naming the cause (`[ftr] is 4.29px outside [s1]`). `wireframe --lint` lists every finding,
+  house style included; `--json` carries them under `lint`.
 - **Annotations**: what a person drew, attached to the component it refers to, and what it asks
   for when drawn in one of four colours: red change, orange remove, blue question, green fine.
   The "How to mark up" legend that says so (`skills/excalidraw-skill/references/markup-legend.json`)

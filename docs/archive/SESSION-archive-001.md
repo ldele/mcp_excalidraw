@@ -4,6 +4,17 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (a) — Claude Code — ADR-004 built (SPEC-006); STAGED, not committed
+- **Done:** a person's mark in red, orange, blue or green reads as change, remove, question or
+  fine in `wireframe` and `changes`; the skill ships a "How to mark up" legend
+  (`references/markup-legend.json`) that the reading leaves out. Round trip closed on port 3072
+  with a real tab; 139 / 139 node tests (DEVLOG 2026-11-17 (a), SPEC-006 § Verified).
+- **Where:** `main` at `82ef3ed`; this change is staged, waiting on the owner's yes to commit.
+  `dist/` is rebuilt (the baton's open item from (m) is done).
+- **Next:** commit ADR-004; build ADR-005 (an approval box per screen, its line in the legend,
+  its README row); then PR 4.
+- **Picks up:** any session with a terminal; ADR-005's round trip needs a browser tab.
+
 ## 2026-11-16 (m) — Claude Code — session closed; everything committed and pushed
 - **Done today (DEVLOG 2026-11-16):** cpc re-vendored to 1.23.0 and kept out of git (rule 5); the
   README and FORK.md cut, with a table of how the fork differs from upstream; tickets triaged;

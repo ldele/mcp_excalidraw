@@ -468,6 +468,8 @@ export const tools: Tool[] = [
       'person has approved by ticking their Approved box. Use this for UI/UX work — reviewing ' +
       'a wireframe, turning one into code, or understanding a flow a user drew. Roles are ' +
       'inferred and marked with `?` when uncertain; raw type and size are always included. ' +
+      'A Drawing quality block appears when the drawing is a few pixels from a different ' +
+      'reading (an element just outside its screen, a header that stops short). ' +
       'For flowcharts and architecture diagrams use describe_scene instead.',
     inputSchema: {
       type: 'object',

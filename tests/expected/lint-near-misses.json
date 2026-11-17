@@ -1,0 +1,35 @@
+{
+  "fixture": "lint-near-misses.excalidraw",
+  "what": "Two rectangle screens drawn to break the conventions by a pixel or a few: Checkout with its footer 4.29px past the screen's bottom edge (the 2026-08-07 case), and Settings with a header band spanning 70% of its width, a 29px square, 19px text, a 7px-thin bar, two boxes side by side that overlap 40% vertically, two overlapping cards and 8px text.",
+  "why": "Findings are listed in the order the lint gives them: depth first, each container's siblings before its children. The positive case for the geometry lint (ADR-002, SPEC-008 test case 1): one finding per rule the CLI can draw. The footer reproduces the failure that motivated PR 4: the reading says '1 screen could not be named' and the lint names the cause.",
+  "score": {
+    "screens": 3,
+    "components": 16,
+    "fallbacks": 0,
+    "inferred": 3,
+    "unnamedScreens": 1,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s1", "label": "Checkout" },
+    { "id": "ftr" },
+    { "id": "s2", "label": "Settings" }
+  ],
+  "navigation": [],
+  "markup": [],
+  "lint": [
+    { "ruleId": "containment-near-miss", "severity": "error", "elementId": "ftr", "measured": 4.29 },
+    { "ruleId": "row-split", "severity": "error", "elementId": "s2-b", "measured": 0.4 },
+    { "ruleId": "sibling-overlap", "severity": "advisory", "elementId": "s2-c2", "measured": 60 },
+    { "ruleId": "bar-short", "severity": "error", "elementId": "s2-hdr", "measured": 0.7 },
+    { "ruleId": "threshold-edge", "severity": "error", "elementId": "s2-tick", "measured": 29 },
+    { "ruleId": "threshold-edge", "severity": "error", "elementId": "s2-cap", "measured": 19 },
+    { "ruleId": "threshold-edge", "severity": "error", "elementId": "s2-rule", "measured": 7 },
+    { "ruleId": "small-text", "severity": "advisory", "elementId": "s2-fine", "measured": 8 }
+  ],
+  "notes": [
+    "Drawn 2026-11-17 on port 3072 with `apply` and exported with `excalidraw-canvas export`; not patched. No tab was open, so every size is the one given.",
+    "KI-6's oversized annotation needs a person's mark (origin human), which `apply` cannot make; it is tested inline in tests/wireframe-lint.test.mjs.",
+    "The footer, holding its own text, is promoted to a screen of its own, which no heading names: `ftr` is the unnamed screen in the score, read between Checkout and Settings, exactly as on 2026-08-07."
+  ]
+}

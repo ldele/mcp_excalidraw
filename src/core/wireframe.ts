@@ -12,6 +12,13 @@ import {
 } from './changes.js';
 import { MarkIntent, markIntent, isLegendId, legendElementIds } from './markup-intent.js';
 import { Approval, isApprovalId, isFilled, approvalBoxHolding, screenOfApprovalBox } from './approval.js';
+import {
+  contains, sharesRow, isSquarish, declaredRole,
+  EDGE_TOLERANCE, BAR_MAX_HEIGHT_RATIO, BAR_MIN_WIDTH_RATIO, SIDEBAR_MAX_WIDTH_RATIO,
+  SIDEBAR_MIN_HEIGHT_RATIO, CONTROL_MAX_HEIGHT, HEADING_MIN_FONT_SIZE, TICKBOX_MAX_SIZE,
+  AVATAR_MAX_SIZE, DIVIDER_MAX_THICKNESS
+} from './reader-rules.js';
+import { LintFinding, lintWireframe } from './wireframe-lint.js';
 
 // ─── Reading a wireframe as a UI, not as geometry ──────────────
 //
@@ -74,6 +81,8 @@ export interface WireframeModel {
   markup: WireframeMarkup[];
   componentCount: number;
   legend?: WireframeLegend;
+  // The geometry lint's findings on this reading (ADR-002, SPEC-008); empty on a clean drawing.
+  lint: LintFinding[];
 }
 
 // ─── Colour ────────────────────────────────────────────────────
@@ -156,16 +165,6 @@ function mentions(label: string | undefined, words: string[]): boolean {
   return words.some(word => set.has(word));
 }
 
-// An author who declares a role knows something inference cannot recover.
-// Unknown strings fall through to inference rather than erroring — the API
-// schema is where a typo gets rejected.
-function declaredRole(el: ServerElement): ComponentRole | undefined {
-  const raw = (el as { role?: unknown }).role;
-  if (typeof raw !== 'string') return undefined;
-  const role = raw.trim().toLowerCase() as ComponentRole;
-  return (COMPONENT_ROLES as readonly string[]).includes(role) ? role : undefined;
-}
-
 // The word budget a control's own wording gets: past this it is prose, and
 // prose belongs to content rather than to a button or a field.
 const CONTROL_LABEL_MAX_WORDS = 4;
@@ -200,16 +199,7 @@ function looksLikeField(label: string | undefined): boolean {
 
 // ─── Containment ───────────────────────────────────────────────
 
-const CONTAINMENT_TOLERANCE = 2;
-
-function contains(outer: Box, inner: Box): boolean {
-  return (
-    outer.x - CONTAINMENT_TOLERANCE <= inner.x &&
-    outer.y - CONTAINMENT_TOLERANCE <= inner.y &&
-    outer.x + outer.w + CONTAINMENT_TOLERANCE >= inner.x + inner.w &&
-    outer.y + outer.h + CONTAINMENT_TOLERANCE >= inner.y + inner.h
-  );
-}
+// `contains` and its tolerance live in reader-rules.ts, shared with the lint.
 
 function area(box: Box): number {
   return Math.max(0, box.w) * Math.max(0, box.h);
@@ -303,13 +293,6 @@ function buildTree(nodes: WireframeNode[]): WireframeNode[] {
 
 // Two boxes share a row when they overlap vertically by more than half the
 // shorter one — how a person's eye groups a row of controls.
-function sharesRow(band: { top: number; bottom: number }, box: Box): boolean {
-  const overlap = Math.min(band.bottom, box.y + box.h) - Math.max(band.top, box.y);
-  if (overlap <= 0) return false;
-  const shorter = Math.min(band.bottom - band.top, box.h);
-  return shorter <= 0 ? true : overlap / shorter > 0.5;
-}
-
 export function inReadingOrder(nodes: WireframeNode[]): WireframeNode[] {
   const sorted = [...nodes].sort((a, b) => a.box.y - b.box.y || a.box.x - b.box.x);
   const rows: { band: { top: number; bottom: number }; items: WireframeNode[] }[] = [];
@@ -332,16 +315,8 @@ export function inReadingOrder(nodes: WireframeNode[]): WireframeNode[] {
 
 // ─── Role inference ────────────────────────────────────────────
 
-const EDGE_TOLERANCE = 10;
-const BAR_MAX_HEIGHT_RATIO = 0.2;
-const BAR_MIN_WIDTH_RATIO = 0.8;
-const SIDEBAR_MAX_WIDTH_RATIO = 0.35;
-const SIDEBAR_MIN_HEIGHT_RATIO = 0.7;
-const CONTROL_MAX_HEIGHT = 72;
-const HEADING_MIN_FONT_SIZE = 20;
-const TICKBOX_MAX_SIZE = 28;
-const AVATAR_MAX_SIZE = 72;
-const DIVIDER_MAX_THICKNESS = 6;
+// The thresholds (EDGE_TOLERANCE, TICKBOX_MAX_SIZE, ...) live in reader-rules.ts, shared with the
+// lint (ADR-002).
 
 interface Classification {
   role: ComponentRole;
@@ -440,7 +415,7 @@ function classify(
   if (mentions(label, CHART_WORDS)) return { role: 'chart', inferred: true };
   if (mentions(label, TABLE_WORDS)) return { role: 'table', inferred: true };
 
-  const squarish = box.w > 0 && box.h > 0 && Math.abs(box.w - box.h) / Math.max(box.w, box.h) < 0.25;
+  const squarish = isSquarish(box);
 
   if (el.type === 'ellipse') {
     if (squarish && box.w <= TICKBOX_MAX_SIZE) return { role: 'radio', inferred: true };
@@ -727,7 +702,8 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
   // Markup is attributed against real components only, never against other markup.
   const targets = componentElements;
   const containerIds = findContainers(targets);
-  const markup: WireframeMarkup[] = markupElements.filter(el => !tickIds.has(el.id)).map(el => {
+  const shownMarkup = markupElements.filter(el => !tickIds.has(el.id));
+  const markup: WireframeMarkup[] = shownMarkup.map(el => {
     const link = attributeAnnotation(el, targets, containerIds);
     const text = effectiveLabel(el, context, boundLabels);
     const intent = markIntent(el);
@@ -748,7 +724,8 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
     markup,
     // Counted from the tree, after tickbox labels have been folded in.
     componentCount: countNodes(orderedRoots),
-    ...(legend ? { legend } : {})
+    ...(legend ? { legend } : {}),
+    lint: lintWireframe(orderedRoots, shownMarkup)
   };
 }
 
@@ -897,6 +874,17 @@ export function formatWireframe(model: WireframeModel): string {
         '(marked `?`). Fine on anything you would not mind being guessed wrong.'
       );
     }
+  }
+
+  // The lint's errors, each a few pixels from a different reading (ADR-002). Advisories are house
+  // style and stay behind `wireframe --lint`, so this block only appears when the drawing is at
+  // risk of being misread, as Reading quality only appears when it was.
+  const lintErrors = (model.lint ?? []).filter(finding => finding.severity === 'error');
+  if (lintErrors.length > 0) {
+    lines.push('');
+    lines.push('### Drawing quality');
+    for (const finding of lintErrors) lines.push(`  ⚠️  ${finding.message}  (${finding.ruleId})`);
+    lines.push('  `wireframe --lint` lists every finding, house style included.');
   }
 
   const renderRoot = (node: WireframeNode, heading: string): void => {

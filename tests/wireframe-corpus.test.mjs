@@ -64,6 +64,14 @@ for (const name of names) {
       assert.deepEqual(actual, expected.navigation ?? []);
     });
 
+    // The geometry lint (ADR-002, SPEC-008): a fixture with no `lint` list must have no finding,
+    // so a rule that starts firing on a drawing that reads right fails here.
+    test('lint findings match', () => {
+      const actual = model.lint.map(f => ({ ruleId: f.ruleId, severity: f.severity, elementId: f.elementId }));
+      const wanted = (expected.lint ?? []).map(f => ({ ruleId: f.ruleId, severity: f.severity, elementId: f.elementId }));
+      assert.deepEqual(actual, wanted);
+    });
+
     test('markup binds where expected, with its intent (ADR-004)', () => {
       const actual = model.markup.map(note => ({
         id: note.id,

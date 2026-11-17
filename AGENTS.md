@@ -23,7 +23,8 @@ exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 10 tickets are open
 `docs/TICKETS.md`, each ranked in its 2026-11-16 triage note. ADR-003 (screens as named frames,
 T-028) is on `main` as `6414461`, pushed (SPEC-005). ADR-004 (a mark's intent is its colour, with
 a legend) is on `main` as `1a5f530` (SPEC-006) and ADR-005 (an approval box per screen) as
-`a420ce5` (SPEC-007), both pushed; T-027 is closed. **Next: PR 4.** Detail: `.claude/CONTEXT.md`.
+`a420ce5` (SPEC-007), both pushed; T-027 is closed. PR 4, the geometry lint (ADR-002,
+SPEC-008), is staged. **Next: commit PR 4; then PR 1's measurement with a person.** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 

@@ -29,8 +29,10 @@ dispatched on it. ADR-004 is on `main` as `1a5f530` (SPEC-006): a person's mark 
 blue or green reads as change, remove, question or fine, and a legend frame the skill ships is
 left out of the reading. ADR-005 is on `main` as `a420ce5` (SPEC-007): each screen's "Approved"
 box, ticked by a person, reads as the screen approved. Both pushed 2026-11-17; no CI run
-dispatched on them.
-**Next:** PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
+dispatched on them. PR 4, the geometry lint (ADR-002, SPEC-008), was built the same day and is
+staged, not committed: `wireframe --lint`, and a Drawing quality block in the reading.
+**Next:** commit PR 4 on the owner's yes; then ROADMAP PR 1, the attribution measurement with a
+person. Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

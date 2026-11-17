@@ -4,6 +4,16 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (d) — Claude Code — PR 4 built: the geometry lint (SPEC-008); STAGED
+- **Done:** `wireframe --lint` and a `### Drawing quality` block in the reading: five errors,
+  three advisories, every tolerance calibrated on the corpus first. 189 / 189 node tests
+  (DEVLOG 2026-11-17 (c), SPEC-008 § Verified). KI-9 logged (a test canvas dying at boot on
+  Windows, seen twice).
+- **Where:** `main` at `b2792cc`, equal to `origin/main`; PR 4 staged, waiting on the owner's yes.
+- **Next:** commit PR 4; the full gate once, then push on the owner's yes; then ROADMAP PR 1, the
+  attribution measurement, which needs a person.
+- **Picks up:** any session with a terminal; PR 1 needs a person and a browser tab.
+
 ## 2026-11-17 (c) — Claude Code — ADR-004 and ADR-005 landed and pushed
 - **Done:** ADR-005 committed as `a420ce5` on the owner's yes; the full gate (`npm test`) passed
   once, then both commits were pushed on the owner's yes. `origin/main` is at `a420ce5`.
@@ -22,14 +32,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** commit ADR-005 on the owner's yes; the full gate (`npm test`) once, then push both on
   the owner's yes; then PR 4 (ADR-002).
 - **Picks up:** any session with a terminal.
-
-## 2026-11-17 (a) — Claude Code — ADR-004 built (SPEC-006); STAGED, not committed
-- **Done:** a person's mark in red, orange, blue or green reads as change, remove, question or
-  fine in `wireframe` and `changes`; the skill ships a "How to mark up" legend
-  (`references/markup-legend.json`) that the reading leaves out. Round trip closed on port 3072
-  with a real tab; 139 / 139 node tests (DEVLOG 2026-11-17 (a), SPEC-006 § Verified).
-- **Where:** `main` at `82ef3ed`; this change is staged, waiting on the owner's yes to commit.
-  `dist/` is rebuilt (the baton's open item from (m) is done).
-- **Next:** commit ADR-004; build ADR-005 (an approval box per screen, its line in the legend,
-  its README row); then PR 4.
-- **Picks up:** any session with a terminal; ADR-005's round trip needs a browser tab.

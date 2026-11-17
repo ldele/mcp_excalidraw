@@ -192,7 +192,11 @@ describe('a scene exported before 2.1.1 still works', () => {
       env: { ...process.env, EXPRESS_SERVER_URL: baseUrl, EXCALIDRAW_NO_AUTOSTART: '1' },
       encoding: 'utf-8'
     }));
-    assert.deepEqual(reading, expected);
+    // ADR-002 added `lint` to this payload after UI-Wizard committed its reading; the rest must be
+    // exactly what it committed, and the lint finds nothing on this real drawing (SPEC-008).
+    const { lint, ...committed } = reading;
+    assert.deepEqual(committed, expected);
+    assert.deepEqual(lint, []);
 
     const { scene } = await buildSceneFile();
     const keys = scene.elements.map(e => e.index);

@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-16 · class: living -->
+<!-- status: active · updated: 2026-11-17 · class: living -->
 
 # KNOWN ISSUES
 
@@ -124,6 +124,18 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
   banner is owner-only; a logged-out view cannot exclude it). If no banner: a no-op edit to
   `ci.yml` and a push, then read the workflow record's `updated_at` — a re-registered workflow
   carries the push's date.
+
+## KI-9 — a canvas server started by a test sometimes dies at boot on Windows (`0xC0000409`)
+- **Symptom:** a test that boots its own canvas fails with `canvas server exited early (code
+  3221226505)`, the native fail-fast status `0xC0000409`, and passes on the next run. Seen twice:
+  2026-11-16, one Playwright run of three, in a restart test (SPEC-004, case 8); 2026-11-17, one
+  `node --test` run of four, `server-contract.test.mjs` "a scene file it cannot read is moved
+  aside" (SPEC-008). A different test each time; Windows 11, Node 24, both times.
+- **Cause:** open. The process dies before it prints anything, so no JavaScript error reaches the
+  test. Neither change in flight touched `src/server.ts`.
+- **Workaround:** run the suite again; a real failure repeats, this has not.
+- **Real fix:** unknown. A next look: capture the child's stderr and a Windows Error Reporting
+  dump on the failure, and see whether it tracks the concurrent boots the suite runs.
 
 ## Resolved index
 
