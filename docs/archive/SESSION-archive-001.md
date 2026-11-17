@@ -4,6 +4,16 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (b) — Claude Code — ADR-004 committed (`1a5f530`); ADR-005 built (SPEC-007), STAGED
+- **Done:** ADR-004 committed on the owner's yes as `1a5f530`, not pushed. ADR-005: each screen's
+  "Approved" box (`s01-approval`), ticked by a person in a real tab, reads `· approved` in
+  `wireframe` and `approves screen` in `changes`. 157 / 157 node tests; round trip closed on port
+  3072 (DEVLOG 2026-11-17 (b), SPEC-007 § Verified). T-027 closed.
+- **Where:** `main` at `1a5f530`, one commit ahead of `origin/main`; ADR-005 staged.
+- **Next:** commit ADR-005 on the owner's yes; the full gate (`npm test`) once, then push both on
+  the owner's yes; then PR 4 (ADR-002).
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (a) — Claude Code — ADR-004 built (SPEC-006); STAGED, not committed
 - **Done:** a person's mark in red, orange, blue or green reads as change, remove, question or
   fine in `wireframe` and `changes`; the skill ships a "How to mark up" legend

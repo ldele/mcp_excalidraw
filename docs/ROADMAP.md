@@ -51,7 +51,7 @@ Three measures, because "it looked right" has already proved too weak a bar once
 | 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; attribution number still untaken | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
-| 4  | Geometry lint: check a drawing against the conventions, report the cause | built 2026-11-17, staged — `wireframe --lint`, eight rules calibrated on the corpus | `docs/specs/SPEC-008-geometry-lint.md` |
+| 4  | Geometry lint: check a drawing against the conventions, report the cause | **done 2026-11-17** (`5c5daf6`) — `wireframe --lint`, eight rules calibrated on the corpus | `docs/specs/SPEC-008-geometry-lint.md` |
 
 **Before PR 4:** the upstream merge is done (2026-10-07, § Upstream — taken ahead of T-001, the
 2026-09-07 order reversed by Lucas). The three defects the merge left that were ours — bound-label

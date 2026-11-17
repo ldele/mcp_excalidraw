@@ -7,7 +7,7 @@
 > SPEC is the *how*, and records the tolerances ADR-002 left uncalibrated (its Confidence, ⚠) with
 > their evidence. Written 2026-11-17 by the session the owner gave PR 4 to.
 >
-> **Built 2026-11-17, staged on `main`, not committed.** Every test case ran; § Verified gives each
+> **Landed 2026-11-17 as `5c5daf6`, pushed.** Every test case ran; § Verified gives each
 > result. The module named `reader-thresholds.ts` while planning is `reader-rules.ts`: it holds
 > `declaredRole` and the row rule as well as the numbers.
 
