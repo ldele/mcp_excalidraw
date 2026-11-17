@@ -225,7 +225,7 @@ there and tunnel to it (`ssh -N -L 13000:127.0.0.1:3000 host`), then set `EXPRES
 | `EXCALIDRAW_DATA_DIR` | Upstream's store instead of ours (see [Persistence](#persistence)) | (unset) |
 | `EXCALIDRAW_SHARE_UPLOAD_URL` / `EXCALIDRAW_SHARE_BASE_URL` | Where `share` uploads, and the Excalidraw app its links open in | excalidraw.com |
 | `PORT` / `HOST` | Canvas server bind address | `3000` / `127.0.0.1` |
-| `CANVAS_ALLOWED_ORIGINS` | Other page origins allowed to call the canvas, comma-separated (for example `http://localhost:5173` for `npm run dev`) | (unset: the canvas's own page only) |
+| `CANVAS_ALLOWED_ORIGINS` | Other page origins allowed to call the canvas, comma-separated. `npm run dev` needs none: Vite's proxy presents its page as the canvas's own | (unset: the canvas's own page only) |
 | `LOG_LEVEL` | `error`, `warn`, `info`, `debug` | `info` |
 | `LOG_FILE_PATH` | Log file | `~/Library/Logs/excalidraw-mcp.log` (macOS), `$XDG_STATE_HOME/excalidraw-mcp/excalidraw.log` (Linux), `%LOCALAPPDATA%\Excalidraw-MCP\excalidraw.log` (Windows) |
 
@@ -293,8 +293,9 @@ A quick look by hand: `npx @modelcontextprotocol/inspector --cli node dist/index
 - **Exit code 4** (browser required): open `http://127.0.0.1:3000` and retry, or drop
   `--renderer browser`.
 - **HTTP 403, "this canvas answers its own page and local tools only"**: a page on another origin
-  called the canvas, such as another port, a file opened from disk or the Vite dev server. List its
-  origin in `CANVAS_ALLOWED_ORIGINS` and restart the canvas.
+  called the canvas, such as another port or a file opened from disk. List its origin in
+  `CANVAS_ALLOWED_ORIGINS` and restart the canvas. The Vite dev page is not one: `npm run dev`
+  reaches the canvas through Vite's proxy as its own page.
 - **Boxes instead of CJK or emoji in a headless PNG**: install a font for that script on the
   machine running the canvas.
 - **Plain fonts on the canvas page offline**: the page loads its fonts from the esm.sh CDN.
@@ -311,6 +312,23 @@ npm run build
 npm run cli -- status      # the CLI from the local build
 npm run sync:skills        # after editing skills/excalidraw-skill
 ```
+
+To work on the page with hot reload, run the canvas and Vite side by side, then open
+`http://localhost:5173`:
+
+```bash
+npm run canvas
+```
+
+```bash
+npm run dev
+```
+
+Vite proxies the page's API calls and its socket to the canvas on port 3000, and presents its own
+page as the canvas's, so the origin guard lets it in and still refuses any other site's page
+(T-017, `scripts/vite-dev-proxy.mjs`). `npm run canvas` loads port 3000's saved scene; set
+`EXCALIDRAW_NO_PERSIST=1` for a throwaway one. One "WebSocket is closed before the connection is
+established" warning in the console is React's development mode mounting the page twice.
 
 Agent sessions start at [AGENTS.md](AGENTS.md).
 

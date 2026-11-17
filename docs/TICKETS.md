@@ -48,14 +48,6 @@ created.
 - **Note:** 2026-11-16 — Rank 6, test infrastructure. The probes are still only in C:/Projects/mcp_excalidraw-upstream/tests/probe-fork (README.txt and five files, checked 2026-11-16). Moving tab-sync-reroute.spec.mjs and the two cross-origin probes into tests/browser is small; CI still runs no browser suite, so they would guard a developer's machine only. Do it before that worktree is removed.
 - **Resolution:** —
 
-## T-017 — npm run dev was never run under the T-015 guard: the Vite page on port 5173 is another origin
-- **Status:** triaged · 2026-11-16
-- **From:** Scribe agent session, closing its 2026-10-08 work (1.3.0) · 2026-10-09
-- **Symptom:** Since 23e4afc the server refuses a request whose Origin is not its own page. In the dev flow the page is served by Vite on http://localhost:5173 and reaches the API and the socket through Vite's proxy, so it should get 403 on every write and on the socket unless CANVAS_ALLOWED_ORIGINS lists that origin. The README says so; nobody ran it, with the setting or without. Not known: whether the proxy forwards the Origin on the socket upgrade, and whether the setting alone is enough.
-- **Reproduce:** npm run canvas in one terminal and npx vite in another; open http://localhost:5173, draw a shape, watch the network tab for 403. Stop the canvas, set CANVAS_ALLOWED_ORIGINS=http://localhost:5173, start it again, repeat. If the setting is not enough, the fix is in vite.config.js or in src/core/origin-guard.ts.
-- **Note:** 2026-11-16 — Rank 5. Still never run. It needs two terminals and a browser, about 15 minutes, and its answer decides whether vite.config.js or src/core/origin-guard.ts changes. Nothing else waits on it unless someone uses npm run dev.
-- **Resolution:** —
-
 ## T-008 — A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border
 - **Status:** triaged · 2026-11-16
 - **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07

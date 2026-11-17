@@ -4,6 +4,15 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (k) — Claude Code — T-006/T-021 pushed (`49cc155`); T-017 fixed; STAGED
+- **Done:** `49cc155` pushed after the full gate. T-017 run for the first time: the dev page never
+  synced (no socket proxy) and every proxied call got 403. Vite's proxy now carries the socket and
+  presents only the dev page as the canvas's own (DEVLOG 2026-11-17 (i)). 5 tests; verified live.
+- **Where:** `main` at `49cc155`, equal to `origin/main`; T-017 staged; the ticket closed.
+  `.claude/launch.json` (gitignored) gained `canvas-memory` and `vite-5174` entries.
+- **Next:** commit; the full gate and push on the owner's yes; then T-018 and T-019 (rank 6).
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (j) — Claude Code — T-006 and T-021 fixed; STAGED
 - **Done:** an element beside a stacked column reads as a column block, so a full-height sidebar
   no longer turns the main column column-major and stacked checkboxes keep their labels. The
@@ -24,13 +33,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   the day's commits: the Playwright suite and a CI dispatch (KI-8).
 - **Picks up:** any session with a terminal; round 2 needs the owner, a browser tab, and a design
   under review.
-
-## 2026-11-17 (h) — Claude Code — round 1 and the lint fix pushed; KI-10 fixed with ADR-006; STAGED
-- **Done:** `3d5c383` and `2b97ebe` pushed on the owner's yes. KI-10: a ring round a whole
-  container is about it; ADR-006 (owner's call): a green ring round a whole screen approves it.
-  The owner's round-1 loop is now a hit that approves S01; baseline 8 / 9. 207 / 207; live on
-  port 3082 (DEVLOG 2026-11-17 (f)).
-- **Where:** `main` at `2b97ebe`, equal to `origin/main`; KI-10 staged.
-- **Next:** commit KI-10; the full gate and push on the owner's yes; then PR 1 round 2 with more
-  marks (port 3080's store still holds round 1's scene).
-- **Picks up:** any session with a terminal; round 2 needs the owner and a browser tab.

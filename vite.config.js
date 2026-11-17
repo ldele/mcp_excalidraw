@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+// Fork (T-017): the dev page's API calls and socket go to the canvas as its own page. See
+// scripts/vite-dev-proxy.mjs and FORK.md.
+import { canvasProxy } from './scripts/vite-dev-proxy.mjs'
 
 export default defineConfig({
   root: 'frontend',
@@ -22,15 +25,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:3000',
-        changeOrigin: true,
-      },
-      '/health': {
-        target: 'http://127.0.0.1:3000',
-        changeOrigin: true,
-      },
-    },
+    proxy: canvasProxy('http://127.0.0.1:3000'),
   },
 })

@@ -4,6 +4,14 @@
 
 Closed tickets, moved here from `docs/TICKETS.md` when they were closed, **verbatim** per cpc ADR-071, and listed in `TICKETS-INDEX.md`. Newest on top. Append-only; never edited.
 
+## T-017 — npm run dev was never run under the T-015 guard: the Vite page on port 5173 is another origin
+- **Status:** fixed · 2026-11-17
+- **From:** Scribe agent session, closing its 2026-10-08 work (1.3.0) · 2026-10-09
+- **Symptom:** Since 23e4afc the server refuses a request whose Origin is not its own page. In the dev flow the page is served by Vite on http://localhost:5173 and reaches the API and the socket through Vite's proxy, so it should get 403 on every write and on the socket unless CANVAS_ALLOWED_ORIGINS lists that origin. The README says so; nobody ran it, with the setting or without. Not known: whether the proxy forwards the Origin on the socket upgrade, and whether the setting alone is enough.
+- **Reproduce:** npm run canvas in one terminal and npx vite in another; open http://localhost:5173, draw a shape, watch the network tab for 403. Stop the canvas, set CANVAS_ALLOWED_ORIGINS=http://localhost:5173, start it again, repeat. If the setting is not enough, the fix is in vite.config.js or in src/core/origin-guard.ts.
+- **Note:** 2026-11-16 — Rank 5. Still never run. It needs two terminals and a browser, about 15 minutes, and its answer decides whether vite.config.js or src/core/origin-guard.ts changes. Nothing else waits on it unless someone uses npm run dev.
+- **Resolution:** DEVLOG 2026-11-17 (i): Vite's proxy carries the socket and presents only the dev page as the canvas's own (scripts/vite-dev-proxy.mjs, tests/dev-proxy.test.mjs)
+
 ## T-021 — A tall sibling merges a stacked checkbox column into one row, so each checkbox loses its label
 - **Status:** fixed · 2026-11-17
 - **From:** pharma-dq-validator session driving the CLI (1.3.0) · 2026-10-21

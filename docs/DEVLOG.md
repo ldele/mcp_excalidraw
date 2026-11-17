@@ -10,6 +10,25 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
+- **Why:** since T-015 the canvas refuses any page Origin but its own; the Vite dev flow had never
+  been run under it.
+- **Found** (a memory-only canvas on 3000, so port 3000's saved scene was never touched; Vite on
+  5175, since 5173 was another project's dev server): the dev page read Disconnected. Its socket
+  opens at the page's own host, and Vite's proxy had no socket entry, so it never reached the
+  canvas. Every proxied API call, GET included, got 403. So `CANVAS_ALLOWED_ORIGINS` alone, which
+  the README advised, would have fixed the API and not the socket.
+- **What:** `scripts/vite-dev-proxy.mjs`, wired into upstream's `vite.config.js` (FORK.md): the
+  proxy carries the socket (`^/$`, upgrades only; Vite still serves the page) and gives a request
+  whose Origin is the Vite server it was sent to the canvas's Origin. Any other Origin is forwarded
+  as it came. `tests/dev-proxy.test.mjs` (5, red first).
+- **Verified live:** the page Connected; a rectangle drawn on it reached the canvas as one change by
+  a person; through the proxy, the page's own Origin got 200 on the API and opened the socket, while
+  `https://evil.example` and `http://localhost:5173` got 403 on both. Vite's hot reload still
+  connects; `vite build` passes. README's dev section and 403 note rewritten.
+- **Rejected:** Vite's `rewriteWsOrigin` (rewrites every Origin, which reopens T-015's hole for the
+  socket); widening the guard to any localhost port (another local dev server is another site).
+
 ## 2026-11-17 (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column
 - **Why:** both tickets, rank 4, four reports between them (UI-Wizard, BlackBox, doc_assistant,
   pharma-dq-validator), all with a clean score. `inReadingOrder` grew a row's band to its tallest
@@ -41,20 +60,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Lesson:** the attribution measurement needs a design under real review. Marks invented for
   the test would measure an imitation, as the agent-drawn corpus does. KI-3 now says how to close
   it: take round 2 from the next real review.
-
-## 2026-11-17 (f) — KI-10 fixed: a ring round a whole screen is about it, and a green one approves it (ADR-006)
-- **Why:** PR 1 round 1's only mark, a green loop round S01 meaning "S01 is fine", bound to a
-  heading inside the screen, and nothing read S01 as approved (it had no room for a box).
-- **What:** `attributeAnnotation`'s `encloses` skipped containers, against `findContainers`' own
-  comment; it now targets the largest container a mark wholly rings, else the smallest component
-  as before. ADR-006, the owner's call: a "fine" mark that rings a whole screen approves it, box or
-  no box, and stays an annotation; `changes` adds `↳ approves screen`. Conventions § 8, SKILL.md,
-  README.
-- **Tests:** `tests/attribution.test.mjs` (4, two seen red), four in `tests/approval.test.mjs`
-  (two seen red, two pinning what must not change); `human-round-1` flips to a hit that approves
-  S01; baseline 8 / 9; no other binding moved. Live on port 3082: a green ring drawn in the tab
-  round a frame reads `circles / marks [s01]` and `approves screen [s01]`. 207 / 207.
-- **Rejected:** approving by a ring in any colour (a red ring round a screen means change it).
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

@@ -17,6 +17,7 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-022 | fixed | 2026-11-16 | apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-021 | fixed | 2026-11-17 | A tall sibling merges a stacked checkbox column into one row, so each checkbox loses its label | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-020 | fixed | 2026-11-16 | Update cpc from 1.8.0 to 1.18.1 at the start of the next session | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-017 | fixed | 2026-11-17 | npm run dev was never run under the T-015 guard: the Vite page on port 5173 is another origin | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-016 | fixed | 2026-10-08 | The conventions' list of valid roles leaves out icon, which the toolkit accepts and a small glyph needs | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-015 | fixed | 2026-10-08 | Any origin can read, change and wipe a running canvas; a write through sync is logged as a person's | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-014 | fixed | 2026-10-07 | A sync with no elements deletes the whole drawing: 98 elements lost to a tab that had failed to load | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
