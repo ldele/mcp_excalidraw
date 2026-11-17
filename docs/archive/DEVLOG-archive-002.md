@@ -4,6 +4,26 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
+- **T-018:** two of the three probes kept since 2026-10-08 in an untracked folder of the upstream
+  worktree are now tests with assertions in `tests/browser/`: `tab-sync-reroute.spec.mjs` (both
+  bound arrows follow every API move of a shape, with no tab, an unsynced tab, after a manual sync,
+  after a reload, after the tab's own sync, and after a person's drag) and `cross-origin.spec.mjs`
+  (a page from another local port, and one from a file on disk, is refused a read, a write, the
+  socket and a clear, and the canvas is untouched). The probe's public-website cases needed the
+  internet and are left out. `cross-origin-http.mjs` is not ported: the state check *requests
+  from another site are refused* sends the same raw HTTP and socket. The worktree folder can go.
+- **Seen red:** with the guard switched off in the build, the cross-origin test failed on both
+  pages, on the socket: Chrome's own CORS already blocks the HTTP calls, so the socket is what
+  the guard holds alone. The tab-sync test pins what the fork has done since 2026-10-08; upstream's
+  sync is its red (DEVLOG archive 2026-10-08 (e)).
+- **T-019:** the state check's health wait is 30 s (was 5) and Playwright's `webServer` timeout
+  60 s (was 15); both return as soon as the server answers. Not reproduced: after `npm ci` and a
+  build, the first state check took 3 s and the first browser run 1.8 min, 35 passed. The cause
+  stays unknown; the waits are the margin.
+- **Browser suite:** 35 / 35 with the installed Chrome (a scratch config, not staged: this
+  Playwright's own Chromium build is not on this machine), twice.
+
 ## 2026-11-17 (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
 - **Why:** since T-015 the canvas refuses any page Origin but its own; the Vite dev flow had never
   been run under it.

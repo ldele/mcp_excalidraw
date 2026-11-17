@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-17** (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
 - **2026-11-17** (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
 - **2026-11-17** (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column
 - **2026-11-17** (g) — PR 1 round 2 not run: an approved scene gives nothing to mark

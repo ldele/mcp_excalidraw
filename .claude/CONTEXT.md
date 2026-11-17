@@ -40,9 +40,10 @@ mark (DEVLOG 2026-11-17 (g)).
 T-006 and T-021 (rank 4, reading order beside a column) were fixed the same day (`49cc155`,
 pushed); T-017 (rank 5, `npm run dev` under the origin guard) after them (`9c7a6f6`, pushed);
 T-018 and T-019 (rank 6, test infrastructure) after that (`e8c6017`, pushed); T-004 and T-008
-(rank 7) after that (`5c57155`, pushed); T-005 (rank 8) last, staged.
-**Next:** T-002 and T-003, both the owner's decisions; PR 1's round 2 from the next real review
-(KI-3). Each ticket's rank is in its 2026-11-16 note in
+(rank 7) after that (`5c57155`, pushed); T-005 (rank 8) last (`1e7f468`, pushed). ADR-007
+(the agent reads a round when the person sends it) proposed the same day.
+**Next:** the owner decides ADR-007, T-002 and T-003 (2026-11-18); then PR 1's round 2 from the
+next real review (KI-3), run the way ADR-007 settles. Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

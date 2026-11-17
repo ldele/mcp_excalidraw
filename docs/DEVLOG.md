@@ -10,6 +10,17 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (m) — ADR-007 proposed: a person's markup reaches the agent when they send it
+- **Why:** the owner, after PR 1's round 1: the agent read the canvas mid-round and gave its view
+  before the person had finished; it should wait for the end of the markup, perhaps with a
+  Claude Docs-style "send to Claude" for one comment, without becoming intrusive.
+- **What:** `docs/decisions/ADR-007-markup-is-sent-not-watched.md`, proposed, to decide
+  2026-11-18: seven options (etiquette in the skill, a Send box on the canvas, a Send button in
+  the page, a longer quiet period, holding unsent markup back from the reading, `@claude` for one
+  comment, the agent answering on the canvas). Recommended: the Send box, unsent markup held back,
+  and the skill's loop rewritten around the send; the button next, `@claude` only on evidence.
+  Nothing built.
+
 ## 2026-11-17 (l) — T-005 fixed: a screen is named by its largest own heading, not its topmost
 - **Why:** a 20px overlay caption above a 26px title named the screen after the caption
   (doc_assistant, 2026-08-21): `deriveScreenName` took the first heading in reading order.
@@ -32,26 +43,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **T-008:** confirmed in the same PNG: a `"text"` label on a `#d7d5cc` border is drawn in that
   grey. Conventions § 4 now says to colour every label on a light border, and the secondary-button
   recipe gives `#14130f`; SKILL.md says why. The default stays upstream's.
-
-## 2026-11-17 (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
-- **T-018:** two of the three probes kept since 2026-10-08 in an untracked folder of the upstream
-  worktree are now tests with assertions in `tests/browser/`: `tab-sync-reroute.spec.mjs` (both
-  bound arrows follow every API move of a shape, with no tab, an unsynced tab, after a manual sync,
-  after a reload, after the tab's own sync, and after a person's drag) and `cross-origin.spec.mjs`
-  (a page from another local port, and one from a file on disk, is refused a read, a write, the
-  socket and a clear, and the canvas is untouched). The probe's public-website cases needed the
-  internet and are left out. `cross-origin-http.mjs` is not ported: the state check *requests
-  from another site are refused* sends the same raw HTTP and socket. The worktree folder can go.
-- **Seen red:** with the guard switched off in the build, the cross-origin test failed on both
-  pages, on the socket: Chrome's own CORS already blocks the HTTP calls, so the socket is what
-  the guard holds alone. The tab-sync test pins what the fork has done since 2026-10-08; upstream's
-  sync is its red (DEVLOG archive 2026-10-08 (e)).
-- **T-019:** the state check's health wait is 30 s (was 5) and Playwright's `webServer` timeout
-  60 s (was 15); both return as soon as the server answers. Not reproduced: after `npm ci` and a
-  build, the first state check took 3 s and the first browser run 1.8 min, 35 passed. The cause
-  stays unknown; the waits are the margin.
-- **Browser suite:** 35 / 35 with the installed Chrome (a scratch config, not staged: this
-  Playwright's own Chromium build is not on this machine), twice.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

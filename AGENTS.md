@@ -26,9 +26,9 @@ a legend) is on `main` as `1a5f530` (SPEC-006) and ADR-005 (an approval box per 
 `a420ce5` (SPEC-007), both pushed; T-027 is closed. PR 4, the geometry lint (ADR-002,
 SPEC-008), is on `main` as `5c5daf6`, pushed. PR 1's round 1 gave one mark, a miss (KI-10).
 The lint's misfires on that drawing are fixed (`2b97ebe`) and KI-10 with ADR-006 (`31d1f6e`),
-both pushed. T-006, T-021, T-017, T-018, T-019, T-004 and T-008 are fixed and pushed (last `5c57155`); T-005
-is fixed and staged. **Next: commit it; then T-002 and T-003, the owner's decisions; PR 1's round
-2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
+both pushed. T-006, T-021, T-017, T-018, T-019, T-004, T-008 and T-005 are fixed and pushed (last `1e7f468`).
+ADR-007 (markup is sent, not watched) is proposed. **Next: the owner decides ADR-007, T-002 and
+T-003; then PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
