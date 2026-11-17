@@ -159,7 +159,7 @@ If you find any issue: **stop, fix it, re-screenshot, then continue.** Say "I se
 ### Steps (CLI shown; MCP tools are 1:1 — see cheatsheet)
 
 1. Plan your coordinate grid — map out tiers and x-positions before writing JSON. (MCP mode: call `read_diagram_guide` for colors/sizing; the same guidance lives in `references/cheatsheet.md`.)
-2. Fresh start: `excalidraw-canvas clear --yes`. The canvas reopens on the last scene saved for its port, so clear it for a new diagram — after `describe`, if it might be someone's drawing in progress.
+2. Fresh start: `excalidraw-canvas clear --yes`. The canvas reopens on the last scene saved for its port, so clear it for a new diagram — after `describe`, if it might be someone's drawing in progress. For a scene a script generates, `clear --yes` then add it all again is the intended way to redraw it: cheaper and safer than patching it element by element (T-005).
 3. Create shapes and arrows in one call. Custom `id` fields (e.g. `"id": "auth-svc"`) make later updates easy:
    ```bash
    excalidraw-canvas add - <<'EOF'

@@ -82,7 +82,9 @@ rectangle is not a child of that screen, and the whole tree collapses.
 Never put `text` on a rectangle screen — the bound label centres itself in the middle
 of the screen, on top of the content. Name it with a free-standing heading (font
 size ≥ 20) near its top, or a header bar containing one; `wireframe` names the screen
-after whichever it finds. A frame with no name is named the same way.
+after the largest heading directly in it or in its header bar, the first one on a tie, so a
+smaller caption above the title does not take its name (T-005). A frame with no name is named
+the same way.
 
 ### The measurements that work
 

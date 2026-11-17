@@ -4,6 +4,25 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
+- **Why:** since T-015 the canvas refuses any page Origin but its own; the Vite dev flow had never
+  been run under it.
+- **Found** (a memory-only canvas on 3000, so port 3000's saved scene was never touched; Vite on
+  5175, since 5173 was another project's dev server): the dev page read Disconnected. Its socket
+  opens at the page's own host, and Vite's proxy had no socket entry, so it never reached the
+  canvas. Every proxied API call, GET included, got 403. So `CANVAS_ALLOWED_ORIGINS` alone, which
+  the README advised, would have fixed the API and not the socket.
+- **What:** `scripts/vite-dev-proxy.mjs`, wired into upstream's `vite.config.js` (FORK.md): the
+  proxy carries the socket (`^/$`, upgrades only; Vite still serves the page) and gives a request
+  whose Origin is the Vite server it was sent to the canvas's Origin. Any other Origin is forwarded
+  as it came. `tests/dev-proxy.test.mjs` (5, red first).
+- **Verified live:** the page Connected; a rectangle drawn on it reached the canvas as one change by
+  a person; through the proxy, the page's own Origin got 200 on the API and opened the socket, while
+  `https://evil.example` and `http://localhost:5173` got 403 on both. Vite's hot reload still
+  connects; `vite build` passes. README's dev section and 403 note rewritten.
+- **Rejected:** Vite's `rewriteWsOrigin` (rewrites every Origin, which reopens T-015's hole for the
+  socket); widening the guard to any localhost port (another local dev server is another site).
+
 ## 2026-11-17 (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column
 - **Why:** both tickets, rank 4, four reports between them (UI-Wizard, BlackBox, doc_assistant,
   pharma-dq-validator), all with a clean score. `inReadingOrder` grew a row's band to its tallest

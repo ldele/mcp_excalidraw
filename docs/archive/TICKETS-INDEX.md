@@ -31,5 +31,6 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-008 | fixed | 2026-11-17 | A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-007 | fixed | 2026-10-08 | changes reports the first routing of a bound arrow as an edit by human | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-006 | fixed | 2026-11-17 | A corner-to-corner sidebar merges every sibling into one row, so the reading order goes column-major | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-005 | fixed | 2026-11-17 | Screen naming picks the topmost heading, not the most screen-like one | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-004 | fixed | 2026-11-17 | textAlign on a bound label round-trips but has no visual effect | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-001 | fixed | 2026-11-16 | A text element without width/height silently disappears from the reading, including the screen heading | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

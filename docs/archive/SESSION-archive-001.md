@@ -4,6 +4,15 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (k) — Claude Code — T-006/T-021 pushed (`49cc155`); T-017 fixed; STAGED
+- **Done:** `49cc155` pushed after the full gate. T-017 run for the first time: the dev page never
+  synced (no socket proxy) and every proxied call got 403. Vite's proxy now carries the socket and
+  presents only the dev page as the canvas's own (DEVLOG 2026-11-17 (i)). 5 tests; verified live.
+- **Where:** `main` at `49cc155`, equal to `origin/main`; T-017 staged; the ticket closed.
+  `.claude/launch.json` (gitignored) gained `canvas-memory` and `vite-5174` entries.
+- **Next:** commit; the full gate and push on the owner's yes; then T-018 and T-019 (rank 6).
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (j) — Claude Code — T-006 and T-021 fixed; STAGED
 - **Done:** an element beside a stacked column reads as a column block, so a full-height sidebar
   no longer turns the main column column-major and stacked checkboxes keep their labels. The

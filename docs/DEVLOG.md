@@ -10,6 +10,17 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (l) — T-005 fixed: a screen is named by its largest own heading, not its topmost
+- **Why:** a 20px overlay caption above a 26px title named the screen after the caption
+  (doc_assistant, 2026-08-21): `deriveScreenName` took the first heading in reading order.
+- **What:** it now takes the largest heading that sits directly in the screen or in its header
+  bar, the first in reading order on a tie; a heading deeper in, inside a card, names the screen
+  only when there is no other, as before. Conventions § 1 says so. SKILL.md now says `clear --yes`
+  and add it all again is the way to redraw a generated scene, the report's second ask.
+- **Checked:** none of 62 screens renamed across the corpus and five real drawings (pharma,
+  UI-Wizard twice, doc_assistant, dnd_crawler). `tests/screen-name.test.mjs` (5, two red first);
+  live on port 3086, the caption above "Library" no longer names the screen. 251 / 251.
+
 ## 2026-11-17 (k) — T-004 fixed, T-008 documented: a label goes where it is aligned, and needs its own colour
 - **T-004:** not Excalidraw's limit, as the report supposed, but upstream's page code:
   `recenterBoundShapeTextElements` (`frontend/src/utils/scene.ts`, upstream #61) moved every bound
@@ -41,25 +52,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   stays unknown; the waits are the margin.
 - **Browser suite:** 35 / 35 with the installed Chrome (a scratch config, not staged: this
   Playwright's own Chromium build is not on this machine), twice.
-
-## 2026-11-17 (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
-- **Why:** since T-015 the canvas refuses any page Origin but its own; the Vite dev flow had never
-  been run under it.
-- **Found** (a memory-only canvas on 3000, so port 3000's saved scene was never touched; Vite on
-  5175, since 5173 was another project's dev server): the dev page read Disconnected. Its socket
-  opens at the page's own host, and Vite's proxy had no socket entry, so it never reached the
-  canvas. Every proxied API call, GET included, got 403. So `CANVAS_ALLOWED_ORIGINS` alone, which
-  the README advised, would have fixed the API and not the socket.
-- **What:** `scripts/vite-dev-proxy.mjs`, wired into upstream's `vite.config.js` (FORK.md): the
-  proxy carries the socket (`^/$`, upgrades only; Vite still serves the page) and gives a request
-  whose Origin is the Vite server it was sent to the canvas's Origin. Any other Origin is forwarded
-  as it came. `tests/dev-proxy.test.mjs` (5, red first).
-- **Verified live:** the page Connected; a rectangle drawn on it reached the canvas as one change by
-  a person; through the proxy, the page's own Origin got 200 on the API and opened the socket, while
-  `https://evil.example` and `http://localhost:5173` got 403 on both. Vite's hot reload still
-  connects; `vite build` passes. README's dev section and 403 note rewritten.
-- **Rejected:** Vite's `rewriteWsOrigin` (rewrites every Origin, which reopens T-015's hole for the
-  socket); widening the guard to any localhost port (another local dev server is another site).
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

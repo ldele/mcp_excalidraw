@@ -32,14 +32,6 @@ created.
      - **Note:** date — what triage changed (optional; `cpc-ticket triage --id N --note` adds it)
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
 
-## T-005 — Screen naming picks the topmost heading, not the most screen-like one
-- **Status:** triaged · 2026-11-16
-- **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §5
-- **Symptom:** A 20px overlay caption above a 26px screen title named the screen after the caption ('Drop to add 12 documents'). Nearest-the-top and largest disagree more often than the conventions doc implies. Same note asks to bless clear --yes + re-add as the intended redraw loop for generated scenes.
-- **Reproduce:** Two headings in one frame, the smaller one higher; wireframe names the screen after the higher one.
-- **Note:** 2026-11-16 — Rank 8. Still open. Picking the largest heading near the top, rather than the topmost, is a change in wireframe.ts under rule 4. The second ask, saying clear --yes and re-add is the redraw loop for generated scenes, is one line in SKILL.md.
-- **Resolution:** —
-
 ## T-003 — No role for progress / meter / gauge
 - **Status:** triaged · 2026-11-16
 - **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §3

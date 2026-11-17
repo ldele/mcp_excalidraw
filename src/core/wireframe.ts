@@ -601,7 +601,28 @@ function absorbControlLabels(parent: WireframeNode): void {
 
 // Name a screen the way a person would refer to it: by its own heading, or
 // failing that by whatever its header bar says.
+//
+// Its own heading is the largest one that sits directly in the screen or in its header bar, the
+// first in reading order on a tie: a 20px caption above a 26px title named the screen after the
+// caption when the topmost heading won (T-005). A heading deeper in, inside a card, is a card's
+// title, and names the screen only when there is no other, as before.
 function deriveScreenName(screen: WireframeNode): string | undefined {
+  const own: WireframeNode[] = [];
+  const collect = (node: WireframeNode, inHeader: boolean): void => {
+    for (const child of node.children) {
+      if (child.role === 'heading' && child.label) own.push(child);
+      if (inHeader || child.role === 'header') collect(child, true);
+    }
+  };
+  collect(screen, false);
+  const size = (node: WireframeNode): number => {
+    const fontSize = (node.element as { fontSize?: unknown }).fontSize;
+    return typeof fontSize === 'number' ? fontSize : 0;
+  };
+  const largest = own.reduce<WireframeNode | undefined>(
+    (best, node) => (!best || size(node) > size(best) ? node : best), undefined);
+  if (largest?.label) return largest.label;
+
   let headerText: string | undefined;
 
   const walk = (node: WireframeNode, insideHeader: boolean): string | undefined => {

@@ -19,16 +19,16 @@ why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 SPEC-002; 2026-11-16, upstream 2.2.0, SPEC-004). The 2.2.0 merge is on `main` as `c800fa8`,
 pushed, with CI green (`FORK.md` § Upstream 2.2.0). The two-way markup leg has run with a human
 and works, but the attribution accuracy it
-exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 3 tickets are open in
+exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 2 tickets are open in
 `docs/TICKETS.md`, each ranked in its 2026-11-16 triage note. ADR-003 (screens as named frames,
 T-028) is on `main` as `6414461`, pushed (SPEC-005). ADR-004 (a mark's intent is its colour, with
 a legend) is on `main` as `1a5f530` (SPEC-006) and ADR-005 (an approval box per screen) as
 `a420ce5` (SPEC-007), both pushed; T-027 is closed. PR 4, the geometry lint (ADR-002,
 SPEC-008), is on `main` as `5c5daf6`, pushed. PR 1's round 1 gave one mark, a miss (KI-10).
 The lint's misfires on that drawing are fixed (`2b97ebe`) and KI-10 with ADR-006 (`31d1f6e`),
-both pushed. T-006, T-021, T-017, T-018 and T-019 are fixed and pushed (last `e8c6017`); T-004 and T-008 are
-fixed and staged. **Next: commit them; then the three rank-8 tickets (T-002 and T-003 are the
-owner's decisions); PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
+both pushed. T-006, T-021, T-017, T-018, T-019, T-004 and T-008 are fixed and pushed (last `5c57155`); T-005
+is fixed and staged. **Next: commit it; then T-002 and T-003, the owner's decisions; PR 1's round
+2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
