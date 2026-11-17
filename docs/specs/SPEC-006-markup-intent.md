@@ -119,4 +119,4 @@ In the main checkout, 2026-11-17, Windows 11, Node 24.
 ## Docs to touch when this lands
 - this SPEC, last: § Verified, then the shipped line and `status: archived · class: append-only`.
 - README's "How it differs from upstream" table, FORK.md if a page file changes (none planned).
-- docs/DEVLOG.md · .claude/SESSION.md · .claude/CONTEXT.md · T-027's note in `docs/TICKETS.md`.
+- docs/DEVLOG.md · .claude/SESSION.md · .claude/CONTEXT.md · T-027's note (closed 2026-11-17, now in `docs/archive/TICKETS-archive-001.md`).

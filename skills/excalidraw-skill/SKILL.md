@@ -298,6 +298,9 @@ the same canvas as a UI:
   the person drew it in one of the four intent colours (ADR-004).
 - **`Left out: the markup legend`** — the "How to mark up" frame you added for the person;
   it is never a screen, a component or a mark's target.
+- **`· approved` / `· not approved yet`** on a screen's heading, and `Approved: 1 of 2
+  screens.` — the screen's approval box, ticked by the person or not (ADR-005). The box
+  itself is never listed as a component, and the tick is not an annotation.
 - **Reading quality** — a block that appears *only when something is wrong*: how
   many components fell back to `shape`, how many screens could not be named, how
   many fell outside every frame. If you don't see it, the reading is clean.
@@ -372,8 +375,9 @@ it is far cheaper and more precise than asking them to describe edits in prose.
 
 **The loop:**
 
-1. **Draw** the wireframe (`add` / `batch_create_elements`), then `screenshot` and
-   run the Quality Checklist.
+1. **Draw** the wireframe (`add` / `batch_create_elements`), with an approval box in
+   each screen's top-right corner (`s01-approval`, `references/wireframe-conventions.md`
+   § 8), then `screenshot` and run the Quality Checklist.
 2. **Hand over the pen.** First put the legend on the canvas, so the person can see how to
    mark up without asking (`references/wireframe-conventions.md` § 8):
    ```bash
@@ -382,8 +386,8 @@ it is far cheaper and more precise than asking them to describe edits in prose.
    Then tell the user explicitly what to do, in canvas terms:
    > "The sign-in wireframe is on the canvas at http://127.0.0.1:3000, with a 'How to
    > mark up' key beside it. Circle, scribble on, or write next to anything: red to
-   > change it, orange to remove it, blue for a question, green when it is fine. Tell
-   > me when you're done."
+   > change it, orange to remove it, blue for a question, green when it is fine. Tick a
+   > screen's Approved box when it is done. Tell me when you're done."
 3. **Wait** with `watch` (`wait_for_changes`) instead of polling. It blocks until
    the canvas is touched, then waits for a quiet moment so a whole round of markup
    arrives as one batch. On timeout it says so — call it again to keep waiting.
@@ -398,7 +402,8 @@ it is far cheaper and more precise than asking them to describe edits in prose.
 4. **Read** the report. Then *act on it*: apply the edits to the code/design, or
    update the wireframe and go round again. For UI work, follow up with `wireframe`
    to re-read the marked-up design as an interface — the report tells you what
-   moved, the wireframe reading tells you what the design now *is*.
+   moved, the wireframe reading tells you what the design now *is*. A screen marked
+   `· approved` is done: leave it alone unless the person says otherwise.
 
 **The user must have the canvas open in a browser.** Edits only reach the server
 from an open tab — that is the transport. If `watch` keeps timing out, check this
@@ -437,6 +442,8 @@ for "Connected" in the tab you already have*.
 - **`by human · change`** — the mark's colour says what it asks for: `change`, `remove`,
   `question` or `fine` (ADR-004). No tag means another colour; read it as a change request.
   `intent change → fine` under an edit means the person recoloured their mark.
+- **`↳ approves screen [s01] …`** — the mark was drawn inside that screen's approval box, or
+  the person filled it: the screen is done. `withdraws approval of` means the fill came off.
 - **What the editor does by itself is not an entry.** Opening the canvas measures text, wraps a
   label to its shape, grows a shape that is too small for its label and gives a bound arrow its
   box. None of that is reported, and a shape the editor grew is stored at its new size.

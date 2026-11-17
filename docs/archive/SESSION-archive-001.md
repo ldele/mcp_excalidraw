@@ -4,6 +4,16 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (l) — Claude Code — README § How it differs from upstream; STAGED
+- **Done:** a table in the README sums up how the fork differs from upstream 2.2.0, each upstream
+  claim checked against `upstream/main`. FORK.md says to update it at every merge (DEVLOG
+  2026-11-16 (l)). Both nested sessions, the merge and ADR-003, had finished and closed out first.
+- **Where:** `main` at `e4e2bb4`, pushed. This change is staged, not committed.
+- **Open:** this checkout's `dist/` predates ADR-003, so `excalidraw-canvas` on PATH lacks it. A
+  canvas is running on port 3000 (231 elements); rebuild with `npm run build` once it is stopped.
+- **Next:** build ADR-004 and ADR-005; then PR 4.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-16 (k) — Claude Code — ADR-003 landed on `main` as `6414461`; CI dispatched
 - **Done:** entry (j)'s work was committed as `6414461` on the owner's yes, fast-forwarded onto
   `main` and pushed. The worktree `C:\Projects\mcp_excalidraw-adr003` and branch

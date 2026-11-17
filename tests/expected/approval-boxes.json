@@ -1,0 +1,23 @@
+{
+  "fixture": "approval-boxes.excalidraw",
+  "what": "Two frame screens, S01 — Sign in and S02 — Home, each with an \"Approved\" box in its top-right corner (`s01-approval`, `s02-approval`), and the markup legend beside them. A person drew one green stroke inside S01's box in a real tab.",
+  "why": "ADR-005 (SPEC-007 test cases 1 and 2): a ticked box approves its screen, an empty one does not, and neither box is read as a checkbox or any component of the design; the tick is no annotation.",
+  "score": {
+    "screens": 2,
+    "components": 7,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s01", "label": "S01 — Sign in", "approval": "approved" },
+    { "id": "s02", "label": "S02 — Home", "approval": "open" }
+  ],
+  "navigation": [],
+  "markup": [],
+  "notes": [
+    "Drawn 2026-11-17 on port 3072: the screens, the boxes and the legend by the CLI (`apply`), the tick in the browser pane with the editor's pen in the stroke picker's green. Exported with `excalidraw-canvas export`, which kept the tick's origin. The only patch: the tick's random id was renamed `tick-s01`.",
+    "The legend here is the version with the approval line (\"Done with a screen? Tick its Approved box, top right.\"), 12 elements; markup-legend holds the earlier one, 11."
+  ]
+}

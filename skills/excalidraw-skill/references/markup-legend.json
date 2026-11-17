@@ -7,7 +7,7 @@
       "x": -360,
       "y": 120,
       "width": 300,
-      "height": 350,
+      "height": 420,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent"
     },
@@ -165,6 +165,18 @@
       "text": "Any other colour reads as a\nchange request. Circle it,\nscribble on it, or write beside it.",
       "fontSize": 16,
       "strokeColor": "#1e1e1e",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-approve",
+      "type": "text",
+      "x": -344,
+      "y": 470,
+      "width": 268,
+      "height": 45,
+      "text": "Done with a screen? Tick its\nApproved box, top right.",
+      "fontSize": 16,
+      "strokeColor": "#2f9e44",
       "frameId": "legend"
     }
   ]

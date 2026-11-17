@@ -15,15 +15,16 @@ component roles, reading order, navigation flows — plus a review loop where a 
 up and the agent reads the markup attributed to the component it refers to. What the fork adds and
 why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 
-**State (2026-11-16):** three upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
+**State (2026-11-17):** three upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
 SPEC-002; 2026-11-16, upstream 2.2.0, SPEC-004). The 2.2.0 merge is on `main` as `c800fa8`,
 pushed, with CI green (`FORK.md` § Upstream 2.2.0). The two-way markup leg has run with a human
 and works, but the attribution accuracy it
-exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 11 tickets are open in
-`docs/TICKETS.md`, each ranked in its 2026-11-16 triage note; T-001, T-022, T-024, T-025 and T-026
-were fixed the same day, and ADR-003 to ADR-005 (T-027, T-028) were decided. ADR-003 (screens as
-named frames, T-028) is on `main` as `6414461`, pushed (SPEC-005). **Next: build ADR-004 and
-ADR-005; then PR 4.** Detail: `.claude/CONTEXT.md`.
+exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 10 tickets are open in
+`docs/TICKETS.md`, each ranked in its 2026-11-16 triage note. ADR-003 (screens as named frames,
+T-028) is on `main` as `6414461`, pushed (SPEC-005). ADR-004 (a mark's intent is its colour, with
+a legend) is on `main` as `1a5f530`, not pushed (SPEC-006); ADR-005 (an approval box per screen)
+is staged (SPEC-007), and with it T-027 is closed. **Next: commit ADR-005, push both; then
+PR 4.** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 

@@ -349,6 +349,23 @@ before each mark; `changes` prints it after `by human`, and `intent change → f
 recolours a mark. A colour-blind reviewer has the legend's words, not the swatches: read the
 note's words too when a tag and the words disagree.
 
+**Give every screen up for review an approval box** (ADR-005). A person ticks it when the
+screen is done, so you can see which screens are approved without asking. Draw it inside the
+screen's top-right corner, transparent, and give it the screen's id with `-approval` after it:
+
+```json
+{"id": "s01-approval", "type": "rectangle", "x": 1144, "y": 136, "width": 120, "height": 36,
+ "strokeColor": "#2f9e44", "backgroundColor": "transparent", "label": {"text": "Approved"},
+ "frameId": "s01"}
+```
+
+(For the 1160-wide frame at (120, 120): x = frame right − 136, y = frame top + 16.) It is never a
+component: no `checkbox?`, no `shape`. A fill, or any mark of a person's whose centre is inside
+it, ticks it, and that mark is not listed as an annotation. `wireframe` prints each screen
+`· approved` or `· not approved yet` with `Approved: 1 of 2 screens.` at the top; `changes`
+reports a tick as `↳ approves screen [s01] …`, and a fill taken off as `withdraws approval of`.
+A round still ends with `watch`'s quiet period; the boxes show which screens are done.
+
 **Where a mark lands** is attributed by gesture, whatever its colour:
 
 | Gesture | Reported as |

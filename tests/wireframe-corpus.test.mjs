@@ -44,10 +44,11 @@ for (const name of names) {
       assert.deepEqual(score, expected.score);
     });
 
-    test('screens are named as expected', () => {
+    test('screens are named, and approved (ADR-005), as expected', () => {
       const actual = model.screens.map(screen => ({
         id: screen.id,
-        ...(screen.label ? { label: screen.label } : {})
+        ...(screen.label ? { label: screen.label } : {}),
+        ...(screen.approval ? { approval: screen.approval } : {})
       }));
       assert.deepEqual(actual, expected.screens);
     });

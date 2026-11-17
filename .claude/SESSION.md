@@ -4,6 +4,16 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (b) — Claude Code — ADR-004 committed (`1a5f530`); ADR-005 built (SPEC-007), STAGED
+- **Done:** ADR-004 committed on the owner's yes as `1a5f530`, not pushed. ADR-005: each screen's
+  "Approved" box (`s01-approval`), ticked by a person in a real tab, reads `· approved` in
+  `wireframe` and `approves screen` in `changes`. 157 / 157 node tests; round trip closed on port
+  3072 (DEVLOG 2026-11-17 (b), SPEC-007 § Verified). T-027 closed.
+- **Where:** `main` at `1a5f530`, one commit ahead of `origin/main`; ADR-005 staged.
+- **Next:** commit ADR-005 on the owner's yes; the full gate (`npm test`) once, then push both on
+  the owner's yes; then PR 4 (ADR-002).
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (a) — Claude Code — ADR-004 built (SPEC-006); STAGED, not committed
 - **Done:** a person's mark in red, orange, blue or green reads as change, remove, question or
   fine in `wireframe` and `changes`; the skill ships a "How to mark up" legend
@@ -27,13 +37,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   screen), each adding its row to the README's differences table in the same commit; then PR 4.
 - **Picks up:** any session with a terminal; the round trips for ADR-004 and ADR-005 need a
   browser tab.
-
-## 2026-11-16 (l) — Claude Code — README § How it differs from upstream; STAGED
-- **Done:** a table in the README sums up how the fork differs from upstream 2.2.0, each upstream
-  claim checked against `upstream/main`. FORK.md says to update it at every merge (DEVLOG
-  2026-11-16 (l)). Both nested sessions, the merge and ADR-003, had finished and closed out first.
-- **Where:** `main` at `e4e2bb4`, pushed. This change is staged, not committed.
-- **Open:** this checkout's `dist/` predates ADR-003, so `excalidraw-canvas` on PATH lacks it. A
-  canvas is running on port 3000 (231 elements); rebuild with `npm run build` once it is stopped.
-- **Next:** build ADR-004 and ADR-005; then PR 4.
-- **Picks up:** any session with a terminal.

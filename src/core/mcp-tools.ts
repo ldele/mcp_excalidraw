@@ -464,7 +464,8 @@ export const tools: Tool[] = [
       'every component (button, input, heading, header, checkbox, divider, ...), which ' +
       'control navigates to which screen, and any human annotations currently on the ' +
       'canvas with the component each one refers to and, when drawn in one of the four ' +
-      'intent colours, what it asks for (change, remove, question, fine). Use this for UI/UX work — reviewing ' +
+      'intent colours, what it asks for (change, remove, question, fine), and which screens a ' +
+      'person has approved by ticking their Approved box. Use this for UI/UX work — reviewing ' +
       'a wireframe, turning one into code, or understanding a flow a user drew. Roles are ' +
       'inferred and marked with `?` when uncertain; raw type and size are always included. ' +
       'For flowcharts and architecture diagrams use describe_scene instead.',

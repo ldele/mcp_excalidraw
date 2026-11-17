@@ -25,10 +25,11 @@ decided T-027 and T-028, which stand between the project and PR 1. ADR-003: scre
 frames. ADR-004: a mark's intent is its colour. ADR-005: each screen gets an approval box.
 ADR-003 is on `main` as `6414461`, pushed (SPEC-005, T-028): a top-level frame is a screen named
 by its name, and the page now keeps an agent's arrow bound to a frame. CI run 43952866891 was
-dispatched on it. ADR-004 was built on 2026-11-17 (SPEC-006) and is staged, not committed: a
-person's mark in red, orange, blue or green reads as change, remove, question or fine, and a
-legend frame the skill ships is left out of the reading.
-**Next:** commit ADR-004 on the owner's yes; build ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
+dispatched on it. ADR-004 is on `main` as `1a5f530` (SPEC-006): a person's mark in red, orange,
+blue or green reads as change, remove, question or fine, and a legend frame the skill ships is
+left out of the reading. ADR-005 was built the same day (SPEC-007) and is staged, not committed:
+each screen's "Approved" box, ticked by a person, reads as the screen approved.
+**Next:** commit ADR-005 on the owner's yes; push both; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

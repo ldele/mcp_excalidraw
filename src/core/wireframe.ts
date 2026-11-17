@@ -11,6 +11,7 @@ import {
   AnnotationRelation
 } from './changes.js';
 import { MarkIntent, markIntent, isLegendId, legendElementIds } from './markup-intent.js';
+import { Approval, isApprovalId, isFilled, approvalBoxHolding, screenOfApprovalBox } from './approval.js';
 
 // ─── Reading a wireframe as a UI, not as geometry ──────────────
 //
@@ -35,6 +36,8 @@ export interface WireframeNode {
   inferred: boolean;
   label?: string;
   children: WireframeNode[];
+  // A screen with an approval box: ticked by a person or not yet (ADR-005).
+  approval?: Approval;
 }
 
 export interface WireframeFlow {
@@ -616,6 +619,20 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
   const markupElements = collectMarkup(allElements, trustOrigin);
   const markupIds = new Set(markupElements.map(el => el.id));
 
+  // Approval boxes (ADR-005) are no component, and a person's mark inside one is its tick, not an
+  // annotation.
+  const approvalBoxes = allElements.filter(el => isApprovalId(el.id));
+  const tickedBoxIds = new Set<string>();
+  const tickIds = new Set<string>();
+  for (const mark of markupElements) {
+    if (mark.origin !== 'human') continue;
+    const holder = approvalBoxHolding(mark, approvalBoxes);
+    if (holder) {
+      tickedBoxIds.add(holder.id);
+      tickIds.add(mark.id);
+    }
+  }
+
   const connectors = allElements.filter(el => el.type === 'arrow' && !markupIds.has(el.id));
   const connectorIds = new Set(connectors.map(el => el.id));
 
@@ -624,6 +641,7 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
   // is gone is still drawn, so it reads as the text it is (T-025).
   const componentElements = allElements.filter(el => {
     if (markupIds.has(el.id) || connectorIds.has(el.id)) return false;
+    if (isApprovalId(el.id)) return false;
     if (el.type === 'text' && el.containerId && context.has(el.containerId)) return false;
     if (el.type === 'freedraw') return false;
     const box = boxOf(el);
@@ -666,6 +684,13 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
     }
   }
 
+  for (const approvalBox of approvalBoxes) {
+    const screen = screenOfApprovalBox(approvalBox, screens);
+    if (!screen) continue;
+    if (isFilled(approvalBox) || tickedBoxIds.has(approvalBox.id)) screen.approval = 'approved';
+    else screen.approval ??= 'open';
+  }
+
   const flows: WireframeFlow[] = [];
   for (const arrow of connectors) {
     const anyArrow = arrow as any;
@@ -702,7 +727,7 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
   // Markup is attributed against real components only, never against other markup.
   const targets = componentElements;
   const containerIds = findContainers(targets);
-  const markup: WireframeMarkup[] = markupElements.map(el => {
+  const markup: WireframeMarkup[] = markupElements.filter(el => !tickIds.has(el.id)).map(el => {
     const link = attributeAnnotation(el, targets, containerIds);
     const text = effectiveLabel(el, context, boundLabels);
     const intent = markIntent(el);
@@ -803,6 +828,11 @@ export function formatWireframe(model: WireframeModel): string {
     `${flows.length} connection${flows.length === 1 ? '' : 's'}, ` +
     `${markup.length} annotation${markup.length === 1 ? '' : 's'}.`
   );
+  const boxed = screens.filter(screen => screen.approval);
+  if (boxed.length > 0) {
+    const approved = boxed.filter(screen => screen.approval === 'approved').length;
+    lines.push(`Approved: ${approved} of ${boxed.length} screen${boxed.length === 1 ? '' : 's'}.`);
+  }
   lines.push('');
   lines.push(
     'Roles are inferred from geometry, style and wording — a trailing `?` marks a ' +
@@ -872,7 +902,9 @@ export function formatWireframe(model: WireframeModel): string {
   const renderRoot = (node: WireframeNode, heading: string): void => {
     lines.push('');
     const label = node.label ? ` "${truncate(node.label, 48)}"` : '';
-    lines.push(`### ${heading}${label}  [${node.id}] ${nodeSummary(node)}`);
+    const approval = node.approval === 'approved' ? ' · approved'
+      : node.approval === 'open' ? ' · not approved yet' : '';
+    lines.push(`### ${heading}${label}  [${node.id}] ${nodeSummary(node)}${approval}`);
     if (node.children.length === 0) {
       lines.push('  (empty)');
       return;

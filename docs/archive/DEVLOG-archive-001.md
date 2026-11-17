@@ -4,6 +4,21 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (l) — README § How it differs from upstream: the differences at a glance
+- **Why:** the owner asked for a document, reachable from the README, that sums up how this
+  project differs from upstream. FORK.md holds the detail, but it is written for whoever merges
+  upstream next.
+- **What:** a table in the README, upstream 2.2.0 against this fork, by what a user would notice:
+  install, reading the canvas, a person's edits, MCP tools, restart, other sites' requests, a
+  tab's sync, `apply`, deleting a labelled shape, arrows, the skill. The README's opening note
+  points to it. FORK.md § Keeping current says to bring it up to date at every merge.
+- **Checked:** each upstream claim against `upstream/main` (`81720ac`). Its sync clears the store
+  and rewrites it; `cors()` answers every origin, and nothing refuses an empty sync; `apply` runs
+  create, update, delete; no waypoints are kept; it has 27 tools; its store needs
+  `EXCALIDRAW_DATA_DIR`.
+- **Before this:** both nested sessions, the 2.2.0 merge and the ADR-003 build, had finished and
+  closed out, on the owner's word that they should first. Their work is on `main` up to `e4e2bb4`.
+
 ## 2026-11-16 (j) — ADR-003 built: screens are native frames, staged (SPEC-005, T-028)
 - **What:** a top-level frame is a screen named by its `name`, held or empty; `frameId` decides
   membership, then geometry, so a scene with no frames reads as before. A rename is a label change

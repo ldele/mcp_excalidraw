@@ -8,6 +8,7 @@ import {
 } from '../types.js';
 import { Box, boxOf, isUnsizedText, normalizePoints } from './box.js';
 import { MarkIntent, markIntent, intentOfColor, legendElementIds } from './markup-intent.js';
+import { isApprovalId, isFilled, approvalBoxHolding, screenOfApprovalBox } from './approval.js';
 
 // Box geometry lives in box.ts; re-exported because the reading and the tests import it from here.
 export { boxOf, isUnsizedText } from './box.js';
@@ -744,7 +745,21 @@ export function formatChangeReport(changeSet: ChangeSet, currentElements: Server
   const addedIds = new Set(added.map(r => r.id));
   // The markup legend is the agent's key to the colours, never what a mark is about (ADR-004).
   const legendIds = legendElementIds(currentElements);
-  const targets = annotationTargets(currentElements, new Set([...addedIds, ...legendIds]));
+  // A screen's approval box (ADR-005) is not what a mark is about: a mark inside it ticks it.
+  const approvalBoxes = currentElements.filter(el => isApprovalId(el.id) && !legendIds.has(el.id));
+  const targets = annotationTargets(
+    currentElements,
+    new Set([...addedIds, ...legendIds, ...approvalBoxes.map(el => el.id)])
+  );
+  const screenCandidates = currentElements
+    .filter(el => !isApprovalId(el.id) && !legendIds.has(el.id) && el.type !== 'text')
+    .map(el => ({ id: el.id, box: boxOf(el) }));
+  const approvesLine = (approvalBox: ServerElement, verb: string): string => {
+    const screen = screenOfApprovalBox(approvalBox, screenCandidates);
+    return screen
+      ? `      ↳ ${verb} screen ${describeElement(context.get(screen.id), screen.id, context)}`
+      : `      ↳ ${verb} no screen: the box [${approvalBox.id}] is outside every screen`;
+  };
   // Computed once for the whole report rather than per annotation.
   const containerIds = findContainers(targets);
 
@@ -791,7 +806,10 @@ export function formatChangeReport(changeSet: ChangeSet, currentElements: Server
         `${where}${size} — by ${originLabel(record.origin)}${intent ? ` · ${intent}` : ''}`
       );
 
-      if (el && isMark) {
+      const ticked = el && isMark ? approvalBoxHolding(el, approvalBoxes) : undefined;
+      if (ticked) {
+        lines.push(approvesLine(ticked, 'approves'));
+      } else if (el && isMark) {
         const link = attributeAnnotation(el, targets, containerIds);
         if (link) {
           const target = context.get(link.targetId);
@@ -819,6 +837,12 @@ export function formatChangeReport(changeSet: ChangeSet, currentElements: Server
       }
       const recoloured = recolouredIntent(el, entry);
       if (recoloured) lines.push(`      ${recoloured}`);
+      if (el && entry.record.origin === 'human' && isApprovalId(el.id) && 'backgroundColor' in entry.after) {
+        const wasFilled = isFilled({ ...el, backgroundColor: entry.before.backgroundColor as string });
+        if (isFilled(el) !== wasFilled) {
+          lines.push(approvesLine(el, isFilled(el) ? 'approves' : 'withdraws approval of'));
+        }
+      }
     }
   }
 
