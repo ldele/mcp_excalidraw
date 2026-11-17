@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-16 · class: living -->
+<!-- status: active · updated: 2026-11-17 · class: living -->
 
 # CONTEXT — mcp_excalidraw
 
@@ -9,7 +9,7 @@ server on `http://127.0.0.1:3000`. Package manager: npm.
 interface*, and share with a human who marks it up. The differentiator over upstream is the
 wireframe layer: a drawing is finished when `wireframe` reads it back as what you meant, not when
 the screenshot looks right.
-**Current phase (2026-11-16):** the fork stands on its own (renamed, private, `FORK.md`) and has
+**Current phase (2026-11-17):** the fork stands on its own (renamed, private, `FORK.md`) and has
 taken three upstream merges (2026-08-07, clean; 2026-10-07, upstream 2.1.2, SPEC-002; 2026-11-16,
 upstream 2.2.0 at `81720ac`, fourteen conflicts, SPEC-004). The 2.2.0 merge is on `main` as
 `c800fa8`, pushed, with CI green (run 43914224879). It brought upstream's opt-in store: ours
@@ -25,8 +25,10 @@ decided T-027 and T-028, which stand between the project and PR 1. ADR-003: scre
 frames. ADR-004: a mark's intent is its colour. ADR-005: each screen gets an approval box.
 ADR-003 is on `main` as `6414461`, pushed (SPEC-005, T-028): a top-level frame is a screen named
 by its name, and the page now keeps an agent's arrow bound to a frame. CI run 43952866891 was
-dispatched on it; the main checkout is not yet rebuilt (baton (k)).
-**Next:** build ADR-004 and ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
+dispatched on it. ADR-004 was built on 2026-11-17 (SPEC-006) and is staged, not committed: a
+person's mark in red, orange, blue or green reads as change, remove, question or fine, and a
+legend frame the skill ships is left out of the reading.
+**Next:** commit ADR-004 on the owner's yes; build ADR-005; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

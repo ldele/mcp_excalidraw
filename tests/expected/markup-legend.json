@@ -1,0 +1,38 @@
+{
+  "fixture": "markup-legend.excalidraw",
+  "what": "A sign-in screen drawn as a frame, the markup legend from skills/excalidraw-skill/references/markup-legend.json beside it, and two marks a person drew in a real tab: a red note between the legend and the Password field, and a green ring round the Sign in button.",
+  "why": "ADR-004 (SPEC-006 test cases 2 and 3): the legend must read as nothing, and a mark beside it must bind to the design, not to the legend. The note sits 13px from the legend's edge and 19px from Password, so it binds right only because the legend is left out.",
+  "score": {
+    "screens": 1,
+    "components": 4,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s01", "label": "S01 — Sign in" }
+  ],
+  "navigation": [],
+  "markup": [
+    {
+      "id": "note-toggle",
+      "text": "add a show toggle",
+      "targetId": "s01-password",
+      "relation": "near",
+      "intent": "change",
+      "intendedTargetId": "s01-password"
+    },
+    {
+      "id": "ring-submit",
+      "targetId": "s01-submit",
+      "relation": "encloses",
+      "intent": "fine",
+      "intendedTargetId": "s01-submit"
+    }
+  ],
+  "notes": [
+    "Drawn 2026-11-17 on port 3072: the screen and the legend by the CLI (`apply`), the two marks in the browser pane with the editor's text and ellipse tools, each recoloured from the stroke picker's one-click swatches. Exported with `excalidraw-canvas export`, which kept every origin. The only patch: the two marks' random ids were renamed `note-toggle` and `ring-submit` so the golden reading is legible.",
+    "The ring was drawn red (the tool kept the note's colour) and then set green; the change log folded that into one human addition reading `· fine`."
+  ]
+}

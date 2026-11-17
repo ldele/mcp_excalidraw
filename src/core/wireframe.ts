@@ -10,6 +10,7 @@ import {
   findContainers,
   AnnotationRelation
 } from './changes.js';
+import { MarkIntent, markIntent, isLegendId, legendElementIds } from './markup-intent.js';
 
 // ─── Reading a wireframe as a UI, not as geometry ──────────────
 //
@@ -53,6 +54,14 @@ export interface WireframeMarkup {
   targetId?: string;
   relation?: AnnotationRelation;
   distance: number;
+  // What the mark asks for, from its colour (ADR-004); absent for any other colour.
+  intent?: MarkIntent;
+}
+
+// The markup legend the reading left out (ADR-004): its root ids and how many elements it took.
+export interface WireframeLegend {
+  ids: string[];
+  elements: number;
 }
 
 export interface WireframeModel {
@@ -61,6 +70,7 @@ export interface WireframeModel {
   flows: WireframeFlow[];
   markup: WireframeMarkup[];
   componentCount: number;
+  legend?: WireframeLegend;
 }
 
 // ─── Colour ────────────────────────────────────────────────────
@@ -584,7 +594,21 @@ function screenAncestorOf(node: WireframeNode, parents: Map<string, WireframeNod
   return screen;
 }
 
-export function readWireframe(allElements: ServerElement[]): WireframeModel {
+export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
+  // The markup legend is the agent's key to the colours, not part of the design: it is no
+  // screen, no component and nothing a mark can be about (ADR-004).
+  const legendIds = legendElementIds(sceneElements);
+  const allElements = legendIds.size > 0
+    ? sceneElements.filter(el => !legendIds.has(el.id))
+    : sceneElements;
+  const legend: WireframeLegend | undefined = legendIds.size > 0
+    ? {
+        // The legend's roots: members named legend-… are counted, not listed.
+        ids: sceneElements.filter(el => isLegendId(el.id) && !isLegendId(el.frameId)).map(el => el.id),
+        elements: legendIds.size
+      }
+    : undefined;
+
   const context = new Map(allElements.map(el => [el.id, el]));
   const boundLabels = buildBoundLabelIndex(context);
 
@@ -681,12 +705,14 @@ export function readWireframe(allElements: ServerElement[]): WireframeModel {
   const markup: WireframeMarkup[] = markupElements.map(el => {
     const link = attributeAnnotation(el, targets, containerIds);
     const text = effectiveLabel(el, context, boundLabels);
+    const intent = markIntent(el);
     return {
       id: el.id,
       elementType: el.type,
       ...(text ? { text } : {}),
       ...(link ? { targetId: link.targetId, relation: link.relation } : {}),
-      distance: link?.distance ?? 0
+      distance: link?.distance ?? 0,
+      ...(intent ? { intent } : {})
     };
   });
 
@@ -696,7 +722,8 @@ export function readWireframe(allElements: ServerElement[]): WireframeModel {
     flows,
     markup,
     // Counted from the tree, after tickbox labels have been folded in.
-    componentCount: countNodes(orderedRoots)
+    componentCount: countNodes(orderedRoots),
+    ...(legend ? { legend } : {})
   };
 }
 
@@ -742,10 +769,13 @@ function renderNode(node: WireframeNode, prefix: string, depth: number, lines: s
 
 // Render the model as the agent-readable UI reading.
 export function formatWireframe(model: WireframeModel): string {
-  const { roots, screens, flows, markup, componentCount } = model;
+  const { roots, screens, flows, markup, componentCount, legend } = model;
 
   if (componentCount === 0 && markup.length === 0) {
-    return 'The canvas is empty. Nothing to read as a wireframe.';
+    return legend
+      ? `The canvas holds only the markup legend ${legend.ids.map(id => `[${id}]`).join(', ')}. ` +
+        'Nothing to read as a wireframe.'
+      : 'The canvas is empty. Nothing to read as a wireframe.';
   }
 
   const byId = new Map<string, WireframeNode>();
@@ -780,6 +810,15 @@ export function formatWireframe(model: WireframeModel): string {
     'disagree with the reading. Numbering is reading order (top-to-bottom, ' +
     'left-to-right within a row).'
   );
+
+  if (legend) {
+    lines.push('');
+    lines.push(
+      `Left out: the markup legend ${legend.ids.map(id => `[${id}]`).join(', ')} ` +
+      `(${legend.elements} element${legend.elements === 1 ? '' : 's'}), the key to the markup ` +
+      'colours rather than part of the design.'
+    );
+  }
 
   // Nothing nests and everything is wired together: that is a diagram, and
   // reading it as an interface will only produce misleading role guesses.
@@ -883,9 +922,17 @@ export function formatWireframe(model: WireframeModel): string {
   if (markup.length > 0) {
     lines.push('');
     lines.push(`### Annotations on this wireframe (${markup.length})`);
-    lines.push('  Human markup currently on the canvas — treat as change requests.');
+    if (markup.some(note => note.intent)) {
+      lines.push(
+        "  Human markup currently on the canvas. A tag is what the mark's colour asks for: " +
+        '[change], [remove], [question] or [fine]; a mark with no tag is a change request.'
+      );
+    } else {
+      lines.push('  Human markup currently on the canvas — treat as change requests.');
+    }
     for (const note of markup) {
-      const text = note.text ? `"${truncate(note.text, 80)}"` : `(${note.elementType} markup)`;
+      const tag = note.intent ? `[${note.intent}] ` : '';
+      const text = tag + (note.text ? `"${truncate(note.text, 80)}"` : `(${note.elementType} markup)`);
       if (note.targetId && note.relation) {
         const gap = note.relation === 'near' && note.distance > 0 ? ` (${note.distance}px away)` : '';
         lines.push(`  ${text}`);

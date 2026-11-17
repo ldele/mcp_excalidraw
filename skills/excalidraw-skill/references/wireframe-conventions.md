@@ -320,8 +320,36 @@ button "Continue" [submit] → screen "Dashboard" [s2]
 
 ## 8. Annotation conventions (for the human)
 
-When handing the pen over, these are the four markup gestures that get attributed
-correctly — worth telling the user explicitly:
+**Put the legend on the canvas before handing over the pen** (ADR-004). It is a frame named
+"How to mark up" that tells the person what each colour means. It ships with this skill as
+`references/markup-legend.json`, an `apply` patch; from this repository:
+
+```bash
+excalidraw-canvas apply skills/excalidraw-skill/references/markup-legend.json
+```
+
+It lands left of the convention's frame origin, at x −360 to −60. If a screen is there, shift
+every `x` in a copy of the file before applying it. `wireframe` leaves it out
+and says so in one line: an element whose id is `legend` or begins `legend-`, with everything
+that is a member of it or drawn inside it, is never a screen, a component or a mark's target.
+
+**A mark's colour is what it asks for.** The four one-click swatches beside black in the stroke
+picker; any shade of the same family means the same:
+
+| Colour | Swatch | Intent | Read as |
+|---|---|---|---|
+| Red | `#e03131` | change this | `[change]` |
+| Orange (the editor calls it yellow) | `#f08c00` | remove this | `[remove]` |
+| Blue | `#1971c2` | I have a question | `[question]` |
+| Green | `#2f9e44` | this is fine | `[fine]` |
+
+Any other colour gives no tag and reads as a change request, as all markup did before. Only a
+person's marks are read for intent, so the agent's own colours never carry one. `wireframe` prints the tag
+before each mark; `changes` prints it after `by human`, and `intent change → fine` when a person
+recolours a mark. A colour-blind reviewer has the legend's words, not the swatches: read the
+note's words too when a tag and the words disagree.
+
+**Where a mark lands** is attributed by gesture, whatever its colour:
 
 | Gesture | Reported as |
 |---|---|

@@ -294,7 +294,10 @@ the same canvas as a UI:
 - **Navigation** — arrows that cross from one screen to another are reported as
   flows: `button "Continue" [submit] → screen "Dashboard" [s2]`.
 - **Annotations** — human markup currently on the canvas, each attached to the
-  component it refers to.
+  component it refers to, and tagged `[change]`, `[remove]`, `[question]` or `[fine]` when
+  the person drew it in one of the four intent colours (ADR-004).
+- **`Left out: the markup legend`** — the "How to mark up" frame you added for the person;
+  it is never a screen, a component or a mark's target.
 - **Reading quality** — a block that appears *only when something is wrong*: how
   many components fell back to `shape`, how many screens could not be named, how
   many fell outside every frame. If you don't see it, the reading is clean.
@@ -371,10 +374,16 @@ it is far cheaper and more precise than asking them to describe edits in prose.
 
 1. **Draw** the wireframe (`add` / `batch_create_elements`), then `screenshot` and
    run the Quality Checklist.
-2. **Hand over the pen.** Tell the user explicitly what to do, in canvas terms:
-   > "The sign-in wireframe is on the canvas at http://127.0.0.1:3000. Mark it up
-   > however you like — drag things, retype labels, circle what's wrong, or drop a
-   > text note next to anything you want changed. Tell me when you're done."
+2. **Hand over the pen.** First put the legend on the canvas, so the person can see how to
+   mark up without asking (`references/wireframe-conventions.md` § 8):
+   ```bash
+   excalidraw-canvas apply skills/excalidraw-skill/references/markup-legend.json
+   ```
+   Then tell the user explicitly what to do, in canvas terms:
+   > "The sign-in wireframe is on the canvas at http://127.0.0.1:3000, with a 'How to
+   > mark up' key beside it. Circle, scribble on, or write next to anything: red to
+   > change it, orange to remove it, blue for a question, green when it is fine. Tell
+   > me when you're done."
 3. **Wait** with `watch` (`wait_for_changes`) instead of polling. It blocks until
    the canvas is touched, then waits for a quiet moment so a whole round of markup
    arrives as one batch. On timeout it says so — call it again to keep waiting.
@@ -425,6 +434,9 @@ for "Connected" in the tab you already have*.
 
 - **`by human` vs `by agent`** — your own writes are tracked too, so you can tell
   your changes from theirs. Only `by human` entries are feedback.
+- **`by human · change`** — the mark's colour says what it asks for: `change`, `remove`,
+  `question` or `fine` (ADR-004). No tag means another colour; read it as a change request.
+  `intent change → fine` under an edit means the person recoloured their mark.
 - **What the editor does by itself is not an entry.** Opening the canvas measures text, wraps a
   label to its shape, grows a shape that is too small for its label and gives a bound arrow its
   box. None of that is reported, and a shape the editor grew is stored at its new size.

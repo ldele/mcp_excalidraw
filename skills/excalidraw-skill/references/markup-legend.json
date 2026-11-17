@@ -1,0 +1,171 @@
+{
+  "create": [
+    {
+      "id": "legend",
+      "type": "frame",
+      "name": "How to mark up",
+      "x": -360,
+      "y": 120,
+      "width": 300,
+      "height": 350,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent"
+    },
+    {
+      "id": "legend-intro",
+      "type": "text",
+      "x": -344,
+      "y": 140,
+      "width": 200,
+      "height": 45,
+      "text": "Mark it up in one of\nthese colours:",
+      "fontSize": 16,
+      "strokeColor": "#1e1e1e",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-change-swatch",
+      "type": "line",
+      "x": -344,
+      "y": 220,
+      "width": 32,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          32,
+          0
+        ]
+      ],
+      "strokeColor": "#e03131",
+      "strokeWidth": 4,
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-change",
+      "type": "text",
+      "x": -300,
+      "y": 210,
+      "width": 224,
+      "height": 20,
+      "text": "Red — change this",
+      "fontSize": 16,
+      "strokeColor": "#e03131",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-remove-swatch",
+      "type": "line",
+      "x": -344,
+      "y": 260,
+      "width": 32,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          32,
+          0
+        ]
+      ],
+      "strokeColor": "#f08c00",
+      "strokeWidth": 4,
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-remove",
+      "type": "text",
+      "x": -300,
+      "y": 250,
+      "width": 224,
+      "height": 20,
+      "text": "Orange — remove this",
+      "fontSize": 16,
+      "strokeColor": "#f08c00",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-question-swatch",
+      "type": "line",
+      "x": -344,
+      "y": 300,
+      "width": 32,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          32,
+          0
+        ]
+      ],
+      "strokeColor": "#1971c2",
+      "strokeWidth": 4,
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-question",
+      "type": "text",
+      "x": -300,
+      "y": 290,
+      "width": 224,
+      "height": 20,
+      "text": "Blue — I have a question",
+      "fontSize": 16,
+      "strokeColor": "#1971c2",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-fine-swatch",
+      "type": "line",
+      "x": -344,
+      "y": 340,
+      "width": 32,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          32,
+          0
+        ]
+      ],
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 4,
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-fine",
+      "type": "text",
+      "x": -300,
+      "y": 330,
+      "width": 224,
+      "height": 20,
+      "text": "Green — this is fine",
+      "fontSize": 16,
+      "strokeColor": "#2f9e44",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-other",
+      "type": "text",
+      "x": -344,
+      "y": 380,
+      "width": 268,
+      "height": 70,
+      "text": "Any other colour reads as a\nchange request. Circle it,\nscribble on it, or write beside it.",
+      "fontSize": 16,
+      "strokeColor": "#1e1e1e",
+      "frameId": "legend"
+    }
+  ]
+}

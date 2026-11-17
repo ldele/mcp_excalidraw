@@ -463,7 +463,8 @@ export const tools: Tool[] = [
       'what is nested inside what, the reading order of each screen, the likely role of ' +
       'every component (button, input, heading, header, checkbox, divider, ...), which ' +
       'control navigates to which screen, and any human annotations currently on the ' +
-      'canvas with the component each one refers to. Use this for UI/UX work — reviewing ' +
+      'canvas with the component each one refers to and, when drawn in one of the four ' +
+      'intent colours, what it asks for (change, remove, question, fine). Use this for UI/UX work — reviewing ' +
       'a wireframe, turning one into code, or understanding a flow a user drew. Roles are ' +
       'inferred and marked with `?` when uncertain; raw type and size are always included. ' +
       'For flowcharts and architecture diagrams use describe_scene instead.',
@@ -478,7 +479,8 @@ export const tools: Tool[] = [
       'Read what changed on the canvas since you last looked — including edits a person made ' +
       'by hand in the browser. Reports additions, edits and deletions in design terms (moved ' +
       'right 120px, resized, relabelled, restyled) and attributes human markup — sticky notes, ' +
-      'circled shapes, arrows — to the element it refers to. This is how you collect design ' +
+      'circled shapes, arrows — to the element it refers to, with the intent its colour gives ' +
+      '(red change, orange remove, blue question, green fine). This is how you collect design ' +
       'feedback: draw a wireframe, ask the user to mark it up, then call this to read their ' +
       'notes. Call with no arguments to get everything since your previous call.',
     inputSchema: {

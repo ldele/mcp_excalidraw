@@ -63,16 +63,18 @@ for (const name of names) {
       assert.deepEqual(actual, expected.navigation ?? []);
     });
 
-    test('markup binds where expected', () => {
+    test('markup binds where expected, with its intent (ADR-004)', () => {
       const actual = model.markup.map(note => ({
         id: note.id,
         ...(note.targetId ? { targetId: note.targetId } : {}),
-        ...(note.relation ? { relation: note.relation } : {})
+        ...(note.relation ? { relation: note.relation } : {}),
+        ...(note.intent ? { intent: note.intent } : {})
       }));
       const wanted = (expected.markup ?? []).map(note => ({
         id: note.id,
         ...(note.targetId ? { targetId: note.targetId } : {}),
-        ...(note.relation ? { relation: note.relation } : {})
+        ...(note.relation ? { relation: note.relation } : {}),
+        ...(note.intent ? { intent: note.intent } : {})
       }));
       assert.deepEqual(actual, wanted);
     });

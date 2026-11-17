@@ -1,8 +1,19 @@
-<!-- status: active · updated: 2026-11-16 · class: append-only -->
+<!-- status: active · updated: 2026-11-17 · class: append-only -->
 
 # SESSION — handoff baton
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
+
+## 2026-11-17 (a) — Claude Code — ADR-004 built (SPEC-006); STAGED, not committed
+- **Done:** a person's mark in red, orange, blue or green reads as change, remove, question or
+  fine in `wireframe` and `changes`; the skill ships a "How to mark up" legend
+  (`references/markup-legend.json`) that the reading leaves out. Round trip closed on port 3072
+  with a real tab; 139 / 139 node tests (DEVLOG 2026-11-17 (a), SPEC-006 § Verified).
+- **Where:** `main` at `82ef3ed`; this change is staged, waiting on the owner's yes to commit.
+  `dist/` is rebuilt (the baton's open item from (m) is done).
+- **Next:** commit ADR-004; build ADR-005 (an approval box per screen, its line in the legend,
+  its README row); then PR 4.
+- **Picks up:** any session with a terminal; ADR-005's round trip needs a browser tab.
 
 ## 2026-11-16 (m) — Claude Code — session closed; everything committed and pushed
 - **Done today (DEVLOG 2026-11-16):** cpc re-vendored to 1.23.0 and kept out of git (rule 5); the
@@ -26,15 +37,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   canvas is running on port 3000 (231 elements); rebuild with `npm run build` once it is stopped.
 - **Next:** build ADR-004 and ADR-005; then PR 4.
 - **Picks up:** any session with a terminal.
-
-## 2026-11-16 (k) — Claude Code — ADR-003 landed on `main` as `6414461`; CI dispatched
-- **Done:** entry (j)'s work was committed as `6414461` on the owner's yes, fast-forwarded onto
-  `main` and pushed. The worktree `C:\Projects\mcp_excalidraw-adr003` and branch
-  `adr-003-frame-screens` are removed. CI run 43952866891, dispatched on it: the three keypoint
-  jobs passed; "Build + wireframe corpus" was still running when this was written.
-- **Not done:** `npm ci && npm run build` in the main checkout. The owner's canvas on :3000 was
-  running, so its `dist/` is the pre-ADR-003 build: it reads frames the old way until it is
-  stopped, rebuilt and started again.
-- **Next:** read CI run 43952866891's result; rebuild the main checkout with no canvas running.
-  Then ADR-004 (its legend frame will read as a screen until it is left out) and ADR-005.
-- **Picks up:** any session with a terminal; ADR-004 and ADR-005 need a browser tab.

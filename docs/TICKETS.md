@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-16 · class: living -->
+<!-- status: active · updated: 2026-11-17 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -33,13 +33,14 @@ created.
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
 
 ## T-027 — A person marking up a wireframe has no convention to follow, so markup falls back to chat messages
-- **Status:** triaged · 2026-11-16
+- **Status:** triaged · 2026-11-17
 - **From:** dnd_crawler_rust session (1.3.0) · 2026-11-16
 - **Symptom:** Character screens S23/S24 (dnd_crawler_rust, ADR-0057 scene): the owner reviewed on the canvas but gave the changes by message; the skill names four gestures (arrow, circle, scribble, note) only for the agent, nothing on the canvas tells the human what to do or how to say 'done'. Asked for: a markup process with a convention a person can follow (e.g. a legend panel or palette for 'change / remove / question / approve', and a way to sign off a screen).
 - **Reproduce:** excalidraw-canvas import docs/engine/wireframes/adr-0057-screens.excalidraw (dnd_crawler_rust) then hand the URL to a person: nothing on the canvas explains how to mark up
 - **Note:** 2026-11-16 — Rank 3, with T-028: both are from one review and both stand between this project and ROADMAP PR 1, a person marking up through the loop (KI-3). This is a design question, not a defect. A legend frame the agent draws beside each scene changes only the skill and the conventions, but the reading must then leave it out. A palette read by changes.ts (for example, a note's colour for change, remove, question or approve) changes code. Sign-off per screen needs one of the two. Decide before building, with an ADR.
 - **Note:** 2026-11-16 — 2026-11-16: framed as two decisions, both proposed. docs/decisions/ADR-004-markup-intent.md covers what a mark asks for: a legend for today's gestures, intent by colour, intent by a first word, or free markup. docs/decisions/ADR-005-sign-off-and-end-of-round.md covers approving a screen and ending a round: an approval box per screen, a Done button in the page, a word in a note, or the quiet period and chat. Waiting on the owner's choices.
 - **Note:** 2026-11-16 — 2026-11-16: decided. ADR-004 accepted: intent by colour, with four stroke colours, a legend frame, and the intent printed beside each mark. ADR-005 accepted: an approval box in each screen; a round still ends with watch's quiet period. To be built after the upstream 2.2.0 merge.
+- **Note:** 2026-11-17 — 2026-11-17: ADR-004 built (SPEC-006), staged: intent by colour, the legend file references/markup-legend.json, the reading leaves the legend out. Stays open for ADR-005, the approval box, which closes the sign-off half.
 - **Resolution:** —
 
 ## T-021 — A tall sibling merges a stacked checkbox column into one row, so each checkbox loses its label

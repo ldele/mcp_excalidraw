@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-16 · class: append-only -->
+<!-- status: active · updated: 2026-11-17 · class: append-only -->
 
 # DEVLOG
 
@@ -9,6 +9,27 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
+
+## 2026-11-17 (a) — ADR-004 built: a mark's intent is its colour, and the legend says so (SPEC-006)
+- **Why:** T-027. A person marking up had nothing on the canvas telling them how, and the agent
+  guessed what each mark wanted from its words. ADR-004 chose intent by colour with a legend.
+- **What:** `src/core/markup-intent.ts` reads a person's mark in the red, orange (Excalidraw's
+  yellow), blue or green family of the editor's palette as change, remove, question or fine.
+  `wireframe` tags each mark `[change]` etc.; `changes` prints `by human · change`, and
+  `intent change → fine` on a recolour. A legend, an element whose id is `legend` or begins
+  `legend-`, is left out with its members and whatever is drawn inside it, and the reading says
+  so in one line. The skill ships it as `references/markup-legend.json`; conventions § 8,
+  SKILL.md's hand-over, the README (a new differences row) and two MCP descriptions say how.
+  `boxOf` and its helpers moved, unchanged, to `src/core/box.ts` so the new module and
+  `changes.ts` do not import each other.
+- **Tests:** annotated's marks recoloured to pin one of each intent and one untagged; a new
+  fixture, markup-legend, whose two marks were drawn in a real tab on port 3072; 11 unit tests.
+  Each failed first. Attribution baseline 7 / 8 (was 5 / 6), re-reviewed by hand. The other six
+  goldens unchanged byte for byte. 139 / 139.
+- **Rejected:** an exact-hex match (a lighter red from the shade row would carry nothing); a
+  declared `role` for the legend (a new role); a CLI command to draw the legend (a file is
+  enough and testable).
+- **Opens:** ADR-005, the approval box, builds on this and adds its line to the legend.
 
 ## 2026-11-16 (m) — The upstream-differences table is kept current with every change
 - **Why:** the owner asked that the differences with upstream be updated as the work goes, not
@@ -34,22 +55,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   `EXCALIDRAW_DATA_DIR`.
 - **Before this:** both nested sessions, the 2.2.0 merge and the ADR-003 build, had finished and
   closed out, on the owner's word that they should first. Their work is on `main` up to `e4e2bb4`.
-
-## 2026-11-16 (j) — ADR-003 built: screens are native frames, staged (SPEC-005, T-028)
-- **What:** a top-level frame is a screen named by its `name`, held or empty; `frameId` decides
-  membership, then geometry, so a scene with no frames reads as before. A rename is a label change
-  in `changes`. The skill and conventions draw a screen as a frame.
-- **The owner's calls:** the whole name is the label; the name is enough (an empty frame is an
-  empty screen); `frameId`, then geometry. **Rejected:** splitting the name, a heading in every
-  frame, geometry only (SPEC-005 § Open questions).
-- **Found live, fixed:** an agent's arrow ending on a frame lost its binding in a tab (upstream
-  #110 keeps frames out of the converter), and the reading took the navigation for markup.
-  `prepareServerScene` binds it as the export does (`FORK.md`, SPEC-005 § Findings).
-- **Verified:** both type-checks; `npm test` (corpus 123 / 123); Playwright 32 / 32, system Chrome. Old goldens
-  unchanged; attribution 5 / 6; each new test failed first. Live on 3071 with a real tab: frame
-  names read, 0 fallbacks; a tab note was one human record on `[s02-out]`; a tab rename was one
-  record and the reading took it; navigation intact.
-- **Not done:** ADR-004, ADR-005; `describe_scene` ignores frame names; no rectangle scene migrated.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

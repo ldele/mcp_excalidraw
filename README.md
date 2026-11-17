@@ -37,6 +37,7 @@ Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
 | **Install** | `npx mcp-excalidraw-server` from npm, or a Docker image | Not published: `npm link` from this repository gives `excalidraw-canvas`; no Docker image |
 | **Reading the canvas** | `describe`: a list of shapes | Also `wireframe`: screens, component roles, reading order, flows between screens, a person's annotations. A named frame is a screen |
 | **A person's edits** | No change log | Every change carries a revision and who made it, agent or person. `changes` and `watch` report them, each mark attached to the component it refers to |
+| **Markup** | Whatever a person draws, read by no one | A "How to mark up" legend the agent adds from the skill; a person's mark in red, orange, blue or green reads as change, remove, question or fine, and the reading leaves the legend out |
 | **MCP tools** | 27 | 30: adds `describe_wireframe`, `get_canvas_changes` and `wait_for_changes` |
 | **After a restart** | The scene is gone, unless `EXCALIDRAW_DATA_DIR` turns on one store shared by every port | Saved per port by default, change log included. `EXCALIDRAW_NO_PERSIST=1` turns it off; `EXCALIDRAW_DATA_DIR` switches to upstream's store |
 | **A request from another site's page** | Answered: CORS is open to every origin | Refused with 403, on the API and on the socket. `CANVAS_ALLOWED_ORIGINS` lists exceptions |
@@ -63,7 +64,10 @@ changes upstream's files and the test that fails if a merge undoes it.
 - **Reading order** is top to bottom, then left to right within a row (`3.`, `3.1.`).
 - **Navigation flows**: an arrow from one screen to another reads as
   `button "Continue" → screen "Dashboard"`.
-- **Annotations**: what a person drew, attached to the component it refers to.
+- **Annotations**: what a person drew, attached to the component it refers to, and what it asks
+  for when drawn in one of four colours: red change, orange remove, blue question, green fine.
+  The "How to mark up" legend that says so (`skills/excalidraw-skill/references/markup-legend.json`)
+  is left out of the reading.
 
 `changes` (MCP `get_canvas_changes`) lists what changed since a revision and who made each change,
 agent or human, in design terms (*moved down 60px*, *text "Continue" → "Log in"*). `watch` (MCP

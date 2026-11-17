@@ -1,0 +1,18 @@
+## Wireframe reading
+1 screen, 4 components, 0 connections, 2 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+Left out: the markup legend [legend] (11 elements), the key to the markup colours rather than part of the design.
+
+### Screen 1 "S01 — Sign in"  [s01] frame 500x420
+  1. input "Email"  [s01-email] rectangle 436x48 · fill #ffffff
+  2. input "Password"  [s01-password] rectangle 436x48 · fill #ffffff
+  3. button "Sign in"  [s01-submit] rectangle 436x52 · fill #74c0fc
+
+### Annotations on this wireframe (2)
+  Human markup currently on the canvas. A tag is what the mark's colour asks for: [change], [remove], [question] or [fine]; a mark with no tag is a change request.
+  [change] "add a show toggle"
+      ↳ annotates input "Password" [s01-password] (19px away)
+  [fine] (ellipse markup)
+      ↳ circles / marks button "Sign in" [s01-submit]

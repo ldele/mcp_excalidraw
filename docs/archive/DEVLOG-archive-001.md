@@ -4,6 +4,22 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 20, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (j) — ADR-003 built: screens are native frames, staged (SPEC-005, T-028)
+- **What:** a top-level frame is a screen named by its `name`, held or empty; `frameId` decides
+  membership, then geometry, so a scene with no frames reads as before. A rename is a label change
+  in `changes`. The skill and conventions draw a screen as a frame.
+- **The owner's calls:** the whole name is the label; the name is enough (an empty frame is an
+  empty screen); `frameId`, then geometry. **Rejected:** splitting the name, a heading in every
+  frame, geometry only (SPEC-005 § Open questions).
+- **Found live, fixed:** an agent's arrow ending on a frame lost its binding in a tab (upstream
+  #110 keeps frames out of the converter), and the reading took the navigation for markup.
+  `prepareServerScene` binds it as the export does (`FORK.md`, SPEC-005 § Findings).
+- **Verified:** both type-checks; `npm test` (corpus 123 / 123); Playwright 32 / 32, system Chrome. Old goldens
+  unchanged; attribution 5 / 6; each new test failed first. Live on 3071 with a real tab: frame
+  names read, 0 fallbacks; a tab note was one human record on `[s02-out]`; a tab rename was one
+  record and the reading took it; navigation intact.
+- **Not done:** ADR-004, ADR-005; `describe_scene` ignores frame names; no rectangle scene migrated.
+
 ## 2026-11-16 (h) — Upstream 2.2.0 merged on a branch, staged (SPEC-004)
 - **What:** all 14 commits to `81720ac`, on `merge/upstream-2.2.0` in the worktree
   `C:\Projects\mcp_excalidraw-merge`. 14 conflicts; the Dockerfiles stay deleted. In

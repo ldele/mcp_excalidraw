@@ -13,14 +13,14 @@ Roles are inferred from geometry, style and wording — a trailing `?` marks a l
   6. button "Pay now"  [pay] rectangle 536x52 · fill #74c0fc
 
 ### Annotations on this wireframe (5)
-  Human markup currently on the canvas — treat as change requests.
-  "needs a card-type icon here"
+  Human markup currently on the canvas. A tag is what the mark's colour asks for: [change], [remove], [question] or [fine]; a mark with no tag is a change request.
+  [change] "needs a card-type icon here"
       ↳ annotates input "Card number" [card-num] (96px away)
   (arrow markup)
       ↳ points at input "Card number" [card-num]
-  "show VAT breakdown"
+  [question] "show VAT breakdown"
       ↳ annotates input "CVC" [cvc] (120px away)
-  (ellipse markup)
+  [fine] (ellipse markup)
       ↳ circles / marks button "Pay now" [pay]
-  (freedraw markup)
+  [remove] (freedraw markup)
       ↳ sits on input "Expiry" [expiry]
