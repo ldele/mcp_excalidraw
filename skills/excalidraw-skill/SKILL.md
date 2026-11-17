@@ -60,7 +60,7 @@ Results are JSON on stdout — except `describe` (plain text) and raw-content ou
 The CLI and MCP tools accept the same agent-friendly format and normalize it automatically:
 
 - **Labels**: put `"text": "My Label"` on any shape — converted to Excalidraw's bound-label format for you.
-- **Label typography**: `fontSize`, `fontFamily`, `textAlign` and `verticalAlign` alongside `text` style the label (a shape has no font of its own, so they follow the text into it). For label colour pass the label explicitly — `"label": {"text": "Save", "strokeColor": "#d03b3b"}` — since a shape's `strokeColor` is its border. Explicit `label` keys win over the shorthand.
+- **Label typography**: `fontSize`, `fontFamily`, `textAlign` and `verticalAlign` alongside `text` style the label (a shape has no font of its own, so they follow the text into it). `textAlign` `left` / `right` and `verticalAlign` `top` / `bottom` place the label 5px from that edge of its shape, in a tab and in a PNG; the default is centred. For label colour pass the label explicitly — `"label": {"text": "Save", "strokeColor": "#d03b3b"}` — since a shape's `strokeColor` is its border, and a label left to inherit it on a pale border is nearly invisible. Explicit `label` keys win over the shorthand.
 - **Wireframe role**: `"role": "chart"` declares what a shape is, so `wireframe` reports it instead of guessing. Any role from the vocabulary is accepted; an unknown one is rejected by the API.
 - **Arrow binding**: `"startElementId": "a"` / `"endElementId": "b"` — arrows auto-route to element edges.
 - **fontFamily**: pass a string name (`"helvetica"`, `"cascadia"`, `"excalifont"`, ...) or string number `"1"`–`"8"`.

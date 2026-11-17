@@ -154,11 +154,19 @@ const recenterBoundShapeTextElements = (
       return element
     }
 
-    return {
-      ...element,
-      x: container.x + (container.width - textElement.width) / 2,
-      y: container.y + (container.height - textElement.height) / 2,
-    }
+    // Fork (T-004): place the label by its own alignment, as Excalidraw does, rather than always
+    // in the middle: a `textAlign: "left"` label was stored and read back but drawn centred.
+    // BOUND_TEXT_PADDING is Excalidraw's gap between a shape's edge and its label.
+    const BOUND_TEXT_PADDING = 5
+    const align = (textElement as { textAlign?: string }).textAlign
+    const vertical = (textElement as { verticalAlign?: string }).verticalAlign
+    const x = align === 'left' ? container.x + BOUND_TEXT_PADDING
+      : align === 'right' ? container.x + container.width - textElement.width - BOUND_TEXT_PADDING
+      : container.x + (container.width - textElement.width) / 2
+    const y = vertical === 'top' ? container.y + BOUND_TEXT_PADDING
+      : vertical === 'bottom' ? container.y + container.height - textElement.height - BOUND_TEXT_PADDING
+      : container.y + (container.height - textElement.height) / 2
+    return { ...element, x, y }
   })
 }
 

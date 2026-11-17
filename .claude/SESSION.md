@@ -4,6 +4,15 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (m) — Claude Code — T-018/T-019 pushed (`e8c6017`); T-004 fixed, T-008 documented; STAGED
+- **Done:** `e8c6017` pushed after the full gate. T-004: the page's label recentring now honours
+  `textAlign` / `verticalAlign` (upstream's code, FORK.md row). T-008: conventions § 4 says to
+  colour labels on light borders (DEVLOG 2026-11-17 (k)).
+- **Where:** `main` at `e8c6017`, equal to `origin/main`; both staged; both tickets closed.
+- **Next:** commit; the full gate and push on the owner's yes; then T-002, T-003 (decisions for
+  the owner) and T-005 (rank 8).
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (l) — Claude Code — T-017 pushed (`9c7a6f6`); T-018 and T-019 fixed; STAGED
 - **Done:** `9c7a6f6` pushed after the full gate. T-018: the tab-sync and cross-origin probes are
   browser tests with assertions (the cross-origin one seen red with the guard off). T-019: the two
@@ -24,13 +33,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `.claude/launch.json` (gitignored) gained `canvas-memory` and `vite-5174` entries.
 - **Next:** commit; the full gate and push on the owner's yes; then T-018 and T-019 (rank 6).
 - **Picks up:** any session with a terminal.
-
-## 2026-11-17 (j) — Claude Code — T-006 and T-021 fixed; STAGED
-- **Done:** an element beside a stacked column reads as a column block, so a full-height sidebar
-  no longer turns the main column column-major and stacked checkboxes keep their labels. The
-  three reported drawings read right; 238 / 238; live on port 3083 (DEVLOG 2026-11-17 (h)).
-- **Where:** `main` at `cef6002`, equal to `origin/main`; the fix staged; both tickets closed in
-  the ledger.
-- **Next:** commit; the full gate and push on the owner's yes; tell the owner dnd_crawler's
-  reading file will differ in seven screens when regenerated; then T-017 (rank 5).
-- **Picks up:** any session with a terminal; T-017 needs two terminals and a browser.

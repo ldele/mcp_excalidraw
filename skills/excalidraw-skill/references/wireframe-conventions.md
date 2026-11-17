@@ -196,10 +196,17 @@ dodge it. Read it as "this is the tile's own title", which is what it is.
 Geometry and colour, chosen so inference lands on the right role without help.
 `role` column is what the reading should say.
 
+**Colour every label on a light border.** A label written as `"text"` takes the shape's
+`strokeColor`, so on the `#d7d5cc` border of an input, a card or a secondary button it is drawn
+in that pale grey and nearly disappears. Give the label its own colour:
+`"label": {"text": "Cancel", "strokeColor": "#14130f"}` (T-008). Its `textAlign` (`left`,
+`right`) and `verticalAlign` (`top`, `bottom`) place it in the shape, 5px from that edge: a
+file row or an input's placeholder reads as drawn with `"textAlign": "left"` (T-004).
+
 | Component | Geometry | Fill / stroke | Notes | Role |
 |---|---|---|---|---|
 | Primary button | h 44–52, w ≥ 120 | accent primary | action verb label | `button` |
-| Secondary button | h 44–52 | `#ffffff` / `#d7d5cc` | declare the role — a white button reads as `input` | `button` |
+| Secondary button | h 44–52 | `#ffffff` / `#d7d5cc` | declare the role — a white button reads as `input`; label `strokeColor` `#14130f` | `button` |
 | Text input | h 44–56, w ≥ 240 | `#ffffff` / `#d7d5cc` | label is the field name, ≤ 4 words | `input` |
 | Segmented / tabs | h 44, siblings on one `y` | selected = primary, rest = secondary | see below | `button` |
 | Checkbox | square ≤ 28 | `#ffffff` / `#d7d5cc` | label text immediately right | `checkbox` |

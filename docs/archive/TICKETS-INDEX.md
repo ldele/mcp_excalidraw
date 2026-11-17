@@ -28,6 +28,8 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-011 | fixed | 2026-10-08 | A tab that is panned or clicked rewrites an imported scene: every free-standing text moves by half its size and the reading loses half its components | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-010 | fixed | 2026-10-08 | changes reports the tab's own label-fitting resize as an edit by human, and the write-back has a trigger: the first pan or click | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-009 | fixed | 2026-10-08 | A bound arrow's waypoints are dropped when it is created; update keeps them | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-008 | fixed | 2026-11-17 | A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-007 | fixed | 2026-10-08 | changes reports the first routing of a bound arrow as an edit by human | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-006 | fixed | 2026-11-17 | A corner-to-corner sidebar merges every sibling into one row, so the reading order goes column-major | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-004 | fixed | 2026-11-17 | textAlign on a bound label round-trips but has no visual effect | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-001 | fixed | 2026-11-16 | A text element without width/height silently disappears from the reading, including the screen heading | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

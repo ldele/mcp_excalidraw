@@ -4,6 +4,22 @@
 
 Closed tickets, moved here from `docs/TICKETS.md` when they were closed, **verbatim** per cpc ADR-071, and listed in `TICKETS-INDEX.md`. Newest on top. Append-only; never edited.
 
+## T-008 — A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border
+- **Status:** fixed · 2026-11-17
+- **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07
+- **Symptom:** A rectangle with backgroundColor #ffffff, strokeColor #e2e2e2 and "text": "Short form" draws its label in #e2e2e2 (the bound text element's strokeColor is #e2e2e2). The same shape with "label": {"text": ..., "strokeColor": "#1a1a1a"} draws it in #1a1a1a. wireframe-conventions section 4 recommends white secondary buttons with a #d7d5cc border, which gives exactly this; nothing in the skill mentions the label object or its colour.
+- **Reproduce:** excalidraw-canvas add the two rectangles above; open one tab and pan once so the labels become elements; excalidraw-canvas query --type text and compare each label's strokeColor, or excalidraw-canvas screenshot. Met while drawing Scribe docs/wireframes/library.excalidraw (2026-10-05) and worked around with the label object.
+- **Note:** 2026-11-16 — Rank 7, documentation. Part of the report does not hold: SKILL.md has said how to colour a label (the label object with its own strokeColor) since 505e8fe, 2026-07-30, and the cheatsheet and README say it too. What stands: wireframe-conventions section 4 recipes a white secondary button with a #d7d5cc border and never mentions the label's colour, so following it with the text shorthand gives a near-invisible label (src/core/expand-elements.ts:276, a label with no strokeColor takes the shape's). Fix: one line in that recipe; changing the default is upstream's code and the owner's call.
+- **Resolution:** DEVLOG 2026-11-17 (k): conventions section 4 says to colour labels on light borders; the default stays upstream's
+
+## T-004 — textAlign on a bound label round-trips but has no visual effect
+- **Status:** fixed · 2026-11-17
+- **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §4
+- **Symptom:** SKILL.md lists textAlign among label typography keys; it is stored and read back, but Excalidraw centres container-bound labels, so every row of a file list renders centred. The workaround (standalone text in the row) costs the reading: list-item 'filename' becomes list-item with a nested text.
+- **Reproduce:** add a rectangle with label {text, textAlign: left}; screenshot shows it centred; get <id> shows textAlign: left. Ask: document the limit beside textAlign in SKILL.md § Element Format.
+- **Note:** 2026-11-16 — Rank 7, documentation, to check first: SKILL.md line 62 still lists textAlign with the label keys and no limit. Excalidraw's editor offers left, centre and right for a container's text, so the centring may come from this toolkit's path (normalize or the renderer) rather than from Excalidraw. Try it in a tab before writing a limit into the skill.
+- **Resolution:** DEVLOG 2026-11-17 (k): the page's label recentring honours textAlign/verticalAlign (tests/label-align.test.mjs)
+
 ## T-019 — The first test run after an install or a build does not start: the server is not ready within the wait
 - **Status:** fixed · 2026-11-17
 - **From:** Scribe agent session, closing its 2026-10-08 work (1.3.0) · 2026-10-09

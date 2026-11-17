@@ -10,6 +10,18 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (k) — T-004 fixed, T-008 documented: a label goes where it is aligned, and needs its own colour
+- **T-004:** not Excalidraw's limit, as the report supposed, but upstream's page code:
+  `recenterBoundShapeTextElements` (`frontend/src/utils/scene.ts`, upstream #61) moved every bound
+  label to its shape's middle, so `textAlign: "left"` was stored, read back and drawn centred, in a
+  tab and in the headless PNG (which bundles the same function). It now places the label by its
+  `textAlign` and `verticalAlign`, 5px from the edge, as Excalidraw does; the default is centred as
+  before. `tests/label-align.test.mjs` (3, two red first); FORK.md row; seen live in a tab and a PNG
+  on port 3085, the tab's load making no record. Files with left-aligned labels now draw them left.
+- **T-008:** confirmed in the same PNG: a `"text"` label on a `#d7d5cc` border is drawn in that
+  grey. Conventions § 4 now says to colour every label on a light border, and the secondary-button
+  recipe gives `#14130f`; SKILL.md says why. The default stays upstream's.
+
 ## 2026-11-17 (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
 - **T-018:** two of the three probes kept since 2026-10-08 in an untracked folder of the upstream
   worktree are now tests with assertions in `tests/browser/`: `tab-sync-reroute.spec.mjs` (both
@@ -48,28 +60,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   connects; `vite build` passes. README's dev section and 403 note rewritten.
 - **Rejected:** Vite's `rewriteWsOrigin` (rewrites every Origin, which reopens T-015's hole for the
   socket); widening the guard to any localhost port (another local dev server is another site).
-
-## 2026-11-17 (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column
-- **Why:** both tickets, rank 4, four reports between them (UI-Wizard, BlackBox, doc_assistant,
-  pharma-dq-validator), all with a clean score. `inReadingOrder` grew a row's band to its tallest
-  member, so a full-height sidebar or two tall drop zones swallowed every row beside them, the
-  main column read sorted by x and two checkboxes lost their labels.
-- **What:** in `src/core/wireframe.ts`, a sibling with two or more stacked siblings beside it,
-  within its height, is a column. Rows are grouped from the rest; the column reads as one block
-  with what sits under it in its own width, before the rows it spans when it stands to their left,
-  after them when to their right. No threshold to calibrate.
-- **Rejected first:** a height-over-median ratio (it took S01's save card for a column) and
-  joining a column to the row of its top edge (S07's detail card landed mid-list). Both pinned.
-- **Real drawings:** the three reports read from their files (read-only) are fixed; UI-Wizard's
-  legacy dashboard is T-006's own drawing, and its expected reading was regenerated (order only,
-  checked). The owner's dnd scene changes in seven screens with a side column beside a list (S04,
-  S17, S18, S22, S26, S28, S30): two read better as columns, five move a side card by one item;
-  none worse; dnd_crawler's committed reading file will differ when next regenerated.
-- **Tests:** `tests/reading-order.test.mjs` (6: the two reports seen red, four layouts that must
-  not break); fixtures `sidebar-rows` and `stacked-checkboxes`; the harness checks a stated
-  `readingOrder` and `checkboxLabels`. Every older golden unchanged. Live on port 3083 with a tab.
-  238 / 238.
-- **Opens:** BlackBox's two wrapper cards (`[s2-main]`, `[s3-main]`) can go.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

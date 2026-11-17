@@ -4,6 +4,28 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column
+- **Why:** both tickets, rank 4, four reports between them (UI-Wizard, BlackBox, doc_assistant,
+  pharma-dq-validator), all with a clean score. `inReadingOrder` grew a row's band to its tallest
+  member, so a full-height sidebar or two tall drop zones swallowed every row beside them, the
+  main column read sorted by x and two checkboxes lost their labels.
+- **What:** in `src/core/wireframe.ts`, a sibling with two or more stacked siblings beside it,
+  within its height, is a column. Rows are grouped from the rest; the column reads as one block
+  with what sits under it in its own width, before the rows it spans when it stands to their left,
+  after them when to their right. No threshold to calibrate.
+- **Rejected first:** a height-over-median ratio (it took S01's save card for a column) and
+  joining a column to the row of its top edge (S07's detail card landed mid-list). Both pinned.
+- **Real drawings:** the three reports read from their files (read-only) are fixed; UI-Wizard's
+  legacy dashboard is T-006's own drawing, and its expected reading was regenerated (order only,
+  checked). The owner's dnd scene changes in seven screens with a side column beside a list (S04,
+  S17, S18, S22, S26, S28, S30): two read better as columns, five move a side card by one item;
+  none worse; dnd_crawler's committed reading file will differ when next regenerated.
+- **Tests:** `tests/reading-order.test.mjs` (6: the two reports seen red, four layouts that must
+  not break); fixtures `sidebar-rows` and `stacked-checkboxes`; the harness checks a stated
+  `readingOrder` and `checkboxLabels`. Every older golden unchanged. Live on port 3083 with a tab.
+  238 / 238.
+- **Opens:** BlackBox's two wrapper cards (`[s2-main]`, `[s3-main]`) can go.
+
 ## 2026-11-17 (g) — PR 1 round 2 not run: an approved scene gives nothing to mark
 - **What:** the round-1 scene was reopened on port 3080 for a second round (it read clean, S01
   approved by the owner's loop since ADR-006, the tab's load made no record). The owner pointed

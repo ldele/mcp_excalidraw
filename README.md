@@ -44,6 +44,7 @@ Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
 | **A tab's sync** | Clears the store and rewrites it | Merges element by element. An empty sync against a drawing is refused unless it says `allowEmpty` |
 | **`apply`** | Create, update, then delete: a patch that re-creates an id it deletes loses it | Delete, create, then update |
 | **Deleting a labelled shape** | Its label stays drawn | The label goes with it |
+| **A label's alignment** | `textAlign` and `verticalAlign` are stored but the label is always drawn centred | Drawn where they say: left, right, top or bottom |
 | **Arrows** | A bound arrow drops its waypoints when created; an elbowed arrow exports unbindable (`fixedPoint: null`); an arrow to a frame comes back unbound from a tab | All three keep what the agent gave them |
 | **The agent skill** | Drawing and diagram guidance | Adds the wireframe conventions (`skills/excalidraw-skill/references/wireframe-conventions.md`) and the review loop |
 
