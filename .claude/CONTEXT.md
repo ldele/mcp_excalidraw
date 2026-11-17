@@ -27,9 +27,10 @@ ADR-003 is on `main` as `6414461`, pushed (SPEC-005, T-028): a top-level frame i
 by its name, and the page now keeps an agent's arrow bound to a frame. CI run 43952866891 was
 dispatched on it. ADR-004 is on `main` as `1a5f530` (SPEC-006): a person's mark in red, orange,
 blue or green reads as change, remove, question or fine, and a legend frame the skill ships is
-left out of the reading. ADR-005 was built the same day (SPEC-007) and is staged, not committed:
-each screen's "Approved" box, ticked by a person, reads as the screen approved.
-**Next:** commit ADR-005 on the owner's yes; push both; then PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
+left out of the reading. ADR-005 is on `main` as `a420ce5` (SPEC-007): each screen's "Approved"
+box, ticked by a person, reads as the screen approved. Both pushed 2026-11-17; no CI run
+dispatched on them.
+**Next:** PR 4 (ADR-002). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

@@ -4,6 +4,19 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-16 (m) — Claude Code — session closed; everything committed and pushed
+- **Done today (DEVLOG 2026-11-16):** cpc re-vendored to 1.23.0 and kept out of git (rule 5); the
+  README and FORK.md cut, with a table of how the fork differs from upstream; tickets triaged;
+  T-001, T-022, T-024, T-025 and T-026 fixed; ADR-003 to ADR-005 decided; upstream 2.2.0 merged
+  (`c800fa8`); ADR-003 built (`6414461`). The nested sessions are done and archived.
+- **Where:** `main` equals `origin/main` at `9942c4b`, apart from this entry; nothing else staged.
+- **Open:** this checkout's `dist/` predates ADR-003. Once the canvas on :3000 is stopped, run
+  `npm ci && npm run build` here.
+- **Next:** build ADR-004 (intent by colour, a legend frame) and ADR-005 (an approval box per
+  screen), each adding its row to the README's differences table in the same commit; then PR 4.
+- **Picks up:** any session with a terminal; the round trips for ADR-004 and ADR-005 need a
+  browser tab.
+
 ## 2026-11-16 (l) — Claude Code — README § How it differs from upstream; STAGED
 - **Done:** a table in the README sums up how the fork differs from upstream 2.2.0, each upstream
   claim checked against `upstream/main`. FORK.md says to update it at every merge (DEVLOG

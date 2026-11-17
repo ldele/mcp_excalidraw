@@ -22,9 +22,8 @@ and works, but the attribution accuracy it
 exists to measure is **still untaken** (ROADMAP PR 1, KI-3). 10 tickets are open in
 `docs/TICKETS.md`, each ranked in its 2026-11-16 triage note. ADR-003 (screens as named frames,
 T-028) is on `main` as `6414461`, pushed (SPEC-005). ADR-004 (a mark's intent is its colour, with
-a legend) is on `main` as `1a5f530`, not pushed (SPEC-006); ADR-005 (an approval box per screen)
-is staged (SPEC-007), and with it T-027 is closed. **Next: commit ADR-005, push both; then
-PR 4.** Detail: `.claude/CONTEXT.md`.
+a legend) is on `main` as `1a5f530` (SPEC-006) and ADR-005 (an approval box per screen) as
+`a420ce5` (SPEC-007), both pushed; T-027 is closed. **Next: PR 4.** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
