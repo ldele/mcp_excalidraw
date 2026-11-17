@@ -41,8 +41,9 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **2026-11-17, round 1:** the owner marked up their dnd_crawler_rust wireframe (29 screens, the
   markup legend, 23 approval boxes) in the browser pane, and drew one mark: a green loop round all
   of S01, meaning "S01 is fine". Its intent read right (`fine`); its target did not, a heading
-  inside the screen (KI-10). Pinned as `tests/fixtures/human-round-1.excalidraw`. N = 1 measures
-  nothing, so this stays open until a round has a sample worth a number.
+  inside the screen (KI-10). Pinned as `tests/fixtures/human-round-1.excalidraw`; since KI-10's
+  fix the same day it binds to the screen and approves it. N = 1 measures nothing, so this stays
+  open until a round has a sample worth a number.
 
 ## KI-4 — a note beside a card can bind to the wrong component
 - **Symptom:** in `tests/fixtures/annotated.excalidraw`, the note "show VAT breakdown" sits level
@@ -142,7 +143,7 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Real fix:** unknown. A next look: capture the child's stderr and a Windows Error Reporting
   dump on the failure, and see whether it tracks the concurrent boots the suite runs.
 
-## KI-10 — a mark round a whole screen cannot target the screen
+## KI-10 — a mark round a whole screen cannot target the screen (RESOLVED 2026-11-17)
 - **Symptom:** a person's green loop round all of S01 ("S01 is fine", the owner, 2026-11-17) reads
   `circles / marks text … [s01-save-h]`: the heading of a card inside the screen. The first
   mark a person drew through the loop (KI-3, PR 1 round 1).
@@ -154,9 +155,11 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
   the screen is what the person reached for there.
 - **Workaround:** read a `fine` loop whose box holds a whole screen as about the screen; the reading
   gives its size.
-- **Real fix:** not attempted. Let `encloses` target a top-level screen when the mark holds the
-  whole of it, and let a `fine` mark that does so approve it, which reopens ADR-005's alternative;
-  `human-round-1` flips from miss to hit when it lands.
+- **Real fix (2026-11-17):** `encloses` now targets the largest container a mark wholly rings
+  (a screen, a card), as `findContainers`' own comment always said, and the smallest component
+  otherwise, as before (`tests/attribution.test.mjs`). ADR-006, decided by the owner the same
+  day: a mark in the "fine" colour that rings a whole screen approves it. `human-round-1` is now a
+  hit that approves S01; baseline 8 / 9.
 
 ## Resolved index
 

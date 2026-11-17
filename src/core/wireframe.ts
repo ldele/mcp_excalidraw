@@ -717,6 +717,14 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
     };
   });
 
+  // ADR-006: a person's mark in the "fine" colour that rings a whole screen approves it, box or
+  // no box. The mark stays an annotation: it is markup as well as a sign-off.
+  const screenById = new Map(screens.map(screen => [screen.id, screen]));
+  for (const note of markup) {
+    const screen = note.targetId ? screenById.get(note.targetId) : undefined;
+    if (screen && note.intent === 'fine' && note.relation === 'encloses') screen.approval = 'approved';
+  }
+
   return {
     roots: orderedRoots,
     screens,

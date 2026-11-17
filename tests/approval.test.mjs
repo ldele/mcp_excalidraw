@@ -173,3 +173,34 @@ test("the skill's legend explains the approval box", () => {
   assert.ok(patch.create.some(el => el.type === 'text' && /Approved/.test(el.text)),
     'a legend line names the Approved box');
 });
+
+// ─── ADR-006: a green ring round a whole screen approves it ────
+
+const greenRing = (id, x, y, w, h, strokeColor = '#2f9e44') => ({
+  id, type: 'ellipse', x, y, width: w, height: h, origin: 'human', strokeColor, backgroundColor: 'transparent'
+});
+const noBoxes = (...extra) => [...twoScreens().filter(el => !isApprovalId(el.id)), ...extra];
+
+test('a green ring round a whole screen with no box approves it, and stays an annotation', () => {
+  const model = readWireframe(noBoxes(greenRing('r', 80, 80, 580, 500)));
+  assert.deepEqual(approvalOf(model), { s01: 'approved', s02: undefined });
+  assert.deepEqual(model.markup.map(m => `${m.relation}:${m.targetId}:${m.intent}`), ['encloses:s01:fine']);
+  assert.match(formatWireframe(model), /\[s01\] frame 500x420 · approved/);
+});
+
+test('a red ring round a whole screen is a mark on it, not an approval', () => {
+  const model = readWireframe(noBoxes(greenRing('r', 80, 80, 580, 500, '#e03131')));
+  assert.deepEqual(approvalOf(model), { s01: undefined, s02: undefined });
+  assert.equal(model.markup[0].targetId, 's01');
+});
+
+test('a green ring round one field approves nothing', () => {
+  const model = readWireframe(twoScreens([greenRing('r', 140, 190, 340, 64)]));
+  assert.deepEqual(approvalOf(model), { s01: 'open', s02: 'open' });
+});
+
+test('changes says a green ring round a whole screen approves it', () => {
+  const r = greenRing('r', 80, 80, 580, 500);
+  const text = report([record(1, 'add', r, 'human')], noBoxes(r));
+  assert.match(text, /↳ circles \/ marks \[s01\] frame "S01 — Sign in"\n\s+↳ approves screen \[s01\] frame "S01 — Sign in"/);
+});

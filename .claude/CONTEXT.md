@@ -33,8 +33,9 @@ dispatched on them. PR 4, the geometry lint (ADR-002, SPEC-008), is on `main` as
 pushed: `wireframe --lint`, and a Drawing quality block in the reading.
 PR 1's round 1 ran the same day: the owner drew one mark, a miss (KI-10); the lint
 misfires 14 times on that real scene, which reads right.
-The misfires were fixed the same day (DEVLOG 2026-11-17 (e)), staged: that scene now gives no error.
-**Next:** commit the lint fix; push; then KI-10; then a round 2 with more marks. Each ticket's rank is in its 2026-11-16 note in
+The misfires were fixed the same day (`2b97ebe`, pushed): that scene now gives no error. KI-10
+was fixed after it, with ADR-006 (a green ring round a whole screen approves it), staged.
+**Next:** commit KI-10; then a round 2 of PR 1 with more marks. Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

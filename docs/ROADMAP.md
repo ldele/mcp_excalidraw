@@ -17,10 +17,10 @@ Three measures, because "it looked right" has already proved too weak a bar once
    reading, run as tests: `npm run test:corpus`. This is what stops a role-inference tweak from
    silently regressing another shape. Spec: `docs/specs/SPEC-001-fixture-corpus.md`.
 3. **Markup attribution accuracy** — of N human annotations, how many bind to the component a
-   person would say they refer to. **7 of 9 in the corpus, eight of them agent-drawn**
+   person would say they refer to. **8 of 9 in the corpus, eight of them agent-drawn**
    (`tests/expected/attribution-baseline.json`). The first mark a person drew, on 2026-11-17 (PR 1,
-   round 1), is a miss: a green loop round a whole screen meaning "this screen is fine" binds to a
-   heading inside it (KI-10). One mark is no measurement; the corpus figure is a regression guard,
+   round 1), was a miss: a green loop round a whole screen meaning "this screen is fine" bound to a
+   heading inside it. KI-10's fix the same day made it a hit, and ADR-006 an approval. One mark is no measurement; the corpus figure is a regression guard,
    not evidence the loop works.
 
    The human round finally ran on 2026-08-07 and **the number is still untaken** — the loop turned

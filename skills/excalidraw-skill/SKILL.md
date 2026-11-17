@@ -299,8 +299,9 @@ the same canvas as a UI:
 - **`Left out: the markup legend`** — the "How to mark up" frame you added for the person;
   it is never a screen, a component or a mark's target.
 - **`· approved` / `· not approved yet`** on a screen's heading, and `Approved: 1 of 2
-  screens.` — the screen's approval box, ticked by the person or not (ADR-005). The box
-  itself is never listed as a component, and the tick is not an annotation.
+  screens.` — the screen's approval box, ticked by the person or not (ADR-005), or a green
+  ring round the whole screen (ADR-006). The box itself is never listed as a component, and
+  the tick is not an annotation; the ring is, attached to the screen.
 - **Reading quality** — a block that appears *only when something is wrong*: how
   many components fell back to `shape`, how many screens could not be named, how
   many fell outside every frame. If you don't see it, the reading is clean.
@@ -447,7 +448,7 @@ for "Connected" in the tab you already have*.
   `question` or `fine` (ADR-004). No tag means another colour; read it as a change request.
   `intent change → fine` under an edit means the person recoloured their mark.
 - **`↳ approves screen [s01] …`** — the mark was drawn inside that screen's approval box, or
-  the person filled it: the screen is done. `withdraws approval of` means the fill came off.
+  the person filled it, or rang the whole screen in green: the screen is done. `withdraws approval of` means the fill came off.
 - **What the editor does by itself is not an entry.** Opening the canvas measures text, wraps a
   label to its shape, grows a shape that is too small for its label and gives a bound arrow its
   box. None of that is reported, and a shape the editor grew is stored at its new size.

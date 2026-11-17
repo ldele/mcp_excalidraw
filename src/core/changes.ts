@@ -440,11 +440,13 @@ export function attributeAnnotation(
   const annotationCenter = centerOf(annotationBox);
 
   let enclosed: AnnotationLink | null = null;
+  let enclosedContainer: AnnotationLink | null = null;
   let inside: AnnotationLink | null = null;
   let onContainer: AnnotationLink | null = null;
   let nearest: AnnotationLink | null = null;
   let nearestConnector: AnnotationLink | null = null;
   let enclosedArea = Infinity;
+  let enclosedContainerArea = 0;
   let insideArea = Infinity;
   let containerArea = Infinity;
 
@@ -469,12 +471,22 @@ export function attributeAnnotation(
 
     const isContainer = containerIds.has(candidate.id);
 
-    // Circled / boxed: most of the candidate sits inside the annotation.
-    if (annotationBox.w > 0 && annotationBox.h > 0 && !isContainer) {
+    // Circled / boxed: most of the candidate sits inside the annotation. A ring round a whole
+    // container (a screen, a card) is about that container, the largest one it holds: a person who
+    // loops a screen means the screen, not the smallest thing in it (KI-10, PR 1 round 1).
+    // Otherwise it is about the smallest component it holds, as a ring round one button is.
+    if (annotationBox.w > 0 && annotationBox.h > 0) {
       const covered = intersectionArea(annotationBox, candidateBox) / candidateArea;
-      if (covered >= ENCLOSE_RATIO && candidateArea < enclosedArea) {
-        enclosed = { targetId: candidate.id, relation: 'encloses', distance: 0 };
-        enclosedArea = candidateArea;
+      if (covered >= ENCLOSE_RATIO) {
+        if (isContainer) {
+          if (candidateArea > enclosedContainerArea) {
+            enclosedContainer = { targetId: candidate.id, relation: 'encloses', distance: 0 };
+            enclosedContainerArea = candidateArea;
+          }
+        } else if (candidateArea < enclosedArea) {
+          enclosed = { targetId: candidate.id, relation: 'encloses', distance: 0 };
+          enclosedArea = candidateArea;
+        }
       }
     }
 
@@ -504,7 +516,7 @@ export function attributeAnnotation(
   // the whitespace of a screen is about the control it is next to, and only
   // falls back to a connector, then to "sits on <screen>", when nothing
   // specific is in reach.
-  return enclosed ?? inside ?? nearest ?? nearestConnector ?? onContainer;
+  return enclosedContainer ?? enclosed ?? inside ?? nearest ?? nearestConnector ?? onContainer;
 }
 
 // Elements an annotation can be *about*: real scene content, not the markup
@@ -704,6 +716,18 @@ function foldRecords(records: ChangeRecord[]): {
   return { added, updates, deleted };
 }
 
+// Whether another candidate's box wholly holds `el`'s: false for a screen, true for what is in one.
+function isHeld(el: ServerElement, candidates: ServerElement[]): boolean {
+  const own = boxOf(el);
+  return candidates.some(other => {
+    if (other.id === el.id) return false;
+    const box = boxOf(other);
+    return box.x <= own.x && box.y <= own.y &&
+      box.x + box.w >= own.x + own.w && box.y + box.h >= own.y + own.h &&
+      box.w * box.h > own.w * own.h;
+  });
+}
+
 // A person who recolours their own mark changes what it asks for (ADR-004): "intent change →
 // fine". Nothing when the colour did not move between intents, or the mark is not a person's.
 function recolouredIntent(el: ServerElement | undefined, entry: FoldedUpdate): string | undefined {
@@ -818,6 +842,12 @@ export function formatChangeReport(changeSet: ChangeSet, currentElements: Server
             `      ↳ ${RELATION_PHRASE[link.relation]} ` +
             `${describeElement(target, link.targetId, context)}${gap}`
           );
+          // ADR-006: a "fine" ring round a whole screen approves it. A screen here is a container
+          // no other element holds, as the reader's screens are roots.
+          if (intent === 'fine' && link.relation === 'encloses' && target && containerIds.has(target.id) &&
+              !isHeld(target, targets)) {
+            lines.push(`      ↳ approves screen ${describeElement(target, link.targetId, context)}`);
+          }
         }
       }
     }

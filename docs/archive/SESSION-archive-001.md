@@ -4,6 +4,14 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (e) — Claude Code — PR 4 landed and pushed (`5c5daf6`)
+- **Done:** PR 4 committed on the owner's yes; the full gate (`npm test`) passed once; pushed on
+  the owner's yes. `origin/main` is at `5c5daf6`.
+- **Not done:** the Playwright browser suite, and a CI dispatch on the day's commits (KI-8).
+- **Next:** ROADMAP PR 1: a person marks a canvas up through the loop, with the legend, the intent
+  colours and the approval boxes, and the attribution accuracy is measured on what they drew.
+- **Picks up:** a session with a terminal and a browser tab, and the owner at the canvas.
+
 ## 2026-11-17 (d) — Claude Code — PR 4 built: the geometry lint (SPEC-008); STAGED
 - **Done:** `wireframe --lint` and a `### Drawing quality` block in the reading: five errors,
   three advisories, every tolerance calibrated on the corpus first. 189 / 189 node tests

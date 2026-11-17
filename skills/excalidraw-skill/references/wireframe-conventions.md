@@ -366,6 +366,11 @@ it, ticks it, and that mark is not listed as an annotation. `wireframe` prints e
 reports a tick as `↳ approves screen [s01] …`, and a fill taken off as `withdraws approval of`.
 A round still ends with `watch`'s quiet period; the boxes show which screens are done.
 
+**Where a screen has no room for a box,** a person approves it by ringing the whole screen in
+green (ADR-006): a mark in the "fine" colour that encloses a whole screen reads `· approved`, and
+`changes` adds `↳ approves screen [s01] …` under it. The ring stays in the annotations, attached
+to the screen. A red, orange or blue ring round a screen is a mark on the screen, not an approval.
+
 **Where a mark lands** is attributed by gesture, whatever its colour:
 
 | Gesture | Reported as |

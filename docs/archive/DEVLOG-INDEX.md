@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-17** (c) — PR 4 built: the geometry lint (ADR-002, SPEC-008)
 - **2026-11-17** (b) — ADR-005 built: an approval box in each screen (SPEC-007)
 - **2026-11-17** (a) — ADR-004 built: a mark's intent is its colour, and the legend says so (SPEC-006)
 

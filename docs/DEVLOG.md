@@ -10,6 +10,20 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (f) — KI-10 fixed: a ring round a whole screen is about it, and a green one approves it (ADR-006)
+- **Why:** PR 1 round 1's only mark, a green loop round S01 meaning "S01 is fine", bound to a
+  heading inside the screen, and nothing read S01 as approved (it had no room for a box).
+- **What:** `attributeAnnotation`'s `encloses` skipped containers, against `findContainers`' own
+  comment; it now targets the largest container a mark wholly rings, else the smallest component
+  as before. ADR-006, the owner's call: a "fine" mark that rings a whole screen approves it, box or
+  no box, and stays an annotation; `changes` adds `↳ approves screen`. Conventions § 8, SKILL.md,
+  README.
+- **Tests:** `tests/attribution.test.mjs` (4, two seen red), four in `tests/approval.test.mjs`
+  (two seen red, two pinning what must not change); `human-round-1` flips to a hit that approves
+  S01; baseline 8 / 9; no other binding moved. Live on port 3082: a green ring drawn in the tab
+  round a frame reads `circles / marks [s01]` and `approves screen [s01]`. 207 / 207.
+- **Rejected:** approving by a ring in any colour (a red ring round a screen means change it).
+
 ## 2026-11-17 (e) — The lint recalibrated on a real drawing: 14 false errors to none (SPEC-008)
 - **Why:** on the owner's dnd_crawler wireframe, which reads with all zeros and was ruled right,
   PR 4's lint gave 14 errors and 24 advisories (DEVLOG 2026-11-17 (d)).
@@ -40,29 +54,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   corpus missed them; fixing them is the next change (the list is in the scene's lint output).
 - **Opens:** KI-10's fix (a mark round a whole screen targets it, and a `fine` one approves it);
   the lint's misfires; a round 2 with more marks.
-
-## 2026-11-17 (c) — PR 4 built: the geometry lint (ADR-002, SPEC-008)
-- **Why:** `--score` says whether the reading succeeded; nothing said whether the drawing follows
-  the conventions, and on 2026-08-07 a footer 4.29px outside its frame surfaced only as "1 screen
-  could not be named".
-- **What:** `src/core/wireframe-lint.ts` reads the reader's own model into findings with a stable
-  `ruleId`, `severity`, `elementId`, `message` and `measured` value. Five errors
-  (`containment-near-miss`, `row-split`, `bar-short`, `threshold-edge`, `oversized-annotation`)
-  and three advisories (`frame-overflow`, `sibling-overlap`, `small-text`). The plain reading,
-  and so `describe_wireframe`, shows `### Drawing quality` when there is an error;
-  `wireframe --lint` lists all; `--json` carries `lint`. Reporting only. The reader's thresholds
-  moved to `src/core/reader-rules.ts`, which the lint shares.
-- **Calibration:** every tolerance measured on the corpus first (SPEC-008 § Calibration). Off-grid
-  coordinates, frame width and inset were rejected: the conventions' own 1px inset and the
-  phone-sized fixtures make them fire on drawings that read right. Zero errors on every clean
-  fixture and on UI-Wizard's 98-element dashboard.
-- **Tests:** a new fixture, lint-near-misses, with the 2026-08-07 footer and one case of each
-  other error; 17 unit tests; the corpus now asserts each fixture's lint. 189 / 189.
-- **Also:** conventions § 4 said a header must span 90% of its edge; the reader uses 80% (70% for
-  a sidebar's height), and the conventions now say so. KI-9 logged: a canvas a test boots
-  sometimes dies at boot on Windows (`0xC0000409`), seen twice.
-- **Opens:** a `--check` exit code once the rules have met more real drawings (ADR-002); the
-  browser panel as a view over `lint`.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.
