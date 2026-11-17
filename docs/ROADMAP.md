@@ -30,7 +30,9 @@ Three measures, because "it looked right" has already proved too weak a bar once
    sessions in, every attribution figure we have was produced by an agent imitating a person.
 
 4. **Drawing conformance** — measured from 2026-11-17 by `wireframe --lint` (SPEC-008): zero
-   errors on the eleven corpus fixtures that read as intended and on UI-Wizard's real dashboard.
+   errors on the corpus fixtures that read as intended, on UI-Wizard's real dashboard and, after
+   a recalibration the same day, on the owner's 29-screen dnd_crawler wireframe (SPEC-008
+   § Recalibration).
    Before that, not measured. `wireframe --score` says whether the *reading*
    succeeded; nothing says whether the *drawing* follows the conventions it was drawn against. On
    2026-08-07 a footer 4.29px outside its frame produced "1 screen could not be named" — the symptom,

@@ -4,6 +4,16 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (d) — Claude Code — PR 4 built: the geometry lint (SPEC-008); STAGED
+- **Done:** `wireframe --lint` and a `### Drawing quality` block in the reading: five errors,
+  three advisories, every tolerance calibrated on the corpus first. 189 / 189 node tests
+  (DEVLOG 2026-11-17 (c), SPEC-008 § Verified). KI-9 logged (a test canvas dying at boot on
+  Windows, seen twice).
+- **Where:** `main` at `b2792cc`, equal to `origin/main`; PR 4 staged, waiting on the owner's yes.
+- **Next:** commit PR 4; the full gate once, then push on the owner's yes; then ROADMAP PR 1, the
+  attribution measurement, which needs a person.
+- **Picks up:** any session with a terminal; PR 1 needs a person and a browser tab.
+
 ## 2026-11-17 (c) — Claude Code — ADR-004 and ADR-005 landed and pushed
 - **Done:** ADR-005 committed as `a420ce5` on the owner's yes; the full gate (`npm test`) passed
   once, then both commits were pushed on the owner's yes. `origin/main` is at `a420ce5`.

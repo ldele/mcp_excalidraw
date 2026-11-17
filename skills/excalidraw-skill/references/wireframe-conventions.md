@@ -419,12 +419,12 @@ names the cause when the reading is a few pixels from a different one. Each find
 | Rule | Severity | Fires when |
 |---|---|---|
 | `containment-near-miss` | error | an element overlaps a larger sibling but reaches 2–20px outside it, so it nests beside it, not inside (the footer 4.29px out that became a phantom screen) |
-| `row-split` | error | two boxes side by side overlap vertically by half the shorter one's height or less, so they read as two rows |
-| `bar-short` | error | a band flush to an edge spans ≥ 60% of it but misses the header / footer / sidebar test above |
+| `row-split` | error | two boxes of a size (the shorter ≥ 75% of the taller) sit side by side but overlap vertically by half or less, so they read as two rows |
+| `bar-short` | error | a rectangle band flush to an edge spans ≥ 60% of it but misses the header / footer / sidebar test above |
 | `threshold-edge` | error | an undeclared box is 1px past a threshold: a 29px square, 19px text, a 7px-thin bar |
 | `oversized-annotation` | error | a transparent shape a person drew holds two or more components (KI-6) |
 | `frame-overflow` | advisory | a frame member reaches outside its frame, where the editor hides it |
-| `sibling-overlap` | advisory | siblings overlap by more than a near miss and neither holds the other |
+| `sibling-overlap` | advisory | siblings overlap by more than 2px and more than a near miss, and neither holds the other |
 | `small-text` | advisory | text under 10px |
 
 It reports only; the exit code says nothing. `wireframe --json` carries the same findings under

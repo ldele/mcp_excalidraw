@@ -24,17 +24,9 @@
       "miss": "The person said 'yes I meant S01 is fine' (2026-11-17). Encloses never targets a container, so a loop round a whole screen lands on something inside it. KI-10."
     }
   ],
-  "lint": [
-    {
-      "ruleId": "sibling-overlap",
-      "severity": "advisory",
-      "elementId": "s01-h",
-      "measured": 0.6,
-      "why": "A misfire, pinned so it is seen: the heading's measured box touches the note's by 0.6px, which no reader would call an overlap. Among the false positives the dnd_crawler scene showed the lint on 2026-11-17, to be fixed in the follow-up (DEVLOG 2026-11-17 (d))."
-    }
-  ],
   "notes": [
     "Drawn 2026-11-17 on port 3081: the 13 components by `apply`, from the original's geometry, exported with `excalidraw-canvas export`; then the person's freedraw element was appended from the round's canvas (port 3080, rev 655) with origin human, as annotated.excalidraw's marks were patched in.",
+    "Until 2026-11-17 (e) this fixture pinned a lint misfire, a 0.6px touch between the heading and the note read as a sibling overlap; the lint's fix removed it, so the fixture now has no finding.",
     "The round itself ran on the whole dnd_crawler scene, 29 screens with the markup legend and 23 approval boxes; this one mark is everything the person drew."
   ]
 }

@@ -114,11 +114,31 @@ In the main checkout, 2026-11-17, Windows 11, Node 24.
 | 12 · the docs | Conventions § 4 (the reader's 80% / 70% span) and § 9 (the rules); SKILL.md (Drawing quality); README (the reading bullet and its differences row); `describe_wireframe`'s description; `npm run sync:skills` |
 | Gates | `type-check`, `type-check:frontend`: pass. `node --test tests/**/*.test.mjs`: 189 / 189, after one run of four lost a canvas boot to `0xC0000409` in an unrelated test (finding 1). `test:mcp`, `test:bind`: pass. `docs_check --strict`, `init_check`: pass. Not run: the rest of `npm test` and the browser suite, due once before the push |
 
+## Recalibration on a real drawing (2026-11-17, after landing)
+
+The owner's dnd_crawler_rust wireframe (29 screens, 584 components, read-only from that repo),
+which reads with all zeros and which its owner ruled right, gave **14 errors and 24 advisories**.
+The corpus had none of its shapes. Three rules changed; each change has a test drawn small in
+`tests/wireframe-lint.test.mjs`, seen red first:
+
+| Rule | Misfires | Cause | Change |
+|---|---|---|---|
+| `bar-short` | 6 errors | a card's heading text flush to the card's top was judged as a band | only a rectangle is a band; the reader never makes text a header |
+| `row-split` | 8 errors | a short item grazing a card three to seven times its height in the next column: two columns, not a row | only boxes of a size, the shorter ≥ 75% of the taller (the misfires were at most 57%; the designed case is 100%) |
+| `sibling-overlap` | 22 advisories | each screen's heading and note touching by a measured 0.6px | an overlap within the reader's 2px containment slack is a touch |
+
+After: **0 errors and 2 advisories** on that scene, the two real ones (a segmented control in S09
+whose buttons overlap by 6px). UI-Wizard's dashboard: still none. The corpus: unchanged, except
+that `human-round-1` loses the 0.6px advisory it had pinned. Every golden reading unchanged.
+The 0.75 is set from one scene; a second real drawing should check it.
+
 ## Findings
 
 1. **A canvas booted by a test sometimes dies on Windows with `0xC0000409`.** One run of four, in
    `server-contract.test.mjs`, a test this change does not reach; SPEC-004 saw the same once in
    Playwright. Its second sighting, so logged as KI-9.
+3. **The corpus could not calibrate the lint alone.** Its drawings were made to show one thing
+   each; a real scene of 29 screens showed three misfires in an hour (§ Recalibration).
 2. **The conventions said 90% where the reader uses 80%.** Conventions § 4 corrected to the reader's
    numbers (row 1).
 

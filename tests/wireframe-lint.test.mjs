@@ -179,3 +179,40 @@ test('formatLint lists errors before advisories, each with its rule id', () => {
   assert.match(out, /advisory {2}small-text {2}\[tiny\]/);
   assert.equal(formatLint([]), 'No findings: the drawing follows the conventions the lint checks.');
 });
+
+// ─── Misfires on a real drawing (2026-11-17, the owner's dnd_crawler scene) ───
+// That scene reads with all zeros and was ruled right by its owner, yet gave 14 errors and 24
+// advisories. The three shapes behind 36 of them, drawn small (DEVLOG 2026-11-17 (e)).
+
+test("a card's heading text flush to its top is no short band", () => {
+  const elements = screen(
+    // The heading's 173px span 72% of the card's 240.
+    rect('card', 32, 100, 240, 200, { backgroundColor: '#ffffff', strokeColor: '#d7d5cc' }),
+    text('card-h', 32, 100, 'Keys while playing', 16),
+    input('email', 32, 400, 'Email')
+  );
+  assert.deepEqual(rules(elements).filter(r => r.includes('bar-short')), []);
+});
+
+test('a heading and the note under it touching by 0.6px do not overlap', () => {
+  // The title's measured box ends at y 57; the note starts at 56.4.
+  const elements = screen(text('note', 32, 56.4, 'A note under the heading', 12));
+  assert.deepEqual(rules(elements), []);
+});
+
+test('a short item grazing a taller panel in the next column is no row split', () => {
+  // A list item 44 tall whose top edge grazes the bottom of a 210-tall card beside it.
+  const elements = screen(
+    rect('why', 360, 100, 200, 210, { backgroundColor: '#ffffff', strokeColor: '#d7d5cc' }),
+    rect('item', 32, 300, 300, 44, { backgroundColor: '#ffffff', strokeColor: '#d7d5cc', role: 'list-item' })
+  );
+  assert.deepEqual(rules(elements).filter(r => r.includes('row-split')), []);
+});
+
+test('adjacent buttons overlapping by 6px stay an advisory', () => {
+  const elements = screen(
+    rect('l', 32, 100, 120, 48, { backgroundColor: '#dbeafe', label: { text: 'Left' }, role: 'button' }),
+    rect('m', 146, 100, 120, 48, { backgroundColor: '#dbeafe', label: { text: 'Middle' }, role: 'button' })
+  );
+  assert.deepEqual(rules(elements), ['advisory:sibling-overlap:m']);
+});

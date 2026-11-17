@@ -4,6 +4,14 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (g) — Claude Code — round 1 committed (`3d5c383`); the lint recalibrated; STAGED
+- **Done:** round 1 committed on the owner's yes, not pushed. The lint's three misfiring rules
+  fixed on the dnd_crawler scene: 14 errors and 24 advisories down to 0 and 2, both real
+  (DEVLOG 2026-11-17 (e), SPEC-008 § Recalibration). 199 / 199.
+- **Where:** `main` at `3d5c383`, one ahead of `origin/main`; the fix staged.
+- **Next:** commit the fix; the full gate; push both on the owner's yes; then KI-10.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (f) — Claude Code — PR 1 round 1 recorded; STAGED
 - **Done:** the owner marked up the dnd_crawler wireframe on port 3080: one mark, a green loop
   round S01 meaning "S01 is fine", read `fine` but attached to a heading inside (KI-10). Pinned as
@@ -21,13 +29,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** ROADMAP PR 1: a person marks a canvas up through the loop, with the legend, the intent
   colours and the approval boxes, and the attribution accuracy is measured on what they drew.
 - **Picks up:** a session with a terminal and a browser tab, and the owner at the canvas.
-
-## 2026-11-17 (d) — Claude Code — PR 4 built: the geometry lint (SPEC-008); STAGED
-- **Done:** `wireframe --lint` and a `### Drawing quality` block in the reading: five errors,
-  three advisories, every tolerance calibrated on the corpus first. 189 / 189 node tests
-  (DEVLOG 2026-11-17 (c), SPEC-008 § Verified). KI-9 logged (a test canvas dying at boot on
-  Windows, seen twice).
-- **Where:** `main` at `b2792cc`, equal to `origin/main`; PR 4 staged, waiting on the owner's yes.
-- **Next:** commit PR 4; the full gate once, then push on the owner's yes; then ROADMAP PR 1, the
-  attribution measurement, which needs a person.
-- **Picks up:** any session with a terminal; PR 1 needs a person and a browser tab.

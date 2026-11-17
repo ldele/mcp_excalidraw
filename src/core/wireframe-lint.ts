@@ -46,6 +46,10 @@ const NEAR_MISS_MAX = 20; // px outside a container that still reads as a slip, 
 const BAND_MIN_SPAN = 0.6; // a band spanning less than this of its edge is a card by intent
 const THRESHOLD_MARGIN = 1; // px past an inference threshold that is still "almost"
 const SMALL_TEXT_MIN = 10; // px; conventions § 3 allow 10–11 for micro-labels
+// Two boxes are a ragged row only when they are of a size: a short item grazing a panel three
+// times its height in the next column is two columns, not a row. Set from the misfires on a real
+// drawing, 2026-11-17 (the shorter at most 0.57 of the taller) against the designed case (1.0).
+const ROW_MIN_HEIGHT_RATIO = 0.75;
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 const pct = (n: number): string => `${Math.round(n * 100)}%`;
@@ -89,7 +93,10 @@ function lintSiblings(siblings: WireframeNode[], out: LintFinding[]): void {
             message: `[${inner.id}] is ${round(out_)}px outside [${outer.id}]: it reads beside it, ` +
               'not inside. Move it fully inside.'
           });
-        } else {
+        } else if (Math.min(o.w, o.h) > CONTAINMENT_TOLERANCE) {
+          // Within the reader's own containment slack, two boxes touch rather than overlap: a
+          // heading's measured box and the note under it meet by 0.6px on every screen of a real
+          // drawing (2026-11-17).
           const by = round(Math.min(o.w, o.h));
           out.push({
             ruleId: 'sibling-overlap', severity: 'advisory',
@@ -101,7 +108,8 @@ function lintSiblings(siblings: WireframeNode[], out: LintFinding[]): void {
       }
 
       // Side by side (no horizontal overlap) yet split into two rows by the reader.
-      if (o.w <= 0) {
+      const heights = Math.min(first.box.h, later.box.h) / Math.max(first.box.h, later.box.h);
+      if (o.w <= 0 && heights >= ROW_MIN_HEIGHT_RATIO) {
         const ratio = rowOverlapRatio(
           { top: first.box.y, bottom: first.box.y + first.box.h },
           later.box
@@ -120,6 +128,9 @@ function lintSiblings(siblings: WireframeNode[], out: LintFinding[]): void {
 }
 
 function lintBand(node: WireframeNode, parent: WireframeNode, out: LintFinding[]): void {
+  // A band is a shape. A card's heading text flush to the card's top is a heading, and the
+  // reader never makes text a header (2026-11-17, six misfires on a real drawing).
+  if (node.element.type !== 'rectangle') return;
   if (declaredRole(node.element)) return;
   if (node.role === 'header' || node.role === 'footer' || node.role === 'sidebar') return;
   const { box } = node;

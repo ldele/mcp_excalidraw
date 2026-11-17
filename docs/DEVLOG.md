@@ -10,6 +10,21 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (e) — The lint recalibrated on a real drawing: 14 false errors to none (SPEC-008)
+- **Why:** on the owner's dnd_crawler wireframe, which reads with all zeros and was ruled right,
+  PR 4's lint gave 14 errors and 24 advisories (DEVLOG 2026-11-17 (d)).
+- **What:** `bar-short` judges rectangles only (six errors were cards' heading text);
+  `row-split` needs boxes of a size, the shorter ≥ 75% of the taller (eight errors were short
+  items grazing taller cards in the next column); `sibling-overlap` ignores overlaps within the
+  reader's 2px slack (22 advisories were headings touching their notes by 0.6px). Conventions § 9
+  says so.
+- **Result:** that scene 0 errors and 2 advisories (S09's buttons, overlapping by 6px, real).
+  UI-Wizard's dashboard still none; every golden unchanged; `human-round-1` loses its pinned 0.6px
+  advisory. Four tests, three seen red first. 199 / 199.
+- **Rejected:** dropping `row-split` (the ragged row it targets is real); a tolerance on
+  `bar-short`'s span (the misfires were text, not near misses).
+- **Opens:** the 0.75 rests on one scene; KI-10 is next.
+
 ## 2026-11-17 (d) — PR 1, round 1: one mark by a person, a miss; the lint misfires on a real drawing
 - **Why:** the attribution measurement (ROADMAP measure 3, KI-3) needs marks a person drew.
 - **What ran:** the owner's dnd_crawler_rust wireframe (29 screens, read-only from that repo)
@@ -48,22 +63,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   sometimes dies at boot on Windows (`0xC0000409`), seen twice.
 - **Opens:** a `--check` exit code once the rules have met more real drawings (ADR-002); the
   browser panel as a view over `lint`.
-
-## 2026-11-17 (b) — ADR-005 built: an approval box in each screen (SPEC-007)
-- **Why:** T-027's second half. A person who was done with a screen had to say so in chat.
-- **What:** `src/core/approval.ts`: an element whose id ends `-approval` is its screen's approval
-  box (by `frameId`, else the screen holding it). The reading leaves it out of the components;
-  a fill or a person's mark centred inside it ticks it, and the tick is no annotation. A screen
-  reads `· approved` or `· not approved yet`, under `Approved: 1 of 2 screens.`; `changes` says a
-  tick `approves screen [s01] …`, and a fill taken off `withdraws approval of`. The legend gains
-  a line; conventions § 8 has the box recipe; SKILL.md's loop, the README and
-  `describe_wireframe`'s description say how.
-- **Tests:** a new fixture, approval-boxes, the tick drawn in a real tab on port 3072; 13 unit
-  tests. Each failed first. Every other golden unchanged. 157 / 157.
-- **Rejected:** a tick only in green (a person who ticks in black means it too); the smallest
-  holder as the box's screen in `changes` (it would name a header bar the box sits on).
-- **Opens:** T-027 closes with this. Next is PR 4 (ADR-002), and ROADMAP PR 1, a person marking up
-  through the loop, now has its conventions on the canvas.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

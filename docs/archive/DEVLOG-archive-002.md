@@ -4,6 +4,22 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (b) — ADR-005 built: an approval box in each screen (SPEC-007)
+- **Why:** T-027's second half. A person who was done with a screen had to say so in chat.
+- **What:** `src/core/approval.ts`: an element whose id ends `-approval` is its screen's approval
+  box (by `frameId`, else the screen holding it). The reading leaves it out of the components;
+  a fill or a person's mark centred inside it ticks it, and the tick is no annotation. A screen
+  reads `· approved` or `· not approved yet`, under `Approved: 1 of 2 screens.`; `changes` says a
+  tick `approves screen [s01] …`, and a fill taken off `withdraws approval of`. The legend gains
+  a line; conventions § 8 has the box recipe; SKILL.md's loop, the README and
+  `describe_wireframe`'s description say how.
+- **Tests:** a new fixture, approval-boxes, the tick drawn in a real tab on port 3072; 13 unit
+  tests. Each failed first. Every other golden unchanged. 157 / 157.
+- **Rejected:** a tick only in green (a person who ticks in black means it too); the smallest
+  holder as the box's screen in `changes` (it would name a header bar the box sits on).
+- **Opens:** T-027 closes with this. Next is PR 4 (ADR-002), and ROADMAP PR 1, a person marking up
+  through the loop, now has its conventions on the canvas.
+
 ## 2026-11-17 (a) — ADR-004 built: a mark's intent is its colour, and the legend says so (SPEC-006)
 - **Why:** T-027. A person marking up had nothing on the canvas telling them how, and the agent
   guessed what each mark wanted from its words. ADR-004 chose intent by colour with a legend.
