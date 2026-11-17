@@ -38,6 +38,11 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Workaround:** none needed. `tests/fixtures/annotated.excalidraw` pins all four attribution
   relations and `tests/frontend-echo.test.mjs` now pins the browser echo.
 - **Real fix:** `docs/ROADMAP.md` PR 1 — one sitting with a person, now unblocked.
+- **2026-11-17, round 1:** the owner marked up their dnd_crawler_rust wireframe (29 screens, the
+  markup legend, 23 approval boxes) in the browser pane, and drew one mark: a green loop round all
+  of S01, meaning "S01 is fine". Its intent read right (`fine`); its target did not, a heading
+  inside the screen (KI-10). Pinned as `tests/fixtures/human-round-1.excalidraw`. N = 1 measures
+  nothing, so this stays open until a round has a sample worth a number.
 
 ## KI-4 — a note beside a card can bind to the wrong component
 - **Symptom:** in `tests/fixtures/annotated.excalidraw`, the note "show VAT breakdown" sits level
@@ -136,6 +141,22 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
 - **Workaround:** run the suite again; a real failure repeats, this has not.
 - **Real fix:** unknown. A next look: capture the child's stderr and a Windows Error Reporting
   dump on the failure, and see whether it tracks the concurrent boots the suite runs.
+
+## KI-10 — a mark round a whole screen cannot target the screen
+- **Symptom:** a person's green loop round all of S01 ("S01 is fine", the owner, 2026-11-17) reads
+  `circles / marks text … [s01-save-h]`: the heading of a card inside the screen. The first
+  mark a person drew through the loop (KI-3, PR 1 round 1).
+- **Cause:** `attributeAnnotation` (`src/core/changes.ts`) never lets `encloses` target a container,
+  so that a ring round a card means the card's contents; a screen is a container, so a ring round a
+  screen falls through to the largest thing it encloses that is not one. ADR-005 met the same limit
+  and set aside "a green mark on the screen itself" for an approval box.
+- **Why it matters:** five of 28 screens in that scene had no room for an approval box; a ring round
+  the screen is what the person reached for there.
+- **Workaround:** read a `fine` loop whose box holds a whole screen as about the screen; the reading
+  gives its size.
+- **Real fix:** not attempted. Let `encloses` target a top-level screen when the mark holds the
+  whole of it, and let a `fine` mark that does so approve it, which reopens ADR-005's alternative;
+  `human-round-1` flips from miss to hit when it lands.
 
 ## Resolved index
 

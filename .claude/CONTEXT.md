@@ -31,7 +31,10 @@ left out of the reading. ADR-005 is on `main` as `a420ce5` (SPEC-007): each scre
 box, ticked by a person, reads as the screen approved. Both pushed 2026-11-17; no CI run
 dispatched on them. PR 4, the geometry lint (ADR-002, SPEC-008), is on `main` as `5c5daf6`,
 pushed: `wireframe --lint`, and a Drawing quality block in the reading.
-**Next:** ROADMAP PR 1, the attribution measurement with a person. Each ticket's rank is in its 2026-11-16 note in
+PR 1's round 1 ran the same day: the owner drew one mark, a miss (KI-10); the lint
+misfires 14 times on that real scene, which reads right.
+**Next:** fix the lint's misfires (DEVLOG 2026-11-17 (d)); then KI-10; then a round 2 with more
+marks. Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

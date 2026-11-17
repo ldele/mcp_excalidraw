@@ -1,0 +1,23 @@
+## Wireframe reading
+1 screen, 13 components, 0 connections, 1 annotation.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "S01 Title — continue or start again"  [s01] rectangle 960x600
+  1. heading "S01 Title — continue or start again"  [s01-h] text 439x33 · 22px
+  2. text "A note on when this screen is shown, under the …"  [s01-n] text 821x20 · 12px
+  3. image "Title picture"  [s01-art] rectangle 440x420
+  4. card  [s01-save] rectangle 440x140 · fill #ffffff
+    4.1. text "Your saved game"  [s01-save-h] text 169x25 · 16px
+    4.2. text "Who you are, where you are, and when you last s…"  [s01-save-b] text 324x51 · 12px
+  5. button "Continue"  [s01-cont] rectangle 440x48 · fill #74c0fc
+  6. button "New game"  [s01-new] rectangle 440x48 · fill #dbeafe
+  7. button "Controls"  [s01-ctl] rectangle 440x48 · fill #dbeafe
+  8. button "Quit"  [s01-quit] rectangle 440x48 · fill #dbeafe
+  9. text "New game asks first before it replaces a save."  [s01-x] text 364x20 · 12px
+  10. footer "[A] Choose [D-pad] Move"  [s01-pad] rectangle 960x44 · fill #fbfaf8
+
+### Annotations on this wireframe (1)
+  Human markup currently on the canvas. A tag is what the mark's colour asks for: [change], [remove], [question] or [fine]; a mark with no tag is a change request.
+  [fine] (freedraw markup)
+      ↳ circles / marks text "Your saved game" [s01-save-h]

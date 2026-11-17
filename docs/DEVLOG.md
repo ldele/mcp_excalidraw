@@ -10,6 +10,22 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (d) — PR 1, round 1: one mark by a person, a miss; the lint misfires on a real drawing
+- **Why:** the attribution measurement (ROADMAP measure 3, KI-3) needs marks a person drew.
+- **What ran:** the owner's dnd_crawler_rust wireframe (29 screens, read-only from that repo)
+  imported on port 3080, with the markup legend and approval boxes on the 23 screens with room;
+  the owner drew in the browser pane. The tab's load made no human record. The owner drew one
+  mark: a green loop round all of S01, confirmed as "S01 is fine". Intent read right; the target
+  was a heading inside the screen: 0 of 1. Logged as KI-10; pinned as `human-round-1` (S01's
+  geometry with neutral words, since this repository is public, and the owner's stroke as drawn).
+  Baseline 7 / 9. KI-3 stays open: one mark is no measurement.
+- **Also found:** the geometry lint (PR 4) gives 14 errors and 24 advisories on that scene, which
+  reads with all zeros and which the owner ruled correct: `bar-short` judges text, `row-split`
+  fires on a column beside a taller panel, `sibling-overlap` on a 0.6px touch. Calibration on the
+  corpus missed them; fixing them is the next change (the list is in the scene's lint output).
+- **Opens:** KI-10's fix (a mark round a whole screen targets it, and a `fine` one approves it);
+  the lint's misfires; a round 2 with more marks.
+
 ## 2026-11-17 (c) — PR 4 built: the geometry lint (ADR-002, SPEC-008)
 - **Why:** `--score` says whether the reading succeeded; nothing said whether the drawing follows
   the conventions, and on 2026-08-07 a footer 4.29px outside its frame surfaced only as "1 screen
@@ -48,27 +64,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   holder as the box's screen in `changes` (it would name a header bar the box sits on).
 - **Opens:** T-027 closes with this. Next is PR 4 (ADR-002), and ROADMAP PR 1, a person marking up
   through the loop, now has its conventions on the canvas.
-
-## 2026-11-17 (a) — ADR-004 built: a mark's intent is its colour, and the legend says so (SPEC-006)
-- **Why:** T-027. A person marking up had nothing on the canvas telling them how, and the agent
-  guessed what each mark wanted from its words. ADR-004 chose intent by colour with a legend.
-- **What:** `src/core/markup-intent.ts` reads a person's mark in the red, orange (Excalidraw's
-  yellow), blue or green family of the editor's palette as change, remove, question or fine.
-  `wireframe` tags each mark `[change]` etc.; `changes` prints `by human · change`, and
-  `intent change → fine` on a recolour. A legend, an element whose id is `legend` or begins
-  `legend-`, is left out with its members and whatever is drawn inside it, and the reading says
-  so in one line. The skill ships it as `references/markup-legend.json`; conventions § 8,
-  SKILL.md's hand-over, the README (a new differences row) and two MCP descriptions say how.
-  `boxOf` and its helpers moved, unchanged, to `src/core/box.ts` so the new module and
-  `changes.ts` do not import each other.
-- **Tests:** annotated's marks recoloured to pin one of each intent and one untagged; a new
-  fixture, markup-legend, whose two marks were drawn in a real tab on port 3072; 11 unit tests.
-  Each failed first. Attribution baseline 7 / 8 (was 5 / 6), re-reviewed by hand. The other six
-  goldens unchanged byte for byte. 139 / 139.
-- **Rejected:** an exact-hex match (a lighter red from the shade row would carry nothing); a
-  declared `role` for the legend (a new role); a CLI command to draw the legend (a file is
-  enough and testable).
-- **Opens:** ADR-005, the approval box, builds on this and adds its line to the legend.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

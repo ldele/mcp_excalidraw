@@ -4,6 +4,16 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (f) — Claude Code — PR 1 round 1 recorded; STAGED
+- **Done:** the owner marked up the dnd_crawler wireframe on port 3080: one mark, a green loop
+  round S01 meaning "S01 is fine", read `fine` but attached to a heading inside (KI-10). Pinned as
+  `human-round-1`; baseline 7 / 9; KI-3 stays open (DEVLOG 2026-11-17 (d)).
+- **Where:** `main` at `135a1ab`; the record is staged. The canvas on 3080 keeps the round
+  (`scene-3080.json`); 3081 held the fixture's draft.
+- **Next:** fix the lint's misfires on that real scene (14 errors on a drawing that reads right);
+  then KI-10; then a round 2.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (e) — Claude Code — PR 4 landed and pushed (`5c5daf6`)
 - **Done:** PR 4 committed on the owner's yes; the full gate (`npm test`) passed once; pushed on
   the owner's yes. `origin/main` is at `5c5daf6`.
@@ -21,12 +31,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** commit PR 4; the full gate once, then push on the owner's yes; then ROADMAP PR 1, the
   attribution measurement, which needs a person.
 - **Picks up:** any session with a terminal; PR 1 needs a person and a browser tab.
-
-## 2026-11-17 (c) — Claude Code — ADR-004 and ADR-005 landed and pushed
-- **Done:** ADR-005 committed as `a420ce5` on the owner's yes; the full gate (`npm test`) passed
-  once, then both commits were pushed on the owner's yes. `origin/main` is at `a420ce5`.
-- **Not done:** the Playwright browser suite (`test:canvas`) was not run, and no CI run was
-  dispatched on the two commits (CI runs only by `workflow_dispatch`, KI-8).
-- **Next:** PR 4 (ADR-002). ROADMAP PR 1, a person marking up through the loop, now has its
-  conventions on the canvas: the legend, the intent colours, the approval boxes.
-- **Picks up:** any session with a terminal.

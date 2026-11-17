@@ -17,9 +17,11 @@ Three measures, because "it looked right" has already proved too weak a bar once
    reading, run as tests: `npm run test:corpus`. This is what stops a role-inference tweak from
    silently regressing another shape. Spec: `docs/specs/SPEC-001-fixture-corpus.md`.
 3. **Markup attribution accuracy** — of N human annotations, how many bind to the component a
-   person would say they refer to. **Still 4 of 5, and still agent-drawn**
-   (`tests/expected/attribution-baseline.json`). The one miss is a note that binds to the field
-   above the card it sits level with. That is a regression guard, not evidence the loop works.
+   person would say they refer to. **7 of 9 in the corpus, eight of them agent-drawn**
+   (`tests/expected/attribution-baseline.json`). The first mark a person drew, on 2026-11-17 (PR 1,
+   round 1), is a miss: a green loop round a whole screen meaning "this screen is fine" binds to a
+   heading inside it (KI-10). One mark is no measurement; the corpus figure is a regression guard,
+   not evidence the loop works.
 
    The human round finally ran on 2026-08-07 and **the number is still untaken** — the loop turned
    out to be broken before any annotation could be drawn (opening a browser tab restamped every
@@ -48,7 +50,7 @@ Three measures, because "it looked right" has already proved too weak a bar once
 
 | PR | Scope | Status | Spec |
 |----|-------|--------|------|
-| 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; attribution number still untaken | — |
+| 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; round 1 of the measurement 2026-11-17 gave one mark, a miss (KI-10); attribution number still untaken | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
 | 4  | Geometry lint: check a drawing against the conventions, report the cause | **done 2026-11-17** (`5c5daf6`) — `wireframe --lint`, eight rules calibrated on the corpus | `docs/specs/SPEC-008-geometry-lint.md` |

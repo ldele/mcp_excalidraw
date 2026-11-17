@@ -1,0 +1,40 @@
+{
+  "fixture": "human-round-1.excalidraw",
+  "what": "ROADMAP PR 1, round 1 (2026-11-17): the only mark a person drew, a green freehand loop round a whole screen, on a copy of that screen's geometry. The screen is S01 of the owner's dnd_crawler_rust wireframe, its 13 components at their exact positions, sizes, fills and roles, with neutral wording (this repository is public, that design is not). The stroke is the person's, all 144 points, unchanged but for its id.",
+  "why": "The first annotation in the corpus a person drew rather than an agent imitating one. It is a miss, recorded: the person meant 'S01 is fine', and the reader attaches a circle to the largest thing it encloses that is not a container, here the heading inside the save card. S01 had no room for an approval box (ADR-005), so a green ring round the screen was the person's way to approve it; ADR-005 set that gesture aside because a mark cannot target a screen (KI-10).",
+  "score": {
+    "screens": 1,
+    "components": 13,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s01", "label": "S01 Title — continue or start again" }
+  ],
+  "navigation": [],
+  "markup": [
+    {
+      "id": "loop-s01",
+      "targetId": "s01-save-h",
+      "relation": "encloses",
+      "intent": "fine",
+      "intendedTargetId": "s01",
+      "miss": "The person said 'yes I meant S01 is fine' (2026-11-17). Encloses never targets a container, so a loop round a whole screen lands on something inside it. KI-10."
+    }
+  ],
+  "lint": [
+    {
+      "ruleId": "sibling-overlap",
+      "severity": "advisory",
+      "elementId": "s01-h",
+      "measured": 0.6,
+      "why": "A misfire, pinned so it is seen: the heading's measured box touches the note's by 0.6px, which no reader would call an overlap. Among the false positives the dnd_crawler scene showed the lint on 2026-11-17, to be fixed in the follow-up (DEVLOG 2026-11-17 (d))."
+    }
+  ],
+  "notes": [
+    "Drawn 2026-11-17 on port 3081: the 13 components by `apply`, from the original's geometry, exported with `excalidraw-canvas export`; then the person's freedraw element was appended from the round's canvas (port 3080, rev 655) with origin human, as annotated.excalidraw's marks were patched in.",
+    "The round itself ran on the whole dnd_crawler scene, 29 screens with the markup legend and 23 approval boxes; this one mark is everything the person drew."
+  ]
+}

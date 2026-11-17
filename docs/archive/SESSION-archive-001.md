@@ -4,6 +4,15 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (c) — Claude Code — ADR-004 and ADR-005 landed and pushed
+- **Done:** ADR-005 committed as `a420ce5` on the owner's yes; the full gate (`npm test`) passed
+  once, then both commits were pushed on the owner's yes. `origin/main` is at `a420ce5`.
+- **Not done:** the Playwright browser suite (`test:canvas`) was not run, and no CI run was
+  dispatched on the two commits (CI runs only by `workflow_dispatch`, KI-8).
+- **Next:** PR 4 (ADR-002). ROADMAP PR 1, a person marking up through the loop, now has its
+  conventions on the canvas: the legend, the intent colours, the approval boxes.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (b) — Claude Code — ADR-004 committed (`1a5f530`); ADR-005 built (SPEC-007), STAGED
 - **Done:** ADR-004 committed on the owner's yes as `1a5f530`, not pushed. ADR-005: each screen's
   "Approved" box (`s01-approval`), ticked by a person in a real tab, reads `· approved` in
