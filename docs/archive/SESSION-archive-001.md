@@ -4,6 +4,15 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (m) — Claude Code — T-018/T-019 pushed (`e8c6017`); T-004 fixed, T-008 documented; STAGED
+- **Done:** `e8c6017` pushed after the full gate. T-004: the page's label recentring now honours
+  `textAlign` / `verticalAlign` (upstream's code, FORK.md row). T-008: conventions § 4 says to
+  colour labels on light borders (DEVLOG 2026-11-17 (k)).
+- **Where:** `main` at `e8c6017`, equal to `origin/main`; both staged; both tickets closed.
+- **Next:** commit; the full gate and push on the owner's yes; then T-002, T-003 (decisions for
+  the owner) and T-005 (rank 8).
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (l) — Claude Code — T-017 pushed (`9c7a6f6`); T-018 and T-019 fixed; STAGED
 - **Done:** `9c7a6f6` pushed after the full gate. T-018: the tab-sync and cross-origin probes are
   browser tests with assertions (the cross-origin one seen red with the guard off). T-019: the two
