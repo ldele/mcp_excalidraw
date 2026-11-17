@@ -44,6 +44,12 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
   inside the screen (KI-10). Pinned as `tests/fixtures/human-round-1.excalidraw`; since KI-10's
   fix the same day it binds to the screen and approves it. N = 1 measures nothing, so this stays
   open until a round has a sample worth a number.
+- **2026-11-17, round 2, not run:** the same scene was offered again, and the owner pointed out
+  that it was already approved: there was nothing on it they wanted changed. Marks made up for a
+  test would measure an imitation, as the agent-drawn corpus already does. **How to close this:**
+  take the measurement from the next real review, when screens are drawn for a project and the
+  owner marks them up because they want changes; read the round with `changes`, confirm each
+  mark's target with the owner, and record it as round 2.
 
 ## KI-4 — a note beside a card can bind to the wrong component
 - **Symptom:** in `tests/fixtures/annotated.excalidraw`, the note "show VAT breakdown" sits level

@@ -4,6 +4,22 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (d) — PR 1, round 1: one mark by a person, a miss; the lint misfires on a real drawing
+- **Why:** the attribution measurement (ROADMAP measure 3, KI-3) needs marks a person drew.
+- **What ran:** the owner's dnd_crawler_rust wireframe (29 screens, read-only from that repo)
+  imported on port 3080, with the markup legend and approval boxes on the 23 screens with room;
+  the owner drew in the browser pane. The tab's load made no human record. The owner drew one
+  mark: a green loop round all of S01, confirmed as "S01 is fine". Intent read right; the target
+  was a heading inside the screen: 0 of 1. Logged as KI-10; pinned as `human-round-1` (S01's
+  geometry with neutral words, since this repository is public, and the owner's stroke as drawn).
+  Baseline 7 / 9. KI-3 stays open: one mark is no measurement.
+- **Also found:** the geometry lint (PR 4) gives 14 errors and 24 advisories on that scene, which
+  reads with all zeros and which the owner ruled correct: `bar-short` judges text, `row-split`
+  fires on a column beside a taller panel, `sibling-overlap` on a 0.6px touch. Calibration on the
+  corpus missed them; fixing them is the next change (the list is in the scene's lint output).
+- **Opens:** KI-10's fix (a mark round a whole screen targets it, and a `fine` one approves it);
+  the lint's misfires; a round 2 with more marks.
+
 ## 2026-11-17 (c) — PR 4 built: the geometry lint (ADR-002, SPEC-008)
 - **Why:** `--score` says whether the reading succeeded; nothing said whether the drawing follows
   the conventions, and on 2026-08-07 a footer 4.29px outside its frame surfaced only as "1 screen

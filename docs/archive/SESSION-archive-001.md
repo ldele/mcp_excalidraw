@@ -4,6 +4,16 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (f) — Claude Code — PR 1 round 1 recorded; STAGED
+- **Done:** the owner marked up the dnd_crawler wireframe on port 3080: one mark, a green loop
+  round S01 meaning "S01 is fine", read `fine` but attached to a heading inside (KI-10). Pinned as
+  `human-round-1`; baseline 7 / 9; KI-3 stays open (DEVLOG 2026-11-17 (d)).
+- **Where:** `main` at `135a1ab`; the record is staged. The canvas on 3080 keeps the round
+  (`scene-3080.json`); 3081 held the fixture's draft.
+- **Next:** fix the lint's misfires on that real scene (14 errors on a drawing that reads right);
+  then KI-10; then a round 2.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (e) — Claude Code — PR 4 landed and pushed (`5c5daf6`)
 - **Done:** PR 4 committed on the owner's yes; the full gate (`npm test`) passed once; pushed on
   the owner's yes. `origin/main` is at `5c5daf6`.

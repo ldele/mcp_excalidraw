@@ -34,8 +34,11 @@ pushed: `wireframe --lint`, and a Drawing quality block in the reading.
 PR 1's round 1 ran the same day: the owner drew one mark, a miss (KI-10); the lint
 misfires 14 times on that real scene, which reads right.
 The misfires were fixed the same day (`2b97ebe`, pushed): that scene now gives no error. KI-10
-was fixed after it, with ADR-006 (a green ring round a whole screen approves it), staged.
-**Next:** commit KI-10; then a round 2 of PR 1 with more marks. Each ticket's rank is in its 2026-11-16 note in
+was fixed after it, with ADR-006 (a green ring round a whole screen approves it), as `31d1f6e`,
+pushed. PR 1's round 2 was not run: the scene was already approved, so it gave nothing genuine to
+mark (DEVLOG 2026-11-17 (g)).
+**Next:** take PR 1's round 2 from the next real review (KI-3); meanwhile the open tickets, in
+their triage order (`docs/TICKETS.md`). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

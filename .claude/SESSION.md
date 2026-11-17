@@ -4,6 +4,17 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (i) — Claude Code — KI-10 pushed (`31d1f6e`); round 2 not run; STAGED
+- **Done:** `31d1f6e` (KI-10, ADR-006) pushed on the owner's yes after the full gate. Round 2
+  offered on the round-1 scene and stopped: the owner had already approved that scene, so there
+  was nothing genuine to mark (DEVLOG 2026-11-17 (g)). This note is staged.
+- **Where:** `main` at `31d1f6e`, equal to `origin/main`, apart from this staged record.
+- **Next:** PR 1's round 2 from the next real review, when the owner marks up screens they want
+  changed (KI-3 says how); meanwhile the open tickets in their triage order. Still not run on
+  the day's commits: the Playwright suite and a CI dispatch (KI-8).
+- **Picks up:** any session with a terminal; round 2 needs the owner, a browser tab, and a design
+  under review.
+
 ## 2026-11-17 (h) — Claude Code — round 1 and the lint fix pushed; KI-10 fixed with ADR-006; STAGED
 - **Done:** `3d5c383` and `2b97ebe` pushed on the owner's yes. KI-10: a ring round a whole
   container is about it; ADR-006 (owner's call): a green ring round a whole screen approves it.
@@ -20,14 +31,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   (DEVLOG 2026-11-17 (e), SPEC-008 § Recalibration). 199 / 199.
 - **Where:** `main` at `3d5c383`, one ahead of `origin/main`; the fix staged.
 - **Next:** commit the fix; the full gate; push both on the owner's yes; then KI-10.
-- **Picks up:** any session with a terminal.
-
-## 2026-11-17 (f) — Claude Code — PR 1 round 1 recorded; STAGED
-- **Done:** the owner marked up the dnd_crawler wireframe on port 3080: one mark, a green loop
-  round S01 meaning "S01 is fine", read `fine` but attached to a heading inside (KI-10). Pinned as
-  `human-round-1`; baseline 7 / 9; KI-3 stays open (DEVLOG 2026-11-17 (d)).
-- **Where:** `main` at `135a1ab`; the record is staged. The canvas on 3080 keeps the round
-  (`scene-3080.json`); 3081 held the fixture's draft.
-- **Next:** fix the lint's misfires on that real scene (14 errors on a drawing that reads right);
-  then KI-10; then a round 2.
 - **Picks up:** any session with a terminal.

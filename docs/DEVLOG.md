@@ -10,6 +10,15 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (g) — PR 1 round 2 not run: an approved scene gives nothing to mark
+- **What:** the round-1 scene was reopened on port 3080 for a second round (it read clean, S01
+  approved by the owner's loop since ADR-006, the tab's load made no record). The owner pointed
+  out that the scene was already approved, so there was nothing they wanted changed; no mark was
+  drawn and the round was stopped.
+- **Lesson:** the attribution measurement needs a design under real review. Marks invented for
+  the test would measure an imitation, as the agent-drawn corpus does. KI-3 now says how to close
+  it: take round 2 from the next real review.
+
 ## 2026-11-17 (f) — KI-10 fixed: a ring round a whole screen is about it, and a green one approves it (ADR-006)
 - **Why:** PR 1 round 1's only mark, a green loop round S01 meaning "S01 is fine", bound to a
   heading inside the screen, and nothing read S01 as approved (it had no room for a box).
@@ -38,22 +47,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Rejected:** dropping `row-split` (the ragged row it targets is real); a tolerance on
   `bar-short`'s span (the misfires were text, not near misses).
 - **Opens:** the 0.75 rests on one scene; KI-10 is next.
-
-## 2026-11-17 (d) — PR 1, round 1: one mark by a person, a miss; the lint misfires on a real drawing
-- **Why:** the attribution measurement (ROADMAP measure 3, KI-3) needs marks a person drew.
-- **What ran:** the owner's dnd_crawler_rust wireframe (29 screens, read-only from that repo)
-  imported on port 3080, with the markup legend and approval boxes on the 23 screens with room;
-  the owner drew in the browser pane. The tab's load made no human record. The owner drew one
-  mark: a green loop round all of S01, confirmed as "S01 is fine". Intent read right; the target
-  was a heading inside the screen: 0 of 1. Logged as KI-10; pinned as `human-round-1` (S01's
-  geometry with neutral words, since this repository is public, and the owner's stroke as drawn).
-  Baseline 7 / 9. KI-3 stays open: one mark is no measurement.
-- **Also found:** the geometry lint (PR 4) gives 14 errors and 24 advisories on that scene, which
-  reads with all zeros and which the owner ruled correct: `bar-short` judges text, `row-split`
-  fires on a column beside a taller panel, `sibling-overlap` on a 0.6px touch. Calibration on the
-  corpus missed them; fixing them is the next change (the list is in the scene's lint output).
-- **Opens:** KI-10's fix (a mark round a whole screen targets it, and a `fine` one approves it);
-  the lint's misfires; a round 2 with more marks.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

@@ -52,7 +52,7 @@ Three measures, because "it looked right" has already proved too weak a bar once
 
 | PR | Scope | Status | Spec |
 |----|-------|--------|------|
-| 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; round 1 of the measurement 2026-11-17 gave one mark, a miss (KI-10); attribution number still untaken | — |
+| 1  | Run the two-way markup round with a human end to end; fix what it exposes | in progress — ran 2026-08-07, fixed what it exposed; round 1 of the measurement 2026-11-17 gave one mark (a miss, a hit since KI-10's fix); round 2 waits for a real review, since a scene already approved gives nothing genuine to mark (KI-3) | — |
 | 2  | Fixture corpus + test harness: `.excalidraw` in, expected reading out | **done 2026-08-01** | `docs/specs/SPEC-001-fixture-corpus.md` |
 | 3  | `wireframe --score`: emit fallback and uncertainty counts as a number | **done 2026-08-01** | — |
 | 4  | Geometry lint: check a drawing against the conventions, report the cause | **done 2026-11-17** (`5c5daf6`) — `wireframe --lint`, eight rules calibrated on the corpus | `docs/specs/SPEC-008-geometry-lint.md` |
