@@ -1,0 +1,17 @@
+## Wireframe reading
+1 screen, 12 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "Check a file of records"  [u-screen] rectangle 1160x640
+  1. heading "Check a file of records"  [u-title] text 420x36 · 28px
+  2. text "Upload a file of records and choose what to che…"  [u-desc] text 1060x60 · 14px
+  3. card "Drop the records here"  [u-records] rectangle 262x120 · fill #ffffff
+  4. card "Drop the rules here"  [u-table] rectangle 262x120 · fill #ffffff
+  5. input "Standard"  [u-standard] rectangle 262x52 · fill #ffffff
+  6. checkbox "Say what looks unusual"  [u-profile] rectangle 24x24 · fill #74c0fc
+  7. checkbox "Also score it a second way"  [u-ml] rectangle 24x24 · fill #ffffff
+  8. button "Check the file"  [u-validate] rectangle 1096x52 · fill #74c0fc
+  9. button "Findings"  [u-tab-findings] rectangle 240x40 · fill #74c0fc
+  10. button "Data"  [u-tab-data] rectangle 180x40 · fill #ffffff
+  11. table "Findings, one row each"  [u-results] rectangle 1096x164 · fill #ffffff

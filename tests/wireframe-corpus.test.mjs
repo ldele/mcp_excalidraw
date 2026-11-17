@@ -64,6 +64,20 @@ for (const name of names) {
       assert.deepEqual(actual, expected.navigation ?? []);
     });
 
+    // Reading order (T-006, T-021): where a fixture states the first screen's top-level order, or
+    // the label each checkbox must absorb, the reading must give exactly that.
+    test('reading order and checkbox labels, where stated', () => {
+      if (expected.readingOrder) {
+        assert.deepEqual(model.screens[0].children.map(node => node.id), expected.readingOrder);
+      }
+      if (expected.checkboxLabels) {
+        const found = {};
+        const walk = node => { if (node.role === 'checkbox') found[node.id] = node.label; node.children.forEach(walk); };
+        model.screens.forEach(walk);
+        assert.deepEqual(found, expected.checkboxLabels);
+      }
+    });
+
     // The geometry lint (ADR-002, SPEC-008): a fixture with no `lint` list must have no finding,
     // so a rule that starts firing on a drawing that reads right fails here.
     test('lint findings match', () => {

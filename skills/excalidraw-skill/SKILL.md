@@ -290,7 +290,8 @@ the same canvas as a UI:
   recognise. Declare the role when you draw it and the reading comes back exact.
 - **Reading order** — children are numbered top-to-bottom, left-to-right within a
   row (`3.`, `3.1.`, `3.2.`), which is the order a person reads them and the order
-  you should generate markup in.
+  you should generate markup in. A full-height sidebar, or anything else with two or
+  more stacked siblings beside it, reads as a column block before or after those rows.
 - **Navigation** — arrows that cross from one screen to another are reported as
   flows: `button "Continue" [submit] → screen "Dashboard" [s2]`.
 - **Annotations** — human markup currently on the canvas, each attached to the

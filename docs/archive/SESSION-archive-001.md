@@ -4,6 +4,14 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (g) — Claude Code — round 1 committed (`3d5c383`); the lint recalibrated; STAGED
+- **Done:** round 1 committed on the owner's yes, not pushed. The lint's three misfiring rules
+  fixed on the dnd_crawler scene: 14 errors and 24 advisories down to 0 and 2, both real
+  (DEVLOG 2026-11-17 (e), SPEC-008 § Recalibration). 199 / 199.
+- **Where:** `main` at `3d5c383`, one ahead of `origin/main`; the fix staged.
+- **Next:** commit the fix; the full gate; push both on the owner's yes; then KI-10.
+- **Picks up:** any session with a terminal.
+
 ## 2026-11-17 (f) — Claude Code — PR 1 round 1 recorded; STAGED
 - **Done:** the owner marked up the dnd_crawler wireframe on port 3080: one mark, a green loop
   round S01 meaning "S01 is fine", read `fine` but attached to a heading inside (KI-10). Pinned as

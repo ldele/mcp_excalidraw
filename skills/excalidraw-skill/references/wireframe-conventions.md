@@ -292,6 +292,12 @@ is the order to emit markup in, so it should match the DOM you want.
 - If two things must be adjacent in the markup, make them adjacent on the canvas.
 - A card's own children are numbered within it (`3.1`, `3.2`), so put a card's title
   above its body — the reading inherits the visual order, including mistakes.
+- **An element beside a stacked column reads as a column.** A full-height sidebar, a
+  picture beside a stack of buttons, a detail card beside a list: whatever has two or
+  more stacked siblings beside it is read as one block with what sits under it in its
+  own width, before the rows beside it when it stands to their left, after them when it
+  stands to their right. The rows beside it read row by row. No wrapper card is needed
+  round a main column (T-006, T-021).
 
 ---
 

@@ -16,7 +16,7 @@ import {
   contains, sharesRow, isSquarish, declaredRole,
   EDGE_TOLERANCE, BAR_MAX_HEIGHT_RATIO, BAR_MIN_WIDTH_RATIO, SIDEBAR_MAX_WIDTH_RATIO,
   SIDEBAR_MIN_HEIGHT_RATIO, CONTROL_MAX_HEIGHT, HEADING_MIN_FONT_SIZE, TICKBOX_MAX_SIZE,
-  AVATAR_MAX_SIZE, DIVIDER_MAX_THICKNESS
+  AVATAR_MAX_SIZE, DIVIDER_MAX_THICKNESS, CONTAINMENT_TOLERANCE
 } from './reader-rules.js';
 import { LintFinding, lintWireframe } from './wireframe-lint.js';
 
@@ -293,10 +293,10 @@ function buildTree(nodes: WireframeNode[]): WireframeNode[] {
 
 // Two boxes share a row when they overlap vertically by more than half the
 // shorter one — how a person's eye groups a row of controls.
-export function inReadingOrder(nodes: WireframeNode[]): WireframeNode[] {
-  const sorted = [...nodes].sort((a, b) => a.box.y - b.box.y || a.box.x - b.box.x);
-  const rows: { band: { top: number; bottom: number }; items: WireframeNode[] }[] = [];
+type Row = { band: { top: number; bottom: number }; items: WireframeNode[] };
 
+function groupRows(sorted: WireframeNode[]): Row[] {
+  const rows: Row[] = [];
   for (const node of sorted) {
     const row = rows[rows.length - 1];
     if (row && sharesRow(row.band, node.box)) {
@@ -304,13 +304,99 @@ export function inReadingOrder(nodes: WireframeNode[]): WireframeNode[] {
       row.band.bottom = Math.max(row.band.bottom, node.box.y + node.box.h);
       continue;
     }
-    rows.push({
-      band: { top: node.box.y, bottom: node.box.y + node.box.h },
-      items: [node]
-    });
+    rows.push({ band: { top: node.box.y, bottom: node.box.y + node.box.h }, items: [node] });
+  }
+  return rows;
+}
+
+// A sibling that stands beside a column: at least two siblings, stacked one above the other
+// (they share no row), sit beside it (no horizontal overlap) and within its height (each over
+// half inside it). A full-height sidebar beside a main column, two drop zones beside two stacked
+// checkboxes, a detail card beside a list, a picture beside a stack of buttons.
+function spansAColumn(node: WireframeNode, siblings: WireframeNode[]): boolean {
+  const top = node.box.y;
+  const bottom = node.box.y + node.box.h;
+  const beside = siblings.filter(other => {
+    if (other === node || other.box.h >= node.box.h) return false;
+    const apart = other.box.x >= node.box.x + node.box.w || other.box.x + other.box.w <= node.box.x;
+    const within = Math.min(bottom, other.box.y + other.box.h) - Math.max(top, other.box.y);
+    return apart && within > other.box.h / 2;
+  });
+  return beside.some((a, i) => beside.slice(i + 1).some(b =>
+    !sharesRow({ top: a.box.y, bottom: a.box.y + a.box.h }, b.box)));
+}
+
+// A sibling that stands beside a column (spansAColumn) is a column itself, not a row: a band grown to its
+// height swallowed every row beside it, and the column read sorted by x (T-006, T-021). Rows are
+// grouped from the other siblings; a tall sibling is then read as a block with the rows it spans,
+// before them when it stands to their left, after them when it stands to their right. One that
+// spans no row takes a row of its own by its top, grouped with any tall sibling it shares it with.
+export function inReadingOrder(nodes: WireframeNode[]): WireframeNode[] {
+  const sorted = [...nodes].sort((a, b) => a.box.y - b.box.y || a.box.x - b.box.x);
+  const tall = new Set(sorted.filter(node => spansAColumn(node, sorted)));
+  const isTall = (node: WireframeNode): boolean => tall.has(node);
+
+  const rows = groupRows(sorted.filter(node => !isTall(node)));
+  const before = new Map<number, WireframeNode[]>();
+  const after = new Map<number, WireframeNode[]>();
+  const homeless: WireframeNode[] = [];
+  const centre = (box: Box): number => box.x + box.w / 2;
+
+  for (const column of sorted.filter(isTall)) {
+    const tall = column;
+    const top = tall.box.y;
+    const bottom = tall.box.y + tall.box.h;
+    const spanned = rows
+      .map((row, index) => ({ row, index }))
+      .filter(({ row }) => Math.min(bottom, row.band.bottom) - Math.max(top, row.band.top) > 0);
+    if (spanned.length === 0) {
+      homeless.push(tall);
+      continue;
+    }
+    // What sits inside the column's own width, within the height of the rows beside it (a
+    // portrait's caption under the portrait), goes with the column rather than with those rows.
+    const extentTop = Math.min(top, ...spanned.map(({ row }) => row.band.top));
+    const extentBottom = Math.max(bottom, ...spanned.map(({ row }) => row.band.bottom));
+    const underneath: WireframeNode[] = [];
+    for (const { row } of spanned) {
+      row.items = row.items.filter(item => {
+        const inWidth = item.box.x >= tall.box.x - CONTAINMENT_TOLERANCE &&
+          item.box.x + item.box.w <= tall.box.x + tall.box.w + CONTAINMENT_TOLERANCE;
+        const inExtent = item.box.y >= extentTop && item.box.y + item.box.h <= extentBottom;
+        if (inWidth && inExtent) underneath.push(item);
+        return !(inWidth && inExtent);
+      });
+    }
+    const items = spanned.flatMap(({ row }) => row.items);
+    const rowsCentre = items.length > 0
+      ? items.reduce((sum, item) => sum + centre(item.box), 0) / items.length
+      : centre(tall.box);
+    const [anchor, side] = centre(tall.box) <= rowsCentre
+      ? [spanned[0]!.index, before]
+      : [spanned[spanned.length - 1]!.index, after];
+    side.set(anchor, [...(side.get(anchor) ?? []), tall, ...underneath.sort((a, b) => a.box.y - b.box.y)]);
   }
 
-  return rows.flatMap(row => row.items.sort((a, b) => a.box.x - b.box.x));
+  const byX = (list: WireframeNode[]): WireframeNode[] => [...list].sort((a, b) => a.box.x - b.box.x);
+  // A column block reads top to bottom within each column, columns left to right.
+  const byColumn = (list: WireframeNode[]): WireframeNode[] => {
+    const columns = list.filter(isTall).sort((a, b) => a.box.x - b.box.x);
+    return columns.flatMap(column => [column, ...list.filter(item => !isTall(item) &&
+      item.box.x >= column.box.x - CONTAINMENT_TOLERANCE &&
+      item.box.x + item.box.w <= column.box.x + column.box.w + CONTAINMENT_TOLERANCE)
+      .sort((a, b) => a.box.y - b.box.y)]);
+  };
+  const ordered: WireframeNode[][] = [];
+  const loose = groupRows(homeless);
+  let next = 0;
+  rows.forEach((row, index) => {
+    while (next < loose.length && loose[next]!.band.top < row.band.top) ordered.push(byX(loose[next++]!.items));
+    if (before.has(index)) ordered.push(byColumn(before.get(index)!));
+    if (row.items.length > 0) ordered.push(byX(row.items));
+    if (after.has(index)) ordered.push(byColumn(after.get(index)!));
+  });
+  while (next < loose.length) ordered.push(byX(loose[next++]!.items));
+  return ordered.flat();
 }
 
 // ─── Role inference ────────────────────────────────────────────

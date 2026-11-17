@@ -1,0 +1,41 @@
+{
+  "fixture": "stacked-checkboxes.excalidraw",
+  "what": "T-021's screen, its geometry exact: two 262x120 drop zones beside an input and two stacked 24px checkboxes, each with its label 8px to the right, then a button, two tabs and a results table.",
+  "why": "T-021: the drop zones' band took both checkbox rows, so the row sorted by x read checkbox, checkbox, label, label, and neither checkbox got its label. Since the fix the drop zones are a column block read before the rows they span, and each checkbox absorbs its label.",
+  "score": {
+    "screens": 1,
+    "components": 12,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    {
+      "id": "u-screen",
+      "label": "Check a file of records"
+    }
+  ],
+  "navigation": [],
+  "markup": [],
+  "readingOrder": [
+    "u-title",
+    "u-desc",
+    "u-records",
+    "u-table",
+    "u-standard",
+    "u-profile",
+    "u-ml",
+    "u-validate",
+    "u-tab-findings",
+    "u-tab-data",
+    "u-results"
+  ],
+  "checkboxLabels": {
+    "u-profile": "Say what looks unusual",
+    "u-ml": "Also score it a second way"
+  },
+  "notes": [
+    "Drawn 2026-11-17 on port 3083 by `apply` from pharma-dq-validator's upload-and-report screen (read-only there), with neutral wording; exported, then the two checkboxes were given role checkbox as the original declares them."
+  ]
+}

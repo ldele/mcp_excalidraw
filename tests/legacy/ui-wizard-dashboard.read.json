@@ -349,6 +349,20 @@
           "children": []
         },
         {
+          "id": "tour",
+          "role": "button",
+          "inferred": false,
+          "label": "Take the tour",
+          "type": "rectangle",
+          "box": {
+            "x": 1276,
+            "y": 198,
+            "w": 100,
+            "h": 30
+          },
+          "children": []
+        },
+        {
           "id": "onboarding",
           "role": "card",
           "inferred": false,
@@ -574,159 +588,6 @@
           ]
         },
         {
-          "id": "kpi-signups",
-          "role": "card",
-          "inferred": false,
-          "type": "rectangle",
-          "box": {
-            "x": 400,
-            "y": 752,
-            "w": 480,
-            "h": 144
-          },
-          "children": [
-            {
-              "id": "kpi-signups-k",
-              "role": "text",
-              "inferred": false,
-              "label": "Q3 signups target",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 768,
-                "w": 300,
-                "h": 16
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-signups-v",
-              "role": "heading",
-              "inferred": false,
-              "label": "7'420 / 10'000",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 790,
-                "w": 260,
-                "h": 34
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-signups-progress",
-              "role": "divider",
-              "inferred": false,
-              "type": "rectangle",
-              "box": {
-                "x": 416,
-                "y": 846,
-                "w": 448,
-                "h": 4
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-signups-d",
-              "role": "text",
-              "inferred": false,
-              "label": "74% of goal · 2'580 to go",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 862,
-                "w": 260,
-                "h": 16
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": "revenue",
-          "role": "card",
-          "inferred": false,
-          "type": "rectangle",
-          "box": {
-            "x": 400,
-            "y": 920,
-            "w": 976,
-            "h": 629
-          },
-          "children": [
-            {
-              "id": "revenue-title",
-              "role": "heading",
-              "inferred": false,
-              "label": "Revenue vs expenses",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 936,
-                "w": 300,
-                "h": 26
-              },
-              "children": []
-            },
-            {
-              "id": "revenue-desc",
-              "role": "text",
-              "inferred": false,
-              "label": "Last 8 months",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 966,
-                "w": 200,
-                "h": 16
-              },
-              "children": []
-            },
-            {
-              "id": "revenue-plot",
-              "role": "chart",
-              "inferred": false,
-              "label": "Area chart · revenue vs expenses · 8 months · x = month, y = € · series 1 and 2 on --chart-1 / --chart-2 · grid on --chart-grid",
-              "type": "rectangle",
-              "box": {
-                "x": 418,
-                "y": 996,
-                "w": 940,
-                "h": 535
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": "invoices-heading",
-          "role": "heading",
-          "inferred": false,
-          "label": "Invoices",
-          "type": "text",
-          "box": {
-            "x": 400,
-            "y": 1586,
-            "w": 200,
-            "h": 26
-          },
-          "children": []
-        },
-        {
-          "id": "invoices-table",
-          "role": "table",
-          "inferred": false,
-          "label": "24 rows × 5 cols — invoice, customer, email, status (paid / pending / overdue pill), amount (tabular, right-aligned) · sortable headers · filter row · row selection · 5 per page with pagination",
-          "type": "rectangle",
-          "box": {
-            "x": 400,
-            "y": 1654,
-            "w": 976,
-            "h": 316
-          },
-          "children": []
-        },
-        {
           "id": "kpi-churn",
           "role": "card",
           "inferred": false,
@@ -797,62 +658,6 @@
           ]
         },
         {
-          "id": "kpi-tickets",
-          "role": "card",
-          "inferred": false,
-          "type": "rectangle",
-          "box": {
-            "x": 896,
-            "y": 752,
-            "w": 232,
-            "h": 144
-          },
-          "children": [
-            {
-              "id": "kpi-tickets-k",
-              "role": "text",
-              "inferred": false,
-              "label": "Support tickets",
-              "type": "text",
-              "box": {
-                "x": 912,
-                "y": 768,
-                "w": 200,
-                "h": 16
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-tickets-v",
-              "role": "heading",
-              "inferred": false,
-              "label": "96",
-              "type": "text",
-              "box": {
-                "x": 912,
-                "y": 790,
-                "w": 80,
-                "h": 34
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-tickets-d",
-              "role": "text",
-              "inferred": false,
-              "label": "−26.7% · prev. 131",
-              "type": "text",
-              "box": {
-                "x": 912,
-                "y": 862,
-                "w": 200,
-                "h": 16
-              },
-              "children": []
-            }
-          ]
-        },
-        {
           "id": "kpi-workspaces",
           "role": "card",
           "inferred": false,
@@ -901,6 +706,131 @@
               "box": {
                 "x": 1160,
                 "y": 700,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-signups",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 752,
+            "w": 480,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-signups-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Q3 signups target",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 768,
+                "w": 300,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "7'420 / 10'000",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 790,
+                "w": 260,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-progress",
+              "role": "divider",
+              "inferred": false,
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 846,
+                "w": 448,
+                "h": 4
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-d",
+              "role": "text",
+              "inferred": false,
+              "label": "74% of goal · 2'580 to go",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 862,
+                "w": 260,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-tickets",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 896,
+            "y": 752,
+            "w": 232,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-tickets-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Support tickets",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 768,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "96",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 790,
+                "w": 80,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-d",
+              "role": "text",
+              "inferred": false,
+              "label": "−26.7% · prev. 131",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 862,
                 "w": 200,
                 "h": 16
               },
@@ -979,16 +909,72 @@
           ]
         },
         {
-          "id": "tour",
-          "role": "button",
+          "id": "revenue",
+          "role": "card",
           "inferred": false,
-          "label": "Take the tour",
           "type": "rectangle",
           "box": {
-            "x": 1276,
-            "y": 198,
-            "w": 100,
-            "h": 30
+            "x": 400,
+            "y": 920,
+            "w": 976,
+            "h": 629
+          },
+          "children": [
+            {
+              "id": "revenue-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Revenue vs expenses",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 936,
+                "w": 300,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-desc",
+              "role": "text",
+              "inferred": false,
+              "label": "Last 8 months",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 966,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-plot",
+              "role": "chart",
+              "inferred": false,
+              "label": "Area chart · revenue vs expenses · 8 months · x = month, y = € · series 1 and 2 on --chart-1 / --chart-2 · grid on --chart-grid",
+              "type": "rectangle",
+              "box": {
+                "x": 418,
+                "y": 996,
+                "w": 940,
+                "h": 535
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "invoices-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "Invoices",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 1586,
+            "w": 200,
+            "h": 26
           },
           "children": []
         },
@@ -1003,6 +989,20 @@
             "y": 1614,
             "w": 76,
             "h": 28
+          },
+          "children": []
+        },
+        {
+          "id": "invoices-table",
+          "role": "table",
+          "inferred": false,
+          "label": "24 rows × 5 cols — invoice, customer, email, status (paid / pending / overdue pill), amount (tabular, right-aligned) · sortable headers · filter row · row selection · 5 per page with pagination",
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 1654,
+            "w": 976,
+            "h": 316
           },
           "children": []
         }
@@ -1359,6 +1359,20 @@
           "children": []
         },
         {
+          "id": "tour",
+          "role": "button",
+          "inferred": false,
+          "label": "Take the tour",
+          "type": "rectangle",
+          "box": {
+            "x": 1276,
+            "y": 198,
+            "w": 100,
+            "h": 30
+          },
+          "children": []
+        },
+        {
           "id": "onboarding",
           "role": "card",
           "inferred": false,
@@ -1584,159 +1598,6 @@
           ]
         },
         {
-          "id": "kpi-signups",
-          "role": "card",
-          "inferred": false,
-          "type": "rectangle",
-          "box": {
-            "x": 400,
-            "y": 752,
-            "w": 480,
-            "h": 144
-          },
-          "children": [
-            {
-              "id": "kpi-signups-k",
-              "role": "text",
-              "inferred": false,
-              "label": "Q3 signups target",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 768,
-                "w": 300,
-                "h": 16
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-signups-v",
-              "role": "heading",
-              "inferred": false,
-              "label": "7'420 / 10'000",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 790,
-                "w": 260,
-                "h": 34
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-signups-progress",
-              "role": "divider",
-              "inferred": false,
-              "type": "rectangle",
-              "box": {
-                "x": 416,
-                "y": 846,
-                "w": 448,
-                "h": 4
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-signups-d",
-              "role": "text",
-              "inferred": false,
-              "label": "74% of goal · 2'580 to go",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 862,
-                "w": 260,
-                "h": 16
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": "revenue",
-          "role": "card",
-          "inferred": false,
-          "type": "rectangle",
-          "box": {
-            "x": 400,
-            "y": 920,
-            "w": 976,
-            "h": 629
-          },
-          "children": [
-            {
-              "id": "revenue-title",
-              "role": "heading",
-              "inferred": false,
-              "label": "Revenue vs expenses",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 936,
-                "w": 300,
-                "h": 26
-              },
-              "children": []
-            },
-            {
-              "id": "revenue-desc",
-              "role": "text",
-              "inferred": false,
-              "label": "Last 8 months",
-              "type": "text",
-              "box": {
-                "x": 416,
-                "y": 966,
-                "w": 200,
-                "h": 16
-              },
-              "children": []
-            },
-            {
-              "id": "revenue-plot",
-              "role": "chart",
-              "inferred": false,
-              "label": "Area chart · revenue vs expenses · 8 months · x = month, y = € · series 1 and 2 on --chart-1 / --chart-2 · grid on --chart-grid",
-              "type": "rectangle",
-              "box": {
-                "x": 418,
-                "y": 996,
-                "w": 940,
-                "h": 535
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": "invoices-heading",
-          "role": "heading",
-          "inferred": false,
-          "label": "Invoices",
-          "type": "text",
-          "box": {
-            "x": 400,
-            "y": 1586,
-            "w": 200,
-            "h": 26
-          },
-          "children": []
-        },
-        {
-          "id": "invoices-table",
-          "role": "table",
-          "inferred": false,
-          "label": "24 rows × 5 cols — invoice, customer, email, status (paid / pending / overdue pill), amount (tabular, right-aligned) · sortable headers · filter row · row selection · 5 per page with pagination",
-          "type": "rectangle",
-          "box": {
-            "x": 400,
-            "y": 1654,
-            "w": 976,
-            "h": 316
-          },
-          "children": []
-        },
-        {
           "id": "kpi-churn",
           "role": "card",
           "inferred": false,
@@ -1807,62 +1668,6 @@
           ]
         },
         {
-          "id": "kpi-tickets",
-          "role": "card",
-          "inferred": false,
-          "type": "rectangle",
-          "box": {
-            "x": 896,
-            "y": 752,
-            "w": 232,
-            "h": 144
-          },
-          "children": [
-            {
-              "id": "kpi-tickets-k",
-              "role": "text",
-              "inferred": false,
-              "label": "Support tickets",
-              "type": "text",
-              "box": {
-                "x": 912,
-                "y": 768,
-                "w": 200,
-                "h": 16
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-tickets-v",
-              "role": "heading",
-              "inferred": false,
-              "label": "96",
-              "type": "text",
-              "box": {
-                "x": 912,
-                "y": 790,
-                "w": 80,
-                "h": 34
-              },
-              "children": []
-            },
-            {
-              "id": "kpi-tickets-d",
-              "role": "text",
-              "inferred": false,
-              "label": "−26.7% · prev. 131",
-              "type": "text",
-              "box": {
-                "x": 912,
-                "y": 862,
-                "w": 200,
-                "h": 16
-              },
-              "children": []
-            }
-          ]
-        },
-        {
           "id": "kpi-workspaces",
           "role": "card",
           "inferred": false,
@@ -1911,6 +1716,131 @@
               "box": {
                 "x": 1160,
                 "y": 700,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-signups",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 752,
+            "w": 480,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-signups-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Q3 signups target",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 768,
+                "w": 300,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "7'420 / 10'000",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 790,
+                "w": 260,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-progress",
+              "role": "divider",
+              "inferred": false,
+              "type": "rectangle",
+              "box": {
+                "x": 416,
+                "y": 846,
+                "w": 448,
+                "h": 4
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-signups-d",
+              "role": "text",
+              "inferred": false,
+              "label": "74% of goal · 2'580 to go",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 862,
+                "w": 260,
+                "h": 16
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "kpi-tickets",
+          "role": "card",
+          "inferred": false,
+          "type": "rectangle",
+          "box": {
+            "x": 896,
+            "y": 752,
+            "w": 232,
+            "h": 144
+          },
+          "children": [
+            {
+              "id": "kpi-tickets-k",
+              "role": "text",
+              "inferred": false,
+              "label": "Support tickets",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 768,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-v",
+              "role": "heading",
+              "inferred": false,
+              "label": "96",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 790,
+                "w": 80,
+                "h": 34
+              },
+              "children": []
+            },
+            {
+              "id": "kpi-tickets-d",
+              "role": "text",
+              "inferred": false,
+              "label": "−26.7% · prev. 131",
+              "type": "text",
+              "box": {
+                "x": 912,
+                "y": 862,
                 "w": 200,
                 "h": 16
               },
@@ -1989,16 +1919,72 @@
           ]
         },
         {
-          "id": "tour",
-          "role": "button",
+          "id": "revenue",
+          "role": "card",
           "inferred": false,
-          "label": "Take the tour",
           "type": "rectangle",
           "box": {
-            "x": 1276,
-            "y": 198,
-            "w": 100,
-            "h": 30
+            "x": 400,
+            "y": 920,
+            "w": 976,
+            "h": 629
+          },
+          "children": [
+            {
+              "id": "revenue-title",
+              "role": "heading",
+              "inferred": false,
+              "label": "Revenue vs expenses",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 936,
+                "w": 300,
+                "h": 26
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-desc",
+              "role": "text",
+              "inferred": false,
+              "label": "Last 8 months",
+              "type": "text",
+              "box": {
+                "x": 416,
+                "y": 966,
+                "w": 200,
+                "h": 16
+              },
+              "children": []
+            },
+            {
+              "id": "revenue-plot",
+              "role": "chart",
+              "inferred": false,
+              "label": "Area chart · revenue vs expenses · 8 months · x = month, y = € · series 1 and 2 on --chart-1 / --chart-2 · grid on --chart-grid",
+              "type": "rectangle",
+              "box": {
+                "x": 418,
+                "y": 996,
+                "w": 940,
+                "h": 535
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "invoices-heading",
+          "role": "heading",
+          "inferred": false,
+          "label": "Invoices",
+          "type": "text",
+          "box": {
+            "x": 400,
+            "y": 1586,
+            "w": 200,
+            "h": 26
           },
           "children": []
         },
@@ -2013,6 +1999,20 @@
             "y": 1614,
             "w": 76,
             "h": 28
+          },
+          "children": []
+        },
+        {
+          "id": "invoices-table",
+          "role": "table",
+          "inferred": false,
+          "label": "24 rows × 5 cols — invoice, customer, email, status (paid / pending / overdue pill), amount (tabular, right-aligned) · sortable headers · filter row · row selection · 5 per page with pagination",
+          "type": "rectangle",
+          "box": {
+            "x": 400,
+            "y": 1654,
+            "w": 976,
+            "h": 316
           },
           "children": []
         }

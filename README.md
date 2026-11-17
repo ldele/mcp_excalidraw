@@ -61,7 +61,9 @@ changes upstream's files and the test that fails if a merge undoes it.
 - **Component roles** such as `button`, `input`, `card`, `checkbox`, `chart` and `table` are
   inferred from geometry, fill and wording. An uncertain guess carries a `?`. `"role": "chart"` on
   an element declares the role, and the reading takes it as given.
-- **Reading order** is top to bottom, then left to right within a row (`3.`, `3.1.`).
+- **Reading order** is top to bottom, then left to right within a row (`3.`, `3.1.`). An element
+  beside a stacked column, such as a full-height sidebar, reads as a column of its own, so the rows
+  beside it stay rows.
 - **Navigation flows**: an arrow from one screen to another reads as
   `button "Continue" → screen "Dashboard"`.
 - **Drawing quality**: a block that appears only when the drawing is a few pixels from a different

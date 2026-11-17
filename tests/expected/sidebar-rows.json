@@ -1,0 +1,35 @@
+{
+  "fixture": "sidebar-rows.excalidraw",
+  "what": "T-006's own nine-element scene: a frame screen with a corner-to-corner sidebar, a title, four KPI tiles on one y, one full-width row and two cards side by side.",
+  "why": "T-006, three reports (UI-Wizard, BlackBox, doc_assistant): the full-height sidebar stretched one row band over the whole screen, so the main column read sorted by x, tiles 3, 6, 7, 9. Since the fix a sibling beside a stacked column is read as a column block, and the main column reads row by row.",
+  "score": {
+    "screens": 1,
+    "components": 10,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    {
+      "id": "s1",
+      "label": "S1 — Library summary"
+    }
+  ],
+  "navigation": [],
+  "markup": [],
+  "readingOrder": [
+    "s1-rail",
+    "s1-title",
+    "s1-kpi0",
+    "s1-kpi1",
+    "s1-kpi2",
+    "s1-kpi3",
+    "s1-rows",
+    "s1-card0",
+    "s1-card1"
+  ],
+  "notes": [
+    "Drawn 2026-11-17 on port 3083 by `apply` and exported; not patched. The ticket's example, with neutral wording."
+  ]
+}

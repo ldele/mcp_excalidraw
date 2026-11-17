@@ -37,8 +37,9 @@ The misfires were fixed the same day (`2b97ebe`, pushed): that scene now gives n
 was fixed after it, with ADR-006 (a green ring round a whole screen approves it), as `31d1f6e`,
 pushed. PR 1's round 2 was not run: the scene was already approved, so it gave nothing genuine to
 mark (DEVLOG 2026-11-17 (g)).
+T-006 and T-021 (rank 4, reading order beside a column) were fixed the same day, staged.
 **Next:** take PR 1's round 2 from the next real review (KI-3); meanwhile the open tickets, in
-their triage order (`docs/TICKETS.md`). Each ticket's rank is in its 2026-11-16 note in
+their triage order (`docs/TICKETS.md`): T-017 (rank 5) is next. Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

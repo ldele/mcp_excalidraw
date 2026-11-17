@@ -15,6 +15,7 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-024 | fixed | 2026-11-16 | A tab opening the canvas drops the bindings of an elbowed arrow made through the API, so the reading loses its flows | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-023 | fixed | 2026-10-23 | A restarted canvas comes back empty, and a tab still open on it replaces its drawing with the empty scene | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-022 | fixed | 2026-11-16 | apply runs create before delete, so a patch that replaces elements under the same ids deletes the new ones, silently | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-021 | fixed | 2026-11-17 | A tall sibling merges a stacked checkbox column into one row, so each checkbox loses its label | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-020 | fixed | 2026-11-16 | Update cpc from 1.8.0 to 1.18.1 at the start of the next session | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-016 | fixed | 2026-10-08 | The conventions' list of valid roles leaves out icon, which the toolkit accepts and a small glyph needs | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-015 | fixed | 2026-10-08 | Any origin can read, change and wipe a running canvas; a write through sync is logged as a person's | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
@@ -25,4 +26,5 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-010 | fixed | 2026-10-08 | changes reports the tab's own label-fitting resize as an edit by human, and the write-back has a trigger: the first pan or click | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-009 | fixed | 2026-10-08 | A bound arrow's waypoints are dropped when it is created; update keeps them | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-007 | fixed | 2026-10-08 | changes reports the first routing of a bound arrow as an edit by human | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-006 | fixed | 2026-11-17 | A corner-to-corner sidebar merges every sibling into one row, so the reading order goes column-major | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-001 | fixed | 2026-11-16 | A text element without width/height silently disappears from the reading, including the screen heading | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

@@ -193,7 +193,9 @@ describe('a scene exported before 2.1.1 still works', () => {
       encoding: 'utf-8'
     }));
     // ADR-002 added `lint` to this payload after UI-Wizard committed its reading; the rest must be
-    // exactly what it committed, and the lint finds nothing on this real drawing (SPEC-008).
+    // what it committed, and the lint finds nothing on this real drawing (SPEC-008). The order is
+    // not what it committed: this is T-006's own drawing, and since that fix (2026-11-17) the main
+    // column beside the full-height sidebar reads row by row, the expected file regenerated then.
     const { lint, ...committed } = reading;
     assert.deepEqual(committed, expected);
     assert.deepEqual(lint, []);

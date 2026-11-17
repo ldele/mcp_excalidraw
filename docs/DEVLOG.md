@@ -10,6 +10,29 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column
+- **Why:** both tickets, rank 4, four reports between them (UI-Wizard, BlackBox, doc_assistant,
+  pharma-dq-validator), all with a clean score. `inReadingOrder` grew a row's band to its tallest
+  member, so a full-height sidebar or two tall drop zones swallowed every row beside them, the
+  main column read sorted by x and two checkboxes lost their labels.
+- **What:** in `src/core/wireframe.ts`, a sibling with two or more stacked siblings beside it,
+  within its height, is a column. Rows are grouped from the rest; the column reads as one block
+  with what sits under it in its own width, before the rows it spans when it stands to their left,
+  after them when to their right. No threshold to calibrate.
+- **Calibration rejected first:** a height-over-median ratio. It needed under 3 for T-021, and
+  there it also took S01's 140px save card for a column on the owner's dnd scene; joining a column
+  to the row of its top edge read S07's detail card into the middle of its list. Both pinned now.
+- **Real drawings:** the three reports read from their files (read-only) are fixed; UI-Wizard's
+  legacy dashboard is T-006's own drawing, and its expected reading was regenerated (order only,
+  checked). The owner's dnd scene changes in seven screens with a side column beside a list (S04,
+  S17, S18, S22, S26, S28, S30): two read better as columns, five move a side card by one item;
+  none worse; dnd_crawler's committed reading file will differ when next regenerated.
+- **Tests:** `tests/reading-order.test.mjs` (6: the two reports seen red, four layouts that must
+  not break); fixtures `sidebar-rows` and `stacked-checkboxes`; the harness checks a stated
+  `readingOrder` and `checkboxLabels`. Every older golden unchanged. Live on port 3083 with a tab.
+  238 / 238.
+- **Opens:** BlackBox's two wrapper cards (`[s2-main]`, `[s3-main]`) can go.
+
 ## 2026-11-17 (g) — PR 1 round 2 not run: an approved scene gives nothing to mark
 - **What:** the round-1 scene was reopened on port 3080 for a second round (it read clean, S01
   approved by the owner's loop since ADR-006, the tab's load made no record). The owner pointed
@@ -32,21 +55,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   S01; baseline 8 / 9; no other binding moved. Live on port 3082: a green ring drawn in the tab
   round a frame reads `circles / marks [s01]` and `approves screen [s01]`. 207 / 207.
 - **Rejected:** approving by a ring in any colour (a red ring round a screen means change it).
-
-## 2026-11-17 (e) — The lint recalibrated on a real drawing: 14 false errors to none (SPEC-008)
-- **Why:** on the owner's dnd_crawler wireframe, which reads with all zeros and was ruled right,
-  PR 4's lint gave 14 errors and 24 advisories (DEVLOG 2026-11-17 (d)).
-- **What:** `bar-short` judges rectangles only (six errors were cards' heading text);
-  `row-split` needs boxes of a size, the shorter ≥ 75% of the taller (eight errors were short
-  items grazing taller cards in the next column); `sibling-overlap` ignores overlaps within the
-  reader's 2px slack (22 advisories were headings touching their notes by 0.6px). Conventions § 9
-  says so.
-- **Result:** that scene 0 errors and 2 advisories (S09's buttons, overlapping by 6px, real).
-  UI-Wizard's dashboard still none; every golden unchanged; `human-round-1` loses its pinned 0.6px
-  advisory. Four tests, three seen red first. 199 / 199.
-- **Rejected:** dropping `row-split` (the ragged row it targets is real); a tolerance on
-  `bar-short`'s span (the misfires were text, not near misses).
-- **Opens:** the 0.75 rests on one scene; KI-10 is next.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

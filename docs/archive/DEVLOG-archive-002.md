@@ -4,6 +4,21 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (e) — The lint recalibrated on a real drawing: 14 false errors to none (SPEC-008)
+- **Why:** on the owner's dnd_crawler wireframe, which reads with all zeros and was ruled right,
+  PR 4's lint gave 14 errors and 24 advisories (DEVLOG 2026-11-17 (d)).
+- **What:** `bar-short` judges rectangles only (six errors were cards' heading text);
+  `row-split` needs boxes of a size, the shorter ≥ 75% of the taller (eight errors were short
+  items grazing taller cards in the next column); `sibling-overlap` ignores overlaps within the
+  reader's 2px slack (22 advisories were headings touching their notes by 0.6px). Conventions § 9
+  says so.
+- **Result:** that scene 0 errors and 2 advisories (S09's buttons, overlapping by 6px, real).
+  UI-Wizard's dashboard still none; every golden unchanged; `human-round-1` loses its pinned 0.6px
+  advisory. Four tests, three seen red first. 199 / 199.
+- **Rejected:** dropping `row-split` (the ragged row it targets is real); a tolerance on
+  `bar-short`'s span (the misfires were text, not near misses).
+- **Opens:** the 0.75 rests on one scene; KI-10 is next.
+
 ## 2026-11-17 (d) — PR 1, round 1: one mark by a person, a miss; the lint misfires on a real drawing
 - **Why:** the attribution measurement (ROADMAP measure 3, KI-3) needs marks a person drew.
 - **What ran:** the owner's dnd_crawler_rust wireframe (29 screens, read-only from that repo)

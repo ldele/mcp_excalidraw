@@ -4,6 +4,16 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (j) — Claude Code — T-006 and T-021 fixed; STAGED
+- **Done:** an element beside a stacked column reads as a column block, so a full-height sidebar
+  no longer turns the main column column-major and stacked checkboxes keep their labels. The
+  three reported drawings read right; 238 / 238; live on port 3083 (DEVLOG 2026-11-17 (h)).
+- **Where:** `main` at `cef6002`, equal to `origin/main`; the fix staged; both tickets closed in
+  the ledger.
+- **Next:** commit; the full gate and push on the owner's yes; tell the owner dnd_crawler's
+  reading file will differ in seven screens when regenerated; then T-017 (rank 5).
+- **Picks up:** any session with a terminal; T-017 needs two terminals and a browser.
+
 ## 2026-11-17 (i) — Claude Code — KI-10 pushed (`31d1f6e`); round 2 not run; STAGED
 - **Done:** `31d1f6e` (KI-10, ADR-006) pushed on the owner's yes after the full gate. Round 2
   offered on the round-1 scene and stopped: the owner had already approved that scene, so there
@@ -24,11 +34,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** commit KI-10; the full gate and push on the owner's yes; then PR 1 round 2 with more
   marks (port 3080's store still holds round 1's scene).
 - **Picks up:** any session with a terminal; round 2 needs the owner and a browser tab.
-
-## 2026-11-17 (g) — Claude Code — round 1 committed (`3d5c383`); the lint recalibrated; STAGED
-- **Done:** round 1 committed on the owner's yes, not pushed. The lint's three misfiring rules
-  fixed on the dnd_crawler scene: 14 errors and 24 advisories down to 0 and 2, both real
-  (DEVLOG 2026-11-17 (e), SPEC-008 § Recalibration). 199 / 199.
-- **Where:** `main` at `3d5c383`, one ahead of `origin/main`; the fix staged.
-- **Next:** commit the fix; the full gate; push both on the owner's yes; then KI-10.
-- **Picks up:** any session with a terminal.

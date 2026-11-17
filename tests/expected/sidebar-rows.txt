@@ -1,0 +1,15 @@
+## Wireframe reading
+1 screen, 10 components, 0 connections, 0 annotations.
+
+Roles are inferred from geometry, style and wording — a trailing `?` marks a low-confidence guess. Raw type and size follow each entry, so you can disagree with the reading. Numbering is reading order (top-to-bottom, left-to-right within a row).
+
+### Screen 1 "S1 — Library summary"  [s1] frame 1280x900
+  1. sidebar  [s1-rail] rectangle 240x900 · fill #f8f7f3
+  2. heading "Summary of your library"  [s1-title] text 420x34 · 26px
+  3. card "Documents"  [s1-kpi0] rectangle 220x96 · fill #ffffff
+  4. card "Pages"  [s1-kpi1] rectangle 220x96 · fill #ffffff
+  5. card "Passages"  [s1-kpi2] rectangle 220x96 · fill #ffffff
+  6. card "Folders"  [s1-kpi3] rectangle 220x96 · fill #ffffff
+  7. table "Rows of indexed documents"  [s1-rows] rectangle 928x200 · fill #ffffff
+  8. card "What is in it"  [s1-card0] rectangle 456x300 · fill #ffffff
+  9. card "When it was added"  [s1-card1] rectangle 456x300 · fill #ffffff
