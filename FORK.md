@@ -78,7 +78,8 @@ merged cleanly in 2.2.0. Where we touch upstream's files, and what fails if a me
 | `scripts/check-durable-state.mjs`, `scripts/check-selection.mjs` | `EXCALIDRAW_NO_PERSIST=1` on the canvases they start: their "memory only" is upstream's, which forgets a scene on restart | `npm run test:durable` |
 | `src/cli/commands/elements.ts`, `apply` and `delete` | `apply` deletes before it creates, so a patch can replace an id it deletes (T-022); both skip a label the server already removed | `tests/server-contract.test.mjs` |
 | `frontend/src/App.tsx`, `frontend/src/utils/scene.ts` | `allowEmpty` in the sync body; `adoptServerScene` / `mergeAfterRestart` for a tab that outlives a restart | `tests/browser/server-restart.spec.mjs`; the `seed` helper of `scene-reload.spec.mjs` sends `allowEmpty` |
-| `scripts/check-state-integrity.mjs` | upstream's file, carrying the three checks above | — |
+| `scripts/check-state-integrity.mjs` | upstream's file, carrying the three checks above, and a 30 s health wait where upstream's is 5 s (T-019) | — |
+| `playwright.config.mjs` | upstream's file: a 60 s `webServer` timeout where upstream's is 15 s (T-019); `tests/browser/` holds three specs of ours beside upstream's (`server-restart`, `tab-sync-reroute`, `cross-origin`) | `npm run test:canvas` |
 | `vite.config.js`, `server.proxy` | `canvasProxy` from `scripts/vite-dev-proxy.mjs`: proxies the page's socket as well as `/api` and `/health`, and gives the dev page's own requests the canvas's Origin, so `npm run dev` passes the origin guard and another site's page still does not (T-017). Upstream's proxy has no socket entry, so its dev page never syncs | `tests/dev-proxy.test.mjs` |
 | `package.json`, lock file | `@excalidraw/mermaid-to-excalidraw` `^2.2.2` (upstream `^1.1.3`), a dev dependency since #112, plus `npm audit fix`: 16 advisories on 2026-11-16, where `main`'s lock before the merge read 19 that day | `npm audit` |
 

@@ -32,8 +32,10 @@ function json(value) {
   };
 }
 
+// 30 s, not 5: the first start after an install or a build has run past 5 s on Windows (T-019).
+// A server that answers returns at once; one that dies says so at once (the exit check below).
 async function waitForHealth(child, getOutput) {
-  const deadline = Date.now() + 5000;
+  const deadline = Date.now() + 30000;
   while (Date.now() < deadline) {
     if (child.exitCode !== null || child.signalCode !== null) {
       throw new Error(`Canvas server exited before health check.\n${getOutput()}`);

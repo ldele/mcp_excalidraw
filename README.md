@@ -277,7 +277,9 @@ npm run type-check && npm run type-check:frontend
 ```
 
 The browser suite builds the app and starts its own server on port 51910 (`CANVAS_TEST_PORT` moves
-it). It refuses to reuse a running server.
+it). It refuses to reuse a running server. Among its tests, a real tab's sync keeps an agent's
+arrows bound, and a page from another local port or from a file on disk is refused by the canvas,
+socket included. CI does not run it, so it guards a developer's machine only.
 
 ```bash
 npx playwright install chromium

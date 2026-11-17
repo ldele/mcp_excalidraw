@@ -23,6 +23,8 @@ export default defineConfig({
     env: { HOST: '127.0.0.1', PORT: String(port), LOG_LEVEL: 'error', EXCALIDRAW_NO_PERSIST: '1' },
     url: `${baseURL}/health`,
     reuseExistingServer: false,
-    timeout: 15000,
+    // 60 s, not 15: the first start after an install or a build timed out at 15 s on Windows
+    // (T-019). Playwright stops waiting the moment /health answers.
+    timeout: 60000,
   },
 });

@@ -38,9 +38,10 @@ was fixed after it, with ADR-006 (a green ring round a whole screen approves it)
 pushed. PR 1's round 2 was not run: the scene was already approved, so it gave nothing genuine to
 mark (DEVLOG 2026-11-17 (g)).
 T-006 and T-021 (rank 4, reading order beside a column) were fixed the same day (`49cc155`,
-pushed); T-017 (rank 5, `npm run dev` under the origin guard) after them, staged.
+pushed); T-017 (rank 5, `npm run dev` under the origin guard) after them (`9c7a6f6`, pushed);
+T-018 and T-019 (rank 6, test infrastructure) after that, staged.
 **Next:** take PR 1's round 2 from the next real review (KI-3); meanwhile the open tickets, in
-their triage order (`docs/TICKETS.md`): rank 6 next, T-018 and T-019. Each ticket's rank is in its 2026-11-16 note in
+their triage order (`docs/TICKETS.md`): rank 7 next, T-004 and T-008 (documentation). Each ticket's rank is in its 2026-11-16 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

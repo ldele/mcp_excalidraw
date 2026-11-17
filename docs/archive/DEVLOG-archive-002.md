@@ -4,6 +4,15 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (g) — PR 1 round 2 not run: an approved scene gives nothing to mark
+- **What:** the round-1 scene was reopened on port 3080 for a second round (it read clean, S01
+  approved by the owner's loop since ADR-006, the tab's load made no record). The owner pointed
+  out that the scene was already approved, so there was nothing they wanted changed; no mark was
+  drawn and the round was stopped.
+- **Lesson:** the attribution measurement needs a design under real review. Marks invented for
+  the test would measure an imitation, as the agent-drawn corpus does. KI-3 now says how to close
+  it: take round 2 from the next real review.
+
 ## 2026-11-17 (f) — KI-10 fixed: a ring round a whole screen is about it, and a green one approves it (ADR-006)
 - **Why:** PR 1 round 1's only mark, a green loop round S01 meaning "S01 is fine", bound to a
   heading inside the screen, and nothing read S01 as approved (it had no room for a box).

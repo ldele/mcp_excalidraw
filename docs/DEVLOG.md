@@ -10,6 +10,26 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-17 (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
+- **T-018:** two of the three probes kept since 2026-10-08 in an untracked folder of the upstream
+  worktree are now tests with assertions in `tests/browser/`: `tab-sync-reroute.spec.mjs` (both
+  bound arrows follow every API move of a shape, with no tab, an unsynced tab, after a manual sync,
+  after a reload, after the tab's own sync, and after a person's drag) and `cross-origin.spec.mjs`
+  (a page from another local port, and one from a file on disk, is refused a read, a write, the
+  socket and a clear, and the canvas is untouched). The probe's public-website cases needed the
+  internet and are left out. `cross-origin-http.mjs` is not ported: the state check *requests
+  from another site are refused* sends the same raw HTTP and socket. The worktree folder can go.
+- **Seen red:** with the guard switched off in the build, the cross-origin test failed on both
+  pages, on the socket: Chrome's own CORS already blocks the HTTP calls, so the socket is what
+  the guard holds alone. The tab-sync test pins what the fork has done since 2026-10-08; upstream's
+  sync is its red (DEVLOG archive 2026-10-08 (e)).
+- **T-019:** the state check's health wait is 30 s (was 5) and Playwright's `webServer` timeout
+  60 s (was 15); both return as soon as the server answers. Not reproduced: after `npm ci` and a
+  build, the first state check took 3 s and the first browser run 1.8 min, 35 passed. The cause
+  stays unknown; the waits are the margin.
+- **Browser suite:** 35 / 35 with the installed Chrome (a scratch config, not staged: this
+  Playwright's own Chromium build is not on this machine), twice.
+
 ## 2026-11-17 (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
 - **Why:** since T-015 the canvas refuses any page Origin but its own; the Vite dev flow had never
   been run under it.
@@ -38,9 +58,8 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   within its height, is a column. Rows are grouped from the rest; the column reads as one block
   with what sits under it in its own width, before the rows it spans when it stands to their left,
   after them when to their right. No threshold to calibrate.
-- **Calibration rejected first:** a height-over-median ratio. It needed under 3 for T-021, and
-  there it also took S01's 140px save card for a column on the owner's dnd scene; joining a column
-  to the row of its top edge read S07's detail card into the middle of its list. Both pinned now.
+- **Rejected first:** a height-over-median ratio (it took S01's save card for a column) and
+  joining a column to the row of its top edge (S07's detail card landed mid-list). Both pinned.
 - **Real drawings:** the three reports read from their files (read-only) are fixed; UI-Wizard's
   legacy dashboard is T-006's own drawing, and its expected reading was regenerated (order only,
   checked). The owner's dnd scene changes in seven screens with a side column beside a list (S04,
@@ -51,15 +70,6 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   `readingOrder` and `checkboxLabels`. Every older golden unchanged. Live on port 3083 with a tab.
   238 / 238.
 - **Opens:** BlackBox's two wrapper cards (`[s2-main]`, `[s3-main]`) can go.
-
-## 2026-11-17 (g) — PR 1 round 2 not run: an approved scene gives nothing to mark
-- **What:** the round-1 scene was reopened on port 3080 for a second round (it read clean, S01
-  approved by the owner's loop since ADR-006, the tab's load made no record). The owner pointed
-  out that the scene was already approved, so there was nothing they wanted changed; no mark was
-  drawn and the round was stopped.
-- **Lesson:** the attribution measurement needs a design under real review. Marks invented for
-  the test would measure an imitation, as the agent-drawn corpus does. KI-3 now says how to close
-  it: take round 2 from the next real review.
 
 > Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
 > are short by intent, not by neglect.

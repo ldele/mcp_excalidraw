@@ -32,22 +32,6 @@ created.
      - **Note:** date — what triage changed (optional; `cpc-ticket triage --id N --note` adds it)
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
 
-## T-019 — The first test run after an install or a build does not start: the server is not ready within the wait
-- **Status:** triaged · 2026-11-16
-- **From:** Scribe agent session, closing its 2026-10-08 work (1.3.0) · 2026-10-09
-- **Symptom:** On Windows with Node 24, straight after npm ci or npm run build, the first run of scripts/check-state-integrity.mjs (5 s health wait) or of Playwright (webServer, 15 s) times out or is slow: the browser suite took 1.4 to 1.8 min where a second run takes 35 s, and once reported Timed out waiting 15000ms from config.webServer. A second run is normal. Seen on 2026-10-07 (upstream's test:state, twice) and five times on 2026-10-08 (DEVLOG entries b, h, i, j and the dependency trial), on changed and unchanged code alike. Not explained. A guess, not checked: the antivirus scanning freshly written files. CI on Linux has not shown it.
-- **Reproduce:** npm ci, npm run build, then at once npx playwright test with the installed Chrome (channel chrome): slow or the webServer timeout. Run it again: 19 passed in about 35 s. Either find the cause or lengthen the two waits; today the workaround is to run twice, which every script written on 2026-10-08 does by hand.
-- **Note:** 2026-11-16 — Rank 6, test infrastructure. Not seen since 2026-10-08 as far as the DEVLOG says. Cheap way out without finding the cause: lengthen the two waits, the 5 s health wait in scripts/check-state-integrity.mjs (l.36) and the 15 s webServer timeout in the Playwright config. Close when a fresh install's first run passes.
-- **Resolution:** —
-
-## T-018 — The browser probes for tab sync and for cross-origin access live outside the repository
-- **Status:** triaged · 2026-11-16
-- **From:** Scribe agent session, closing its 2026-10-08 work (1.3.0) · 2026-10-09
-- **Symptom:** Three scripts written on 2026-10-08 sit untracked in C:/Projects/mcp_excalidraw-upstream/tests/probe-fork, with a README.txt: tab-sync-reroute.spec.mjs (a shape moved through the API still drags its arrows after a tab syncs and after a person's drag), cross-origin-browser.spec.mjs and cross-origin-http.mjs (T-015 from four page origins in Chrome). The two checks in scripts/check-state-integrity.mjs that pin the same behaviour build the tab's payload and the browser's headers themselves, so if the page changes what it syncs, or Chrome what it sends, nothing in the repository notices. tests/browser has no test for either, and removing that worktree loses the scripts.
-- **Reproduce:** ls tests/browser shows fixtures.mjs and scene-reload.spec.mjs only. To run a probe: copy it and playwright.probe.config.mjs into a fork checkout as the README.txt says, build, then PW_CHANNEL=chrome npx playwright test --config playwright.probe.config.mjs. Open question for whoever takes this: CI does not run the browser suite at all, so a test added to tests/browser runs only on a developer's machine.
-- **Note:** 2026-11-16 — Rank 6, test infrastructure. The probes are still only in C:/Projects/mcp_excalidraw-upstream/tests/probe-fork (README.txt and five files, checked 2026-11-16). Moving tab-sync-reroute.spec.mjs and the two cross-origin probes into tests/browser is small; CI still runs no browser suite, so they would guard a developer's machine only. Do it before that worktree is removed.
-- **Resolution:** —
-
 ## T-008 — A label given as text on a shape takes the shape's stroke colour, so it is nearly invisible on a white shape with a light border
 - **Status:** triaged · 2026-11-16
 - **From:** Scribe agent session driving the CLI (excalidraw-canvas 1.2.0, fork at 7c0ddbe) · 2026-10-07

@@ -4,6 +4,17 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (i) — Claude Code — KI-10 pushed (`31d1f6e`); round 2 not run; STAGED
+- **Done:** `31d1f6e` (KI-10, ADR-006) pushed on the owner's yes after the full gate. Round 2
+  offered on the round-1 scene and stopped: the owner had already approved that scene, so there
+  was nothing genuine to mark (DEVLOG 2026-11-17 (g)). This note is staged.
+- **Where:** `main` at `31d1f6e`, equal to `origin/main`, apart from this staged record.
+- **Next:** PR 1's round 2 from the next real review, when the owner marks up screens they want
+  changed (KI-3 says how); meanwhile the open tickets in their triage order. Still not run on
+  the day's commits: the Playwright suite and a CI dispatch (KI-8).
+- **Picks up:** any session with a terminal; round 2 needs the owner, a browser tab, and a design
+  under review.
+
 ## 2026-11-17 (h) — Claude Code — round 1 and the lint fix pushed; KI-10 fixed with ADR-006; STAGED
 - **Done:** `3d5c383` and `2b97ebe` pushed on the owner's yes. KI-10: a ring round a whole
   container is about it; ADR-006 (owner's call): a green ring round a whole screen approves it.

@@ -4,6 +4,18 @@
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
 
+## 2026-11-17 (l) — Claude Code — T-017 pushed (`9c7a6f6`); T-018 and T-019 fixed; STAGED
+- **Done:** `9c7a6f6` pushed after the full gate. T-018: the tab-sync and cross-origin probes are
+  browser tests with assertions (the cross-origin one seen red with the guard off). T-019: the two
+  waits lengthened; a fresh install's first runs passed (DEVLOG 2026-11-17 (j)). The browser suite
+  ran for the first time today: 35 / 35 with the installed Chrome.
+- **Where:** `main` at `9c7a6f6`, equal to `origin/main`; the two fixes staged; both tickets
+  closed. `C:/Projects/mcp_excalidraw-upstream/tests/probe-fork` is now copied in and can be
+  removed (the owner's call; not touched).
+- **Next:** commit; the full gate and push on the owner's yes; then T-004 and T-008 (rank 7).
+- **Picks up:** any session with a terminal; the browser suite needs `channel: 'chrome'` on this
+  machine (a scratch config).
+
 ## 2026-11-17 (k) — Claude Code — T-006/T-021 pushed (`49cc155`); T-017 fixed; STAGED
 - **Done:** `49cc155` pushed after the full gate. T-017 run for the first time: the dev page never
   synced (no socket proxy) and every proxied call got 403. Vite's proxy now carries the socket and
@@ -22,14 +34,3 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Next:** commit; the full gate and push on the owner's yes; tell the owner dnd_crawler's
   reading file will differ in seven screens when regenerated; then T-017 (rank 5).
 - **Picks up:** any session with a terminal; T-017 needs two terminals and a browser.
-
-## 2026-11-17 (i) — Claude Code — KI-10 pushed (`31d1f6e`); round 2 not run; STAGED
-- **Done:** `31d1f6e` (KI-10, ADR-006) pushed on the owner's yes after the full gate. Round 2
-  offered on the round-1 scene and stopped: the owner had already approved that scene, so there
-  was nothing genuine to mark (DEVLOG 2026-11-17 (g)). This note is staged.
-- **Where:** `main` at `31d1f6e`, equal to `origin/main`, apart from this staged record.
-- **Next:** PR 1's round 2 from the next real review, when the owner marks up screens they want
-  changed (KI-3 says how); meanwhile the open tickets in their triage order. Still not run on
-  the day's commits: the Playwright suite and a CI dispatch (KI-8).
-- **Picks up:** any session with a terminal; round 2 needs the owner, a browser tab, and a design
-  under review.

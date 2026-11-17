@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-17** (g) — PR 1 round 2 not run: an approved scene gives nothing to mark
 - **2026-11-17** (f) — KI-10 fixed: a ring round a whole screen is about it, and a green one approves it (ADR-006)
 - **2026-11-17** (e) — The lint recalibrated on a real drawing: 14 false errors to none (SPEC-008)
 - **2026-11-17** (d) — PR 1, round 1: one mark by a person, a miss; the lint misfires on a real drawing
