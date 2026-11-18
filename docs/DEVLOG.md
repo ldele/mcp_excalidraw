@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-17 · class: append-only -->
+<!-- status: active · updated: 2026-11-18 · class: append-only -->
 
 # DEVLOG
 
@@ -9,6 +9,16 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
+
+## 2026-11-18 (a) — Upstream's `claude_desktop_config.json` removed
+- **Why:** the owner asked how agents reach the canvas. The answer is the `npm link`ed
+  `excalidraw-canvas` CLI, and no MCP server is registered. That turned up the repo-root config
+  left from upstream (`110bb19`). It ran `npx -y excalidraw-mcp`, a package that is neither this
+  fork nor upstream, so pasting it into a client fetched a stranger's code.
+- **What:** the file is deleted and logged in FORK.md § What we removed. README § MCP clients
+  already gives the right config (`node <repo>/dist/index.js`, or `excalidraw-canvas`). Upstream
+  has not edited the file since its second commit, so a merge conflict is unlikely; if it comes,
+  keep the file deleted.
 
 ## 2026-11-17 (m) — ADR-007 proposed: a person's markup reaches the agent when they send it
 - **Why:** the owner, after PR 1's round 1: the agent read the canvas mid-round and gave its view
@@ -31,18 +41,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Checked:** none of 62 screens renamed across the corpus and five real drawings (pharma,
   UI-Wizard twice, doc_assistant, dnd_crawler). `tests/screen-name.test.mjs` (5, two red first);
   live on port 3086, the caption above "Library" no longer names the screen. 251 / 251.
-
-## 2026-11-17 (k) — T-004 fixed, T-008 documented: a label goes where it is aligned, and needs its own colour
-- **T-004:** not Excalidraw's limit, as the report supposed, but upstream's page code:
-  `recenterBoundShapeTextElements` (`frontend/src/utils/scene.ts`, upstream #61) moved every bound
-  label to its shape's middle, so `textAlign: "left"` was stored, read back and drawn centred, in a
-  tab and in the headless PNG (which bundles the same function). It now places the label by its
-  `textAlign` and `verticalAlign`, 5px from the edge, as Excalidraw does; the default is centred as
-  before. `tests/label-align.test.mjs` (3, two red first); FORK.md row; seen live in a tab and a PNG
-  on port 3085, the tab's load making no record. Files with left-aligned labels now draw them left.
-- **T-008:** confirmed in the same PNG: a `"text"` label on a `#d7d5cc` border is drawn in that
-  grey. Conventions § 4 now says to colour every label on a light border, and the secondary-button
-  recipe gives `#14130f`; SKILL.md says why. The default stays upstream's.
-
-> Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
-> are short by intent, not by neglect.

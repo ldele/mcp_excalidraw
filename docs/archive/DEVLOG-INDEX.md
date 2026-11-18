@@ -1,4 +1,4 @@
-<!-- status: archived · updated: 2026-11-17 · class: living -->
+<!-- status: archived · updated: 2026-11-18 · class: living -->
 
 # DEVLOG archive index
 
@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-17** (k) — T-004 fixed, T-008 documented: a label goes where it is aligned, and needs its own colour
 - **2026-11-17** (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
 - **2026-11-17** (i) — T-017 run and fixed: `npm run dev` syncs, and the guard still refuses other sites
 - **2026-11-17** (h) — T-006 and T-021 fixed: an element beside a stacked column reads as a column

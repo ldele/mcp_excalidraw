@@ -51,7 +51,9 @@ their readings. `src/` is +3,340 −140 over 22 files.
 Upstream ships as a public npm package and Docker image; we do neither. Gone: `demo.gif`,
 `canvas_roundtrip.png`, `EXCALIDRAW-MCP-VALIDATION.md`, `Dockerfile`, `Dockerfile.canvas`,
 `docker-compose.yml`, `.dockerignore`, `.github/workflows/docker.yml` and `npm-publish.yml`.
-`ci.yml` stays. The 2.8 MB `demo.gif` is still in `.git` history (KI-2).
+`claude_desktop_config.json` went on 2026-11-18: it ran `npx -y excalidraw-mcp`, a package that is
+neither this fork nor upstream (KI-1's trap, one name further off); README § MCP clients has the
+config to use. `ci.yml` stays. The 2.8 MB `demo.gif` is still in `.git` history (KI-2).
 
 ## Keeping current with upstream
 

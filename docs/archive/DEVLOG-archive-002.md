@@ -1,8 +1,23 @@
-<!-- status: archived · updated: 2026-11-17 · class: append-only -->
+<!-- status: archived · updated: 2026-11-18 · class: append-only -->
 
 # DEVLOG archive 002
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
+
+## 2026-11-17 (k) — T-004 fixed, T-008 documented: a label goes where it is aligned, and needs its own colour
+- **T-004:** not Excalidraw's limit, as the report supposed, but upstream's page code:
+  `recenterBoundShapeTextElements` (`frontend/src/utils/scene.ts`, upstream #61) moved every bound
+  label to its shape's middle, so `textAlign: "left"` was stored, read back and drawn centred, in a
+  tab and in the headless PNG (which bundles the same function). It now places the label by its
+  `textAlign` and `verticalAlign`, 5px from the edge, as Excalidraw does; the default is centred as
+  before. `tests/label-align.test.mjs` (3, two red first); FORK.md row; seen live in a tab and a PNG
+  on port 3085, the tab's load making no record. Files with left-aligned labels now draw them left.
+- **T-008:** confirmed in the same PNG: a `"text"` label on a `#d7d5cc` border is drawn in that
+  grey. Conventions § 4 now says to colour every label on a light border, and the secondary-button
+  recipe gives `#14130f`; SKILL.md says why. The default stays upstream's.
+
+> Entries below dated 2026-07-31 were backfilled on 2026-08-01 from the commits and the baton; they
+> are short by intent, not by neglect.
 
 ## 2026-11-17 (j) — T-018 and T-019: the browser probes join the suite; the first run's waits lengthened
 - **T-018:** two of the three probes kept since 2026-10-08 in an untracked folder of the upstream
