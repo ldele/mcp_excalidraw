@@ -1,4 +1,4 @@
-<!-- status: archived · updated: 2026-11-18 · class: living -->
+<!-- status: archived · updated: 2026-11-19 · class: living -->
 
 # DEVLOG archive index
 

@@ -8,8 +8,8 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
 - **Done:** `cpc-init --add deny-rules` laid `.claude/settings.json` (22 deny entries): the agent's
   own `git commit`, `push`, `merge`, `tag` are refused from the next session (DEVLOG 2026-11-19 (a)).
 - **Where:** `main` at `3437a36`; `.claude/settings.json`, DEVLOG and this note staged, not committed.
-- **Next:** CONTEXT.md rule 1 and the memory reworded to match; AGENTS.md:51 awaits the owner's own
-  confirmation; ADR-007, T-002, T-003 unchanged.
+- **Next:** CONTEXT.md rule 1 and the memory reworded to match; AGENTS.md rule 1 reworded too; nothing
+  left to reword; ADR-007, T-002, T-003 unchanged.
 - **Picks up:** any session with a terminal, after the owner's decisions.
 
 ## 2026-11-18 (a) — Claude Code — how agents reach the canvas; stray config removed, pushed

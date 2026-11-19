@@ -48,7 +48,8 @@ Reference: `docs/ROADMAP.md` · `docs/architecture.md` · `docs/decisions/` (ADR
 
 ## Non-negotiables (digest — full text `.claude/CONTEXT.md`)
 1. **Stage, never commit.** Default for every agent: stage the diff and hand it off for the
-   owner's review; commit/push only on the owner's explicit, per-commit instruction (CONVENTIONS §13).
+   owner's review. The owner runs every commit, push, merge and tag; `.claude/settings.json` denies them
+   to the agent, which hands back one command (cpc ADR-080, CONVENTIONS §13).
 2. **Track upstream before editing the collision zone.** `git fetch upstream && git log --oneline HEAD..upstream/main`
    at session start, and always before touching `src/server.ts`, `src/index.ts` or
    `src/core/normalize.ts` (rule 2).

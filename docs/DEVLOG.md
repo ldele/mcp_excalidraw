@@ -20,7 +20,7 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Open:** `.claude/CONTEXT.md` rule 1 ("or gives explicit per-commit approval") and the project
   memory `commits-land-on-main` described an agent that commits after a yes. The owner chose to
   reword to match the deny rules: CONTEXT.md rule 1 and the memory now say the owner runs each
-  commit, push, merge and tag; AGENTS.md:51 is held for the owner's own confirmation.
+  commit, push, merge and tag; AGENTS.md rule 1 is reworded too.
 
 ## 2026-11-18 (a) — Upstream's `claude_desktop_config.json` removed
 - **Why:** the owner asked how agents reach the canvas. The answer is the `npm link`ed
