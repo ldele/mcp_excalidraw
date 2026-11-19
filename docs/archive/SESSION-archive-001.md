@@ -4,6 +4,14 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (o) — Claude Code — T-005 pushed (`1e7f468`); ADR-007 proposed; STAGED
+- **Done:** `1e7f468` pushed after the full gate; 10 tickets closed today, 2 open (T-002, T-003).
+  ADR-007 drafted as proposed: how a person's markup reaches the agent only when they send it
+  (seven options, a recommendation); nothing built (DEVLOG 2026-11-17 (m)).
+- **Where:** `main` at `1e7f468`, equal to `origin/main`; ADR-007 and this note staged.
+- **Next:** the owner decides ADR-007, T-002 and T-003 on 2026-11-18; build what they choose.
+- **Picks up:** any session with a terminal, after the owner's decisions.
+
 ## 2026-11-17 (n) — Claude Code — T-004/T-008 pushed (`5c57155`); T-005 fixed; STAGED
 - **Done:** `5c57155` pushed after the full gate. T-005: a screen is named by its largest own
   heading; no real screen renamed (DEVLOG 2026-11-17 (l)).

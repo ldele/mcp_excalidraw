@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git merge *)",
+      "Bash(git tag *)",
+      "Bash(git -C * commit *)",
+      "Bash(git -C * push *)",
+      "Bash(git -C * merge *)",
+      "Bash(git -C * tag *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh release create *)",
+      "Bash(*CPC_PUSH_OK*)",
+      "PowerShell(git commit *)",
+      "PowerShell(git push *)",
+      "PowerShell(git merge *)",
+      "PowerShell(git tag *)",
+      "PowerShell(git -C * commit *)",
+      "PowerShell(git -C * push *)",
+      "PowerShell(git -C * merge *)",
+      "PowerShell(git -C * tag *)",
+      "PowerShell(gh pr merge *)",
+      "PowerShell(gh release create *)",
+      "PowerShell(*CPC_PUSH_OK*)"
+    ]
+  }
+}

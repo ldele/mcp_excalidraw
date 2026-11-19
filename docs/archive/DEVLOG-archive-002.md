@@ -4,6 +4,17 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (l) — T-005 fixed: a screen is named by its largest own heading, not its topmost
+- **Why:** a 20px overlay caption above a 26px title named the screen after the caption
+  (doc_assistant, 2026-08-21): `deriveScreenName` took the first heading in reading order.
+- **What:** it now takes the largest heading that sits directly in the screen or in its header
+  bar, the first in reading order on a tie; a heading deeper in, inside a card, names the screen
+  only when there is no other, as before. Conventions § 1 says so. SKILL.md now says `clear --yes`
+  and add it all again is the way to redraw a generated scene, the report's second ask.
+- **Checked:** none of 62 screens renamed across the corpus and five real drawings (pharma,
+  UI-Wizard twice, doc_assistant, dnd_crawler). `tests/screen-name.test.mjs` (5, two red first);
+  live on port 3086, the caption above "Library" no longer names the screen. 251 / 251.
+
 ## 2026-11-17 (k) — T-004 fixed, T-008 documented: a label goes where it is aligned, and needs its own colour
 - **T-004:** not Excalidraw's limit, as the report supposed, but upstream's page code:
   `recenterBoundShapeTextElements` (`frontend/src/utils/scene.ts`, upstream #61) moved every bound

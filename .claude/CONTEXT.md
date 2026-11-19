@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-17 · class: living -->
+<!-- status: active · updated: 2026-11-19 · class: living -->
 
 # CONTEXT — mcp_excalidraw
 
@@ -57,8 +57,8 @@ next real review (KI-3), run the way ADR-007 settles. Each ticket's rank is in i
 
 ## Non-negotiable rules
 1. **Stage, never commit or push.** The agent stages and hands the diff off; the owner reviews
-   (`git diff --cached`) and commits, or gives explicit per-commit approval — one approval is not
-   standing permission (CONVENTIONS §13). **Nothing enforces this** — no cpc gate fires by itself
+   (`git diff --cached`) and runs every commit, push, merge and tag (cpc ADR-080; `.claude/settings.json` denies them
+   to the agent, which hands back one command) (CONVENTIONS §13). The deny rules enforce it for the agent; no cpc gate fires by itself
    (ADR-015/ADR-022). `cpc-push-guard` is available as an opt-in accident guard if this project wires
    it (§13 has the recipe); it stops the push you didn't mean to make, not one you did.
 2. **Track upstream; never drift silently.** This is a fork with a live parent

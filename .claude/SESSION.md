@@ -1,8 +1,16 @@
-<!-- status: active · updated: 2026-11-18 · class: append-only -->
+<!-- status: active · updated: 2026-11-19 · class: append-only -->
 
 # SESSION — handoff baton
 
 Append-only. Newest entry on top. Never rewrite a past entry; correct with a new one.
+
+## 2026-11-19 (a) — Claude Code — cpc deny rules laid; STAGED
+- **Done:** `cpc-init --add deny-rules` laid `.claude/settings.json` (22 deny entries): the agent's
+  own `git commit`, `push`, `merge`, `tag` are refused from the next session (DEVLOG 2026-11-19 (a)).
+- **Where:** `main` at `3437a36`; `.claude/settings.json`, DEVLOG and this note staged, not committed.
+- **Next:** CONTEXT.md rule 1 and the memory reworded to match; AGENTS.md:51 awaits the owner's own
+  confirmation; ADR-007, T-002, T-003 unchanged.
+- **Picks up:** any session with a terminal, after the owner's decisions.
 
 ## 2026-11-18 (a) — Claude Code — how agents reach the canvas; stray config removed, pushed
 - **Done:** the owner asked how agents call the toolkit. The answer: the `npm link`ed
@@ -22,12 +30,4 @@ Append-only. Newest entry on top. Never rewrite a past entry; correct with a new
   `docs/FRICTION.md` (two notes, new). No CI run dispatched on the day's commits (KI-8).
 - **Next:** the owner decides ADR-007, T-002 and T-003 (2026-11-18); then PR 1's round 2 from
   the next real review (KI-3), run as ADR-007 settles.
-- **Picks up:** any session with a terminal, after the owner's decisions.
-
-## 2026-11-17 (o) — Claude Code — T-005 pushed (`1e7f468`); ADR-007 proposed; STAGED
-- **Done:** `1e7f468` pushed after the full gate; 10 tickets closed today, 2 open (T-002, T-003).
-  ADR-007 drafted as proposed: how a person's markup reaches the agent only when they send it
-  (seven options, a recommendation); nothing built (DEVLOG 2026-11-17 (m)).
-- **Where:** `main` at `1e7f468`, equal to `origin/main`; ADR-007 and this note staged.
-- **Next:** the owner decides ADR-007, T-002 and T-003 on 2026-11-18; build what they choose.
 - **Picks up:** any session with a terminal, after the owner's decisions.
