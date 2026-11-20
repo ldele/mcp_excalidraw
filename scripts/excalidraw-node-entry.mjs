@@ -14,4 +14,4 @@ export {
   getCommonBounds,
   FONT_FAMILY
 } from '@excalidraw/excalidraw';
-export { prepareServerScene, cleanElementForExcalidraw } from '../frontend/src/utils/scene.ts';
+export { prepareServerScene, prepareSceneUpdate, cleanElementForExcalidraw } from '../frontend/src/utils/scene.ts';

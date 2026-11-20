@@ -500,6 +500,139 @@ export const prepareServerScene = (
   return restored
 }
 
+/**
+ * The tab's scene with server changes merged in: an element on both sides
+ * takes the incoming fields over the tab's copy, a new one goes on top, and
+ * a removed id is dropped. Unchanged elements are the tab's own objects.
+ */
+export const mergeSceneElements = (
+  current: readonly Partial<ExcalidrawElement>[],
+  changed: readonly Partial<ExcalidrawElement>[],
+  removedIds: readonly string[] = []
+): Partial<ExcalidrawElement>[] => {
+  const removed = new Set(removedIds)
+  const incomingById = new Map<string, Partial<ExcalidrawElement>>()
+  for (const element of changed) {
+    if (element.id) incomingById.set(element.id, element)
+  }
+  const merged: Partial<ExcalidrawElement>[] = []
+  for (const element of current) {
+    if (removed.has(element.id!)) continue
+    const incoming = incomingById.get(element.id!)
+    if (!incoming) {
+      merged.push(element)
+      continue
+    }
+    incomingById.delete(element.id!)
+    merged.push({ ...element, ...incoming })
+  }
+  for (const element of incomingById.values()) {
+    if (!removed.has(element.id!)) merged.push(element)
+  }
+  return merged
+}
+
+// Every id an element points at: its bound text and arrows, its container,
+// its arrow ends, its frame.
+const referencedIds = (element: any): string[] => {
+  const ids: string[] = []
+  if (Array.isArray(element.boundElements)) {
+    for (const binding of element.boundElements) if (typeof binding?.id === 'string') ids.push(binding.id)
+  }
+  for (const id of [
+    element.containerId, element.frameId, element.startBinding?.elementId, element.endBinding?.elementId,
+    element.start?.id, element.end?.id, element.label?.id
+  ]) {
+    if (typeof id === 'string') ids.push(id)
+  }
+  return ids
+}
+
+/**
+ * Fork (T-029, T-030): the scene after an incremental server change, preparing
+ * only what the change touches. `prepareServerScene` over the whole drawing
+ * re-measured every label for each agent edit (88 ms per edit, 5 s for a burst
+ * of 60, on a 1713-element drawing), and its fresh copy of every element left
+ * a stroke the person was drawing pointing at an object no longer in the scene.
+ *
+ * Prepared: each changed element and its neighbours (whatever it points at or
+ * is pointed at by), so a resized shape's label re-flows and a removed
+ * element's bindings are dropped. Their own neighbours go in as context, so a
+ * binding is never stripped for lack of its target, and are then discarded.
+ * Everything else is returned as the very object the tab holds.
+ *
+ * Throws when the result would lose or duplicate an element; the caller then
+ * falls back to preparing the whole scene.
+ */
+export const prepareSceneUpdate = (
+  current: readonly Partial<ExcalidrawElement>[],
+  changed: readonly Partial<ExcalidrawElement>[],
+  removedIds: readonly string[] = [],
+  opts: { refreshDimensions?: boolean } = {}
+): ExcalidrawElement[] => {
+  const merged = mergeSceneElements(current, changed, removedIds)
+  const byId = new Map(merged.map(el => [el.id!, el]))
+  if (byId.size !== merged.length) throw new Error('Scene holds duplicate element IDs')
+
+  const pointedAtBy = new Map<string, Set<string>>()
+  for (const element of merged) {
+    for (const id of referencedIds(element)) {
+      let set = pointedAtBy.get(id)
+      if (!set) pointedAtBy.set(id, set = new Set())
+      set.add(element.id!)
+    }
+  }
+  const neighbours = (ids: Iterable<string>): Set<string> => {
+    const out = new Set<string>()
+    for (const id of ids) {
+      const element = byId.get(id)
+      if (element) for (const ref of referencedIds(element)) if (byId.has(ref)) out.add(ref)
+      for (const ref of pointedAtBy.get(id) || []) out.add(ref)
+    }
+    return out
+  }
+
+  // A removed id is not in the scene, but whatever pointed at it must be
+  // prepared again so the dangling binding is dropped.
+  const seeds = new Set<string>()
+  for (const element of changed) if (element.id && byId.has(element.id)) seeds.add(element.id)
+  for (const id of removedIds) for (const ref of pointedAtBy.get(id) || []) seeds.add(ref)
+
+  const touched = new Set([...seeds, ...neighbours(seeds)])
+  const withContext = new Set([...touched, ...neighbours(touched)])
+  const subset = merged.filter(el => withContext.has(el.id!))
+  const prepared = subset.length > 0 ? prepareServerScene(subset, opts) : []
+
+  const subsetIds = new Set(subset.map(el => el.id!))
+  const preparedById = new Map<string, ExcalidrawElement>()
+  const generatedFor = new Map<string, ExcalidrawElement[]>()
+  for (const element of prepared) {
+    if (subsetIds.has(element.id)) {
+      preparedById.set(element.id, element)
+      continue
+    }
+    // A label the converter expanded from shorthand sits on top of its container.
+    const containerId = (element as { containerId?: string | null }).containerId
+    if (containerId && touched.has(containerId)) {
+      generatedFor.set(containerId, [...(generatedFor.get(containerId) || []), element])
+    }
+  }
+
+  const result: ExcalidrawElement[] = []
+  for (const element of merged) {
+    if (!touched.has(element.id!)) {
+      result.push(element as ExcalidrawElement)
+      continue
+    }
+    const next = preparedById.get(element.id!)
+    if (!next) throw new Error(`Scene update lost element ${element.id}`)
+    result.push(next, ...(generatedFor.get(element.id!) || []))
+  }
+  const resultIds = new Set(result.map(el => el.id))
+  if (resultIds.size !== result.length) throw new Error('Scene update produced duplicate element IDs')
+  return result
+}
+
 // Fork (T-023): which server process, drawing and revision a tab's scene came from.
 export interface CanvasIdentity {
   instanceId: string

@@ -4,6 +4,16 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-18 (a) — Upstream's `claude_desktop_config.json` removed
+- **Why:** the owner asked how agents reach the canvas. The answer is the `npm link`ed
+  `excalidraw-canvas` CLI, and no MCP server is registered. That turned up the repo-root config
+  left from upstream (`110bb19`). It ran `npx -y excalidraw-mcp`, a package that is neither this
+  fork nor upstream, so pasting it into a client fetched a stranger's code.
+- **What:** the file is deleted and logged in FORK.md § What we removed. README § MCP clients
+  already gives the right config (`node <repo>/dist/index.js`, or `excalidraw-canvas`). Upstream
+  has not edited the file since its second commit, so a merge conflict is unlikely; if it comes,
+  keep the file deleted.
+
 ## 2026-11-17 (m) — ADR-007 proposed: a person's markup reaches the agent when they send it
 - **Why:** the owner, after PR 1's round 1: the agent read the canvas mid-round and gave its view
   before the person had finished; it should wait for the end of the markup, perhaps with a

@@ -16,7 +16,10 @@ import type {
   LibraryPersistenceAdapter
 } from '@excalidraw/excalidraw/data/library'
 import { convertMermaidToExcalidraw, DEFAULT_MERMAID_CONFIG } from './utils/mermaidConverter'
-import { cleanElementForExcalidraw, prepareServerScene, assertScenePreserved, mergeAfterRestart } from './utils/scene'
+import {
+  cleanElementForExcalidraw, prepareServerScene, prepareSceneUpdate, mergeSceneElements, assertScenePreserved,
+  mergeAfterRestart
+} from './utils/scene'
 import { preloadCanvasFonts } from './utils/fonts'
 import type { ServerElement, CanvasIdentity } from './utils/scene'
 import type { MermaidConfig } from '@excalidraw/mermaid-to-excalidraw'
@@ -255,6 +258,46 @@ function App(): JSX.Element {
     }
   }
 
+  // Fork (T-029, T-030): an agent's create, update or delete, applied to what the
+  // tab holds. Only the touched elements and their neighbours are prepared, so a
+  // large drawing costs no more per edit than a small one. The scene stays
+  // editable throughout: no pauseSceneSync, whose read-only flip cancelled a
+  // stroke the person was drawing, and every untouched element keeps its
+  // object, so the stroke in progress stays in the scene. The generation still
+  // moves on, so a full load fetched before this edit cannot overwrite it.
+  // `refreshDimensions` re-wraps a resized container's label from its
+  // `originalText`; without it the shape grows and the text keeps its old breaks.
+  const applyServerUpdate = (
+    changed: Partial<ExcalidrawElement>[],
+    removedIds: string[] = []
+  ): void => {
+    const api = excalidrawAPIRef.current
+    if (!api || (changed.length === 0 && removedIds.length === 0)) return
+    const current = api.getSceneElements()
+    let next: ExcalidrawElement[]
+    try {
+      next = prepareSceneUpdate(current, changed, removedIds, { refreshDimensions: true })
+    } catch (error) {
+      console.warn('Incremental scene update failed; preparing the whole scene instead:', error)
+      applyServerScene(mergeSceneElements(current, changed, removedIds), pauseSceneSync(), undefined,
+        { refreshDimensions: true })
+      return
+    }
+    sceneGenerationRef.current += 1
+    const previous = api.getSceneElementsIncludingDeleted()
+    try {
+      applySceneUpdateWithoutAutoSync(api, { elements: next, captureUpdate: CaptureUpdateAction.NEVER })
+      assertScenePreserved(next, api.getSceneElements())
+      serverSceneHashRef.current = hashElementsVersion(api.getSceneElements())
+    } catch (error) {
+      // The tab no longer provably holds the server's scene: pause sync and
+      // fetch the whole scene again rather than send back a partial one (T-014).
+      applySceneUpdateWithoutAutoSync(api, { elements: previous, captureUpdate: CaptureUpdateAction.NEVER })
+      console.error('Scene update did not apply; reloading the scene:', error)
+      void loadExistingElements()
+    }
+  }
+
   // Fork (T-023): the server process, drawing and revision this tab's scene came
   // from, and whether they describe the server the socket reaches now (they do not
   // between a drop and the first scene of the next connection).
@@ -456,33 +499,6 @@ function App(): JSX.Element {
     }
 
     try {
-      const currentElements = excalidrawAPI.getSceneElements()
-      const mergeAndApplySceneElements = (incomingElements: Partial<ExcalidrawElement>[]): void => {
-        if (incomingElements.length === 0) return
-
-        const incomingById = new Map<string, Partial<ExcalidrawElement>>()
-        incomingElements.forEach((element) => {
-          if (element.id) {
-            incomingById.set(element.id, element)
-          }
-        })
-
-        const mergedElements: Partial<ExcalidrawElement>[] = currentElements.map((element) => {
-          const incoming = incomingById.get(element.id)
-          if (!incoming) return element
-          incomingById.delete(element.id)
-          return { ...element, ...incoming }
-        })
-
-        mergedElements.push(...incomingById.values())
-
-        // `refreshDimensions` re-wraps bound text from its `originalText`. An
-        // update can resize a container (`update_element` with a new width),
-        // and without this the label keeps the line breaks computed for the old
-        // box — the shape grows, the text stays broken where it was.
-        applyServerScene(mergedElements, pauseSceneSync(), undefined, { refreshDimensions: true })
-      }
-
       switch (data.type) {
         case 'initial_elements':
           {
@@ -512,34 +528,28 @@ function App(): JSX.Element {
         case 'element_created':
           if (!data.element) throw new Error('Missing created element')
           if (data.element) {
-            const cleanedNewElement = cleanElementForExcalidraw(data.element)
-            // Rebuild against full scene so text/container bindings remain intact.
-            mergeAndApplySceneElements([cleanedNewElement])
+            applyServerUpdate([cleanElementForExcalidraw(data.element)])
           }
           break
 
         case 'element_updated':
           if (!data.element) throw new Error('Missing updated element')
           if (data.element) {
-            const cleanedUpdatedElement = cleanElementForExcalidraw(data.element)
-            // Convert with full scene context so text metrics/container placement can refresh.
-            mergeAndApplySceneElements([cleanedUpdatedElement])
+            applyServerUpdate([cleanElementForExcalidraw(data.element)])
           }
           break
 
         case 'element_deleted':
           if (!data.elementId) throw new Error('Missing deleted element ID')
           if (data.elementId) {
-            const filteredElements = currentElements.filter(el => el.id !== data.elementId)
-            applyServerScene(filteredElements, pauseSceneSync())
+            applyServerUpdate([], [data.elementId])
           }
           break
 
         case 'elements_batch_created':
           if (!Array.isArray(data.elements)) throw new Error('Invalid element batch')
           if (data.elements) {
-            const cleanedBatchElements = data.elements.map(cleanElementForExcalidraw)
-            mergeAndApplySceneElements(cleanedBatchElements)
+            applyServerUpdate(data.elements.map(cleanElementForExcalidraw))
           }
           break
 

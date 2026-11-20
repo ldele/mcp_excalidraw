@@ -39,7 +39,12 @@ export interface ExcalidrawNodeModule {
   }) => any[];
   FONT_FAMILY: Record<string, number>;
   // The canvas tab's own scene preparation (frontend/src/utils/scene.ts)
-  prepareServerScene: (elements: readonly any[]) => any[];
+  prepareServerScene: (elements: readonly any[], opts?: { refreshDimensions?: boolean }) => any[];
+  // The tab's incremental update (T-029); exported for tests
+  prepareSceneUpdate: (
+    current: readonly any[], changed: readonly any[], removedIds?: readonly string[],
+    opts?: { refreshDimensions?: boolean }
+  ) => any[];
   cleanElementForExcalidraw: (element: any) => any;
 }
 

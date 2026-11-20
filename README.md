@@ -43,6 +43,7 @@ Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
 | **A request from another site's page** | Answered: CORS is open to every origin | Refused with 403, on the API and on the socket. `CANVAS_ALLOWED_ORIGINS` lists exceptions |
 | **A tab's sync** | Clears the store and rewrites it | Merges element by element. An empty sync against a drawing is refused unless it says `allowEmpty` |
 | **`apply`** | Create, update, then delete: a patch that re-creates an id it deletes loses it | Delete, create, then update |
+| **An agent's edit in an open tab** | Re-prepares the whole drawing and turns the canvas read-only for a moment: slow on a large drawing, and a stroke being drawn is lost | Prepares only the elements the edit touches and keeps the canvas editable (T-029, T-030) |
 | **Deleting a labelled shape** | Its label stays drawn | The label goes with it |
 | **A label's alignment** | `textAlign` and `verticalAlign` are stored but the label is always drawn centred | Drawn where they say: left, right, top or bottom |
 | **Arrows** | A bound arrow drops its waypoints when created; an elbowed arrow exports unbindable (`fixedPoint: null`); an arrow to a frame comes back unbound from a tab | All three keep what the agent gave them |
