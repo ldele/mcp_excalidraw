@@ -4,6 +4,24 @@
 
 Closed tickets, moved here from `docs/TICKETS.md` when they were closed, **verbatim** per cpc ADR-071, and listed in `TICKETS-INDEX.md`. Newest on top. Append-only; never edited.
 
+## T-003 — No role for progress / meter / gauge
+- **Status:** fixed · 2026-11-20
+- **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §3
+- **Symptom:** A progress bar has no honest entry in the role vocabulary: chart reads as a graph to whoever builds it, panel loses the meaning; the consumer settled on nested panels, which reads as two boxes. ROADMAP already lists progress among candidate roles.
+- **Reproduce:** docs/ROADMAP.md:106 names progress, slider, toggle, stepper, fieldset, nav as add-on-evidence roles; this is the first evidence.
+- **Note:** 2026-11-16 — Rank 8, a decision. This is the first evidence ROADMAP's add-on-evidence rule asks for (docs/ROADMAP.md line 114 lists progress). Decide with T-002: the consumer declared shape because the vocabulary had no progress role. Adding a role means COMPONENT_ROLES, inference or declaration only, the two role lists in the skill (tests/role-docs.test.mjs holds them to the code) and a fixture.
+- **Note:** 2026-11-20 — Decided by the owner: add one role, progress, covering progress bar, meter and gauge; declared only, no inference from geometry. COMPONENT_ROLES, both skill role lists (tests/role-docs.test.mjs) and a fixture. Not built yet.
+- **Resolution:** DEVLOG 2026-11-20 (e): progress role, declared only, its fill folded in; skill role lists, recipe row, progress-role fixture
+
+## T-002 — role: shape is accepted by the API and then reported as a failure by the reading
+- **Status:** fixed · 2026-11-20
+- **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §2
+- **Symptom:** shape is in COMPONENT_ROLES (src/types.ts:135) so the API takes it, but wireframe warns 'N components read as shape — the fallback role' for a role that was declared on purpose (a progress bar the vocabulary cannot name).
+- **Reproduce:** Declare role: shape on any element; wireframe --score counts it under fallbacks. Either reject an explicit shape or distinguish declared from inferred in the diagnostic.
+- **Note:** 2026-11-16 — Rank 8, with T-003. Confirmed in code: scoreWireframe counts every node whose role is shape (src/core/wireframe.ts:868), declared or not. Fix one of two ways: count only an inferred shape, or refuse a declared shape at the API. T-016's resolution left the same question open for screen and panel. The owner chooses; both are small.
+- **Note:** 2026-11-20 — Decided by the owner: count only an inferred shape as a fallback; a declared shape is deliberate and no longer counts (scoreWireframe, src/core/wireframe.ts:868, and its warning). The API keeps accepting role: shape. Not built yet.
+- **Resolution:** DEVLOG 2026-11-20 (e): scoreWireframe counts only an inferred shape; a declared one is deliberate; tests/role-progress.test.mjs
+
 ## T-030 — An agent edit during a person's stroke drops the stroke
 - **Status:** fixed · 2026-11-20
 - **From:** owner, drawing on the canvas (1.3.0) · 2026-11-20

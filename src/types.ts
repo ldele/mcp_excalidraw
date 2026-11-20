@@ -134,7 +134,7 @@ export const COMPONENT_ROLES = [
   'screen', 'panel', 'card', 'header', 'footer', 'sidebar',
   'heading', 'text', 'button', 'input', 'checkbox', 'radio',
   'list-item', 'avatar', 'icon', 'image', 'divider',
-  'chart', 'table', 'shape'
+  'chart', 'table', 'progress', 'shape'
 ] as const;
 
 export type ComponentRole = (typeof COMPONENT_ROLES)[number];

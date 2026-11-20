@@ -20,7 +20,7 @@ const { COMPONENT_ROLES } = await import(pathToFileURL(join(root, 'dist', 'types
 const { readWireframe } = await import(pathToFileURL(join(root, 'dist', 'core', 'wireframe.js')).href);
 
 // Three roles are the reader's own and are not offered for declaring: a frame, a structural
-// region, and the fallback the gate counts (T-002).
+// region, and the fallback the gate counts when the reading infers it (a declared one is not, T-002).
 const READERS_OWN = ['screen', 'panel', 'shape'];
 const declarable = COMPONENT_ROLES.filter(role => !READERS_OWN.includes(role)).sort();
 

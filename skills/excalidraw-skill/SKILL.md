@@ -280,8 +280,10 @@ the same canvas as a UI:
   header bar's text.
 - **Component roles** — `button`, `input`, `heading`, `header`, `footer`, `sidebar`,
   `card`, `checkbox`, `radio`, `avatar`, `icon`, `list-item`, `divider`, `chart`, `table`,
-  `image`, `text`. The reader has three more of its own: `screen` and `panel` for a frame and
-  a structural region, and `shape` when nothing else fits.
+  `progress`, `image`, `text`. The reader has three more of its own: `screen` and `panel` for a
+  frame and a structural region, and `shape` when nothing else fits (counted as a fallback only
+  when inferred; a declared `shape` is deliberate). `progress` is declared only, on a bar's
+  track: its fill is read as part of it.
 - **Declared roles** — put `"role": "chart"` (or any role above) on a shape and the
   reader takes your word for it, reported without the `?`. A glyph needs it: with no label,
   a small square reads as `checkbox?` and a small circle as `radio?` until it says `icon`. Do this for dashboard

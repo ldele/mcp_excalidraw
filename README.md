@@ -62,7 +62,8 @@ changes upstream's files and the test that fails if a merge undoes it.
   any zoom; a rectangle screen is named from its own heading or header bar.
 - **Component roles** such as `button`, `input`, `card`, `checkbox`, `chart` and `table` are
   inferred from geometry, fill and wording. An uncertain guess carries a `?`. `"role": "chart"` on
-  an element declares the role, and the reading takes it as given.
+  an element declares the role, and the reading takes it as given. `progress`, for a progress
+  bar, meter or gauge, is declared only, and takes the bar's fill in with it.
 - **Reading order** is top to bottom, then left to right within a row (`3.`, `3.1.`). An element
   beside a stacked column, such as a full-height sidebar, reads as a column of its own, so the rows
   beside it stay rows.
@@ -86,7 +87,8 @@ agent or human, in design terms (*moved down 60px*, *text "Continue" → "Log in
 
 Drawing rules are in `skills/excalidraw-skill/references/wireframe-conventions.md`. A wireframe is
 done when `wireframe` reads it back as what you meant, not when the screenshot looks right.
-`wireframe --score` counts fallbacks, unnamed screens and orphans.
+`wireframe --score` counts fallbacks (a `shape` the reading inferred; a declared `shape` is
+deliberate and not counted), unnamed screens and orphans.
 
 ## Install
 

@@ -35,4 +35,6 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 | T-006 | fixed | 2026-11-17 | A corner-to-corner sidebar merges every sibling into one row, so the reading order goes column-major | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-005 | fixed | 2026-11-17 | Screen naming picks the topmost heading, not the most screen-like one | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-004 | fixed | 2026-11-17 | textAlign on a bound label round-trips but has no visual effect | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-003 | fixed | 2026-11-20 | No role for progress / meter / gauge | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-002 | fixed | 2026-11-20 | role: shape is accepted by the API and then reported as a failure by the reading | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-001 | fixed | 2026-11-16 | A text element without width/height silently disappears from the reading, including the screen heading | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

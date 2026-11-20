@@ -223,6 +223,7 @@ file row or an input's placeholder reads as drawn with `"textAlign": "left"` (T-
 | List item | identical boxes stacked, gap ≤ 16 | `#ffffff` / `#d7d5cc` | needs ≥ 3 to read as a set | `list-item` |
 | Avatar | circle 32–48 | `#d7d5cc` | | `avatar` |
 | Icon glyph | square or circle 16–28, no label | transparent / `#8a867d` | **declare `icon`** — undeclared it reads as a checkbox or a radio | `icon` |
+| Progress bar, meter, gauge | track h 8–16, the fill inside it | track `#e9ecef`, fill accent primary | **declare `progress` on the track**; the fill and any ticks inside are read as part of it. Label the track with the value ("60%", "3 of 5") | `progress` |
 
 **Tabs and segmented controls** are just a row of buttons on a shared `y` with
 exactly one filled in the primary accent. There is no `tab` role — that is fine, and
@@ -268,13 +269,15 @@ secondary button, a search bar wide enough to look like a banner, a single list 
 Cheap to add, and it's the difference between a spec and a suggestion.
 
 Valid roles: `button`, `input`, `heading`, `header`, `footer`, `sidebar`, `card`,
-`checkbox`, `radio`, `avatar`, `icon`, `list-item`, `divider`, `chart`, `table`, `image`,
-`text`. An unknown role is rejected by the API.
+`checkbox`, `radio`, `avatar`, `icon`, `list-item`, `divider`, `chart`, `table`, `progress`,
+`image`, `text`. An unknown role is rejected by the API. `progress` is never inferred: a bar
+you do not declare reads as whatever its geometry suggests.
 
 Three more are in the vocabulary and are the reader's own, so there is nothing to gain by
 declaring them: `screen` comes from a native frame, or from containment for a top-level
 rectangle holding others; `panel` from containment (a region holding half its parent or more);
-and `shape` is the fallback the gate counts, declared or not.
+and `shape` is the fallback the gate counts when the reading gives up. Declared, `shape` says no
+role fits, on purpose, and is not counted (T-002); prefer a real role when one does.
 
 **Declare `icon` on every glyph.** A small box with no label is the one thing inference cannot
 tell apart from a control: up to 28 px, a square reads as `checkbox?` and a circle as `radio?`.

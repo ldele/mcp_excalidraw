@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-20** (b) — T-029 and T-030 fixed: an agent's edit prepares only what it touches
 - **2026-11-20** (a) — Canvas lag measured; T-029 and T-030 filed
 - **2026-11-19** (a) — cpc deny rules laid in `.claude/settings.json`
 - **2026-11-18** (a) — Upstream's `claude_desktop_config.json` removed

@@ -750,6 +750,12 @@ export function readWireframe(sceneElements: ServerElement[]): WireframeModel {
     const { role, inferred } = classify(node, parent, node.label, siblings);
     node.role = role;
     node.inferred = inferred;
+    // A progress bar's fill and ticks are parts of it, not components: a short painted fill
+    // would read as a button and a thin one as a divider (T-003). `progress` is declared only.
+    if (role === 'progress') {
+      node.children = [];
+      return;
+    }
     node.children = inReadingOrder(node.children);
     for (const child of node.children) assign(child, node, node.children);
   };
@@ -1095,7 +1101,8 @@ export interface WireframeScore {
   screens: number;
   components: number;
   // Components that came back as `shape` — the fallback role, meaning the
-  // reading gave up and the next agent is left guessing.
+  // reading gave up and the next agent is left guessing. A declared `shape` is
+  // the author saying no role fits, on purpose, and is not counted (T-002).
   fallbacks: number;
   // Components whose role is a soft guess (the trailing `?` in the report).
   inferred: number;
@@ -1110,7 +1117,7 @@ export function scoreWireframe(model: WireframeModel): WireframeScore {
   let inferred = 0;
 
   const visit = (node: WireframeNode): void => {
-    if (node.role === 'shape') fallbacks++;
+    if (node.role === 'shape' && !declaredRole(node.element)) fallbacks++;
     if (node.inferred) inferred++;
     node.children.forEach(visit);
   };

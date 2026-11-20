@@ -4,6 +4,21 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-20 (b) — T-029 and T-030 fixed: an agent's edit prepares only what it touches
+- **Why:** entry (a): each agent edit re-prepared the whole drawing in the tab, and its read-only
+  flip dropped a stroke being drawn.
+- **What:** `prepareSceneUpdate` (`frontend/src/utils/scene.ts`) prepares the changed elements and
+  their neighbours, with the neighbours' neighbours as context, and returns every other element as
+  the tab's own object. `applyServerUpdate` (`App.tsx`) uses it for created, updated, deleted and
+  batch messages, without `pauseSceneSync`; the whole-scene path is the fallback, and a failed
+  apply reloads the scene (T-014). Same measurement, about 1,710 elements: 20 updates 1,234 ms →
+  26 ms of handler time, 60 creates 5,141 ms → 67 ms, zero `measureText` calls for an unlabelled edit. Two strokes with
+  agent edits arriving mid-stroke both landed, with no view-mode flip. A resized box's label re-flows as before.
+  `tests/scene-update.test.mjs` (6 tests) holds it to the whole-scene result and to identity.
+- **Rejected:** coalescing bursts into one redraw. After the fix a burst of 60 costs 136 ms in all,
+  so there is nothing left for it to save.
+- **Open:** the font `loadingdone` re-measure still re-prepares the whole scene; not measured as a cost.
+
 ## 2026-11-20 (a) — Canvas lag measured; T-029 and T-030 filed
 - **Why:** the owner saw lag drawing on the canvas and asked for a measurement before any fix.
 - **What:** a throwaway in-memory canvas (port 3011) seeded with a copy of the real 231-element

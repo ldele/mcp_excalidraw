@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-17 · class: living -->
+<!-- status: active · updated: 2026-11-20 · class: living -->
 
 # ROADMAP
 
@@ -117,8 +117,9 @@ Measured against `src/` on 2026-07-31.
   is a common redline workflow we cannot read at all.
 
 Roles the vocabulary lacks: `tab-bar`, `modal`, `toolbar`, `breadcrumb`, `badge`, `tooltip`,
-`progress`, `slider`, `toggle`, `stepper`, `fieldset`, `nav`. Add on evidence — a role earns its
-place when a real drawing needed it, not from a list like this one.
+`slider`, `toggle`, `stepper`, `fieldset`, `nav`. Add on evidence — a role earns its place when a
+real drawing needed it, not from a list like this one. `progress` was the first to earn it
+(T-003, 2026-11-20): declared only, its fill folded into it.
 
 Its own PR when it comes: **diffing two wireframes** (`wireframe --against v1.excalidraw`) to answer
 "what changed in this design", which is what a reviewer actually asks.

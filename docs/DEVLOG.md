@@ -10,6 +10,17 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-20 (e) — T-002 and T-003 fixed: a declared `shape` is no fallback; a `progress` role
+- **Why:** the owner's decisions in (c), on one consumer's report (a progress bar with no role).
+- **What:** `scoreWireframe` counts a `shape` as a fallback only when the reading inferred it.
+  `progress` joins `COMPONENT_ROLES`, declared only; a progress node takes its children in (a
+  short painted fill would read as a button, a thin one as a divider). Both role lists in the
+  skill, a recipe row (the fill under a transparent track, so the track's label shows), README,
+  ROADMAP. `tests/role-progress.test.mjs` (5, red first) and the `progress-role` fixture, drawn
+  live: the declared roles survived a person's move in a real tab; every other golden unchanged.
+- **Rejected:** refusing a declared `shape` at the API; inferring `progress` from geometry.
+- **Open:** none; PR 1's round 2 is next.
+
 ## 2026-11-20 (d) — ADR-007 built: markup is held until the person sends it (SPEC-009)
 - **Why:** ADR-007, accepted in (c): in PR 1's round 1 the agent read a half-finished round.
 - **What:** the legend gains a "Send to Claude" box, `legend-send`. `src/core/send-box.ts` (the
@@ -35,18 +46,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Rejected:** the header button now (ADR-007 option 3, after the box is tried); refusing a
   declared `shape` at the API; inferring `progress` from geometry.
 - **Open:** build ADR-007, then T-002 with T-003; PR 1's round 2 is the first round with the box.
-
-## 2026-11-20 (b) — T-029 and T-030 fixed: an agent's edit prepares only what it touches
-- **Why:** entry (a): each agent edit re-prepared the whole drawing in the tab, and its read-only
-  flip dropped a stroke being drawn.
-- **What:** `prepareSceneUpdate` (`frontend/src/utils/scene.ts`) prepares the changed elements and
-  their neighbours, with the neighbours' neighbours as context, and returns every other element as
-  the tab's own object. `applyServerUpdate` (`App.tsx`) uses it for created, updated, deleted and
-  batch messages, without `pauseSceneSync`; the whole-scene path is the fallback, and a failed
-  apply reloads the scene (T-014). Same measurement, about 1,710 elements: 20 updates 1,234 ms →
-  26 ms of handler time, 60 creates 5,141 ms → 67 ms, zero `measureText` calls for an unlabelled edit. Two strokes with
-  agent edits arriving mid-stroke both landed, with no view-mode flip. A resized box's label re-flows as before.
-  `tests/scene-update.test.mjs` (6 tests) holds it to the whole-scene result and to identity.
-- **Rejected:** coalescing bursts into one redraw. After the fix a burst of 60 costs 136 ms in all,
-  so there is nothing left for it to save.
-- **Open:** the font `loadingdone` re-measure still re-prepares the whole scene; not measured as a cost.

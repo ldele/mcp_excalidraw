@@ -1,0 +1,22 @@
+{
+  "fixture": "progress-role.excalidraw",
+  "what": "One frame screen, S01 — Upload: a heading, a progress bar (a blue fill under a transparent track labelled \"3 of 5\", the track declared `progress`), an illustration ellipse declared `shape`, and a Cancel button a person moved in a real tab.",
+  "why": "T-003: a declared progress bar reads as `progress`, and its fill is part of it, not a component (undeclared, a short painted fill reads as a button). T-002: a declared `shape` is read as shape and is not a fallback. The person's move proves both declared roles survive the tab's whole-scene sync.",
+  "score": {
+    "screens": 1,
+    "components": 5,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s01", "label": "S01 — Upload" }
+  ],
+  "navigation": [],
+  "readingOrder": ["s01-title", "s01-progress", "s01-art", "s01-cancel"],
+  "markup": [],
+  "notes": [
+    "Drawn 2026-11-20 on port 3011 (in memory): every element by the CLI (`apply`), then the Cancel button dragged 60px right in the browser pane, which made its origin `human`. Exported with `excalidraw-canvas export`. The editor grew the track from 20 to 25px to fit its label."
+  ]
+}
