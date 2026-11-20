@@ -45,7 +45,8 @@ T-018 and T-019 (rank 6, test infrastructure) after that (`e8c6017`, pushed); T-
 T-029 and T-030 (agent edits lagged the tab and dropped a stroke) fixed 2026-11-20 (`ee05783`).
 ADR-007 accepted 2026-11-20: a Send box, unsent markup held back, the skill's loop around the send.
 T-002 (count only an inferred shape) and T-003 (a declared `progress` role) decided the same day.
-**Next:** build ADR-007, then T-002 with T-003; then PR 1's round 2 from the next real review
+ADR-007 built the same day (SPEC-009): the legend's Send box, unsent markup held, `watch --until-sent`.
+**Next:** T-002 with T-003; then PR 1's round 2 from the next real review
 (KI-3), the first round run with the Send box. Each ticket's decision is in its 2026-11-20 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 

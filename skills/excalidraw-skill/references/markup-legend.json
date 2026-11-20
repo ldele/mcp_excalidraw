@@ -7,7 +7,7 @@
       "x": -360,
       "y": 120,
       "width": 300,
-      "height": 420,
+      "height": 540,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent"
     },
@@ -177,6 +177,32 @@
       "text": "Done with a screen? Tick its\nApproved box, top right.",
       "fontSize": 16,
       "strokeColor": "#2f9e44",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-send-hint",
+      "type": "text",
+      "x": -344,
+      "y": 535,
+      "width": 268,
+      "height": 45,
+      "text": "Done with this round? Tick\nSend to Claude below.",
+      "fontSize": 16,
+      "strokeColor": "#1e1e1e",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-send",
+      "type": "rectangle",
+      "x": -344,
+      "y": 592,
+      "width": 268,
+      "height": 48,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "label": {
+        "text": "Send to Claude"
+      },
       "frameId": "legend"
     }
   ]

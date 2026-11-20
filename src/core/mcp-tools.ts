@@ -470,7 +470,8 @@ export const tools: Tool[] = [
       'inferred and marked with `?` when uncertain; raw type and size are always included. ' +
       'A Drawing quality block appears when the drawing is a few pixels from a different ' +
       'reading (an element just outside its screen, a header that stops short). ' +
-      'For flowcharts and architecture diagrams use describe_scene instead.',
+      'A person\'s markup not yet sent with the legend\'s "Send to Claude" box is held back and ' +
+      'only counted. For flowcharts and architecture diagrams use describe_scene instead.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -485,7 +486,9 @@ export const tools: Tool[] = [
       'circled shapes, arrows — to the element it refers to, with the intent its colour gives ' +
       '(red change, orange remove, blue question, green fine). This is how you collect design ' +
       'feedback: draw a wireframe, ask the user to mark it up, then call this to read their ' +
-      'notes. Call with no arguments to get everything since your previous call.',
+      'notes. Call with no arguments to get everything since your previous call. When the ' +
+      'legend has a "Send to Claude" box, a person\'s edits since they last ticked it are held ' +
+      'back and only counted ("N edits by a person, not sent yet").',
     inputSchema: {
       type: 'object',
       properties: {
@@ -529,6 +532,13 @@ export const tools: Tool[] = [
           description:
             'Quiet period after the last edit before returning, so one batch covers a whole ' +
             'round of markup (default 1.5).'
+        },
+        untilSent: {
+          type: 'boolean',
+          description:
+            'Wait for the person to tick the legend\'s "Send to Claude" box instead of for the ' +
+            'first edit, then return the whole round once and clear the box for the next round. ' +
+            'Use this to hand over the pen: it does not return while they are still marking up.'
         }
       }
     }

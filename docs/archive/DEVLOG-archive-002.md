@@ -4,6 +4,18 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-20 (a) — Canvas lag measured; T-029 and T-030 filed
+- **Why:** the owner saw lag drawing on the canvas and asked for a measurement before any fix.
+- **What:** a throwaway in-memory canvas (port 3011) seeded with a copy of the real 231-element
+  drawing, then ×5 (1713 elements). In the tab, every WebSocket handler, React scheduler task and
+  pointer handler was timed in-process. Agent edits are the cost: 88 ms each at 1713 elements,
+  ~3,800 `measureText` calls to move one rectangle; 60 one-by-one creates in 1 s cost 5.1 s
+  (T-029). An agent edit during a stroke drops the stroke (T-030). Hand drawing and scrolling are
+  Excalidraw's own and fine. `scripts/perf-agent-edits.mjs` sends the agent bursts.
+- **Rejected:** frame-gap and MessageChannel-gap probes. The pane was hidden, and Chromium's
+  background throttling read as 36% load on an idle page.
+- **Open:** the fix (frontend only, both tickets on one path) awaits the owner.
+
 ## 2026-11-19 (a) — cpc deny rules laid in `.claude/settings.json`
 - **Why:** the maintainer wants every project set up before cpc ADR-080 to carry the deny rules
   newer `cpc-init` profiles lay by default, so Claude Code refuses the agent's own commit, push,

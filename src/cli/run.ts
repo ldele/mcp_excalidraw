@@ -30,7 +30,7 @@ const COMMANDS: Record<string, Command> = {
   describe: { handler: scene.describe, summary: 'AI-readable scene description (plain text)', usage: 'describe' },
   wireframe: { handler: scene.wireframe, summary: 'Read the canvas as a UI: screens, components, flows', usage: 'wireframe [--json] [--score] [--lint] (--score emits the pre-flight counts only; --lint lists the geometry lint findings)' },
   changes: { handler: changes, summary: 'What changed on the canvas, and who changed it', usage: 'changes [--since <rev>] [--json]' },
-  watch: { handler: watch, summary: 'Block until a human edits the canvas, then report', usage: 'watch [--since <rev>] [--timeout 60] [--settle 1.5] [--json]' },
+  watch: { handler: watch, summary: 'Block until a human edits the canvas, then report', usage: 'watch [--since <rev>] [--timeout 60] [--settle 1.5] [--until-sent] [--json] (--until-sent waits for the Send box, reports the round once, then clears the box)' },
   screenshot: { handler: scene.screenshot, summary: 'Render the canvas to PNG/SVG (headless; no browser tab needed)', usage: `screenshot [--out file.png|file.svg] [--renderer auto|node|browser] ${IMAGE_FLAG_USAGE}` },
   render: { handler: render, summary: 'Render JSON, Obsidian .excalidraw.md, or embedded-scene PNG to PNG/SVG offline (no canvas server)', usage: `render [scene.excalidraw|note.excalidraw.md|scene.excalidraw.png|-] [--out file.png|file.svg] ${IMAGE_FLAG_USAGE} (PNG input must contain an embedded scene; or stdin)` },
   export: { handler: scene.exportCmd, summary: 'Export the scene as .excalidraw JSON or Obsidian .excalidraw.md', usage: 'export [--out scene.excalidraw | note.excalidraw.md] [--format json|obsidian] (a .md out path implies obsidian)' },

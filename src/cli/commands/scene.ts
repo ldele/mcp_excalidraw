@@ -17,6 +17,7 @@ import { describeScene } from '../../core/describe.js';
 import { readWireframe, formatWireframe, scoreWireframe, WireframeNode } from '../../core/wireframe.js';
 import { formatLint } from '../../core/wireframe-lint.js';
 import { exportToExcalidrawUrl } from '../../core/share-url.js';
+import { sentScene } from '../../core/send-round.js';
 import { EXPRESS_SERVER_URL } from '../../core/config.js';
 import { IMAGE_FLAG_SPEC, imageFormatFromFlags, imageOptionsFromFlags } from '../image-options.js';
 
@@ -40,7 +41,8 @@ export async function wireframe(argv: string[]): Promise<void> {
     lint: { takesValue: false }
   });
   await ensureCanvasRunning();
-  const elements = await getElements();
+  // ADR-007: a person's edits since the last send are held back; the reading says how many.
+  const { elements, heldNote } = await sentScene(await getElements());
   const model = readWireframe(elements);
 
   // The pre-flight checklist as numbers, for a caller that wants to gate on it
@@ -64,7 +66,8 @@ export async function wireframe(argv: string[]): Promise<void> {
       score: scoreWireframe(model),
       // ADR-002: the findings ride in the same payload as the tree they refer to, so a consumer
       // highlights elements against one snapshot of a canvas someone may still be editing.
-      lint: model.lint
+      lint: model.lint,
+      ...(heldNote ? { held: heldNote } : {})
     });
     return;
   }
@@ -77,7 +80,7 @@ export async function wireframe(argv: string[]): Promise<void> {
   }
 
   // Plain text by design: this is the agent/human-readable UI reading
-  process.stdout.write(formatWireframe(model) + '\n');
+  process.stdout.write((heldNote ? `${heldNote}\n\n` : '') + formatWireframe(model) + '\n');
 }
 
 function stripElements(node: WireframeNode): Record<string, unknown> {

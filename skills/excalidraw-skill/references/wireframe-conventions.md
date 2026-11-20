@@ -379,7 +379,17 @@ component: no `checkbox?`, no `shape`. A fill, or any mark of a person's whose c
 it, ticks it, and that mark is not listed as an annotation. `wireframe` prints each screen
 `· approved` or `· not approved yet` with `Approved: 1 of 2 screens.` at the top; `changes`
 reports a tick as `↳ approves screen [s01] …`, and a fill taken off as `withdraws approval of`.
-A round still ends with `watch`'s quiet period; the boxes show which screens are done.
+The boxes show which screens are done; the Send box says the round is.
+
+**A round ends when the person sends it** (ADR-007). The legend carries a "Send to Claude" box,
+`legend-send`; the person ticks it, with any mark inside it or a fill, when the round is done.
+Until then `changes`, `wireframe` and their MCP tools hold back what that person did since the
+round began and print only `⏸ N edits by a person, not sent yet.`: a note they drew is not in the
+reading at all; an edit to an element that already existed (a move, a relabel) still shows as it
+is, and is counted. Your own edits are never held. `watch --until-sent` (`wait_for_changes` with
+`untilSent`) returns the whole round once, at the tick, then deletes the tick and draws the box
+again for the next round. `describe`, `export` and `screenshot` show the canvas as it is: the
+reading is held, not the pixels, so do not look at them during a round either.
 
 **Where a screen has no room for a box,** a person approves it by ringing the whole screen in
 green (ADR-006): a mark in the "fine" colour that encloses a whole screen reads `· approved`, and

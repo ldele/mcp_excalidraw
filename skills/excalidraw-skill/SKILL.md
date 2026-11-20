@@ -47,6 +47,7 @@ Results are JSON on stdout — except `describe` (plain text) and raw-content ou
 | See the scene | `screenshot [--out f.png]` (PNG without `--out` → temp file path in JSON; SVG without `--out` → raw SVG) |
 | Read what the human changed | `changes [--since <rev>]` — additions, edits, deletions in design terms, with markup attributed to its subject |
 | Wait for the human to edit | `watch [--timeout 60]` — blocks until someone touches the canvas, then reports (`--timeout` max 240; re-poll in a loop) |
+| Wait for a markup round to be sent | `watch --until-sent [--timeout 240]` — blocks until the person ticks the legend's Send box, reports the round once, clears the box |
 | Layout operations | `arrange align\|distribute\|group\|ungroup\|lock\|unlock\|duplicate --ids a,b,c [--to left\|horizontal\|...]` |
 | Scene files | `export [--out scene.excalidraw]`, `import [scene.excalidraw|-] [--replace]` — a `.excalidraw.md` out path writes Obsidian's format (see File I/O) |
 | Mermaid → canvas | `mermaid [diagram.mmd|-]` (or stdin) |
@@ -393,23 +394,30 @@ it is far cheaper and more precise than asking them to describe edits in prose.
    > "The sign-in wireframe is on the canvas at http://127.0.0.1:3000, with a 'How to
    > mark up' key beside it. Circle, scribble on, or write next to anything: red to
    > change it, orange to remove it, blue for a question, green when it is fine. Tick a
-   > screen's Approved box when it is done. Tell me when you're done."
-3. **Wait** with `watch` (`wait_for_changes`) instead of polling. It blocks until
-   the canvas is touched, then waits for a quiet moment so a whole round of markup
-   arrives as one batch. On timeout it says so — call it again to keep waiting.
+   > screen's Approved box when it is done, and tick 'Send to Claude' in the key when
+   > the whole round is done. I won't look until you do."
+3. **Wait for the send** with `watch --until-sent` (`wait_for_changes` with
+   `untilSent: true`), and do nothing else meanwhile (ADR-007): do not read the
+   canvas, do not draw on it, do not comment on it in chat. The person's edits are
+   held back from `changes` and `wireframe` until they tick the Send box anyway;
+   `describe` and `screenshot` are not held, so leave them alone too. On timeout it
+   says how many edits are waiting — call it again.
 
    **`--timeout` cannot exceed 240 seconds** (exit code 2 if you ask for more):
    Node aborts a response whose headers take longer than 300s, so the long-poll
    has to return first. A human markup round takes far longer than four minutes,
    so **expect to re-poll in a loop** rather than reaching for one long wait.
-   `--since` is an absolute rev, so nothing drawn between polls is missed. Raise
-   `--settle` (default 1.5s) if a pause for thought is splitting one round of
-   markup into two reports.
-4. **Read** the report. Then *act on it*: apply the edits to the code/design, or
-   update the wireframe and go round again. For UI work, follow up with `wireframe`
-   to re-read the marked-up design as an interface — the report tells you what
-   moved, the wireframe reading tells you what the design now *is*. A screen marked
-   `· approved` is done: leave it alone unless the person says otherwise.
+   Nothing is missed between polls: the round is everything since the box was
+   last cleared. With no Send box on the canvas `--until-sent` exits 2 and says to
+   apply the legend; plain `watch` (first edit, then a quiet moment) still works for
+   a canvas without one.
+4. **Read the round once**, whole, and answer in chat. The report is the round; it
+   clears the Send box itself, so the next round starts there. Then *act on it*:
+   apply the edits to the code/design, or update the wireframe and go round again.
+   For UI work, follow up with `wireframe` to re-read the marked-up design as an
+   interface — the report tells you what moved, the wireframe reading tells you what
+   the design now *is*. A screen marked `· approved` is done: leave it alone unless
+   the person says otherwise.
 
 **The user must have the canvas open in a browser.** Edits only reach the server
 from an open tab — that is the transport. If `watch` keeps timing out, check this

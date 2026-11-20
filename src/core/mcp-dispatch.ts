@@ -42,7 +42,7 @@ import {
 import { buildSceneFile, importScene } from './scene-io.js';
 import { wrapSceneAsObsidianMd } from './obsidian-md.js';
 import { describeScene } from './describe.js';
-import { formatChangeReport } from './changes.js';
+import { heldChangeReport, sentScene, waitUntilSent, NoSendBoxError } from './send-round.js';
 import { readWireframe, formatWireframe } from './wireframe.js';
 import { exportToExcalidrawUrl } from './share-url.js';
 import { DIAGRAM_DESIGN_GUIDE } from './design-guide.js';
@@ -58,7 +58,8 @@ import {
 async function renderChangeReport(payload: ChangePayload): Promise<string> {
   const currentElements = await getElements();
   advanceChangeCursor(payload);
-  return formatChangeReport(
+  // ADR-007: a person's edits since the last send are held back and counted.
+  return heldChangeReport(
     {
       since: payload.since,
       rev: payload.rev,
@@ -688,10 +689,12 @@ export async function callExcalidrawTool(
       case 'describe_wireframe': {
         logger.info('Reading scene as a wireframe via MCP');
 
-        const wireframeElements = await getElements();
+        // ADR-007: a person's edits since the last send are held back; the reading says how many.
+        const { elements: wireframeElements, heldNote } = await sentScene(await getElements());
+        const reading = formatWireframe(readWireframe(wireframeElements));
 
         return {
-          content: [{ type: 'text', text: formatWireframe(readWireframe(wireframeElements)) }]
+          content: [{ type: 'text', text: heldNote ? `${heldNote}\n\n${reading}` : reading }]
         };
       }
       case 'get_canvas_changes': {
@@ -712,12 +715,34 @@ export async function callExcalidrawTool(
         const params = z.object({
           since: z.number().min(0).optional(),
           timeoutSeconds: z.number().min(1).max(MAX_WAIT_SECONDS).optional(),
-          settleSeconds: z.number().min(0).max(30).optional()
+          settleSeconds: z.number().min(0).max(30).optional(),
+          untilSent: z.boolean().optional()
         }).parse(args || {});
 
         const since = params.since ?? changeCursor();
         const timeoutSeconds = params.timeoutSeconds ?? 60;
         const settleSeconds = params.settleSeconds ?? 1.5;
+
+        // ADR-007: wait for the person to tick the Send box, then report the round once.
+        if (params.untilSent) {
+          logger.info('Waiting for the round to be sent via MCP', { timeoutSeconds });
+          try {
+            const round = await waitUntilSent(timeoutSeconds, settleSeconds);
+            if (round.sent) advanceChangeCursor({ rev: round.rev });
+            return {
+              content: [{
+                type: 'text',
+                text: round.sent ? round.report
+                  : `${round.report} Call wait_for_changes with untilSent again to keep waiting.`
+              }]
+            };
+          } catch (error) {
+            if (error instanceof NoSendBoxError) {
+              return { content: [{ type: 'text', text: error.message }], isError: true };
+            }
+            throw error;
+          }
+        }
 
         logger.info('Waiting for canvas changes via MCP', { since, timeoutSeconds });
 

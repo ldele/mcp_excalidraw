@@ -33,7 +33,9 @@ The package is renamed and marked private so a stray `npm publish` fails loudly.
   `wireframe`, MCP `describe_wireframe`.
 - **The two-way review loop** (`src/core/changes.ts`): a revision on every mutation, each change
   attributed to agent or human, and a person's markup attached to the element it refers to. CLI
-  `changes` / `watch`, MCP `get_canvas_changes` / `wait_for_changes`.
+  `changes` / `watch`, MCP `get_canvas_changes` / `wait_for_changes`. A person's markup is held
+  back until they tick the legend's Send box (`src/core/send-box.ts`, ADR-007); `watch
+  --until-sent` waits for it on the client, so upstream's server is untouched.
 - **Drawing conventions** (`skills/excalidraw-skill/references/wireframe-conventions.md`): the grid,
   the palette split role inference relies on, component recipes. A wireframe is finished when
   `wireframe` reads it back as meant, not when the screenshot looks right.

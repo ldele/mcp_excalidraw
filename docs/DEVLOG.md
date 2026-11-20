@@ -10,6 +10,20 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-20 (d) — ADR-007 built: markup is held until the person sends it (SPEC-009)
+- **Why:** ADR-007, accepted in (c): in PR 1's round 1 the agent read a half-finished round.
+- **What:** the legend gains a "Send to Claude" box, `legend-send`. `src/core/send-box.ts` (the
+  rule, pure) holds a person's edits after the round start, or after the tick once there is one;
+  `src/core/send-round.ts` applies it to `changes`, `wireframe` and their MCP tools, which print
+  `⏸ N edits by a person, not sent yet.`, and adds `watch --until-sent` / `untilSent`, which
+  returns the round once and redraws the box. The skill's loop: hand over, wait for the send,
+  read once, answer in chat. 15 new tests; live round on a real tab passed (SPEC-009 § Verified).
+- **Rejected:** a server-side wait (`src/server.ts` is upstream's: the client loops over the
+  existing long-poll); undoing a person's edits to existing elements in the reading (the log's
+  deltas are canonical, SPEC-009 row 6).
+- **Open:** a person's move or relabel of an existing element still shows before the send, counted
+  but not hidden; PR 1's round 2 is the first real round with the box.
+
 ## 2026-11-20 (c) — ADR-007 accepted; T-002 and T-003 decided
 - **Why:** the three owner decisions pending since 2026-11-17, ahead of PR 1's round 2.
 - **What:** ADR-007 accepted as recommended, options 2 + 5 + 1: a "Send to Claude" box in the
@@ -36,15 +50,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Rejected:** coalescing bursts into one redraw. After the fix a burst of 60 costs 136 ms in all,
   so there is nothing left for it to save.
 - **Open:** the font `loadingdone` re-measure still re-prepares the whole scene; not measured as a cost.
-
-## 2026-11-20 (a) — Canvas lag measured; T-029 and T-030 filed
-- **Why:** the owner saw lag drawing on the canvas and asked for a measurement before any fix.
-- **What:** a throwaway in-memory canvas (port 3011) seeded with a copy of the real 231-element
-  drawing, then ×5 (1713 elements). In the tab, every WebSocket handler, React scheduler task and
-  pointer handler was timed in-process. Agent edits are the cost: 88 ms each at 1713 elements,
-  ~3,800 `measureText` calls to move one rectangle; 60 one-by-one creates in 1 s cost 5.1 s
-  (T-029). An agent edit during a stroke drops the stroke (T-030). Hand drawing and scrolling are
-  Excalidraw's own and fine. `scripts/perf-agent-edits.mjs` sends the agent bursts.
-- **Rejected:** frame-gap and MessageChannel-gap probes. The pane was hidden, and Chromium's
-  background throttling read as 36% load on an idle page.
-- **Open:** the fix (frontend only, both tickets on one path) awaits the owner.

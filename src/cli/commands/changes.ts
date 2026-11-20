@@ -9,7 +9,7 @@ import {
   MAX_WAIT_SECONDS,
   ChangePayload
 } from '../../core/canvas-client.js';
-import { formatChangeReport } from '../../core/changes.js';
+import { heldChangeReport, heldChangeSet, waitUntilSent, NoSendBoxError } from '../../core/send-round.js';
 import { EXPRESS_SERVER_URL } from '../../core/config.js';
 
 function parseNumberFlag(value: unknown, name: string): number | undefined {
@@ -26,16 +26,18 @@ async function report(
   asJson: boolean,
   warning?: string | null
 ): Promise<void> {
+  const elements = await getElements();
   if (asJson) {
-    printJson(warning ? { ...payload, warnings: [warning] } : payload);
+    // ADR-007: a person's unsent edits are left out here too, and counted in `held`.
+    const held = await heldChangeSet(payload, elements);
+    printJson(warning ? { ...held, warnings: [warning] } : held);
     return;
   }
-  const elements = await getElements();
   // In-band as well as on stderr: the MCP tools take no arguments and an agent
   // reading a report has no other way to be told the canvas is eating markup.
   const banner = warning ? `⚠️  ${warning}\n\n` : '';
   // Plain text by design: this is the agent/human-readable review report
-  process.stdout.write(banner + formatChangeReport(payload, elements) + '\n');
+  process.stdout.write(banner + await heldChangeReport(payload, elements) + '\n');
 }
 
 // Never fail a report because the health probe did; the warning is a courtesy.
@@ -65,6 +67,7 @@ export async function watch(argv: string[]): Promise<void> {
     since: { takesValue: true },
     timeout: { takesValue: true },
     settle: { takesValue: true },
+    'until-sent': { takesValue: false },
     json: { takesValue: false }
   });
 
@@ -87,6 +90,21 @@ export async function watch(argv: string[]): Promise<void> {
   // ten minutes drawing into a canvas that is deleting their work.
   const warning = await clientWarning();
   if (warning) note(`WARNING: ${warning}`);
+
+  // ADR-007: wait for the person to tick the Send box, then report the round once.
+  if (flags['until-sent']) {
+    note(`Waiting up to ${timeout}s for the round to be sent (the Send box in the legend at ${EXPRESS_SERVER_URL})...`);
+    let round;
+    try {
+      round = await waitUntilSent(timeout, settle);
+    } catch (error) {
+      if (error instanceof NoSendBoxError) throw new CliUsageError(error.message);
+      throw error;
+    }
+    if (flags.json) printJson(warning ? { ...round, warnings: [warning] } : round);
+    else process.stdout.write((warning ? `⚠️  ${warning}\n\n` : '') + round.report + '\n');
+    return;
+  }
 
   note(`Waiting up to ${timeout}s for canvas edits (open ${EXPRESS_SERVER_URL} to draw)...`);
   const payload = await waitForChanges(since, timeout, settle);

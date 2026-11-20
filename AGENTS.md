@@ -28,8 +28,8 @@ SPEC-008), is on `main` as `5c5daf6`, pushed. PR 1's round 1 gave one mark, a mi
 The lint's misfires on that drawing are fixed (`2b97ebe`) and KI-10 with ADR-006 (`31d1f6e`),
 both pushed. T-006, T-021, T-017, T-018, T-019, T-004, T-008 and T-005 are fixed and pushed (last `1e7f468`).
 T-029 and T-030 (agent edits lagged the tab, dropped a stroke) are fixed (`ee05783`). ADR-007
-(markup is sent, not watched), T-002 and T-003 are decided (2026-11-20). **Next: build ADR-007,
-then T-002 with T-003; then PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
+(markup is sent, not watched), T-002 and T-003 are decided (2026-11-20); ADR-007 is built
+(SPEC-009). **Next: T-002 with T-003; then PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 

@@ -124,6 +124,10 @@ Fixture and tests to be written first: a round with marks drawn after the last s
 `watch --until-sent`; an agent's own edits are never held. The skill's review loop and the legend
 file updated; the round trip of rule 4 through a real tab.
 
+Built 2026-11-20 (SPEC-009): `tests/send-box.test.mjs` (the rule, the legend's box) and
+`tests/send-round.test.mjs` (held, released, `waitUntilSent`, the box cleared, the agent never
+held, against a real server); the live round is SPEC-009 § Verified.
+
 ## Consequences
 
 - **Options 2, 3, 5** change what the agent can see mid-round; the skill's review loop is
