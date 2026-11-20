@@ -32,22 +32,6 @@ created.
      - **Note:** date — what triage changed (optional; `cpc-ticket triage --id N --note` adds it)
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
 
-## T-030 — An agent edit during a person's stroke drops the stroke
-- **Status:** triaged · 2026-11-20
-- **From:** owner, drawing on the canvas (1.3.0) · 2026-11-20
-- **Symptom:** A pencil stroke in progress when an agent update arrives is never created (freedraw count unchanged, twice); the same stroke with no agent edit lands. The tab flips into view mode for each incoming edit.
-- **Reproduce:** frontend/src/App.tsx:483 calls pauseSceneSync(), which sets sceneLoadStatus to loading, and App.tsx:1049 viewModeEnabled={sceneLoadStatus !== 'ready'}; start a stroke, then node scripts/perf-agent-edits.mjs update 3 400 <port>
-- **Note:** 2026-11-20 — Reproduced twice against a control stroke that lands. Cause is the view-mode flip from pauseSceneSync on every incremental message (T-029's path). Fix with T-029; a person's in-progress element must survive an incoming agent edit.
-- **Resolution:** —
-
-## T-029 — Each agent edit rebuilds and re-measures the whole scene in the tab
-- **Status:** triaged · 2026-11-20
-- **From:** owner, drawing on the canvas (1.3.0) · 2026-11-20
-- **Symptom:** On a 1713-element drawing every element_created/updated costs the tab ~88 ms (62 ms WebSocket handler + 26 ms React) and ~3,800 measureText calls to move one rectangle; 60 one-by-one creates in 1 s cost 5.1 s of handler time, so the canvas freezes ~4 s behind the agent.
-- **Reproduce:** frontend/src/App.tsx:483 (mergeAndApplySceneElements -> applyServerScene with refreshDimensions: true over the whole scene); node scripts/perf-agent-edits.mjs create 60 10 <port> against a throwaway canvas holding a large scene
-- **Note:** 2026-11-20 — Measured in a hidden browser pane with each handler timed in-process (gap probes read Chromium's background throttling as load). Scales with the drawing: ~15 ms per edit at 231 elements, 88 ms at 1713. Hand drawing is not the problem: pointer moves <0.5 ms, pointer-down 57 ms, auto-save 26 ms. Fix in frontend/ only: apply incremental edits without pauseSceneSync, refreshDimensions only for changed containers, coalesce a burst into one updateScene. Same code path as T-030; fix together.
-- **Resolution:** —
-
 ## T-003 — No role for progress / meter / gauge
 - **Status:** triaged · 2026-11-16
 - **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §3

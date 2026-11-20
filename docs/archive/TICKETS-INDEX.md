@@ -1,4 +1,4 @@
-<!-- status: archived · updated: 2026-11-17 · class: living -->
+<!-- status: archived · updated: 2026-11-20 · class: living -->
 
 # TICKETS archive index
 
@@ -8,6 +8,8 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 
 | Ticket | Status | Closed | Title | Archive |
 |---|---|---|---|---|
+| T-030 | fixed | 2026-11-20 | An agent edit during a person's stroke drops the stroke | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
+| T-029 | fixed | 2026-11-20 | Each agent edit rebuilds and re-measures the whole scene in the tab | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-028 | fixed | 2026-11-16 | Screens on a large canvas are hard to tell apart and to name in a message | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-027 | fixed | 2026-11-17 | A person marking up a wireframe has no convention to follow, so markup falls back to chat messages | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-026 | fixed | 2026-11-16 | A tab connecting re-marks agent shapes as human, and the reading then reorders a row and reads an icon as markup | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
