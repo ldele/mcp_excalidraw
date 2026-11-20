@@ -10,6 +10,21 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-20 (f) — PR 1 round 2: two human marks, both hits; the first round sent with the box
+- **Why:** ROADMAP PR 1 / KI-3, the attribution measure, after ADR-007 was built in (d).
+- **What:** the agent drew SockCast, a nonsense three-screen wireframe the owner asked for in
+  place of a real design, on an in-memory canvas (port 3011), with the legend. The owner marked it
+  up in the browser pane and sent it with the Send box; `watch --until-sent` returned the round
+  once. Two review marks (red loop round S03, orange loop round S02), both bound to the screen the
+  person meant: baseline 10 / 11. Pinned as `human-round-2`. The legend's approval line now shows a
+  ticked example box after "Tick", asked for during the round.
+- **Findings:** a tick that landed across the Send box's corner (its centre outside) was no send,
+  and `changes` read it as markup on a list item 138px away while `wireframe` listed nothing. The
+  person moved the Send box and the legend's example tick while trying to tick with the selection
+  tool. A mark drawn after the reset was held, as designed. The owner chose the header button
+  (ADR-007 option 3), to build next.
+- **Open:** a round with marks on single components (KI-3 stays open); the Send button.
+
 ## 2026-11-20 (e) — T-002 and T-003 fixed: a declared `shape` is no fallback; a `progress` role
 - **Why:** the owner's decisions in (c), on one consumer's report (a progress bar with no role).
 - **What:** `scoreWireframe` counts a `shape` as a fallback only when the reading inferred it.
@@ -34,15 +49,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   deltas are canonical, SPEC-009 row 6).
 - **Open:** a person's move or relabel of an existing element still shows before the send, counted
   but not hidden; PR 1's round 2 is the first real round with the box.
-
-## 2026-11-20 (c) — ADR-007 accepted; T-002 and T-003 decided
-- **Why:** the three owner decisions pending since 2026-11-17, ahead of PR 1's round 2.
-- **What:** ADR-007 accepted as recommended, options 2 + 5 + 1: a "Send to Claude" box in the
-  legend, a person's edits after the last send held back from `changes` and `wireframe`,
-  `watch --until-sent`, and the skill's loop rewritten around the send. T-002: only an inferred
-  `shape` counts as a fallback; a declared one is deliberate. T-003: one declared-only `progress`
-  role for progress bars, meters and gauges. Recorded in the ADR and the tickets' notes; nothing
-  built.
-- **Rejected:** the header button now (ADR-007 option 3, after the box is tried); refusing a
-  declared `shape` at the API; inferring `progress` from geometry.
-- **Open:** build ADR-007, then T-002 with T-003; PR 1's round 2 is the first round with the box.

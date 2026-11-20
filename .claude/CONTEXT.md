@@ -47,7 +47,9 @@ ADR-007 accepted 2026-11-20: a Send box, unsent markup held back, the skill's lo
 T-002 (count only an inferred shape) and T-003 (a declared `progress` role) decided the same day.
 ADR-007 built the same day (SPEC-009): the legend's Send box, unsent markup held, `watch --until-sent`.
 T-002 and T-003 fixed the same day; no ticket is open.
-**Next:** PR 1's round 2 from the next real review (KI-3), the first round run with the Send box. Each ticket's decision is in its 2026-11-20 note in
+PR 1's round 2 ran the same day on a nonsense wireframe, sent with the Send box: two marks, both hits.
+**Next:** the Send button in the page header (ADR-007 option 3, chosen after round 2); then a round
+with marks on single components (KI-3). Each ticket's decision is in its 2026-11-20 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

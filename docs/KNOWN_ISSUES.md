@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-17 · class: living -->
+<!-- status: active · updated: 2026-11-20 · class: living -->
 
 # KNOWN ISSUES
 
@@ -44,6 +44,13 @@ Open weaknesses, recurring failures, workarounds. Log a bug the second time it a
   inside the screen (KI-10). Pinned as `tests/fixtures/human-round-1.excalidraw`; since KI-10's
   fix the same day it binds to the screen and approves it. N = 1 measures nothing, so this stays
   open until a round has a sample worth a number.
+- **2026-11-20, round 2:** the owner marked up SockCast, a nonsense three-screen wireframe drawn
+  for the round, and sent it with the Send box (ADR-007), the first round run that way. Two review
+  marks, a red loop round S03 and an orange loop round S02; asked afterwards, the person meant the
+  whole screen each time, and both bound there (2 / 2). A third stroke was a missed tick across the
+  Send box's corner: `changes` attached it to a list item 138px away, `wireframe` listed nothing.
+  Pinned as `tests/fixtures/human-round-2.excalidraw`; baseline 10 / 11. Three human marks in two
+  rounds, all whole-screen loops: still no number for marks on single components, so this stays open.
 - **2026-11-17, round 2, not run:** the same scene was offered again, and the owner pointed out
   that it was already approved: there was nothing on it they wanted changed. Marks made up for a
   test would measure an imitation, as the agent-drawn corpus already does. **How to close this:**

@@ -1,9 +1,9 @@
 {
   "what": "Markup attribution accuracy across the corpus — ROADMAP measure 3, which the roadmap records as 'currently unmeasured'. This is the first measurement.",
   "how": "Every annotation in a *.json expectation carries `intendedTargetId`: the component a person would say the markup refers to. `correct` counts the annotations whose actual binding equals it.",
-  "total": 9,
-  "correct": 8,
-  "measured": "2026-08-01; re-reviewed 2026-11-16 and 2026-11-17 (twice)",
+  "total": 11,
+  "correct": 10,
+  "measured": "2026-08-01; re-reviewed 2026-11-16 and 2026-11-17 (twice); 2026-11-20 (PR 1, round 2)",
   "misses": [
     "annotated/note-2 — binds to the CVC input; a person would say the totals card."
   ],
@@ -12,6 +12,7 @@
     "2026-11-16 (SPEC-005): the corpus grew by one, frame-screens' note 'Move this to a header bar', typed in a real tab 33px under S02's 'Sign out' inside a frame. It binds to s02-out, where a person would say it belongs: 5/6. The five older annotations bind as before.",
     "2026-11-17 (SPEC-006): the corpus grew by two, markup-legend's marks drawn in a real tab: a red note 19px left of the Password field (and 13px from the legend, which the reading leaves out), and a green ring round Sign in. Both bind where a person would say: 7/8. annotated's marks were recoloured, which moved no binding.",
     "2026-11-17 (PR 1, round 1): the corpus grew by one, the first mark a person drew: a green loop round all of S01 of the owner's dnd_crawler_rust wireframe, which the person confirmed means 'S01 is fine'. It bound to a heading inside the screen, a miss: 7/9. The same day KI-10's fix let a ring round a whole container target it, and the loop binds to the screen: 8/9. The round had one mark in all, so it is no measurement of the loop by itself (KI-3 stays open).",
-    "9 annotations is a small sample: eight drawn by an agent imitating a person, one by a person (human-round-1). The real measurement is ROADMAP PR 1, where a person marks a canvas up and N is whatever they drew; its first round, 2026-11-17, gave N = 1. Treat this as a regression guard, not as evidence the loop works."
+    "2026-11-20 (PR 1, round 2): the corpus grew by two, the person's marks on human-round-2 (SockCast, sent with the Send box): a red loop round all of S03 and an orange loop round S02. The person confirmed after the round that each meant the whole screen; both bind there: 10/11. A third stroke, an orange swipe across the Send box's corner, was a missed tick, not a review mark; the reading lists no annotation for it, so it is not counted.",
+    "11 annotations is a small sample: eight drawn by an agent imitating a person, three by a person (human-round-1, human-round-2). The real measurement is ROADMAP PR 1, where a person marks a canvas up and N is whatever they drew; its first round, 2026-11-17, gave N = 1. Treat this as a regression guard, not as evidence the loop works."
   ]
 }

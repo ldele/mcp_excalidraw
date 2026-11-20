@@ -1,0 +1,30 @@
+{
+  "fixture": "human-round-2.excalidraw",
+  "what": "ROADMAP PR 1, round 2 (2026-11-20): SockCast, a deliberately nonsensical three-screen app (S01 Forecast, S02 Sock detail, S03 Sock settings) with an Approved box per screen and the markup legend with its Send box, drawn by the agent; the person marked it up in a real tab and sent the round with the Send box (ADR-007). Kept: the person's two review marks, a red loop round the whole of S03 and an orange loop round S02, and an orange stroke that was a missed attempt at ticking Send.",
+  "why": "The second round a person marked up, and the first sent with the Send box. Both review marks bind where the person said they meant them (asked after the round): S03 'change', S02 'remove'. The stroke across the Send box's corner is no review mark; the reading lists no annotation for it, though the change report attached it to s01-sock-2 (a finding of the round, DEVLOG 2026-11-20 (f)).",
+  "score": {
+    "screens": 3,
+    "components": 25,
+    "fallbacks": 0,
+    "inferred": 0,
+    "unnamedScreens": 0,
+    "orphans": 0
+  },
+  "screens": [
+    { "id": "s01", "label": "S01 — Forecast", "approval": "open" },
+    { "id": "s02", "label": "S02 — Sock detail", "approval": "open" },
+    { "id": "s03", "label": "S03 — Sock settings", "approval": "open" }
+  ],
+  "navigation": [
+    { "from": "s01-check", "toScreen": "s02" }
+  ],
+  "markup": [
+    { "id": "ring-s03", "targetId": "s03", "relation": "encloses", "intent": "change", "intendedTargetId": "s03" },
+    { "id": "ring-s02", "targetId": "s02", "relation": "encloses", "intent": "remove", "intendedTargetId": "s02" }
+  ],
+  "notes": [
+    "Drawn 2026-11-20 on port 3011 (in memory): the screens, boxes and legend by `apply`, the marks in the browser pane, exported with `excalidraw-canvas export` after the round was sent. The person's random ids were renamed ring-s03, ring-s02 and send-try.",
+    "Left out: the person's tick inside the Send box (deleted by the reset, as `watch --until-sent` does), and a green dot drawn after the reset, which belongs to the next round and was held from the reading live.",
+    "Before ticking, the person moved the legend's example check mark and the Send box itself a few pixels, trying to tick with the selection tool; the legend here carries those moves."
+  ]
+}

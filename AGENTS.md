@@ -29,7 +29,8 @@ The lint's misfires on that drawing are fixed (`2b97ebe`) and KI-10 with ADR-006
 both pushed. T-006, T-021, T-017, T-018, T-019, T-004, T-008 and T-005 are fixed and pushed (last `1e7f468`).
 T-029 and T-030 (agent edits lagged the tab, dropped a stroke) are fixed (`ee05783`). ADR-007
 (markup is sent, not watched), T-002 and T-003 are decided (2026-11-20); ADR-007 is built
-(SPEC-009); T-002 and T-003 are fixed. **Next: PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
+(SPEC-009); T-002 and T-003 are fixed. PR 1's round 2 ran (two human marks, both hits). **Next: the Send button in the page header
+(ADR-007 option 3), then a round with marks on single components (KI-3).** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 

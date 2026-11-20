@@ -173,8 +173,68 @@
       "x": -344,
       "y": 470,
       "width": 268,
-      "height": 45,
-      "text": "Done with a screen? Tick its\nApproved box, top right.",
+      "height": 20,
+      "text": "Done with a screen? Top right,",
+      "fontSize": 16,
+      "strokeColor": "#2f9e44",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-approve-tick",
+      "type": "text",
+      "x": -344,
+      "y": 494,
+      "width": 32,
+      "height": 20,
+      "text": "Tick",
+      "fontSize": 16,
+      "strokeColor": "#2f9e44",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-approve-example",
+      "type": "rectangle",
+      "x": -306,
+      "y": 492,
+      "width": 22,
+      "height": 22,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "transparent",
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-approve-example-mark",
+      "type": "line",
+      "x": -302,
+      "y": 496,
+      "width": 14,
+      "height": 13,
+      "points": [
+        [
+          0,
+          7
+        ],
+        [
+          5,
+          13
+        ],
+        [
+          14,
+          0
+        ]
+      ],
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "frameId": "legend"
+    },
+    {
+      "id": "legend-approve-rest",
+      "type": "text",
+      "x": -276,
+      "y": 494,
+      "width": 140,
+      "height": 20,
+      "text": "its Approved box.",
       "fontSize": 16,
       "strokeColor": "#2f9e44",
       "frameId": "legend"

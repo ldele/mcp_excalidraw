@@ -4,6 +4,18 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-20 (c) — ADR-007 accepted; T-002 and T-003 decided
+- **Why:** the three owner decisions pending since 2026-11-17, ahead of PR 1's round 2.
+- **What:** ADR-007 accepted as recommended, options 2 + 5 + 1: a "Send to Claude" box in the
+  legend, a person's edits after the last send held back from `changes` and `wireframe`,
+  `watch --until-sent`, and the skill's loop rewritten around the send. T-002: only an inferred
+  `shape` counts as a fallback; a declared one is deliberate. T-003: one declared-only `progress`
+  role for progress bars, meters and gauges. Recorded in the ADR and the tickets' notes; nothing
+  built.
+- **Rejected:** the header button now (ADR-007 option 3, after the box is tried); refusing a
+  declared `shape` at the API; inferring `progress` from geometry.
+- **Open:** build ADR-007, then T-002 with T-003; PR 1's round 2 is the first round with the box.
+
 ## 2026-11-20 (b) — T-029 and T-030 fixed: an agent's edit prepares only what it touches
 - **Why:** entry (a): each agent edit re-prepared the whole drawing in the tab, and its read-only
   flip dropped a stroke being drawn.
