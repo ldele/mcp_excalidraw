@@ -4,6 +4,17 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-17 (m) — ADR-007 proposed: a person's markup reaches the agent when they send it
+- **Why:** the owner, after PR 1's round 1: the agent read the canvas mid-round and gave its view
+  before the person had finished; it should wait for the end of the markup, perhaps with a
+  Claude Docs-style "send to Claude" for one comment, without becoming intrusive.
+- **What:** `docs/decisions/ADR-007-markup-is-sent-not-watched.md`, proposed, to decide
+  2026-11-18: seven options (etiquette in the skill, a Send box on the canvas, a Send button in
+  the page, a longer quiet period, holding unsent markup back from the reading, `@claude` for one
+  comment, the agent answering on the canvas). Recommended: the Send box, unsent markup held back,
+  and the skill's loop rewritten around the send; the button next, `@claude` only on evidence.
+  Nothing built.
+
 ## 2026-11-17 (l) — T-005 fixed: a screen is named by its largest own heading, not its topmost
 - **Why:** a 20px overlay caption above a 26px title named the screen after the caption
   (doc_assistant, 2026-08-21): `deriveScreenName` took the first heading in reading order.

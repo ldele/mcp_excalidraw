@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-19 · class: append-only -->
+<!-- status: active · updated: 2026-11-20 · class: append-only -->
 
 # DEVLOG
 
@@ -9,6 +9,18 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
+
+## 2026-11-20 (a) — Canvas lag measured; T-029 and T-030 filed
+- **Why:** the owner saw lag drawing on the canvas and asked for a measurement before any fix.
+- **What:** a throwaway in-memory canvas (port 3011) seeded with a copy of the real 231-element
+  drawing, then ×5 (1713 elements). In the tab, every WebSocket handler, React scheduler task and
+  pointer handler was timed in-process. Agent edits are the cost: 88 ms each at 1713 elements,
+  ~3,800 `measureText` calls to move one rectangle; 60 one-by-one creates in 1 s cost 5.1 s
+  (T-029). An agent edit during a stroke drops the stroke (T-030). Hand drawing and scrolling are
+  Excalidraw's own and fine. `scripts/perf-agent-edits.mjs` sends the agent bursts.
+- **Rejected:** frame-gap and MessageChannel-gap probes. The pane was hidden, and Chromium's
+  background throttling read as 36% load on an idle page.
+- **Open:** the fix (frontend only, both tickets on one path) awaits the owner.
 
 ## 2026-11-19 (a) — cpc deny rules laid in `.claude/settings.json`
 - **Why:** the maintainer wants every project set up before cpc ADR-080 to carry the deny rules
@@ -31,14 +43,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   already gives the right config (`node <repo>/dist/index.js`, or `excalidraw-canvas`). Upstream
   has not edited the file since its second commit, so a merge conflict is unlikely; if it comes,
   keep the file deleted.
-
-## 2026-11-17 (m) — ADR-007 proposed: a person's markup reaches the agent when they send it
-- **Why:** the owner, after PR 1's round 1: the agent read the canvas mid-round and gave its view
-  before the person had finished; it should wait for the end of the markup, perhaps with a
-  Claude Docs-style "send to Claude" for one comment, without becoming intrusive.
-- **What:** `docs/decisions/ADR-007-markup-is-sent-not-watched.md`, proposed, to decide
-  2026-11-18: seven options (etiquette in the skill, a Send box on the canvas, a Send button in
-  the page, a longer quiet period, holding unsent markup back from the reading, `@claude` for one
-  comment, the agent answering on the canvas). Recommended: the Send box, unsent markup held back,
-  and the skill's loop rewritten around the send; the button next, `@claude` only on evidence.
-  Nothing built.
