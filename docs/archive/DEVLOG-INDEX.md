@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-19** (a) — cpc deny rules laid in `.claude/settings.json`
 - **2026-11-18** (a) — Upstream's `claude_desktop_config.json` removed
 - **2026-11-17** (m) — ADR-007 proposed: a person's markup reaches the agent when they send it
 - **2026-11-17** (l) — T-005 fixed: a screen is named by its largest own heading, not its topmost

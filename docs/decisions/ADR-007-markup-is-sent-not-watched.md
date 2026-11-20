@@ -1,13 +1,14 @@
-<!-- status: active · updated: 2026-11-17 · class: append-only -->
+<!-- status: active · updated: 2026-11-20 · class: append-only -->
 
 # ADR-007 — A person's markup reaches the agent when they send it, not while they draw
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-11-17
 - **Deciders:** Lucas; drafted by Claude Code
 - **In one sentence:** a person marks up and comments undisturbed, and the agent forms its view of
   the round only when they say they are done, or when they send one comment on purpose.
-- **Decided:** — (to decide 2026-11-18).
+- **Decided:** options 2 + 5 + 1: a "Send to Claude" box in the legend, unsent markup held back
+  from the reading, and the skill's loop rewritten around the send. Lucas, 2026-11-20.
 
 ## In practice — PR 1, round 1 (2026-11-17)
 
@@ -105,7 +106,18 @@ shows a person needing to ask mid-round:
 What would change the recommendation: a person who finds the box harder than the button (build 3
 first); a round where waiting for the end cost more than a mid-round answer would have (build 6).
 
-## Enforced by (if accepted)
+## Decision
+
+Options 2, 5 and 1, as recommended. The legend gains a "Send to Claude" box that a person ticks
+when a round is done. Until then `changes`, `wireframe` and their MCP tools report a person's
+edits only up to the last send, and what came after as "N edits by a person, not sent yet";
+`watch --until-sent` (`wait_for_changes`' `untilSent`) blocks until the box is ticked. The skill's
+review loop says: hand over the pen, wait for the send, read the round once, answer in chat,
+never draw on the canvas during a round. Option 3, the header button, is built once the box has
+been used in a real round and found hard to reach; option 6, `@claude`, only if a round shows a
+person needing to ask mid-round; option 7 not now. Decided by Lucas on 2026-11-20.
+
+## Enforced by
 
 Fixture and tests to be written first: a round with marks drawn after the last send reads as
 "N edits not sent yet" in `changes` and `wireframe`; ticking the box returns the round from

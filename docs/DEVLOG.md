@@ -10,6 +10,18 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-20 (c) — ADR-007 accepted; T-002 and T-003 decided
+- **Why:** the three owner decisions pending since 2026-11-17, ahead of PR 1's round 2.
+- **What:** ADR-007 accepted as recommended, options 2 + 5 + 1: a "Send to Claude" box in the
+  legend, a person's edits after the last send held back from `changes` and `wireframe`,
+  `watch --until-sent`, and the skill's loop rewritten around the send. T-002: only an inferred
+  `shape` counts as a fallback; a declared one is deliberate. T-003: one declared-only `progress`
+  role for progress bars, meters and gauges. Recorded in the ADR and the tickets' notes; nothing
+  built.
+- **Rejected:** the header button now (ADR-007 option 3, after the box is tried); refusing a
+  declared `shape` at the API; inferring `progress` from geometry.
+- **Open:** build ADR-007, then T-002 with T-003; PR 1's round 2 is the first round with the box.
+
 ## 2026-11-20 (b) — T-029 and T-030 fixed: an agent's edit prepares only what it touches
 - **Why:** entry (a): each agent edit re-prepared the whole drawing in the tab, and its read-only
   flip dropped a stroke being drawn.
@@ -36,15 +48,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
 - **Rejected:** frame-gap and MessageChannel-gap probes. The pane was hidden, and Chromium's
   background throttling read as 36% load on an idle page.
 - **Open:** the fix (frontend only, both tickets on one path) awaits the owner.
-
-## 2026-11-19 (a) — cpc deny rules laid in `.claude/settings.json`
-- **Why:** the maintainer wants every project set up before cpc ADR-080 to carry the deny rules
-  newer `cpc-init` profiles lay by default, so Claude Code refuses the agent's own commit, push,
-  merge and tag.
-- **What:** `cpc-init --root . --add deny-rules` created `.claude/settings.json` (22 entries:
-  `git commit|push|merge|tag`, the `git -C` forms, `gh pr merge`, `gh release create`, and
-  `CPC_PUSH_OK`, each for Bash and PowerShell). `docs_check --strict` and `init_check` pass.
-- **Open:** `.claude/CONTEXT.md` rule 1 ("or gives explicit per-commit approval") and the project
-  memory `commits-land-on-main` described an agent that commits after a yes. The owner chose to
-  reword to match the deny rules: CONTEXT.md rule 1 and the memory now say the owner runs each
-  commit, push, merge and tag; AGENTS.md rule 1 is reworded too.

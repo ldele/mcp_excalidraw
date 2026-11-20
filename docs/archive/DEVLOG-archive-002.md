@@ -4,6 +4,18 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-19 (a) — cpc deny rules laid in `.claude/settings.json`
+- **Why:** the maintainer wants every project set up before cpc ADR-080 to carry the deny rules
+  newer `cpc-init` profiles lay by default, so Claude Code refuses the agent's own commit, push,
+  merge and tag.
+- **What:** `cpc-init --root . --add deny-rules` created `.claude/settings.json` (22 entries:
+  `git commit|push|merge|tag`, the `git -C` forms, `gh pr merge`, `gh release create`, and
+  `CPC_PUSH_OK`, each for Bash and PowerShell). `docs_check --strict` and `init_check` pass.
+- **Open:** `.claude/CONTEXT.md` rule 1 ("or gives explicit per-commit approval") and the project
+  memory `commits-land-on-main` described an agent that commits after a yes. The owner chose to
+  reword to match the deny rules: CONTEXT.md rule 1 and the memory now say the owner runs each
+  commit, push, merge and tag; AGENTS.md rule 1 is reworded too.
+
 ## 2026-11-18 (a) — Upstream's `claude_desktop_config.json` removed
 - **Why:** the owner asked how agents reach the canvas. The answer is the `npm link`ed
   `excalidraw-canvas` CLI, and no MCP server is registered. That turned up the repo-root config

@@ -15,7 +15,7 @@ component roles, reading order, navigation flows — plus a review loop where a 
 up and the agent reads the markup attributed to the component it refers to. What the fork adds and
 why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 
-**State (2026-11-17):** three upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
+**State (2026-11-20):** three upstream merges taken (2026-08-07; 2026-10-07, upstream 2.1.2,
 SPEC-002; 2026-11-16, upstream 2.2.0, SPEC-004). The 2.2.0 merge is on `main` as `c800fa8`,
 pushed, with CI green (`FORK.md` § Upstream 2.2.0). The two-way markup leg has run with a human
 and works, but the attribution accuracy it
@@ -27,8 +27,9 @@ a legend) is on `main` as `1a5f530` (SPEC-006) and ADR-005 (an approval box per 
 SPEC-008), is on `main` as `5c5daf6`, pushed. PR 1's round 1 gave one mark, a miss (KI-10).
 The lint's misfires on that drawing are fixed (`2b97ebe`) and KI-10 with ADR-006 (`31d1f6e`),
 both pushed. T-006, T-021, T-017, T-018, T-019, T-004, T-008 and T-005 are fixed and pushed (last `1e7f468`).
-ADR-007 (markup is sent, not watched) is proposed. **Next: the owner decides ADR-007, T-002 and
-T-003; then PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
+T-029 and T-030 (agent edits lagged the tab, dropped a stroke) are fixed (`ee05783`). ADR-007
+(markup is sent, not watched), T-002 and T-003 are decided (2026-11-20). **Next: build ADR-007,
+then T-002 with T-003; then PR 1's round 2 from the next real review (KI-3).** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 
