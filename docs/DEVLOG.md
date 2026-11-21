@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-20 · class: append-only -->
+<!-- status: active · updated: 2026-11-21 · class: append-only -->
 
 # DEVLOG
 
@@ -9,6 +9,20 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
+
+## 2026-11-21 — T-031 fixed: a line or arrow the page re-based is no edit
+- **Why:** T-031, found in (g): an agent's path whose first point is not the origin came back from
+  a tab's first save as "moved, path reshaped — by human".
+- **What:** probed with the page's own scene preparation: it re-bases a line and an arrow (first
+  point to the origin, x and y moved by it), not a freedraw. `canonicalizeElement`
+  (`src/core/changes.ts`, ours) now compares every path re-based, its origin rounded as the points
+  are, so the echo matches; a move or reshape after it still reads as one. 4 tests in
+  `tests/frontend-echo.test.mjs` from the probed payloads, 3 red first. Live on port 3011: an
+  agent's off-origin line and arrow, a tab, a save; the log held only the button's tick, both paths
+  still `agent`. Corpus goldens unchanged.
+- **Rejected:** re-basing paths when the agent writes them (`src/core/normalize.ts` and
+  `src/server.ts` are upstream's, and scenes already stored would still echo).
+- **Open:** a path's move in `changes` now names its first point's position, not the stored x, y.
 
 ## 2026-11-20 (g) — the header's "Send to Claude" button (ADR-007 option 3); T-031 found
 - **Why:** PR 1's round 2, (f): the person moved the Send box while trying to tick it. The owner
@@ -43,14 +57,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   tool. A mark drawn after the reset was held, as designed. The owner chose the header button
   (ADR-007 option 3), to build next.
 - **Open:** a round with marks on single components (KI-3 stays open); the Send button.
-
-## 2026-11-20 (e) — T-002 and T-003 fixed: a declared `shape` is no fallback; a `progress` role
-- **Why:** the owner's decisions in (c), on one consumer's report (a progress bar with no role).
-- **What:** `scoreWireframe` counts a `shape` as a fallback only when the reading inferred it.
-  `progress` joins `COMPONENT_ROLES`, declared only; a progress node takes its children in (a
-  short painted fill would read as a button, a thin one as a divider). Both role lists in the
-  skill, a recipe row (the fill under a transparent track, so the track's label shows), README,
-  ROADMAP. `tests/role-progress.test.mjs` (5, red first) and the `progress-role` fixture, drawn
-  live: the declared roles survived a person's move in a real tab; every other golden unchanged.
-- **Rejected:** refusing a declared `shape` at the API; inferring `progress` from geometry.
-- **Open:** none; PR 1's round 2 is next.

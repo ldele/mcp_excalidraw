@@ -4,6 +4,17 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-20 (e) — T-002 and T-003 fixed: a declared `shape` is no fallback; a `progress` role
+- **Why:** the owner's decisions in (c), on one consumer's report (a progress bar with no role).
+- **What:** `scoreWireframe` counts a `shape` as a fallback only when the reading inferred it.
+  `progress` joins `COMPONENT_ROLES`, declared only; a progress node takes its children in (a
+  short painted fill would read as a button, a thin one as a divider). Both role lists in the
+  skill, a recipe row (the fill under a transparent track, so the track's label shows), README,
+  ROADMAP. `tests/role-progress.test.mjs` (5, red first) and the `progress-role` fixture, drawn
+  live: the declared roles survived a person's move in a real tab; every other golden unchanged.
+- **Rejected:** refusing a declared `shape` at the API; inferring `progress` from geometry.
+- **Open:** none; PR 1's round 2 is next.
+
 ## 2026-11-20 (d) — ADR-007 built: markup is held until the person sends it (SPEC-009)
 - **Why:** ADR-007, accepted in (c): in PR 1's round 1 the agent read a half-finished round.
 - **What:** the legend gains a "Send to Claude" box, `legend-send`. `src/core/send-box.ts` (the

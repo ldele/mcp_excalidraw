@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-20 · class: living -->
+<!-- status: active · updated: 2026-11-21 · class: living -->
 
 # TICKETS — issues reported against mcp_excalidraw
 
@@ -31,10 +31,3 @@ created.
      - **Reproduce:** the command, or the file and line; `path:LINE at vX.Y.Z` can be traced
      - **Note:** date — what triage changed (optional; `cpc-ticket triage --id N --note` adds it)
      - **Resolution:** — (while open) | a DEVLOG date, a CHANGELOG version, KI-N, or why not -->
-
-## T-031 — An agent's line whose first point is not the origin reads as a person's move
-- **Status:** open · 2026-11-20
-- **From:** self (unknown) · 2026-11-20
-- **Symptom:** A line (seen; an arrow or freedraw likely too, unchecked) the agent stores with points[0] != [0,0] (the legend's example tick had [0,7]) is shifted by the tab so points[0] is the origin; the next sync records 'moved down 7px, path reshaped — by human', though nobody touched it. In PR 1 round 2 this was taken for the person moving the tick.
-- **Reproduce:** Add {type:'line', x:0, y:0, points:[[0,7],[5,13],[14,0]]} by the API, open a tab, make any sync (Send button or a stroke), then 'changes': the line shows as moved by human
-- **Resolution:** —

@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-20 · class: living -->
+<!-- status: active · updated: 2026-11-21 · class: living -->
 
 # CONTEXT — mcp_excalidraw
 
@@ -48,9 +48,9 @@ T-002 (count only an inferred shape) and T-003 (a declared `progress` role) deci
 ADR-007 built the same day (SPEC-009): the legend's Send box, unsent markup held, `watch --until-sent`.
 T-002 and T-003 fixed the same day.
 PR 1's round 2 ran the same day on a nonsense wireframe, sent with the Send box: two marks, both hits.
-The header's "Send to Claude" button (ADR-007 option 3) built the same day. T-031 open: an agent's
-line whose first point is not the origin reads as a person's move once a tab syncs.
-**Next:** a round with marks on single components (KI-3), sent with the button; T-031. Each ticket's decision is in its 2026-11-20 note in
+The header's "Send to Claude" button (ADR-007 option 3) built the same day. T-031 (an agent's line
+or arrow read as a person's move once a tab re-based it) fixed 2026-11-21; no ticket is open.
+**Next:** a round with marks on single components (KI-3), sent with the button. Each ticket's decision is in its 2026-11-20 note in
 `docs/TICKETS.md`. CI on this fork runs only by `workflow_dispatch`; a push makes no run (KI-8).
 
 ## Locked settings

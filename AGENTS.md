@@ -19,8 +19,8 @@ why it must not be `npx`'d: **[FORK.md](FORK.md)**.
 SPEC-002; 2026-11-16, upstream 2.2.0, SPEC-004). The 2.2.0 merge is on `main` as `c800fa8`,
 pushed, with CI green (`FORK.md` § Upstream 2.2.0). The two-way markup leg has run with a human
 and works, but the attribution accuracy it
-exists to measure is **still untaken** (ROADMAP PR 1, KI-3). One ticket is open in
-`docs/TICKETS.md` (T-031). ADR-003 (screens as named frames,
+exists to measure is **still untaken** (ROADMAP PR 1, KI-3). No ticket is open in
+`docs/TICKETS.md`. ADR-003 (screens as named frames,
 T-028) is on `main` as `6414461`, pushed (SPEC-005). ADR-004 (a mark's intent is its colour, with
 a legend) is on `main` as `1a5f530` (SPEC-006) and ADR-005 (an approval box per screen) as
 `a420ce5` (SPEC-007), both pushed; T-027 is closed. PR 4, the geometry lint (ADR-002,
@@ -30,8 +30,8 @@ both pushed. T-006, T-021, T-017, T-018, T-019, T-004, T-008 and T-005 are fixed
 T-029 and T-030 (agent edits lagged the tab, dropped a stroke) are fixed (`ee05783`). ADR-007
 (markup is sent, not watched), T-002 and T-003 are decided (2026-11-20); ADR-007 is built
 (SPEC-009); T-002 and T-003 are fixed. PR 1's round 2 ran (two human marks, both hits). The header's Send button (ADR-007 option 3) is
-built. T-031 is open (an agent's line can read as a person's move). **Next: a round with marks on
-single components (KI-3), sent with the button; T-031.** Detail: `.claude/CONTEXT.md`.
+built. T-031 (an agent's line or arrow read as a person's move) is fixed. **Next: a round with
+marks on single components (KI-3), sent with the button.** Detail: `.claude/CONTEXT.md`.
 **Stack:** Node ≥ 20 · TypeScript ESM → `dist/` · React 18 + Vite frontend on `@excalidraw/excalidraw`.
 Full stack + constraints: `.claude/CONTEXT.md`.
 

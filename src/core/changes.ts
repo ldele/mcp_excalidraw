@@ -92,6 +92,27 @@ function bindingTarget(binding: unknown, ref: unknown): string | null {
   return typeof fromRef === 'string' ? fromRef : null;
 }
 
+// A path as the page stores it: its first point the origin, (x, y) where that point is. The editor
+// re-bases a line or an arrow this way on load, moving x and y by the first point, so an agent's
+// path whose first point was elsewhere came back from the first sync as "moved, path reshaped, by
+// human" though nobody touched it (T-031). Compared re-based, the echo is no edit.
+function rebasedPath(
+  x: number,
+  y: number,
+  points: [number, number][] | null
+): { x: number; y: number; points: [number, number][] | null } {
+  // Rounded as the points are, so the page's sum and the agent's land on one value.
+  const round = (n: number): number => Math.round(n * 10) / 10;
+  const first = points?.[0];
+  if (!points || !first) return { x: round(x), y: round(y), points };
+  const [dx, dy] = first;
+  return {
+    x: round(x + dx),
+    y: round(y + dy),
+    points: points.map(([px, py]) => [round(px - dx), round(py - dy)] as [number, number])
+  };
+}
+
 export function canonicalizeElement(
   el: ServerElement,
   context: Map<string, ServerElement>,
@@ -110,14 +131,15 @@ export function canonicalizeElement(
   // through `points` below, so a real reshaping is still seen.
   const isPath = el.type === 'arrow' || el.type === 'line' || el.type === 'freedraw';
   const sized = !isText && !isPath;
+  const path = isPath ? rebasedPath(el.x, el.y, normalizePoints(anyEl.points)) : null;
   return {
     type: el.type,
-    x: el.x,
-    y: el.y,
+    x: path ? path.x : el.x,
+    y: path ? path.y : el.y,
     width: sized ? (el.width ?? 0) : null,
     height: sized ? (el.height ?? 0) : null,
     angle: el.angle ?? 0,
-    points: normalizePoints(anyEl.points),
+    points: path ? path.points : normalizePoints(anyEl.points),
     strokeColor: el.strokeColor ?? null,
     backgroundColor: el.backgroundColor ?? null,
     fillStyle: el.fillStyle ?? null,

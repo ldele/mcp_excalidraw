@@ -4,6 +4,13 @@
 
 Closed tickets, moved here from `docs/TICKETS.md` when they were closed, **verbatim** per cpc ADR-071, and listed in `TICKETS-INDEX.md`. Newest on top. Append-only; never edited.
 
+## T-031 — An agent's line whose first point is not the origin reads as a person's move
+- **Status:** fixed · 2026-11-21
+- **From:** self (unknown) · 2026-11-20
+- **Symptom:** A line (seen; an arrow or freedraw likely too, unchecked) the agent stores with points[0] != [0,0] (the legend's example tick had [0,7]) is shifted by the tab so points[0] is the origin; the next sync records 'moved down 7px, path reshaped — by human', though nobody touched it. In PR 1 round 2 this was taken for the person moving the tick.
+- **Reproduce:** Add {type:'line', x:0, y:0, points:[[0,7],[5,13],[14,0]]} by the API, open a tab, make any sync (Send button or a stroke), then 'changes': the line shows as moved by human
+- **Resolution:** DEVLOG 2026-11-21: the change log compares a line or arrow re-based (first point the origin, x and y moved by it), so the page's re-basing is no edit; tests/frontend-echo.test.mjs; live, a tab's save recorded neither path
+
 ## T-003 — No role for progress / meter / gauge
 - **Status:** fixed · 2026-11-20
 - **From:** doc_assistant agent session driving the CLI from another repo (fork at 88416c7) · 2026-08-21 · docs/feedback/2026-08-21-provenote-wireframe-session.md §3

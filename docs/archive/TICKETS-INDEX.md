@@ -1,4 +1,4 @@
-<!-- status: archived · updated: 2026-11-20 · class: living -->
+<!-- status: archived · updated: 2026-11-21 · class: living -->
 
 # TICKETS archive index
 
@@ -8,6 +8,7 @@ and `cpc-rotate --file tickets`; `cpc-ticket list --all` adds the release that n
 
 | Ticket | Status | Closed | Title | Archive |
 |---|---|---|---|---|
+| T-031 | fixed | 2026-11-21 | An agent's line whose first point is not the origin reads as a person's move | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-030 | fixed | 2026-11-20 | An agent edit during a person's stroke drops the stroke | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-029 | fixed | 2026-11-20 | Each agent edit rebuilds and re-measures the whole scene in the tab | [TICKETS-archive-001.md](TICKETS-archive-001.md) |
 | T-028 | fixed | 2026-11-16 | Screens on a large canvas are hard to tell apart and to name in a message | [TICKETS-archive-001.md](TICKETS-archive-001.md) |

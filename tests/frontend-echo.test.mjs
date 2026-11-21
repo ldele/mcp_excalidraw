@@ -322,3 +322,34 @@ describe('an arrow the agent bound is not redrawn by its first sync', () => {
     assert.equal(diff(line, { ...line, endArrowhead: 'arrow' }).after.endArrowhead, 'arrow');
   });
 });
+
+// T-031: the page re-bases a line or an arrow so its first point is the origin, moving x and y by
+// that point. The payloads are what the page's own scene preparation returned on 2026-11-21 for an
+// agent's elements whose first point was not [0, 0] (the legend's example tick among them). The
+// path did not move, so it is no edit; a real move or reshape still is.
+describe('a re-based path is not an edit (T-031)', () => {
+  const tick = { id: 'tick', type: 'line', x: 0, y: 0, points: [[0, 7], [5, 13], [14, 0]] };
+  const tickEcho = { ...tick, y: 7, points: [[0, 0], [5, 6], [14, -7]], width: 14, height: 13 };
+  const arrow = { id: 'flow', type: 'arrow', x: 100, y: 100, points: [[10, 20], [110, 20]] };
+  const arrowEcho = { ...arrow, x: 110, y: 120, points: [[0, 0], [100, 0]], width: 100, height: 0 };
+
+  test('a line the page re-based is unchanged', () => {
+    assert.equal(diff(tick, tickEcho), null);
+  });
+
+  test('an arrow the page re-based is unchanged', () => {
+    assert.equal(diff(arrow, arrowEcho), null);
+  });
+
+  test('a re-based line that a person then moved is a move', () => {
+    const moved = diff(tick, { ...tickEcho, x: 30 });
+    assert.equal(moved.after.x - moved.before.x, 30);
+    assert.equal(moved.after.y, moved.before.y);
+    assert.ok(!('points' in moved.after), 'no reshape');
+  });
+
+  test('a re-based line that a person then reshaped is a reshape', () => {
+    const reshaped = diff(tick, { ...tickEcho, points: [[0, 0], [5, 6], [20, -7]] });
+    assert.ok('points' in reshaped.after);
+  });
+});
