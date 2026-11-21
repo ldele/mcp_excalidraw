@@ -4,6 +4,20 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-20 (d) — ADR-007 built: markup is held until the person sends it (SPEC-009)
+- **Why:** ADR-007, accepted in (c): in PR 1's round 1 the agent read a half-finished round.
+- **What:** the legend gains a "Send to Claude" box, `legend-send`. `src/core/send-box.ts` (the
+  rule, pure) holds a person's edits after the round start, or after the tick once there is one;
+  `src/core/send-round.ts` applies it to `changes`, `wireframe` and their MCP tools, which print
+  `⏸ N edits by a person, not sent yet.`, and adds `watch --until-sent` / `untilSent`, which
+  returns the round once and redraws the box. The skill's loop: hand over, wait for the send,
+  read once, answer in chat. 15 new tests; live round on a real tab passed (SPEC-009 § Verified).
+- **Rejected:** a server-side wait (`src/server.ts` is upstream's: the client loops over the
+  existing long-poll); undoing a person's edits to existing elements in the reading (the log's
+  deltas are canonical, SPEC-009 row 6).
+- **Open:** a person's move or relabel of an existing element still shows before the send, counted
+  but not hidden; PR 1's round 2 is the first real round with the box.
+
 ## 2026-11-20 (c) — ADR-007 accepted; T-002 and T-003 decided
 - **Why:** the three owner decisions pending since 2026-11-17, ahead of PR 1's round 2.
 - **What:** ADR-007 accepted as recommended, options 2 + 5 + 1: a "Send to Claude" box in the

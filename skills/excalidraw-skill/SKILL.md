@@ -396,8 +396,9 @@ it is far cheaper and more precise than asking them to describe edits in prose.
    > "The sign-in wireframe is on the canvas at http://127.0.0.1:3000, with a 'How to
    > mark up' key beside it. Circle, scribble on, or write next to anything: red to
    > change it, orange to remove it, blue for a question, green when it is fine. Tick a
-   > screen's Approved box when it is done, and tick 'Send to Claude' in the key when
-   > the whole round is done. I won't look until you do."
+   > screen's Approved box when it is done, and click 'Send to Claude' at the top of
+   > the page (or tick the box in the key) when the whole round is done. I won't look
+   > until you do."
 3. **Wait for the send** with `watch --until-sent` (`wait_for_changes` with
    `untilSent: true`), and do nothing else meanwhile (ADR-007): do not read the
    canvas, do not draw on it, do not comment on it in chat. The person's edits are

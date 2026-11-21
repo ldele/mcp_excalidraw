@@ -21,6 +21,8 @@ import {
   mergeAfterRestart
 } from './utils/scene'
 import { preloadCanvasFonts } from './utils/fonts'
+// Fork (ADR-007 option 3): the header's Send button draws the tick a person would
+import { SEND_BOX_ID, sendTick } from '../../src/core/send-tick'
 import type { ServerElement, CanvasIdentity } from './utils/scene'
 import type { MermaidConfig } from '@excalidraw/mermaid-to-excalidraw'
 
@@ -128,6 +130,7 @@ interface ApiResponse {
 }
 
 type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
+type SendStatus = 'idle' | 'sending' | 'sent' | 'error';
 type SceneLoadStatus = 'loading' | 'ready' | 'failed';
 const AUTO_SYNC_DEBOUNCE_MS = 1200;
 const SCENE_MUTATIONS = new Set([
@@ -168,6 +171,9 @@ function App(): JSX.Element {
   // Sync state management
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
+  // Fork (ADR-007 option 3): the button shows only on a scene with the legend's Send box
+  const [hasSendBox, setHasSendBox] = useState<boolean>(false)
+  const [sendStatus, setSendStatus] = useState<SendStatus>('idle')
   const autoSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const syncInFlightRef = useRef<boolean>(false)
   const suppressAutoSyncCountRef = useRef<number>(0)
@@ -838,22 +844,23 @@ function App(): JSX.Element {
   }
 
   // Main sync function
-  const syncToBackend = async (options: { silent?: boolean } = {}): Promise<void> => {
+  // Resolves true once the server holds the scene (fork: the Send button needs to know).
+  const syncToBackend = async (options: { silent?: boolean } = {}): Promise<boolean> => {
     const { silent = false } = options
     // Every caller, including manual sync and Mermaid, must respect a failed
     // restore. A user interaction alone is not evidence of a complete scene.
-    if (!canSyncScene()) return
+    if (!canSyncScene()) return false
 
     // Read through the ref: WS message handlers attached at mount capture a
     // stale closure where the excalidrawAPI state is still null.
     const api = excalidrawAPIRef.current
     if (!api) {
       console.warn('Excalidraw API not available')
-      return
+      return false
     }
 
     if (syncInFlightRef.current) {
-      return
+      return false
     }
 
     if (autoSyncTimerRef.current) {
@@ -928,6 +935,7 @@ function App(): JSX.Element {
           // Reset status after 2 seconds
           setTimeout(() => setSyncStatus('idle'), 2000)
         }
+        return true
       } else {
         const error: ApiResponse = await response.json()
         console.error('Sync failed:', error.error)
@@ -943,6 +951,31 @@ function App(): JSX.Element {
     } finally {
       syncInFlightRef.current = false
     }
+    return false
+  }
+
+  // Fork (ADR-007 option 3, SPEC-009): send the round. Draws a tick inside the legend's Send
+  // box, as a person would by hand, and saves the scene through the ordinary sync, so the agent
+  // sees a person's tick and nothing new. Every mark not yet saved goes in the same sync.
+  const sendRound = async (): Promise<void> => {
+    const api = excalidrawAPIRef.current
+    if (!api || !canSyncScene() || sendStatus === 'sending') return
+    const box = api.getSceneElements().find(el => el.id === SEND_BOX_ID)
+    if (!box) return
+    setSendStatus('sending')
+    const [tick] = convertToExcalidrawElements(
+      [sendTick(box, Date.now().toString(36)) as any], { regenerateIds: false })
+    api.updateScene({
+      elements: [...api.getSceneElementsIncludingDeleted(), tick],
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY
+    })
+    // An auto-sync may be on its way out; wait for it rather than drop the tick.
+    for (let i = 0; i < 100 && syncInFlightRef.current; i++) {
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+    const saved = await syncToBackend({ silent: true })
+    setSendStatus(saved ? 'sent' : 'error')
+    setTimeout(() => setSendStatus('idle'), saved ? 3000 : 5000)
   }
 
   const scheduleAutoSync = (): void => {
@@ -1025,6 +1058,24 @@ function App(): JSX.Element {
             </div>
           </div>
 
+          {/* Fork (ADR-007 option 3): tick the legend's Send box for the person */}
+          {hasSendBox && (
+            <div className="sync-controls">
+              <button
+                className="btn-send"
+                onClick={() => void sendRound()}
+                disabled={sendStatus === 'sending' || !isConnected || sceneLoadStatus !== 'ready'}
+                title="Tick the Send box: Claude reads your marks once you send them"
+              >
+                {sendStatus === 'sending' ? 'Sending...' : 'Send to Claude'}
+              </button>
+              <div className="sync-status" role="status">
+                {sendStatus === 'sent' && <span className="sync-success">✅ Sent</span>}
+                {sendStatus === 'error' && <span className="sync-error">❌ Not sent</span>}
+              </div>
+            </div>
+          )}
+
           <button className="btn-secondary" onClick={clearCanvas} disabled={!isConnected || sceneLoadStatus !== 'ready'}>Clear Canvas</button>
         </div>
       </div>
@@ -1086,6 +1137,9 @@ function App(): JSX.Element {
                   }
                 }
               }
+              // Fork (ADR-007 option 3): a cheap scan, and a re-render only when it flips
+              const sendBoxNow = _elements.some(el => el.id === SEND_BOX_ID && !el.isDeleted)
+              if (sendBoxNow !== hasSendBox) setHasSendBox(sendBoxNow)
               scheduleAutoSync()
             }}
             initialData={{

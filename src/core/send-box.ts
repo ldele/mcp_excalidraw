@@ -10,8 +10,9 @@
 
 import { ChangeRecord, ServerElement } from '../types.js';
 import { approvalBoxHolding, isFilled } from './approval.js';
+import { SEND_BOX_ID } from './send-tick.js';
 
-export const SEND_BOX_ID = 'legend-send';
+export { SEND_BOX_ID };
 
 export function isSendBoxId(id: unknown): boolean {
   return id === SEND_BOX_ID;

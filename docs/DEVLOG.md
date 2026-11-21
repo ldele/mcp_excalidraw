@@ -10,6 +10,25 @@ Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
 
+## 2026-11-20 (g) — the header's "Send to Claude" button (ADR-007 option 3); T-031 found
+- **Why:** PR 1's round 2, (f): the person moved the Send box while trying to tick it. The owner
+  chose the button.
+- **What:** on a scene with the legend's Send box the page header shows "Send to Claude"; a click
+  draws a tick in the box (`src/core/send-tick.ts`, shared with the reading) and saves through the
+  ordinary sync, so the agent sees a person's tick and the send rule is unchanged. A fresh tick per
+  click, so a person can send again. `syncToBackend` resolves whether the save went through.
+  `tests/send-tick.test.mjs` (6), `tests/browser/send-button.spec.mjs` (2). Live on port 3011: a
+  click made `watch --until-sent` return the round once and clear the box. FORK.md row, README,
+  ADR-007, the skill's hand-over line and conventions § 8.
+- **Found:** that live round reported the legend's example tick "moved down 7px — by human",
+  untouched: the tab re-bases a line whose first point is not the origin, and the sync records it
+  as the person's move. Round 2's "the person moved the example tick" in (f) was this, not the
+  person (the Send box's move was theirs); the round-2 fixture's note is corrected. The legend's
+  tick and the button's start at the origin now; a re-check recorded only the button's tick. The
+  general case, any agent line or arrow, is T-031.
+- **Rejected:** filling the box on click (a second send would change nothing); a new server route.
+- **Open:** T-031; a round with marks on single components (KI-3).
+
 ## 2026-11-20 (f) — PR 1 round 2: two human marks, both hits; the first round sent with the box
 - **Why:** ROADMAP PR 1 / KI-3, the attribution measure, after ADR-007 was built in (d).
 - **What:** the agent drew SockCast, a nonsense three-screen wireframe the owner asked for in
@@ -35,17 +54,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   live: the declared roles survived a person's move in a real tab; every other golden unchanged.
 - **Rejected:** refusing a declared `shape` at the API; inferring `progress` from geometry.
 - **Open:** none; PR 1's round 2 is next.
-
-## 2026-11-20 (d) — ADR-007 built: markup is held until the person sends it (SPEC-009)
-- **Why:** ADR-007, accepted in (c): in PR 1's round 1 the agent read a half-finished round.
-- **What:** the legend gains a "Send to Claude" box, `legend-send`. `src/core/send-box.ts` (the
-  rule, pure) holds a person's edits after the round start, or after the tick once there is one;
-  `src/core/send-round.ts` applies it to `changes`, `wireframe` and their MCP tools, which print
-  `⏸ N edits by a person, not sent yet.`, and adds `watch --until-sent` / `untilSent`, which
-  returns the round once and redraws the box. The skill's loop: hand over, wait for the send,
-  read once, answer in chat. 15 new tests; live round on a real tab passed (SPEC-009 § Verified).
-- **Rejected:** a server-side wait (`src/server.ts` is upstream's: the client loops over the
-  existing long-poll); undoing a person's edits to existing elements in the reading (the log's
-  deltas are canonical, SPEC-009 row 6).
-- **Open:** a person's move or relabel of an existing element still shows before the send, counted
-  but not hidden; PR 1's round 2 is the first real round with the box.

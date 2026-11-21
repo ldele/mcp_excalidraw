@@ -128,6 +128,13 @@ Built 2026-11-20 (SPEC-009): `tests/send-box.test.mjs` (the rule, the legend's b
 `tests/send-round.test.mjs` (held, released, `waitUntilSent`, the box cleared, the agent never
 held, against a real server); the live round is SPEC-009 § Verified.
 
+Option 3 built 2026-11-20, after PR 1's round 2, where the person moved the box twice while
+trying to tick it with the selection tool: the header's "Send to Claude" button, shown on a scene
+with the Send box, draws a tick in the box and saves through the ordinary sync, so the rule above
+is unchanged. `tests/send-tick.test.mjs` (the tick passes the rule; a second click sends again)
+and `tests/browser/send-button.spec.mjs` (no box, no button; a click sends); live, a click made
+`watch --until-sent` return the round once.
+
 ## Consequences
 
 - **Options 2, 3, 5** change what the agent can see mid-round; the skill's review loop is

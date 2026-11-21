@@ -386,6 +386,8 @@ The boxes show which screens are done; the Send box says the round is.
 
 **A round ends when the person sends it** (ADR-007). The legend carries a "Send to Claude" box,
 `legend-send`; the person ticks it, with any mark inside it or a fill, when the round is done.
+On a canvas with that box the page's header shows a "Send to Claude" button, which draws the
+tick for them: point the person at the button, it is easier than drawing in the box.
 Until then `changes`, `wireframe` and their MCP tools hold back what that person did since the
 round began and print only `⏸ N edits by a person, not sent yet.`: a note they drew is not in the
 reading at all; an edit to an element that already existed (a move, a relabel) still shows as it

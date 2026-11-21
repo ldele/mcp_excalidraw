@@ -98,7 +98,8 @@ In the main checkout, 2026-11-20, Windows 11, Node 24.
 | Gates | `type-check` and the frontend type-check: pass. `node --test tests/**/*.test.mjs`: 272 / 272. `check-mcp-stdio`: 6 / 6. `test:bind`: pass. Not run: the render, state, durable, share and paths checks and the browser suite, which touch nothing changed here (no frontend file changed) |
 
 ## Out of scope
-- A Send button in the page header (ADR-007 option 3), `@claude` (6), agent notes on the canvas (7).
+- A Send button in the page header (ADR-007 option 3; built afterwards, 2026-11-20, see ADR-007
+  § Enforced by), `@claude` (6), agent notes on the canvas (7).
 - Holding back `describe`, `export`, `screenshot` or the page itself: the reading is held, not the
   pixels (ADR-007 option 5's cost, said in the skill).
 - Undoing a person's edits to existing elements in the reading (row 6).

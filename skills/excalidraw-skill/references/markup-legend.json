@@ -206,21 +206,21 @@
       "id": "legend-approve-example-mark",
       "type": "line",
       "x": -302,
-      "y": 496,
+      "y": 503,
       "width": 14,
       "height": 13,
       "points": [
         [
           0,
-          7
+          0
         ],
         [
           5,
-          13
+          6
         ],
         [
           14,
-          0
+          -7
         ]
       ],
       "strokeColor": "#2f9e44",

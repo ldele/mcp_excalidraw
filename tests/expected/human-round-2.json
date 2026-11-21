@@ -25,6 +25,6 @@
   "notes": [
     "Drawn 2026-11-20 on port 3011 (in memory): the screens, boxes and legend by `apply`, the marks in the browser pane, exported with `excalidraw-canvas export` after the round was sent. The person's random ids were renamed ring-s03, ring-s02 and send-try.",
     "Left out: the person's tick inside the Send box (deleted by the reset, as `watch --until-sent` does), and a green dot drawn after the reset, which belongs to the next round and was held from the reading live.",
-    "Before ticking, the person moved the legend's example check mark and the Send box itself a few pixels, trying to tick with the selection tool; the legend here carries those moves."
+    "Before ticking, the person moved the Send box a few pixels, trying to tick with the selection tool; the legend here carries that move. The report also had the legend's example check mark 'moved down 7px' by the person: that was the tab re-basing a line whose first point was not the origin, not the person (T-031, found 2026-11-20 after the round)."
   ]
 }
