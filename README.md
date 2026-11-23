@@ -36,7 +36,7 @@ Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
 |---|---|---|
 | **Install** | `npx mcp-excalidraw-server` from npm, or a Docker image | Not published: `npm link` from this repository gives `excalidraw-canvas`; no Docker image |
 | **Reading the canvas** | `describe`: a list of shapes | Also `wireframe`: screens, component roles, reading order, flows between screens, a person's annotations. A named frame is a screen. `wireframe --lint` checks the drawing against the conventions and names the cause of a misreading |
-| **A person's edits** | No change log | Every change carries a revision and who made it, agent or person. `changes` and `watch` report them, each mark attached to the component it refers to |
+| **A person's edits** | No change log | Every change carries a revision and who made it, agent or person. `changes` and `watch` report them, each mark attached to the component it refers to. Opening a tab does not turn the agent's drawing into a person's: what the editor changes by itself (defaults, measured text, a label grown to fit, a line re-based on its first point) is no edit |
 | **Markup** | Whatever a person draws, read by no one | A "How to mark up" legend the agent adds from the skill; a person's mark in red, orange, blue or green reads as change, remove, question or fine, and the reading leaves the legend out. Each screen can carry an "Approved" box a person ticks, or a person rings the screen in green, and the reading says which screens are approved. The legend's "Send to Claude" box ends a round, ticked by hand or by the page's "Send to Claude" button: until a person sends it, their edits are held from `changes` and `wireframe` and only counted, and `watch --until-sent` returns the round once (ADR-007) |
 | **MCP tools** | 27 | 30: adds `describe_wireframe`, `get_canvas_changes` and `wait_for_changes` |
 | **After a restart** | The scene is gone, unless `EXCALIDRAW_DATA_DIR` turns on one store shared by every port | Saved per port by default, change log included. `EXCALIDRAW_NO_PERSIST=1` turns it off; `EXCALIDRAW_DATA_DIR` switches to upstream's store |
@@ -45,7 +45,7 @@ Compared with upstream **2.2.0**, merged into this fork on 2026-11-16:
 | **`apply`** | Create, update, then delete: a patch that re-creates an id it deletes loses it | Delete, create, then update |
 | **An agent's edit in an open tab** | Re-prepares the whole drawing and turns the canvas read-only for a moment: slow on a large drawing, and a stroke being drawn is lost | Prepares only the elements the edit touches and keeps the canvas editable (T-029, T-030) |
 | **Deleting a labelled shape** | Its label stays drawn | The label goes with it |
-| **A label's alignment** | `textAlign` and `verticalAlign` are stored but the label is always drawn centred | Drawn where they say: left, right, top or bottom |
+| **A shape's label** | A `fontSize` or `fontFamily` given with it stays on the shape, and the label is drawn in the default font; `textAlign` and `verticalAlign` are stored but the label is always drawn centred | The label takes the font it was given, and is drawn where its alignment says |
 | **Arrows** | A bound arrow drops its waypoints when created; an elbowed arrow exports unbindable (`fixedPoint: null`); an arrow to a frame comes back unbound from a tab | All three keep what the agent gave them |
 | **The agent skill** | Drawing and diagram guidance | Adds the wireframe conventions (`skills/excalidraw-skill/references/wireframe-conventions.md`) and the review loop |
 

@@ -7,7 +7,7 @@ kept for our own use. Not published, not intended for distribution.
 |---|---|
 | Fork point | `505f4c6` |
 | Last upstream merge | 2026-11-16 — upstream **2.2.0** at `81720ac` (SPEC-004); before it 2026-10-07 (2.1.2) and 2026-08-07 |
-| Upstream now | **2.2.0** at `81720ac` (2026-11-10), nothing we lack (fetched 2026-11-16) — see [Upstream 2.2.0](#upstream-220-merged-2026-11-16) |
+| Upstream now | **2.2.0** at `81720ac` (2026-11-10), nothing we lack (fetched 2026-11-16 and again 2026-11-23) — see [Upstream 2.2.0](#upstream-220-merged-2026-11-16) |
 | Our version | **1.3.0**, our own line: the package is private and renamed, so it does not borrow upstream's number |
 | Package name | `@ldele/mcp-excalidraw-server`, `"private": true` |
 | Binary | `excalidraw-canvas` |
@@ -34,8 +34,11 @@ The package is renamed and marked private so a stray `npm publish` fails loudly.
 - **The two-way review loop** (`src/core/changes.ts`): a revision on every mutation, each change
   attributed to agent or human, and a person's markup attached to the element it refers to. CLI
   `changes` / `watch`, MCP `get_canvas_changes` / `wait_for_changes`. A person's markup is held
-  back until they tick the legend's Send box (`src/core/send-box.ts`, ADR-007); `watch
-  --until-sent` waits for it on the client, so upstream's server is untouched.
+  back until they tick the legend's Send box (`src/core/send-box.ts`, ADR-007), by hand or with
+  the page header's "Send to Claude" button; `watch --until-sent` waits for it on the client, so
+  upstream's server is untouched. What the editor does to a drawing by itself (defaults, measured
+  text, a label fit, a re-based line) is not recorded as a person's edit (T-007, T-010, T-012,
+  T-026, T-031).
 - **Drawing conventions** (`skills/excalidraw-skill/references/wireframe-conventions.md`): the grid,
   the palette split role inference relies on, component recipes. A wireframe is finished when
   `wireframe` reads it back as meant, not when the screenshot looks right.
@@ -44,9 +47,9 @@ The package is renamed and marked private so a stray `npm publish` fails loudly.
   waypoints (T-009), the origin guard (T-015), the scene saved per port (T-023), and a change log
   that stays in step with upstream's opt-in store (SPEC-004).
 
-Against upstream 2.2.0 the whole difference is 83 files, +14,240 −2,419 (docs, `.claude/` and
-`tools/` left out), and most of it is tests: 28 files, +8,974, most of them stored drawings and
-their readings. `src/` is +3,340 −140 over 22 files.
+Against upstream 2.2.0 the whole difference is 146 files, +29,964 −2,491 (docs, `.claude/` and
+`tools/` left out; measured 2026-11-23), and most of it is tests: 75 files, +22,452, most of them
+stored drawings and their readings. `src/` is +4,637 −141 over 31 files.
 
 ## What we removed
 
@@ -82,9 +85,16 @@ merged cleanly in 2.2.0. Where we touch upstream's files, and what fails if a me
 | `prepareServerScene` in `frontend/src/utils/scene.ts`, `bindArrowsToFrames` | binds an arrow whose `start` or `end` names a frame to that frame, on both sides, as the export does: upstream keeps frames out of the skeleton converter (#110), so an agent's arrow to a frame came back unbound and the tab's first sync reported it as a person's edit, which the reading then took for markup (SPEC-005); upstream 2.2.0 still drops it | `tests/frame-screens.test.mjs`, *a tab's load keeps an agent's arrow bound to the frame it names* |
 | `frontend/src/App.tsx`, `handleWebSocketMessage`; `prepareSceneUpdate` in `frontend/src/utils/scene.ts` | an agent's create, update or delete prepares only the touched elements and their neighbours, and skips upstream's `pauseSceneSync`, whose read-only flip dropped a stroke being drawn; the whole-scene path stays as the fallback (T-029, T-030) | `tests/scene-update.test.mjs` |
 | `frontend/src/App.tsx` header, `frontend/index.html` (`.btn-send`) | a "Send to Claude" button, shown only on a scene with the legend's Send box: it draws a tick in the box, from `src/core/send-tick.ts`, and saves through the ordinary sync, so the agent sees a person's tick (ADR-007 option 3). `syncToBackend` now resolves whether the save went through | `tests/browser/send-button.spec.mjs`, `tests/send-tick.test.mjs` |
+| `src/core/normalize.ts`, `convertTextToLabel` and the update path | carries a label's `fontSize`, `fontFamily`, `textAlign` and `verticalAlign` from the shape onto its label (`LABEL_STYLE_KEYS` in `src/types.ts`), where upstream wraps the text alone and the label is drawn in the default font (`505e8fe`; T-013 is the export side). In the collision zone (rule 2) | `tests/server-contract.test.mjs`, `tests/frontend-echo.test.mjs` |
+| `src/types.ts` | our types inside upstream's file: `COMPONENT_ROLES` and `role`, `ChangeOrigin`, `ChangeRecord` and the change-log state, `ElementLabel`, `rev` / `origin` on an element (+93 −3) | `npm run type-check` |
+| `src/core/canvas-client.ts`, `src/core/canvas-state.ts`, `src/cli/run.ts`, `src/cli/util.ts` | the hooks of our layer: the change-feed client (`getChanges`, `waitForChanges`, `MAX_WAIT_SECONDS`), the MCP change cursor, the `wireframe` / `changes` / `watch` commands, the two-tab warning (KI-7) | `tests/multi-client-guard.test.mjs`; `check-mcp-stdio`, *the fork's wireframe and review-loop tools are advertised* |
+| `src/core/scene-io.ts` (import), `src/cli/commands/render.ts` | `repairOrderKeys` drops the order keys of a file exported before 2.1.1, which Excalidraw rejects (SPEC-002) | `tests/order-keys.test.mjs`; the `tests/legacy/` scene in `server-contract.test.mjs` |
+| `src/core/render/excalidraw-node/dom.ts`, `scripts/excalidraw-node-entry.mjs` | the headless bundle also exports `prepareSceneUpdate`, and `prepareServerScene` takes `refreshDimensions`, so tests run the tab's own scene code (T-029) | `tests/scene-update.test.mjs` |
+| `skills/excalidraw-skill/SKILL.md`, `references/cheatsheet.md`, `evals/evals.json` | upstream's skill files, grown by the wireframe reading, the review loop and the CLI binary (SKILL.md +287 −12): the likeliest text conflicts at a merge | `tests/role-docs.test.mjs` (the skill's role lists against `COMPONENT_ROLES`) |
 | `scripts/check-durable-state.mjs`, `scripts/check-selection.mjs` | `EXCALIDRAW_NO_PERSIST=1` on the canvases they start: their "memory only" is upstream's, which forgets a scene on restart | `npm run test:durable` |
 | `src/cli/commands/elements.ts`, `apply` and `delete` | `apply` deletes before it creates, so a patch can replace an id it deletes (T-022); both skip a label the server already removed | `tests/server-contract.test.mjs` |
 | `frontend/src/App.tsx`, `frontend/src/utils/scene.ts` | `allowEmpty` in the sync body; `adoptServerScene` / `mergeAfterRestart` for a tab that outlives a restart | `tests/browser/server-restart.spec.mjs`; the `seed` helper of `scene-reload.spec.mjs` sends `allowEmpty` |
+| `scripts/check-mcp-stdio.mjs`, `scripts/check-local-bind.mjs`, `scripts/check-render-parity.mjs`, `.gitignore` | upstream's checks: our three MCP tools must be advertised; the bind and parity checks run their canvas in memory (T-023). `.gitignore` keeps `tools/conventions/` out (rule 5) and commits `docs/`, `.claude/` and the fixture corpus | `npm run test:mcp`, `npm run test:bind` |
 | `scripts/check-state-integrity.mjs` | upstream's file, carrying the three checks above, and a 30 s health wait where upstream's is 5 s (T-019) | — |
 | `playwright.config.mjs` | upstream's file: a 60 s `webServer` timeout where upstream's is 15 s (T-019); `tests/browser/` holds four specs of ours beside upstream's (`server-restart`, `tab-sync-reroute`, `cross-origin`, `send-button`) | `npm run test:canvas` |
 | `vite.config.js`, `server.proxy` | `canvasProxy` from `scripts/vite-dev-proxy.mjs`: proxies the page's socket as well as `/api` and `/health`, and gives the dev page's own requests the canvas's Origin, so `npm run dev` passes the origin guard and another site's page still does not (T-017). Upstream's proxy has no socket entry, so its dev page never syncs | `tests/dev-proxy.test.mjs` |
