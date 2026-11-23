@@ -4,6 +4,15 @@
 
 Rotated baton entries — older than the newest 10 kept in `.claude/SESSION.md`, moved here **verbatim** per ADR-018 D1. Newest entry on top. Append-only; never edited.
 
+## 2026-11-18 (a) — Claude Code — how agents reach the canvas; stray config removed, pushed
+- **Done:** the owner asked how agents call the toolkit. The answer: the `npm link`ed
+  `excalidraw-canvas` CLI, found through the house-skills `wireframe-first` skill. No MCP server
+  is registered. Upstream's `claude_desktop_config.json` (`npx -y excalidraw-mcp`, a stranger's
+  package) is deleted as `e39b18d`, pushed (DEVLOG 2026-11-18 (a)).
+- **Where:** `main` equals `origin/main` at `e39b18d`, apart from this entry. CI not checked.
+- **Next:** unchanged from (p): the owner decides ADR-007, T-002 and T-003; then PR 1's round 2.
+- **Picks up:** any session with a terminal, after the owner's decisions.
+
 ## 2026-11-17 (p) — Claude Code — session closed; everything committed and pushed
 - **Done today (DEVLOG 2026-11-17):** ADR-004, ADR-005, ADR-006 built; PR 4 (geometry lint), then
   recalibrated on a real drawing; PR 1 round 1 (one mark, KI-10, fixed); T-004, T-005, T-006,
