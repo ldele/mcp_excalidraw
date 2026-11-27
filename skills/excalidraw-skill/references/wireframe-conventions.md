@@ -234,6 +234,21 @@ reader (and the person building it) which state is active. Put the group inside 
 **Sidebars and headers must actually span their edge.** A "sidebar" that stops 200px
 short of the bottom reads as a `card`. Pin it corner to corner.
 
+**Menus and dialogs** (checked against a reading on 2026-11-27). There is
+no `menu` or `dialog` role, so they are drawn from the roles that exist:
+
+- **The menu row** is a `header` 40 high across the frame's top, holding one `button` per
+  menu, transparent fill and stroke, label `strokeColor` `#14130f`. It reads as
+  `header` with `button "File"`, `button "Edit"` and so on nested under it.
+- **An open menu** is a `card` under its menu's button, holding `list-item` rows 28 high,
+  white on white, label `"textAlign": "left"`, with a `divider` between groups. The
+  reading lists them in order under the card, the dividers included, so the groups show.
+- **A dialog** is a frame of its own, beside its screen and smaller than it, named
+  `"S02 — Export (dialog over S01)"`, with a flow from the entry that opens it. A
+  rectangle drawn over the screen inside its frame reads as `card?`, the same as a card;
+  the separate frame is what makes it a dialog in the reading. Where it sits over its
+  screen is not in the reading.
+
 ---
 
 ## 5. Declare the role for content

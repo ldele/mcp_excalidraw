@@ -4,6 +4,21 @@
 
 Rotated DEVLOG entries — moved here from `docs/DEVLOG.md` once it held more than 3, **verbatim** per cpc ADR-023 rule 13b and cpc ADR-053. Newest entry on top. Append-only; never edited.
 
+## 2026-11-20 (f) — PR 1 round 2: two human marks, both hits; the first round sent with the box
+- **Why:** ROADMAP PR 1 / KI-3, the attribution measure, after ADR-007 was built in (d).
+- **What:** the agent drew SockCast, a nonsense three-screen wireframe the owner asked for in
+  place of a real design, on an in-memory canvas (port 3011), with the legend. The owner marked it
+  up in the browser pane and sent it with the Send box; `watch --until-sent` returned the round
+  once. Two review marks (red loop round S03, orange loop round S02), both bound to the screen the
+  person meant: baseline 10 / 11. Pinned as `human-round-2`. The legend's approval line now shows a
+  ticked example box after "Tick", asked for during the round.
+- **Findings:** a tick that landed across the Send box's corner (its centre outside) was no send,
+  and `changes` read it as markup on a list item 138px away while `wireframe` listed nothing. The
+  person moved the Send box and the legend's example tick while trying to tick with the selection
+  tool. A mark drawn after the reset was held, as designed. The owner chose the header button
+  (ADR-007 option 3), to build next.
+- **Open:** a round with marks on single components (KI-3 stays open); the Send button.
+
 ## 2026-11-20 (e) — T-002 and T-003 fixed: a declared `shape` is no fallback; a `progress` role
 - **Why:** the owner's decisions in (c), on one consumer's report (a progress bar with no role).
 - **What:** `scoreWireframe` counts a `shape` as a fallback only when the reading inferred it.

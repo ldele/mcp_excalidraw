@@ -1,4 +1,4 @@
-<!-- status: active · updated: 2026-11-21 · class: append-only -->
+<!-- status: active · updated: 2026-11-27 · class: append-only -->
 
 # DEVLOG
 
@@ -9,6 +9,19 @@ below; never edit or summarize a past entry.
 Older entries: [`docs/archive/DEVLOG-archive-001.md`](archive/DEVLOG-archive-001.md). Rotation
 began on 2026-10-08; the archive holds everything older than the entries kept here (three since
 2026-11-16).
+
+## 2026-11-27 — a recipe for menus and dialogs
+- **Why:** a desktop wireframe needs a menu row, an open menu with its groups and a dialog; §4
+  had no recipe for any of them.
+- **What:** `wireframe-conventions.md` §4 gains one: the menu row as a `header` of transparent
+  `button`s, an open menu as a `card` of `list-item`s with `divider`s, a dialog as a frame of its
+  own named *(dialog over S01)* with a flow from its entry. Drawn and read on port 3917 with
+  `dist/bin.js` 1.3.0: the reading nests as written, flow included, score 0 fallbacks, 0 orphans.
+  `npm run sync:skills` run.
+- **Rejected:** a dialog drawn over the screen inside its frame: it reads `card?`, a guess, and the
+  same as a card.
+- **Opens:** no `dialog` or `menu` role, and a dialog's place over its screen is not in the
+  reading; filed to the inbox the same day.
 
 ## 2026-11-21 — T-031 fixed: a line or arrow the page re-based is no edit
 - **Why:** T-031, found in (g): an agent's path whose first point is not the origin came back from
@@ -42,18 +55,3 @@ began on 2026-10-08; the archive holds everything older than the entries kept he
   general case, any agent line or arrow, is T-031.
 - **Rejected:** filling the box on click (a second send would change nothing); a new server route.
 - **Open:** T-031; a round with marks on single components (KI-3).
-
-## 2026-11-20 (f) — PR 1 round 2: two human marks, both hits; the first round sent with the box
-- **Why:** ROADMAP PR 1 / KI-3, the attribution measure, after ADR-007 was built in (d).
-- **What:** the agent drew SockCast, a nonsense three-screen wireframe the owner asked for in
-  place of a real design, on an in-memory canvas (port 3011), with the legend. The owner marked it
-  up in the browser pane and sent it with the Send box; `watch --until-sent` returned the round
-  once. Two review marks (red loop round S03, orange loop round S02), both bound to the screen the
-  person meant: baseline 10 / 11. Pinned as `human-round-2`. The legend's approval line now shows a
-  ticked example box after "Tick", asked for during the round.
-- **Findings:** a tick that landed across the Send box's corner (its centre outside) was no send,
-  and `changes` read it as markup on a list item 138px away while `wireframe` listed nothing. The
-  person moved the Send box and the legend's example tick while trying to tick with the selection
-  tool. A mark drawn after the reset was held, as designed. The owner chose the header button
-  (ADR-007 option 3), to build next.
-- **Open:** a round with marks on single components (KI-3 stays open); the Send button.

@@ -1,4 +1,4 @@
-<!-- status: archived · updated: 2026-11-21 · class: living -->
+<!-- status: archived · updated: 2026-11-27 · class: living -->
 
 # DEVLOG archive index
 
@@ -9,6 +9,7 @@ is off; docs_check rule 17 fails while any archived entry is missing here.
 
 ## DEVLOG-archive-002.md
 
+- **2026-11-20** (f) — PR 1 round 2: two human marks, both hits; the first round sent with the box
 - **2026-11-20** (e) — T-002 and T-003 fixed: a declared `shape` is no fallback; a `progress` role
 - **2026-11-20** (d) — ADR-007 built: markup is held until the person sends it (SPEC-009)
 - **2026-11-20** (c) — ADR-007 accepted; T-002 and T-003 decided
